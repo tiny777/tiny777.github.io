@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="TinyChen">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="TinyChen">
+    <meta name="keywords" content="TinyChen's Blog | TinyChen">
+    <meta name="description" content="">
+    <meta name="Cache-Control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>第六代Wi-Fi协议的前世今生 · TinyChen</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= /css/style.css?v=20180709 as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= /css/mobile.css?v=20180709 media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/Icon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >TinyChen&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">第六代Wi-Fi协议的前世今生</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>TinyChen's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(http://p95to5vmm.bkt.clouddn.com/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            第六代Wi-Fi协议的前世今生
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "WiFi">WiFi</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count">6,013</span> / Reading time: <span class="post-count">21 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/01/09</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>本周，英特尔宣布：将从今年（2018）开始添加对802.11ax的支持，包括路由芯片和消费级零售产品。其实早在去年，通信行业巨头博通就发布了三款支持802.11ax的芯片BCM43684/43694/4375，高通也宣布了IPQ8074/QCA6290。至此，三家芯片巨头都表明了对802.11ax协议的支持，802.11ax也终于是坐稳了第六代Wi-Fi协议的位置了。<br><a id="more"></a></p>
+<p>本文将介绍历代Wi-Fi协议，按照顺序一次为802.11a/b/g/n/ac/ax，本文旨在让不了解Wi-Fi协议的读者对其能有一个粗略的认识，并不涉及过深的专业知识，同时文章本身不短，阅读耗时较长，请各位读者耐心阅读。</p>
+<blockquote>
+<p>小七注：802.11系列协议应用非常广泛，协议本身也非常复杂庞大，本文只设计上述的6种协议和802.11ad协议共计7种。</p>
+</blockquote>
+<h1 id="什么是Wi-Fi？"><a href="#什么是Wi-Fi？" class="headerlink" title="什么是Wi-Fi？"></a>什么是Wi-Fi？</h1><p>既然是讲Wi-Fi协议，那么首先讲的必然就应该是Wi-Fi了。Wi-Fi其实说白了就是一种让包括电脑手机平板在内的电子设备能够连接到一个无线网络的技术。但很多人都不知道的是，Wi-Fi其实本身是一个品牌或者说是商标，由Wi-Fi联盟所持有。Wi-Fi联盟的前身是1999年成立的无线以太网兼容性联盟WECA（Wireless Ethernet Compatibility Alliance）。而Wi-Fi联盟一直在使用的这个802.11系列的无线通信协议标准，是由IEEE下属的802.11工作组所制定的。</p>
+<blockquote>
+<p>小七注：电气和电子工程师协会( IEEE，全称是Institute of Electrical and Electronics Engineers)是一个国际性的电子技术与信息科学工程师的协会，是目前全球最大的非营利性专业技术学会，其会员人数超过40万人，遍布160多个国家。IEEE致力于电气、电子、计算机工程和与科学有关的领域的开发和研究，在太空、计算机、电信、生物医学、电力及消费性电子产品等领域已制定了900多个行业标准，现已发展成为具有较大影响力的国际学术组织。</p>
+</blockquote>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE1.jpg" alt=""> </p>
+<p>看到这里是不是觉得很懵？简单来说就是由IEEE内的802.11工作组制定802.11系列标准，而Wi-Fi联盟对使用802.11系列标准的设备进行认定，符合Wi-Fi联盟的认定标准的设备就可以打上Wi-Fi的这个logo。</p>
+<p><strong>下面进入正文。</strong></p>
+<h1 id="802-11——过于平庸的一代"><a href="#802-11——过于平庸的一代" class="headerlink" title="802.11——过于平庸的一代"></a>802.11——过于平庸的一代</h1><p>二战之后，世界科技进入迅猛发展时期，人们对于无线通讯的需要开始爆发性地增长，IEEE在20世纪90年代初成立了专门的802.11工作组，专门研究和定制WLAN(无线局域网)的标准协议，并在1997年6月推出了第一代WLAN协议——IEEE 802.11-1997。</p>
+<blockquote>
+<p>小七注：此处的802.11指的是IEEE制订的第一代协议，并非是整个系列协议，在802.11之后的协议都加入了字母后缀来进行区分。</p>
+</blockquote>
+<p>作为IEEE最初制定的一个无线局域网标准，802.11协议定义了物理层工作在ISM的2.4G频段，数据传输速率设计为2Mbps。很遗憾的是，由于它在传输速度和传输距离上的表现都不尽如人意，因此并未被规模使用。</p>
+<h1 id="802-11a——生不逢时的一代"><a href="#802-11a——生不逢时的一代" class="headerlink" title="802.11a——生不逢时的一代"></a>802.11a——生不逢时的一代</h1><p>1999年．IEEE吸取了上一次的教训，这一次就直接下了猛药。在制定802.11a标准的时候，直接将频段定在了5GHz（频率越高最高传输速度越快），物理层的最高速率也随之水涨船高到了54Mbps。相比前一代来说，不可谓不给力。但是，802.11a协议也并没有被市场认可，相对来说表现的更出色的反而是几乎和它同时制订的802.11b协议。</p>
+<p>尽管2003世界无线电通信会议让802.11a在全球的应用变得更容易，不同的国家还是有不同的规定支持。美国和日本甚至都已经出现了相关规定对802.11a进行了认可，但是在其他地区，如欧盟却因为标准的问题被禁止使用。再加上802.11a产品中5GHz的组件研制成功太慢，等其开始大规模推广的时候，市场早已被大批的802.11b产品占领，802.11a没有被广泛的采用。再加上802.11a的一些弱点，和一些地方的规定限制，使得它的使用范围更窄了。</p>
+<h1 id="802-11b——奠定基础的一代"><a href="#802-11b——奠定基础的一代" class="headerlink" title="802.11b——奠定基础的一代"></a>802.11b——奠定基础的一代</h1><p>802.11b协议可以说是802.11a是同胞兄弟了。但它本身却是基于2.4GHz频率，同时最大的传输速度相比802.11a来说也只有11Mbps。11Mbps的传输速率在现在看来肯定算不了什么，但在2000年的时候，虽然不是翘楚，但也已经能够满足大部分人的需求了。</p>
+<p>更何况基于2.4GHz的802.11b在传输距离和穿墙能力上本来就比基于5GHz的802.11a协议要有优势（高频率波传输距离和穿墙能力较低频率波差），加上当时802.11a的核心芯片研发进度缓慢，802.11b就此抓住了机会，占领了市场，为日后称霸天下打下了坚实的基础。</p>
+<h1 id="802-11g——融合前人的一代"><a href="#802-11g——融合前人的一代" class="headerlink" title="802.11g——融合前人的一代"></a>802.11g——融合前人的一代</h1><p>时间来到了2003年7月，IEEE制订了第三代Wi-Fi标准：802.11g。（为什么不是C呢？因为802.11协议还应用在其他的很多领域，有些字母被用了，就只能排到g了）</p>
+<p>802.11g继承了802.11b的2.4GHz频段和802.11a的最高54Mbps传输速率。同时，它还使用了CCK技术后向兼容802.11b产品。此时开始，IEEE在制订每一代新协议的时候都会将后向兼容考虑进去，毕竟换了新路由器旧手机就因为不支持新协议而连不上Wi-Fi这种情况谁都受不了。</p>
+<p>说到这里，就还要再提一下在802.11a和802.11g上都有使用到的一种技术：<strong>OFDM。</strong></p>
+<p>OFDM(Orthogonal Frequency Division Multiplexing)即正交频分复用技术，是由MCM（Multi-Carrier Modulation，多载波调制）发展而来的一种实现复杂度低、应用最广的一种多载波传输方案。<strong>OFDM主要思想是：将信道分成若干正交子信道，将高速数据信号转换成并行的低速子数据流，调制到在每个子信道上进行传输。</strong>正交信号可以通过在接收端采用相关技术来分开，这样可以减少子信道之间的相互干扰(ISI) 。每个子信道上的信号带宽小于信道的相关带宽，因此每个子信道上可以看成平坦性衰落，从而可以消除码间串扰，而且由于每个子信道的带宽仅仅是原信道带宽的一小部分，信道均衡变得相对容易。</p>
+<p>上面这段很难理解？没关系，看小七打个比喻你们就懂了。</p>
+<p>假设我们现在有很多车要从A地到B地，没有使用OFDM技术之前，路是一条路，所有的车四处乱开，横冲直撞，结果谁都快不了。现在使用了OFDM技术，将一条大路划分为很多个车道，大家都按照车道驾驶，这样既可以提高速度，又能减少车与车之间的干扰。同时这条道的车多了，就匀一点到那条车少的道上去，管理上也方便很多。</p>
+<p><strong>OFDM技术也因此被应用在之后的每一代Wi-Fi协议中。</strong></p>
+<h1 id="802-11n——初露锋芒的一代"><a href="#802-11n——初露锋芒的一代" class="headerlink" title="802.11n——初露锋芒的一代"></a>802.11n——初露锋芒的一代</h1><p><strong>如果说802.11b是奠定了整个帝国的基础的一代，那么802.11n一定是给帝国开疆扩土的一代。</strong></p>
+<p>时间继续推进，这时的互联网已经开始出现了在线图片、视频、流媒体等服务，而随着YouTube、无线家庭媒体网关、企业VoIP Over WLAN等应用对WLAN技术提出了越来越高的带宽要求，传统技术802.11a/g已经无法支撑。用户需求呼唤着全新一代WLAN接入技术。</p>
+<p>2009年，IEEE宣布了新的802.11n标准。传输速率最高可达600Mbps。</p>
+<p>但是，802.11n协议还是基于2.4GHz频段，速度怎么突然就快了这么多呢？正所谓事出反常必有妖，而这背后的“妖”，就是MIMO、波束成形和40Mhz绑定。</p>
+<h2 id="MIMO"><a href="#MIMO" class="headerlink" title="MIMO"></a>MIMO</h2><p>MIMO（Multiple-Input Multiple-Output）的中文名称为多输入多输出技术是指在发射端和接收端分别使用多个发射天线和接收天线，使信号通过发射端与接收端的多个天线传送和接收，从而改善通信质量。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE2.jpg" alt=""> </p>
+<p>MIMO技术最早是由马可尼于1908年提出的，它利用发射端的多个天线各自独立发送信号，同时在接收端用多个天线接收并恢复原信息，就可以实现以更小的代价达到更高的用户速率。MIMO可大大提高网络传输速率、覆盖范围和性能。当基于MIMO而同时传递多条独立空间流时，系统的吞吐量可成倍地提高。</p>
+<p><strong>简单来说，MIMO技术就是在信号的发射源和接收源都安装了多个天线，通过堆天线的方式来实现更高的传输速率，因此现在的买路由器看天线数量这一个说话虽然不可靠，但也不是没有历史渊源的。</strong></p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE3.jpg" alt=""></p>
+<p>▲通过MIMO传递多条空间流（图片来自网络）</p>
+<p>MIMO系统支持空间流的数量取决于发送天线和接收天线的最小值。如发送天线数量为3,而接收天线数量为2，则支持的空间流为2。MIMO/SDM系统一般用“发射天线数量×接收天线数量”表示。如上图为2*2 MIMO/SDM系统。显然，增加天线可以提高MIMO支持的空间流数。<strong>但是综合成本、实效等多方面因素，当时业界的WLAN AP都普遍采用3×3的模式。而现在的旗舰级路由器都轻松的堆到8×8或者更高。</strong></p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE4.jpg" alt=""> </p>
+<p>▲图为 MIMO利用多径传输数据（图片来自网络）</p>
+<h2 id="波束成形"><a href="#波束成形" class="headerlink" title="波束成形"></a>波束成形</h2><p>而至于波束成形技术，它本身并不是什么新名词，波束成形是天线技术与数字信号处理技术的结合，目的用于定向信号传输或接收。在20世纪60年代，波束成形技术就已经在军事应用上得到了相当高的重视。</p>
+<p>只不过，由于早年半导体技术还处在微米级，所以它没有在民用通信中发挥到理想的状态。</p>
+<p>而发展到无线通讯阶段，特别是应用在消费级产品中，信号传输距离和信道质量以及无线通信的抗干扰问题便成为瓶颈。提高传输速率是WLAN技术发展历程的关键。802.11n主要是结合物理层和MAC层的优化，来充分提高WLAN技术的吞吐。此时，波束成形又有了用武之地。</p>
+<p>波束成形技术的具体原理很复杂，小七在这里用图片给大家简单展示一下，波束成形就是将原本发散的波聚合，再往指定的方向发送，从而提高传输距离。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE5.jpg" alt=""></p>
+<p>▲波束成形技术增加传输距离的示意图（图片来自网络）</p>
+<p>但是波束成形技术固然能改善系统性能，增加接收距离，但同时也会增加设备成本和功耗。在多天线都处于连接的状态下，即使在严重的衰落情况下，它提供的信号增益也可获提高，但要求信号处理能力也要很强。所以，多天线带来的问题是要求数据处理速度高，控制成本，并降低功耗。</p>
+<h2 id="40Mhz绑定"><a href="#40Mhz绑定" class="headerlink" title="40Mhz绑定"></a>40Mhz绑定</h2><p>事实上，802.11n协议还使用了40Mhz绑定技术。这个技术最容易理解，对于无线技术来说，提高所用频谱的宽度，可以最为直接地提高吞吐。就好比是马路变宽了，车辆的通行能力自然提高。传统802.11a/g使用的频宽是20MHz，而802.11n支持将相邻两个频宽绑定为40MHz来使用，所以可以最直接地提高吞吐。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE6.jpg" alt=""></p>
+<p>▲图左为802.11a/g，图右为802.11n</p>
+<h2 id="MCS"><a href="#MCS" class="headerlink" title="MCS"></a>MCS</h2><p>802.11n引进了如此多的新技术，导致它的速率也会因为配置方法不同而不同。在802.11a/b/g时代，配置AP工作的速率非常简单，只要指定特定radio类型(802.11a/b/g)所使用的速率集，速率范围从1Mbps到54Mbps,一共有12种可能的物理速率。到了802.11n时代，由于物理速率依赖于调制方法、编码率、空间流数量、是否40MHz绑定等多个因素。这些影响吞吐的因素组合在一起，将产生非常多的物理速率供选择使用。</p>
+<p>对此，IEEE直接推出了MCS (Modulation Coding Scheme)，MCS可以理解为将上述影响速率因素的完整组合，每种组合用整数来唯一标示。给每种情况标码，然后直接看对应的MCS码就可以知道准确的速率。</p>
+<h2 id="802-11n小结"><a href="#802-11n小结" class="headerlink" title="802.11n小结"></a>802.11n小结</h2><p><strong>总的来说，MIMO和40Mhz绑定技术使得传输速率大大提升，而波束成形则增大了传输距离。</strong></p>
+<h1 id="802-11ac——锋芒毕露的一代"><a href="#802-11ac——锋芒毕露的一代" class="headerlink" title="802.11ac——锋芒毕露的一代"></a>802.11ac——锋芒毕露的一代</h1><p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE7.jpg" alt=""></p>
+<p>随着时代的继续发展，人们身边拥有着越来越多的无线设备，<strong>而2.4GHz这个频段，因为本身的优越性，被各种协议使用（常见的蓝牙4.0系列协议，无线键鼠等），已经变得拥挤不堪，</strong>IEEE此时就将新的第五代Wi-Fi协议制订在了5GHz的频段上。现在说的很多双频Wi-Fi，其实就是2.4GHz和5GHz的混合双频Wi-Fi，而这种路由器常见的四天线设计，一般都是两根天线基于2.4GHz，两根基于5GHz。</p>
+<p>802.11ac在提供良好的后向兼容性的同时，把每个通道的工作频宽将由802.11n的40MHz，提升到80MHz甚至是160MHz，再加上大约10%的实际频率调制效率提升，最终理论传输速度将由802.11n最高的600Mbps跃升至1Gbps。当然，实际传输率可能在300Mbps～400Mbps之间，接近目前802.11n实际传输率的3倍(目前802.11n无线路由器的实际传输率为75Mbps～150Mbps之间)，完全足以在一条信道上同时传输多路压缩视频流。</p>
+<h2 id="MU-MIMO"><a href="#MU-MIMO" class="headerlink" title="MU-MIMO"></a>MU-MIMO</h2><p>实际上，802.11ac协议还分为wave1和wave2两个阶段,两者的主要区别就在于后者提升多用户数据并发处理能力和网络效率。而这背后的功臣，就非MU-MIMO莫属了。</p>
+<p>前面已经跟大家介绍过了，IEEE在802.11n协议时代就引入了MIMO技术，而MU-MIMO技术可以理解为它的升级版或者是多用户版本。</p>
+<p>为什么这么说呢？看下面的图片大家就明白了。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE8.png" alt=""></p>
+<p>▲高通官方展示MU-MIMO技术所用的图片</p>
+<p>MU-MIMO是Multi-User Multiple-Input Multiple-Output（多用户-多输入多输出）的英文缩写。顾名思义，MU-MIMO能让路由器同时和多个设备进行沟通，这极大的改善了网络资源利用率。</p>
+<p>通俗来说，以前在802.11n上面的MIMO只能说是SU-MIMO（Single-User），传统的SU-MIMO路由器信号呈现一个圆环，以路由器圆心，呈360度向外发射信号，并依据远近亲疏，依次单独与上网设备进行通讯。当接入的设备过多时，就会出现设备等待通讯的情况，网络卡顿的情况就由此产生；更为严重的是，这种依次单独的通讯，是基于设备对AP（路由器或热点等）总频宽的平均值。也就是说，如果拥有100MHz的频宽，按照“一次只能服务一个”的原理，在有3个设备同时接入网络的情况下，每个设备只能得到约33.3MHz频宽，另外的66.6MHz则处于闲置状态。即在同一个Wi-Fi区域内，连接设备越多宽频被平均得越小，浪费的资源越多，网速也就越慢。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE9.jpg" alt=""></p>
+<p>▲图为SU-MIMO（左）和MU-MIMO（右）的对比</p>
+<p><strong>MU-MIMO路由器则不同，MU-MIMO路由的信号在时域、频域、空域三个维度上分成三部分，就像是同时发出三个不同的信号，能够同时与三部设备协同工作；尤其值得一提的是，由于三个信号互不干扰，因此每台设备得到的频宽资源并没有打折扣，资源得到最大化的利用，从路由器角度衡量，数据传输速率提高了3倍，改善了网络资源利用率，从而确保Wi-Fi无间断连接。</strong></p>
+<p><strong>MU-MIMO技术就赋予了路由器并行处理的能力，</strong>让它能够同时为多台设备传输数据，极大地改善了网络拥堵的情况。在今天这种无线联网设备数量爆发式增长的时代，它是比单纯提高速率更有实际意义的。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE10.jpg" alt=""></p>
+<p>世界上首台支持MU-MIMO的路由器是Linksys EA8500于2015年发布，采用的是全高通的MU-MIMO解决方案（Qualcomm MU | EFX）。现在MU-MIMO已经是旗舰级路由器的标配了，而那些写着ac双频路由器却不支持MU-MIMO技术的，都只能算是残缺的ac双频路由器或者是ac wave1阶段的路由器。</p>
+<p>这里放一张到ac为止各代协议的主要参数对比图（图片来自网络）：</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE11.jpg" alt=""></p>
+<h1 id="802-11ad——先天不足的一代"><a href="#802-11ad——先天不足的一代" class="headerlink" title="802.11ad——先天不足的一代"></a>802.11ad——先天不足的一代</h1><p>在确定第六代的Wi-Fi协议标准的时候，有一段时间，大家都认为会是802.11ad协议，说这个名字大家可以不太熟悉，它另一个名字叫WiGig。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE12.jpg" alt=""> </p>
+<p>相比我们熟知的802.11n(工作在2.4GHz和5GHz频段)和802.11ac(工作在5GHz频段)，<strong>802.11ad则是工作在60GHz频段，且无线传输速率可高达7Gbps!</strong>当然， 802.11ac标准也可以通过堆BUFF（8x8 MIMO、256 QAM调制和信道绑定4个40 MHz信道）达到7Gbps的理论无线传输速率；但是，11ad达到7Gbps的速度，仅需通过一个空间流、64QAM调制和单个信道即可实现。此外，802.11ad还在容量、功耗和延迟方面有着11ac无法比拟的优势，特别是在延迟方面，其延迟通常仅有10微秒，堪比有线!</p>
+<p>但可惜，802.11ad协议有着它的先天不足——60GHz，这么高的频率注定它的传输距离和穿墙能力弱到不堪一击，而在一些知名评测媒体的评测中，人们惊人地发现只需要一个纸皮箱就能隔绝802.11ad协议路由器的信号。真是可谓成也萧何，败也萧何。</p>
+<h1 id="802-11ax——肩负使命的一代"><a href="#802-11ax——肩负使命的一代" class="headerlink" title="802.11ax——肩负使命的一代"></a>802.11ax——肩负使命的一代</h1><p>802.11ax协议基于2.4GHz和5GHz两个频段，对，就是两个频段，并非是ac双频路由器那样不同的频段对应不同的协议，ax协议本身就支持两个频段。这显然迎合了当下物联网、智能家居等发展潮流。对于一些对带宽需要不高的智能家居设备，可以使用2.4GHz频段去连接，保证足够的传输距离，而对于需要高速传输的设备，就使用5GHz频段。这看起来和现在的ac双频路由器是一样的，但实际上，ax作为第六代Wi-Fi协议的扛把子，可不只这两把刷子。</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE14.png" alt=""></p>
+<p><strong>802.11ax又被称为“高效率无线标准”（High-Efficiency Wireless，HEW），</strong>将大幅度提升用户密集环境中的每位用户的平均传输率，即在高密环境下为更多用户提供一致且稳定的数据流（平均传输率），将有效减少网络拥塞、大幅提升无线速度与覆盖范围。其实，设计802.11ax的首要目的是解决网络容量问题，因为随着公共Wi-Fi的普及，网络容量问题已成为机场、体育赛事和校园等密集环境中的一个大问题。</p>
+<p><strong>此处要介绍两个新技术，上行MU-MIMO和OFDMA。</strong></p>
+<h2 id="上行MU-MIMO"><a href="#上行MU-MIMO" class="headerlink" title="上行MU-MIMO"></a>上行MU-MIMO</h2><p>MU-MIMO技术在前面已经提到过，802.11ac协议中的MU-MIMO技术只是单纯的下行MU-MIMO，只有在路由器给设备传输数据的时候才可以用，而如今随着智能设备的发展，人们对于上行速率的要求也在提高，传个超清视频图片什么的已经是家常便饭了。<strong>上行MU-MIMO技术就是为此而生，改善了设备在向路由器传输数据时的拥堵情况，提高了网络资源利用率。</strong></p>
+<h2 id="OFDMA"><a href="#OFDMA" class="headerlink" title="OFDMA"></a>OFDMA</h2><p>802.11ax与以前的无线局域网(WLAN)系统相比最大的变化在于其是采用了“正交频分多址接入”(orthogonal frequency division multiple access, OFDMA)。</p>
+<p><strong>在OFDM系统中，用户占用了整个信道。随着用户数量的增多，用户之间的数据请求会发生冲突，从而造成瓶颈，从而导致当这些用户在请求数据（特别是在流式视频等高带宽应用中）时，服务质量较差。</strong></p>
+<p>而在OFDMA中，用户仅在规定时间内占用子载波的一个子集。OFDMA要求所有用户同时传输，因此每个用户都需要将其数据包缓冲为相同的规定比特数，这样无论数据量有多少所有用户都能在时间上保持一致。此外， OFDMA AP可根据用户对带宽的需求来动态地改变用户所占用频谱的数量。例如，相比较对实时性能要求不高的电子邮件，流媒体视频用户需要更多子载波（频谱）。</p>
+<p>不理解的话我们看下图：</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/WiFi%E5%8D%8F%E8%AE%AE15.jpg" alt=""></p>
+<p>▲用户在ODFM中占据整个信道，而在“正交频分多址接入”(OFDMA)中不是</p>
+<p>我们还是用回马路开车的例子，假设现在有一条马路有三条车道，现在有甲乙丙三个车队要走这条路（每队都要走一个小时，走前需要半个小时准备），如果按照一次走一个车队的方法，甲乙丙依次走完需要四个半小时，而使用OFDMA技术，给他们一队一条道，则只需要三个半小时，省下了一个小时的准备时间。OFDM和OFDMA在用户数量少的时候差距可能不大，但是一旦用户数量多了起来，差距可就不是一星半点了。</p>
+<p><strong>OFDMA一路走来，其实就是“从无到有，再从有到善用”的演变历程。</strong></p>
+<h2 id="802-11ax小结"><a href="#802-11ax小结" class="headerlink" title="802.11ax小结"></a>802.11ax小结</h2><p>实际上，802.11ax给我们带来的提升远不止此，其他的如更低的延迟、更精确的功耗控制等等也是不可忽略的一环。现在市面上使用802.11ax协议的产品并不是很多，只是零星的几款，<strong>但是好在它的太子身份已经确定，登基只是早晚的问题。</strong>而按照目前的进度来看，小七预计2019年802.11ax的产品就能实现不错的普及率。</p>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/02/25/180225DISALTKB/" title= 禁用笔记本内置键盘 >
+                    <div class="nextTitle">禁用笔记本内置键盘</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2017/10/07/171007BIOS&UEFI/" title= BIOS与UEFI >
+                    <div class="prevTitle">BIOS与UEFI</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!--PC和WAP自适应版-->
+
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:mr.7th@outlook.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/wechat_ID.jpg" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq_ID.png" />
+                </span>
+            
+        
+    
+        
+            
+                <a href="https://github.com/TinySeven7" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是Wi-Fi？"><span class="toc-number">1.</span> <span class="toc-text">什么是Wi-Fi？</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11——过于平庸的一代"><span class="toc-number">2.</span> <span class="toc-text">802.11——过于平庸的一代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11a——生不逢时的一代"><span class="toc-number">3.</span> <span class="toc-text">802.11a——生不逢时的一代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11b——奠定基础的一代"><span class="toc-number">4.</span> <span class="toc-text">802.11b——奠定基础的一代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11g——融合前人的一代"><span class="toc-number">5.</span> <span class="toc-text">802.11g——融合前人的一代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11n——初露锋芒的一代"><span class="toc-number">6.</span> <span class="toc-text">802.11n——初露锋芒的一代</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MIMO"><span class="toc-number">6.1.</span> <span class="toc-text">MIMO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#波束成形"><span class="toc-number">6.2.</span> <span class="toc-text">波束成形</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#40Mhz绑定"><span class="toc-number">6.3.</span> <span class="toc-text">40Mhz绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MCS"><span class="toc-number">6.4.</span> <span class="toc-text">MCS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#802-11n小结"><span class="toc-number">6.5.</span> <span class="toc-text">802.11n小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11ac——锋芒毕露的一代"><span class="toc-number">7.</span> <span class="toc-text">802.11ac——锋芒毕露的一代</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MU-MIMO"><span class="toc-number">7.1.</span> <span class="toc-text">MU-MIMO</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11ad——先天不足的一代"><span class="toc-number">8.</span> <span class="toc-text">802.11ad——先天不足的一代</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#802-11ax——肩负使命的一代"><span class="toc-number">9.</span> <span class="toc-text">802.11ax——肩负使命的一代</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#上行MU-MIMO"><span class="toc-number">9.1.</span> <span class="toc-text">上行MU-MIMO</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OFDMA"><span class="toc-number">9.2.</span> <span class="toc-text">OFDMA</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#802-11ax小结"><span class="toc-number">9.3.</span> <span class="toc-text">802.11ax小结</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 16
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/2018/03/18/180318DouBootUdisk/" >双启动U盘</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/25</span><a class="archive-post-title" href= "/2018/02/25/180225DISALTKB/" >禁用笔记本内置键盘</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/09</span><a class="archive-post-title" href= "/2018/01/09/180109WiFiDev/" >第六代Wi-Fi协议的前世今生</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2017 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/07</span><a class="archive-post-title" href= "/2017/10/07/171007BIOS&UEFI/" >BIOS与UEFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/14</span><a class="archive-post-title" href= "/2017/08/14/170814phoneChargingDev/" >手机充电技术发展史</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/2017/08/10/170810WZD&Sina/" >王志东和新浪</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/08</span><a class="archive-post-title" href= "/2017/08/08/170808MBR/" >MBR分区表</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/03</span><a class="archive-post-title" href= "/2017/07/03/170703Filqlo/" >Filqlo时钟屏保</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/12</span><a class="archive-post-title" href= "/2017/05/12/170512DiskAB/" >电脑的AB盘去哪了？</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/2017/05/09/170509BackupDrivers/" >驱动备份(免第三方)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/2017/05/07/170507Android/" >安卓刷机基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/04</span><a class="archive-post-title" href= "/2017/05/04/170504PageFiles/" >虚拟内存</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span><a class="archive-post-title" href= "/2017/05/03/170503CHKDSK/" >CHKDSK使用方法</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/02</span><a class="archive-post-title" href= "/2017/05/02/170502DISADPOST/" >关闭硬盘开机自检</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/18</span><a class="archive-post-title" href= "/2017/04/18/170418FAT32toNTFS/" >FAT32无损转换为NTFS</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/14</span><a class="archive-post-title" href= "/2017/04/14/170414win10ShowSec/" >win10时间栏显示秒</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="驱动"><span class="iconfont-archer">&#xe606;</span>驱动</span>
+    
+        <span class="sidebar-tag-name" data-tags="Windows"><span class="iconfont-archer">&#xe606;</span>Windows</span>
+    
+        <span class="sidebar-tag-name" data-tags="3C"><span class="iconfont-archer">&#xe606;</span>3C</span>
+    
+        <span class="sidebar-tag-name" data-tags="硬件"><span class="iconfont-archer">&#xe606;</span>硬件</span>
+    
+        <span class="sidebar-tag-name" data-tags="硬盘"><span class="iconfont-archer">&#xe606;</span>硬盘</span>
+    
+        <span class="sidebar-tag-name" data-tags="安卓"><span class="iconfont-archer">&#xe606;</span>安卓</span>
+    
+        <span class="sidebar-tag-name" data-tags="历史"><span class="iconfont-archer">&#xe606;</span>历史</span>
+    
+        <span class="sidebar-tag-name" data-tags="笔记本键盘"><span class="iconfont-archer">&#xe606;</span>笔记本键盘</span>
+    
+        <span class="sidebar-tag-name" data-tags="屏保"><span class="iconfont-archer">&#xe606;</span>屏保</span>
+    
+        <span class="sidebar-tag-name" data-tags="操作系统"><span class="iconfont-archer">&#xe606;</span>操作系统</span>
+    
+        <span class="sidebar-tag-name" data-tags="新浪"><span class="iconfont-archer">&#xe606;</span>新浪</span>
+    
+        <span class="sidebar-tag-name" data-tags="王志东"><span class="iconfont-archer">&#xe606;</span>王志东</span>
+    
+        <span class="sidebar-tag-name" data-tags="WiFi"><span class="iconfont-archer">&#xe606;</span>WiFi</span>
+    
+        <span class="sidebar-tag-name" data-tags="手机"><span class="iconfont-archer">&#xe606;</span>手机</span>
+    
+        <span class="sidebar-tag-name" data-tags="充电"><span class="iconfont-archer">&#xe606;</span>充电</span>
+    
+        <span class="sidebar-tag-name" data-tags="装系统"><span class="iconfont-archer">&#xe606;</span>装系统</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="教程"><span class="iconfont-archer">&#xe60a;</span>教程</span>
+    
+        <span class="sidebar-category-name" data-categories="科普"><span class="iconfont-archer">&#xe60a;</span>科普</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+        <span class="sidebar-category-name" data-categories="分享"><span class="iconfont-archer">&#xe60a;</span>分享</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "TinyChen"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
