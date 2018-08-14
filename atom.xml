@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.tiny777.com/"/>
-  <updated>2018-08-03T19:14:29.550Z</updated>
+  <updated>2018-08-14T14:53:14.683Z</updated>
   <id>http://www.tiny777.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>硬盘RaidOn模式无损转换为AHCI模式</title>
+    <link href="http://www.tiny777.com/2018/08/14/180814RaidOn2AHCI/"/>
+    <id>http://www.tiny777.com/2018/08/14/180814RaidOn2AHCI/</id>
+    <published>2018-08-13T16:00:00.000Z</published>
+    <updated>2018-08-14T14:53:14.683Z</updated>
+    
+    <content type="html"><![CDATA[<p>有些电脑的硬盘出厂模式就是RaidOn,RAID模式对于混合硬盘来说有一定的好处，但是对于单固态来说还是AHCI更为方便一些。今天在装Ubuntu的时候发现安装程序不认RaidOn模式的硬盘，只能改成AHCI模式。</p><a id="more"></a><p><strong>如果直接在BIOS中更改硬盘模式为AHCI，则会出现无法进入系统的情况，因此我们需要使用安全启动模式。</strong></p><h1 id="打开安全启动模式"><a href="#打开安全启动模式" class="headerlink" title="打开安全启动模式"></a>打开安全启动模式</h1><p>同时按下win+R按键，输入msconfig：<br><img src="http://p95to5vmm.bkt.clouddn.com/RaidOn2AHCI%20%281%29.png" alt=""></p><p>打开配置菜单如下图所示，点击boot，勾选safe boot，选择minimal。<br><img src="http://p95to5vmm.bkt.clouddn.com/RaidOn2AHCI%20%282%29.png" alt=""></p><p>点击OK，然后重新启动系统。<br><img src="http://p95to5vmm.bkt.clouddn.com/RaidOn2AHCI%20%283%29.png" alt=""></p><h1 id="更改BIOS中硬盘模式"><a href="#更改BIOS中硬盘模式" class="headerlink" title="更改BIOS中硬盘模式"></a>更改BIOS中硬盘模式</h1><p>进入BIOS，更改硬盘模式为AHCI，点击确定。<br><img src="http://p95to5vmm.bkt.clouddn.com/RaidOn2AHCI%20%284%29.png" alt=""></p><h1 id="关闭安全启动模式"><a href="#关闭安全启动模式" class="headerlink" title="关闭安全启动模式"></a>关闭安全启动模式</h1><p>此时重启完成进入电脑是安全模式，重复第一步，取消勾选。<br><img src="http://p95to5vmm.bkt.clouddn.com/RaidOn2AHCI%20%285%29.png" alt=""></p><p>点击OK，再次重启即可。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;有些电脑的硬盘出厂模式就是RaidOn,RAID模式对于混合硬盘来说有一定的好处，但是对于单固态来说还是AHCI更为方便一些。今天在装Ubuntu的时候发现安装程序不认RaidOn模式的硬盘，只能改成AHCI模式。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="教程" scheme="http://www.tiny777.com/categories/%E6%95%99%E7%A8%8B/"/>
+    
+    
+      <category term="硬盘" scheme="http://www.tiny777.com/tags/%E7%A1%AC%E7%9B%98/"/>
+    
+      <category term="硬件" scheme="http://www.tiny777.com/tags/%E7%A1%AC%E4%BB%B6/"/>
+    
+  </entry>
   
   <entry>
     <title>Android Studio配置</title>
@@ -457,29 +481,6 @@
     
     
       <category term="硬盘" scheme="http://www.tiny777.com/tags/%E7%A1%AC%E7%9B%98/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>win10时间栏显示秒</title>
-    <link href="http://www.tiny777.com/2017/04/14/170414win10ShowSec/"/>
-    <id>http://www.tiny777.com/2017/04/14/170414win10ShowSec/</id>
-    <published>2017-04-13T16:00:00.000Z</published>
-    <updated>2018-07-17T10:26:47.702Z</updated>
-    
-    <content type="html"><![CDATA[<p>对于Win10来说，直接点开任务栏的时间就可以看到具体的秒，但是有没有什么办法让秒这一个选项常驻在任务栏的时间里面，不用点开就能查看呢？</p><p>答案是肯定的，我们只需要在注册表中进行简单地操作就可以实现这个功能啦。<br><a id="more"></a></p><h1 id="BAT文件"><a href="#BAT文件" class="headerlink" title="BAT文件"></a>BAT文件</h1><p>开始之前，我们先简单地说明一下这个bat文件。</p><p>bat文件是DOS下的批处理文件，是一种文本文件（可以使用记事本编辑）。它能够将你写好的命令并存储在里面的命令直接调用cmd.exe这个程序帮你操作，省去了你重复操作的麻烦。</p><p><strong>方法如下：</strong></p><p>我们打开windows里面的记事本（也可以使用notepad++这款软件，如果已经安装了的话），在里面输入下列代码，然后右键另存为bat文件，运行的时候要以管理员身份运行，否则可能不起作用。</p><h1 id="显示秒"><a href="#显示秒" class="headerlink" title="显示秒"></a>显示秒</h1><pre><code>@echo offreg add &quot;HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced&quot; /v ShowSecondsInSystemClock /t REG_DWORD /d 1 /fTASKKILL /F /IM explorer.exeecho.echo 重启explorer.exeSTART %windir%\explorer.exeecho.pause</code></pre><h1 id="删除秒"><a href="#删除秒" class="headerlink" title="删除秒"></a>删除秒</h1><pre><code>@echo offreg delete &quot;HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced&quot; /v ShowSecondsInSystemClock /t REG_DWORD /d 1 /fTASKKILL /F /IM explorer.exeecho.echo 重启explorer.exeSTART %windir%\explorer.exeecho.pause</code></pre><h1 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h1><p>最后上一张效果图</p><p><img src="http://p95to5vmm.bkt.clouddn.com/Win10%E4%BB%BB%E5%8A%A1%E6%A0%8F%E6%98%BE%E7%A4%BA%E7%A7%92%2809%29.jpg" alt=""></p>]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;对于Win10来说，直接点开任务栏的时间就可以看到具体的秒，但是有没有什么办法让秒这一个选项常驻在任务栏的时间里面，不用点开就能查看呢？&lt;/p&gt;
-&lt;p&gt;答案是肯定的，我们只需要在注册表中进行简单地操作就可以实现这个功能啦。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="教程" scheme="http://www.tiny777.com/categories/%E6%95%99%E7%A8%8B/"/>
-    
-    
-      <category term="Windows" scheme="http://www.tiny777.com/tags/Windows/"/>
     
   </entry>
   
