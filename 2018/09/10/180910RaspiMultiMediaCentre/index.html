@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="TinyChen">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="TinyChen">
+    <meta name="keywords" content="TinyChen's Blog | TinyChen">
+    <meta name="description" content="">
+    <meta name="Cache-Control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>树莓派3B+打造多媒体中心 · TinyChen</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= /css/style.css?v=20180709 as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= /css/mobile.css?v=20180709 media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/Icon.ico" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+        <!-- algolia -->
+        <script>
+            
+            var hits = JSON.parse('{"per_page":10}')
+            var labels = JSON.parse('{"input_placeholder":"Search for Posts","hits_empty":"We did not find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}')
+
+            var algolia = {
+                applicationID: 'RY6WZRMIVU',
+                apiKey: '1736e3d9ffc320a138ddb0407db70caa',
+                indexName: 'TinyStudio',
+                hits: hits,
+                labels: labels
+            }
+        </script>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >TinyChen&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">树莓派3B+打造多媒体中心</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>TinyChen's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(http://p95to5vmm.bkt.clouddn.com/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            树莓派3B+打造多媒体中心
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "树莓派">树莓派</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "多媒体">多媒体</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>Word count: <span class="post-count">4,386</span> / Reading time: <span class="post-count">20 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/09/10</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>小七比较喜欢在宿舍和室友一起看电影或听音乐，且对画质和音质要求较高，一般都是观看1080P的蓝光REMUX电影（约30G一部）和听无损音质的音乐（30M一首），且观看设备较多（电视盒子、电脑、手机），再加上平时需要下载电影且自己有写博客的习惯，博客和一些其他的重要资料也需要备份，因此决定使用树莓派3B+、一块移动硬盘和一个路由器搭建一个宿舍多媒体中心来满足这些需求。</p>
+<a id="more"></a>
+<h1 id="功能简介"><a href="#功能简介" class="headerlink" title="功能简介"></a>功能简介</h1><h2 id="Samba"><a href="#Samba" class="headerlink" title="Samba"></a>Samba</h2><p><strong>Samba是在Linux和UNIX系统上实现SMB协议的一个免费软件，由服务器及客户端程序构成。SMB（Server Messages Block，信息服务块）是一种在局域网上共享文件和打印机的一种通信协议，它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。</strong></p>
+<p>换言之，使用Samba可以在局域网内实现文件的共享操作，有些放在移动硬盘里面的文件需要用的时候就不用再插移动硬盘，在网上邻居处拷贝即可。</p>
+<h2 id="miniDLNA"><a href="#miniDLNA" class="headerlink" title="miniDLNA"></a>miniDLNA</h2><p><strong>DLNA的全称是DIGITAL LIVING NETWORK ALLIANCE(数字生活网络联盟)，DLNA并不是创造技术，而是形成一种解决的方案，一种大家可以遵守的规范。</strong></p>
+<p>所以，其选择的各种技术和协议都是当前所应用很广泛的技术和协议。miniDLNA可以实现音乐视频图片的局域网跨设备共享，且目前大多数智能手机、平板和电视均支持DLNA协议，在树莓派上安装miniDLNA服务后即可让处在同一局域网下的设备能轻松访问到树莓派上的影音资源。</p>
+<h2 id="下载机"><a href="#下载机" class="headerlink" title="下载机"></a>下载机</h2><p><strong>Transmission全称TransmissionBittorrent，由C开发而成（Mac OS上用的是Objective-C），硬件资源消耗极少，界面极度精简。</strong>支持包括Linux、BSD、Solaris、Mac OS X等多种操作系统，以及Networked Media Tank、WD MyBook、ReadyNAS、D-Link DNS-323 &amp; CH3SNAS、Synology等多种设备。支持GTK+、命令行、Web等多种界面。</p>
+<p><strong>Aria2支持Http、FTP、磁力链接和BT下载，可以和Transimission互补。</strong></p>
+<h2 id="自动备份"><a href="#自动备份" class="headerlink" title="自动备份"></a>自动备份</h2><p>数据备份是一个好习惯，但是总是会有遗忘或者是疏漏的情况出现，因此我们可以利用树莓派来实现自动备份。<strong>首先可以创建powershell命令实现备份功能，再另存为bat脚本文件，最后利用windows自带的定时任务功能和linux的定时执行命令操作来实现文件自动备份到树莓派上的操作。</strong></p>
+<h2 id="状态监控"><a href="#状态监控" class="headerlink" title="状态监控"></a>状态监控</h2><p>作为长时间运行的多媒体中心，树莓派的运行状态不能忽视，因此我们可以<strong>使用LCD1602显示屏</strong>连接树莓派，显示一些必要的信息来监控它的运行状态。<strong>（CPU，GPU, RAM, IP, TIME）</strong></p>
+<h1 id="安装操作"><a href="#安装操作" class="headerlink" title="安装操作"></a>安装操作</h1><h2 id="Samba-1"><a href="#Samba-1" class="headerlink" title="Samba"></a>Samba</h2><h3 id="安装ntfs-3g"><a href="#安装ntfs-3g" class="headerlink" title="安装ntfs-3g"></a>安装ntfs-3g</h3><p>树莓派接上移动硬盘后，会自动挂载到/media目录下，但是由于我的硬盘是ntfs格式，在树莓系统下只能读不能写，因此我需要安装ntfs-3g服务实现对移动硬盘的写操作，然后再设置开机自动挂载移动硬盘。</p>
+<pre><code>sudo apt-get install ntfs-3g
+#安装ntfs -3g服务
+
+sudo mkdir /home/pi/share
+#创建用于挂载移动硬盘的目录
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image001.png" alt=""></p>
+<pre><code>sudo umont /dev/sda1
+#有些系统会自动挂载，因此先使用umont命令取消挂载移动硬盘
+#后面的/dev/sda1是硬盘在此系统中对应的编号，可以使用 df -h命令查看，或者直接使用硬盘名代替
+
+sudo mount -t ntfs-3g /dev/sda1 /home/pi/share
+#使用ntfs -3g挂载硬盘到指定目录
+
+sudo chmod 777 /home/pi/share
+#使用chmod命令赋予目录读写权限
+
+sudo chmod 777 /home/pi
+#目录的上级目录也需要赋予读写权限
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image002.png" alt=""></p>
+<pre><code>sudo vim /etc/fstab
+#编辑/etc/fstab文件实现开机自动挂载硬盘
+
+#在文件的最后一行加入下列代码
+/dev/sda1   /home/pi/share  ntfsdefaults0   0
+#第一列是挂载的硬盘设备名或者uuid
+#第二列是挂载的目录
+#第三列是硬盘的文件系统类型
+#第四列是文件系统的参数，defaults表示同时具有rw, suid, dev, exec, auto, nouser, async等默认参数的设置
+#第五列是能否被dump备份命令作用：dump是一个用来作为备份的命令。通常这个参数的值为0或者1，0表示不备份
+#第六列是是否检验扇区：开机的过程中，系统默认会以fsck检验我们系统是否为完整（clean）。0表示不要检验
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image003.png" alt=""></p>
+<h3 id="安装Samba"><a href="#安装Samba" class="headerlink" title="安装Samba"></a>安装Samba</h3><pre><code>sudo apt-get update
+#首先更新一下系统源
+
+sudo apt-get install samba samba-common-bin
+#安装samba-common版本
+#samba-common：这个套件则主要提供了 SAMBA 的主要设定档(smb.conf) 、 smb.conf 语法检验的测试程序 ( testparm )等等；
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image004.png" alt=""></p>
+<pre><code>sudo vim /etc/samba/smb.conf
+#编辑配置文件，在文件中加入下列内容
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image005.png" alt=""></p>
+<pre><code>security = share
+#开放security权限等级为share
+#share---不需要提供用户名和密码。
+#user----需要提供用户名和密码，而且身份验证由 samba server 负责。
+#server--需要提供用户名和密码，可指定其他机器(winNT/2000/XP)或另一台 samba server作身份验证。
+#domain--需要提供用户名和密码，指定winNT/2000/XP域服务器作身份验证。
+
+[share] 
+#share为开启共享后的文件夹名
+comment = samba share   
+#comment为备注，帮助理解这个共享文件夹
+path = /home/pi/share   
+#path为共享的文件目录路径
+valid user = pi root   
+#vaild users-----设定只有此名单内的用户才能访问共享资源(拒绝优先)(用户名/@组名)，这里设置为pi和root两个
+public = yes
+#public----------是yes/否no公开共享，若为否则进行身份验证(只有当security = share 时此项才起作用)
+browseable = yes
+#browseable------是yes/否no在浏览资源中显示共享目录，若为否则必须指定共享路径才能存取
+writable = yes  
+#writable--------是yes/否no不以只读方式共享当与read only发生冲突时，无视read only
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image006.png" alt=""></p>
+<pre><code>sudo smbpasswd -a pi
+#新建一个名为pi的用户，然后会提示输入两次密码
+#smbpasswd命令的一些用法如下
+#-a：向smbpasswd文件中添加用户；
+#-c：指定samba的配置文件；
+#-x：从smbpasswd文件中删除用户；
+#-d：在smbpasswd文件中禁用指定的用户；
+#-e：在smbpasswd文件中激活指定的用户；
+#-n：将指定的用户的密码置空。
+
+#设置完用户名和密码后输入下列命令激活用户
+sudo smbpasswd -e pi
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image007.png" alt=""></p>
+<pre><code>#然后重启samba服务即可生效
+sudo /etc/init.d/samba restart
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image008.png" alt=""></p>
+<pre><code>#最后还是要设置开机启动
+sudo vim /etc/rc.local
+
+#在下面添加如下代码
+sudo /etc/init.d/samba restart
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image009.png" alt=""></p>
+<h3 id="添加网络映射"><a href="#添加网络映射" class="headerlink" title="添加网络映射"></a>添加网络映射</h3><p>添加网络映射主要是方便访问，可以将共享的samba文件夹添加到我的电脑中。首先右键我的电脑，点击添加网络映射/Add a network location<img src="http://p95to5vmm.bkt.clouddn.com/image010.png" alt=""></p>
+<p>输入共享的文件夹路径，然后命名，最后即可完成。<img src="http://p95to5vmm.bkt.clouddn.com/image011.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image012.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image013.png" alt=""></p>
+<h2 id="miniDLNA-1"><a href="#miniDLNA-1" class="headerlink" title="miniDLNA"></a>miniDLNA</h2><h3 id="安装miniDLNA"><a href="#安装miniDLNA" class="headerlink" title="安装miniDLNA"></a>安装miniDLNA</h3><pre><code>sudo apt-get update
+#先更新一下安装源
+
+sudo apt-get install minidlna
+#安装minidlna
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image014.png" alt=""></p>
+<pre><code>#安装完后编辑配置文件
+sudo vim /etc/minidlna.conf
+
+media_dir=A,/home/pi/share/Music
+#A表示这个目录是存放音乐的，当minidlna读到配置文件时，它会自动加载这个目录下的音乐文件 
+media_dir=P,/home/pi/share/Picture  
+#P表示图片文件  
+media_dir=V,/home/pi/share/Video
+#V表示视频文件
+db_dir=/home/pi/share/dlnadb
+#配置minidlna的数库数据的存放目录 
+log_dir=/home/pi/share/dlnalog  
+#配置日志目录 
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image015.png" alt=""></p>
+<pre><code>#然后建立对应的文件夹并给予对应的权限
+sudo mkdir /home/pi/share/Music
+sudo mkdir /home/pi/share/Picture
+sudo mkdir /home/pi/share/Video
+sudo mkdir /home/pi/share/dlnadb
+sudo mkdir /home/pi/share/dlnalog
+
+sudo chmod 777 /home/pi/share/Music
+sudo chmod 777 /home/pi/share/Picture
+sudo chmod 777 /home/pi/share/Video
+sudo chmod 777 /home/pi/share/dlnadb
+sudo chmod 777 /home/pi/share/dlnalog
+
+#使用下列命令重启dlna服务
+sudo /etc/init.d/minidlna restart
+
+#再使用下列命令查看dlna状态
+sudo /etc/init.d/minidlna status
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image016.png" alt=""></p>
+<pre><code>#最后修改开机启动文件
+sudo vim /etc/rc.local
+#在后面加入以下代码
+sudo /etc/init.d/minidlna restart
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image017.png" alt=""></p>
+<h3 id="添加DLNA设备"><a href="#添加DLNA设备" class="headerlink" title="添加DLNA设备"></a>添加DLNA设备</h3><p>点击我的电脑左上方的流媒体<br><img src="http://p95to5vmm.bkt.clouddn.com/image018.png" alt=""></p>
+<p>系统会自动搜索到局域网中的支持DLNA的设备，点击添加，等待添加完成。<br><img src="http://p95to5vmm.bkt.clouddn.com/image019.png" alt=""></p>
+<p>打开支持DLNA或者是流媒体播放的软件，就能看到树莓派中的流媒体文件。<br><img src="http://p95to5vmm.bkt.clouddn.com/image020.png" alt=""></p>
+<h2 id="下载机-1"><a href="#下载机-1" class="headerlink" title="下载机"></a>下载机</h2><h3 id="安装transmission"><a href="#安装transmission" class="headerlink" title="安装transmission"></a>安装transmission</h3><pre><code>sudo apt-get update
+#先更新一下安装源
+sudo apt-get install transmission-daemon
+#然后安装transmission
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image021.png" alt=""></p>
+<pre><code>#创建目录用于存放下载文件
+sudo mkdir /home/pi/share/Downloads/Incomplete  
+#存放未下载完成的文件
+sudo mkdir /home/pi/share/Downloads/complete
+#存放下载完成的文件
+
+#更改文件所属组别
+sudo chgrp debian-transmission /home/pi/share/Downloads/Incomplete
+sudo chgrp debian-transmission /home/pi/share/Downloads/complete
+
+#赋予文件夹权限
+sudo chmod 777 /home/pi/share/Downloads/Incomplete 
+sudo chmod 777 /home/pi/share/Downloads/complete 
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image022.png" alt=""></p>
+<pre><code>#修改配置文件
+sudo vim /etc/transmission-daemon/settings.json
+
+#找到以下项进行修改
+#已完成的下载目录
+&quot;download-dir&quot;: &quot;/home/pi/share/Downloads/complete&quot;,
+#未完成的下载目录
+&quot;incomplete-dir&quot;: &quot;/home/pi/share/Downloads/Incomplete&quot;,
+#允许Web访问的白名单地址,这里要根据自己的路由器实际IP地址进行修改
+&quot;rpc-whitelist&quot;: &quot;192.168.8.*&quot;,
+#登录的用户名
+“rpc-username”: “yourname”,
+#登录的密码
+“rpc-password”: “yoursecretcode”,
+
+#最后依次执行下面的两条命令完成重启服务
+sudo service transmission-daemon reload
+sudo service transmission-daemon restart
+</code></pre><p>最后我们访问树莓派的IP再加上9091端口就能登录到下载界面。<img src="http://p95to5vmm.bkt.clouddn.com/image023.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image024.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image025.png" alt=""></p>
+<h3 id="安装Aria2"><a href="#安装Aria2" class="headerlink" title="安装Aria2"></a>安装Aria2</h3><h4 id="安装Aria2-1"><a href="#安装Aria2-1" class="headerlink" title="安装Aria2"></a>安装Aria2</h4><pre><code>sudo apt-get update
+#更新一下安装源
+sudo apt-get install aria2
+#安装aria2
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image026.png" alt=""></p>
+<pre><code>#在/etc目录下创建aria2目录用来存放配置文件：
+sudo mkdir /etc/aria2
+
+#创建空白的aria2.session文件：
+sudo touch /etc/aria2/aria2.session
+
+#创建配置文件
+sudo vim /etc/aria2/aria2.conf
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image027.png" alt=""></p>
+<pre><code>#在该文件中输入以下内容：
+
+dir=/home/pi/share/Downloads
+#设置文件下载的存放目录 
+disable-ipv6=true 
+#打开rpc的目的是为了给web管理端用 
+enable-rpc=true 
+rpc-allow-origin-all=true 
+rpc-listen-all=true 
+#rpc-listen-port=6800 
+continue=true 
+input-file=/etc/aria2/aria2.session 
+save-session=/etc/aria2/aria2.session 
+max-concurrent-downloads=3
+#设置最大同时下载的任务数
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image028.png" alt=""></p>
+<pre><code>#启动aria2
+sudo aria2c --conf-path=/etc/aria2/aria2.conf
+
+#如果没有提示任何错误信息，那就按ctrl+c停止上面的语句，转为后台运行：
+
+sudo aria2c --conf-path=/etc/aria2/aria2.conf －D
+
+#同时其此句写到开机启动中，编辑/etc/rc.local
+sudo vim /etc/rc.local
+
+#在文件的最后面添加这一行
+sudo aria2c --conf-path=/etc/aria2/aria2.conf －D
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image029.png" alt=""></p>
+<h4 id="安装appache"><a href="#安装appache" class="headerlink" title="安装appache"></a>安装appache</h4><pre><code>#安装appach
+sudo apt-get install apache2
+
+#修改/var/www/html的权限
+chmod 777 /var/www/html
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image030.png" alt=""><br><img src="http://p95to5vmm.bkt.clouddn.com/image031.png" alt=""></p>
+<h4 id="安装yaaw"><a href="#安装yaaw" class="headerlink" title="安装yaaw"></a>安装yaaw</h4><p>从<a href="https://github.com/binux/yaaw下载yaaw，点击右下角的Download" target="_blank" rel="noopener">https://github.com/binux/yaaw下载yaaw，点击右下角的Download</a> Zip, 下载后将解压后的文件夹内容拷贝到/var/www/html文件夹下。这时在浏览器内输入树莓派的IP，如果出现以下页面，则表示已经正常工作了。</p>
+<p><strong>点击左上方的add就可以进行下载。</strong><br><img src="http://p95to5vmm.bkt.clouddn.com/image032.png" alt=""></p>
+<h2 id="自动备份-1"><a href="#自动备份-1" class="headerlink" title="自动备份"></a>自动备份</h2><h3 id="创建自动执行文件"><a href="#创建自动执行文件" class="headerlink" title="创建自动执行文件"></a>创建自动执行文件</h3><p>使用记事本新建一个文件，里面输入下列代码，然后保存并更改文件名后缀为bat执行文件。</p>
+<pre><code>@echo off
+echo Backuping D:\MyBlog\source\_posts---------&gt;192.168.8.106\share\Backup
+xcopy &quot;D:\MyBlog\source\_posts&quot; &quot;\\RASPBERRYPI\share\Backup&quot; /e/I/d/h/r/y
+exit
+</code></pre><p>其中xcopy指令后两个路径分别为需要备份的文件夹路径和用于存放备份的文件夹路径，其余参数说明如下：</p>
+<p><strong>/e：拷贝所有子目录，包括空子目录；</strong></p>
+<p><strong>/I： 如果目标文件或目录不存在且拷贝的文件数多于一，则假设目标为目录；</strong></p>
+<p><strong>/d：只拷贝文件日期与在目标文件后的文件（即修改过的源文件）</strong></p>
+<p><strong>/h：同时拷贝隐藏文件和系统文件</strong></p>
+<p><strong>/r：拷贝并覆盖只读文件</strong></p>
+<p><strong>/y： 复制文件审核设置（不显示已有文件覆盖确认）</strong></p>
+<p>以上参数可以根据需要添加，推荐都加上最好。</p>
+<h4 id="设置定时任务"><a href="#设置定时任务" class="headerlink" title="设置定时任务"></a>设置定时任务</h4><p><strong>然后我们打开”控制面板”—“计划任务”添加计划任务，计划任务里的执行目标为该批处理文件，设定在什么时候执行则由个人决定。</strong></p>
+<p>执行效果示例如下：</p>
+<p><img src="http://p95to5vmm.bkt.clouddn.com/image033.png" alt=""></p>
+<h2 id="状态监控-1"><a href="#状态监控-1" class="headerlink" title="状态监控"></a>状态监控</h2><p>按照针脚跳线连接好LCD1602和树莓派并调节好LCD1602的对比度，使用python编写代码，控制1602输出相关信息，具体代码如下：</p>
+<p><strong>将下面这个文件保存为lcd1602.py</strong></p>
+<pre><code>#!/usr/bin/python
+
+#
+# based on code from lrvick and LiquidCrystal
+# lrvic - https://github.com/lrvick/raspi-hd44780/blob/master/hd44780.py
+# LiquidCrystal - https://github.com/arduino/Arduino/blob/master/libraries/LiquidCrystal/LiquidCrystal.cpp
+#
+
+from time import sleep
+
+class lcd1602:
+
+# commands
+LCD_CLEARDISPLAY= 0x01
+LCD_RETURNHOME  = 0x02
+LCD_ENTRYMODESET= 0x04
+LCD_DISPLAYCONTROL  = 0x08
+LCD_CURSORSHIFT = 0x10
+LCD_FUNCTIONSET = 0x20
+LCD_SETCGRAMADDR= 0x40
+LCD_SETDDRAMADDR= 0x80
+
+# flags for display entry mode
+LCD_ENTRYRIGHT  = 0x00
+LCD_ENTRYLEFT   = 0x02
+LCD_ENTRYSHIFTINCREMENT = 0x01
+LCD_ENTRYSHIFTDECREMENT = 0x00
+
+# flags for display on/off control
+LCD_DISPLAYON   = 0x04
+LCD_DISPLAYOFF  = 0x00
+LCD_CURSORON= 0x02
+LCD_CURSOROFF   = 0x00
+LCD_BLINKON = 0x01
+LCD_BLINKOFF= 0x00
+
+# flags for display/cursor shift
+LCD_DISPLAYMOVE = 0x08
+LCD_CURSORMOVE  = 0x00
+
+# flags for display/cursor shift
+LCD_DISPLAYMOVE = 0x08
+LCD_CURSORMOVE  = 0x00
+LCD_MOVERIGHT   = 0x04
+LCD_MOVELEFT= 0x00
+
+# flags for function set
+LCD_8BITMODE= 0x10
+LCD_4BITMODE= 0x00
+LCD_2LINE   = 0x08
+LCD_1LINE   = 0x00
+LCD_5x10DOTS= 0x04
+LCD_5x8DOTS = 0x00
+
+
+
+def __init__(self, pin_rs=14, pin_e=15, pins_db=[17, 18, 27, 22], GPIO = None):
+# Emulate the old behavior of using RPi.GPIO if we haven&apos;t been given
+# an explicit GPIO interface to use
+if not GPIO:
+import RPi.GPIO as GPIO
+self.GPIO = GPIO
+self.pin_rs = pin_rs
+self.pin_e = pin_e
+self.pins_db = pins_db
+
+self.GPIO.setmode(GPIO.BCM)
+self.GPIO.setwarnings(False)
+self.GPIO.setup(self.pin_e, GPIO.OUT)
+self.GPIO.setup(self.pin_rs, GPIO.OUT)
+
+for pin in self.pins_db:
+self.GPIO.setup(pin, GPIO.OUT)
+
+self.write4bits(0x33) # initialization
+self.write4bits(0x32) # initialization
+self.write4bits(0x28) # 2 line 5x7 matrix
+self.write4bits(0x0C) # turn cursor off 0x0E to enable cursor
+self.write4bits(0x06) # shift cursor right
+
+self.displaycontrol = self.LCD_DISPLAYON | self.LCD_CURSOROFF | self.LCD_BLINKOFF
+
+self.displayfunction = self.LCD_4BITMODE | self.LCD_1LINE | self.LCD_5x8DOTS
+self.displayfunction |= self.LCD_2LINE
+
+&quot;&quot;&quot; Initialize to default text direction (for romance languages) &quot;&quot;&quot;
+self.displaymode =  self.LCD_ENTRYLEFT | self.LCD_ENTRYSHIFTDECREMENT
+self.write4bits(self.LCD_ENTRYMODESET | self.displaymode) #  set the entry mode
+
+self.clear()
+
+
+def begin(self, cols, lines):
+
+if (lines &gt; 1):
+self.numlines = lines
+self.displayfunction |= self.LCD_2LINE
+self.currline = 0
+
+
+def home(self):
+
+self.write4bits(self.LCD_RETURNHOME) # set cursor position to zero
+self.delayMicroseconds(3000) # this command takes a long time!
+
+
+def clear(self):
+
+self.write4bits(self.LCD_CLEARDISPLAY) # command to clear display
+self.delayMicroseconds(3000)# 3000 microsecond sleep, clearing the display takes a long time
+
+
+def setCursor(self, col, row):
+
+self.row_offsets = [ 0x00, 0x40, 0x14, 0x54 ]
+
+if ( row &gt; self.numlines ): 
+row = self.numlines - 1 # we count rows starting w/0
+
+self.write4bits(self.LCD_SETDDRAMADDR | (col + self.row_offsets[row]))
+
+
+def noDisplay(self): 
+&quot;&quot;&quot; Turn the display off (quickly) &quot;&quot;&quot;
+
+self.displaycontrol &amp;= ~self.LCD_DISPLAYON
+self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+
+
+def display(self):
+&quot;&quot;&quot; Turn the display on (quickly) &quot;&quot;&quot;
+
+self.displaycontrol |= self.LCD_DISPLAYON
+self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+
+
+def noCursor(self):
+&quot;&quot;&quot; Turns the underline cursor on/off &quot;&quot;&quot;
+
+self.displaycontrol &amp;= ~self.LCD_CURSORON
+self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+
+
+def cursor(self):
+&quot;&quot;&quot; Cursor On &quot;&quot;&quot;
+
+self.displaycontrol |= self.LCD_CURSORON
+self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+
+
+def noBlink(self):
+&quot;&quot;&quot; Turn on and off the blinking cursor &quot;&quot;&quot;
+
+self.displaycontrol &amp;= ~self.LCD_BLINKON
+self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+
+
+def noBlink(self):
+&quot;&quot;&quot; Turn on and off the blinking cursor &quot;&quot;&quot;
+
+self.displaycontrol &amp;= ~self.LCD_BLINKON
+self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)
+
+
+def DisplayLeft(self):
+&quot;&quot;&quot; These commands scroll the display without changing the RAM &quot;&quot;&quot;
+
+self.write4bits(self.LCD_CURSORSHIFT | self.LCD_DISPLAYMOVE | self.LCD_MOVELEFT)
+
+
+def scrollDisplayRight(self):
+&quot;&quot;&quot; These commands scroll the display without changing the RAM &quot;&quot;&quot;
+
+self.write4bits(self.LCD_CURSORSHIFT | self.LCD_DISPLAYMOVE | self.LCD_MOVERIGHT);
+
+
+def leftToRight(self):
+&quot;&quot;&quot; This is for text that flows Left to Right &quot;&quot;&quot;
+
+self.displaymode |= self.LCD_ENTRYLEFT
+self.write4bits(self.LCD_ENTRYMODESET | self.displaymode);
+
+
+def rightToLeft(self):
+&quot;&quot;&quot; This is for text that flows Right to Left &quot;&quot;&quot;
+self.displaymode &amp;= ~self.LCD_ENTRYLEFT
+self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
+
+
+def autoscroll(self):
+&quot;&quot;&quot; This will &apos;right justify&apos; text from the cursor &quot;&quot;&quot;
+
+self.displaymode |= self.LCD_ENTRYSHIFTINCREMENT
+self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
+
+
+def noAutoscroll(self): 
+&quot;&quot;&quot; This will &apos;left justify&apos; text from the cursor &quot;&quot;&quot;
+
+self.displaymode &amp;= ~self.LCD_ENTRYSHIFTINCREMENT
+self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)
+
+
+def write4bits(self, bits, char_mode=False):
+&quot;&quot;&quot; Send command to LCD &quot;&quot;&quot;
+
+self.delayMicroseconds(1000) # 1000 microsecond sleep
+
+bits=bin(bits)[2:].zfill(8)
+
+self.GPIO.output(self.pin_rs, char_mode)
+
+for pin in self.pins_db:
+self.GPIO.output(pin, False)
+
+for i in range(4):
+if bits[i] == &quot;1&quot;:
+self.GPIO.output(self.pins_db[::-1][i], True)
+
+self.pulseEnable()
+
+for pin in self.pins_db:
+self.GPIO.output(pin, False)
+
+for i in range(4,8):
+if bits[i] == &quot;1&quot;:
+self.GPIO.output(self.pins_db[::-1][i-4], True)
+
+self.pulseEnable()
+
+
+def delayMicroseconds(self, microseconds):
+seconds = microseconds / float(1000000) # divide microseconds by 1 million for seconds
+sleep(seconds)
+
+
+def pulseEnable(self):
+self.GPIO.output(self.pin_e, False)
+self.delayMicroseconds(1)   # 1 microsecond pause - enable pulse must be &gt; 450ns 
+self.GPIO.output(self.pin_e, True)
+self.delayMicroseconds(1)   # 1 microsecond pause - enable pulse must be &gt; 450ns 
+self.GPIO.output(self.pin_e, False)
+self.delayMicroseconds(1)   # commands need &gt; 37us to settle
+
+
+def message(self, text):
+&quot;&quot;&quot; Send string to LCD. Newline wraps to second line&quot;&quot;&quot;
+
+for char in text:
+if char == &apos;\n&apos;:
+self.write4bits(0xC0) # next line
+else:
+self.write4bits(ord(char),True)
+
+
+if __name__ == &apos;__main__&apos;:
+
+lcd = lcd1602()
+lcd.clear()
+lcd.message(&quot;hello world!&quot;)
+</code></pre><p><strong>再将这个文件保存为1602.py</strong></p>
+<pre><code>#!/usr/bin/python
+
+from lcd1602 import *
+from datetime import *
+import commands
+
+def get_cpu_temp():
+tmp = open(&apos;/sys/class/thermal/thermal_zone0/temp&apos;)
+cpu = tmp.read()
+tmp.close()
+return &apos;{:.2f}&apos;.format( float(cpu)/1000 ) + &apos; C&apos;
+
+def get_gpu_temp():
+tmp = commands.getoutput(&apos;vcgencmd measure_temp|awk -F= \&apos;{print $2}\&apos;&apos;).replace(&apos;\&apos;C&apos;,&apos;&apos;)
+gpu = float(tmp)
+return &apos;{:.2f}&apos;.format( gpu ) + &apos; C&apos;
+
+def get_time_now():
+return datetime.now().strftime(&apos;%H:%M:%S\n   %Y-%m-%d&apos;)
+
+def get_ip_info():
+ip= commands.getoutput(&apos;ifconfig eth0 | grep inet | awk \&apos;{ print $2 }\&apos; | awk \&apos;NR==1\&apos;&apos;)
+return &apos;Ethernet IP:\n&apos; + ip 
+
+def get_mem_info():
+total= commands.getoutput(&apos;free -m|grep Mem:|awk \&apos;{print $2}\&apos;&apos;)  
+free= commands.getoutput(&apos;free -m|grep Mem:|awk \&apos;{print $4}\&apos;&apos;)
+return &apos;MEM:\n&apos; + free +&apos;/&apos;+ total +&apos;M&apos;
+
+lcd = lcd1602()
+lcd.clear()
+
+if __name__ == &apos;__main__&apos;:
+
+while(1):
+lcd.clear()
+lcd.message( get_ip_info() )
+sleep(5)
+
+lcd.clear()
+lcd.message( get_time_now() )
+sleep(5)
+
+lcd.clear()
+lcd.message( get_mem_info() )
+sleep(5)
+
+lcd.clear()
+lcd.message( &apos;CPU: &apos; + get_cpu_temp()+&apos;\n&apos; )
+lcd.message( &apos;GPU: &apos; + get_gpu_temp() )
+sleep(5)
+</code></pre><p><strong>最后将两个文件保存到同一个目录下面，然后编辑文件设置开机启动即可让LCD1602循环显示信息。</strong></p>
+<p><strong>我将这两个文件保存到/home/pi/1602目录下</strong></p>
+<pre><code>#编辑配置文件
+sudo vim /etc/rc.local
+#将此命令添加到文件最后
+sudo python /home/pi/1602/1602.py
+</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image034.png" alt=""></p>
+<p><strong>重启之后就可以尽情地享用树莓派打造的多媒体中心了，虽然树莓派3B+只有USB2.0接口，但是只要搭配上百兆lan口的路由器，局域网内流畅观看40G左右大小的一部电影还是毫无问题的。</strong></p>
+<p>如果有更高的需求，还是建议上更好的路由器和NAS吧。</p>
+
+    </article>
+    <!-- license  -->
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/08/17/180817UbuntuInstall/" title= Win10下安装Ubuntu双系统 >
+                    <div class="prevTitle">Win10下安装Ubuntu双系统</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+    <div id="lv-container" data-id="city" data-uid= MTAyMC8zODE1MS8xNDY4MQ==>
+        <script type="text/javascript">
+            (function (d, s) {
+                var j, e = d.getElementsByTagName(s)[0];
+                if (typeof LivereTower === 'function') { return; }
+                j = d.createElement(s);
+                j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+                j.async = true;
+
+                e.parentNode.insertBefore(j, e);
+            })(document, 'script');
+        </script>
+        <noscript>为正常使用来必力评论功能请激活JavaScript</noscript>
+    </div>
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!--PC和WAP自适应版-->
+
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:mr.7th@outlook.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer wechat" title=wechat>
+                  
+                  <img class="profile-qr" src="/assets/wechat_ID.jpg" />
+                </span>
+            
+        
+    
+        
+            
+                <span class="iconfont-archer qq" title=qq>
+                  
+                  <img class="profile-qr" src="/assets/qq_ID.png" />
+                </span>
+            
+        
+    
+        
+            
+                <a href="https://github.com/TinySeven7" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="/atom.xml" class="iconfont-archer rss" target="_blank" title=rss></a>
+            
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#功能简介"><span class="toc-number">1.</span> <span class="toc-text">功能简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Samba"><span class="toc-number">1.1.</span> <span class="toc-text">Samba</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#miniDLNA"><span class="toc-number">1.2.</span> <span class="toc-text">miniDLNA</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#下载机"><span class="toc-number">1.3.</span> <span class="toc-text">下载机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自动备份"><span class="toc-number">1.4.</span> <span class="toc-text">自动备份</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#状态监控"><span class="toc-number">1.5.</span> <span class="toc-text">状态监控</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#安装操作"><span class="toc-number">2.</span> <span class="toc-text">安装操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Samba-1"><span class="toc-number">2.1.</span> <span class="toc-text">Samba</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装ntfs-3g"><span class="toc-number">2.1.1.</span> <span class="toc-text">安装ntfs-3g</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装Samba"><span class="toc-number">2.1.2.</span> <span class="toc-text">安装Samba</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加网络映射"><span class="toc-number">2.1.3.</span> <span class="toc-text">添加网络映射</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#miniDLNA-1"><span class="toc-number">2.2.</span> <span class="toc-text">miniDLNA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装miniDLNA"><span class="toc-number">2.2.1.</span> <span class="toc-text">安装miniDLNA</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加DLNA设备"><span class="toc-number">2.2.2.</span> <span class="toc-text">添加DLNA设备</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#下载机-1"><span class="toc-number">2.3.</span> <span class="toc-text">下载机</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装transmission"><span class="toc-number">2.3.1.</span> <span class="toc-text">安装transmission</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装Aria2"><span class="toc-number">2.3.2.</span> <span class="toc-text">安装Aria2</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#安装Aria2-1"><span class="toc-number">2.3.2.1.</span> <span class="toc-text">安装Aria2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#安装appache"><span class="toc-number">2.3.2.2.</span> <span class="toc-text">安装appache</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#安装yaaw"><span class="toc-number">2.3.2.3.</span> <span class="toc-text">安装yaaw</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自动备份-1"><span class="toc-number">2.4.</span> <span class="toc-text">自动备份</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建自动执行文件"><span class="toc-number">2.4.1.</span> <span class="toc-text">创建自动执行文件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#设置定时任务"><span class="toc-number">2.4.1.1.</span> <span class="toc-text">设置定时任务</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#状态监控-1"><span class="toc-number">2.5.</span> <span class="toc-text">状态监控</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 23
+        </div>
+        <!-- search  -->
+        
+            <div class="site-search popup-trigger">
+                <span class="iconfont-archer search-icon">&#xe627;</span>
+            </div>
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/10</span><a class="archive-post-title" href= "/2018/09/10/180910RaspiMultiMediaCentre/" >树莓派3B+打造多媒体中心</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/17</span><a class="archive-post-title" href= "/2018/08/17/180817UbuntuInstall/" >Win10下安装Ubuntu双系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/14</span><a class="archive-post-title" href= "/2018/08/14/180814RaidOn2AHCI/" >硬盘RaidOn模式无损转换为AHCI模式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/02</span><a class="archive-post-title" href= "/2018/08/02/180802AndroidStudio/" >Android Studio配置</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/29</span><a class="archive-post-title" href= "/2018/07/29/180729JAVA10/" >JAVA10安装与环境变量配置</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/18</span><a class="archive-post-title" href= "/2018/07/18/180718TinyPro002/" >小程序之app.json</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/17</span><a class="archive-post-title" href= "/2018/07/17/180717TinyPro001/" >小程序之HelloWorld</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/18</span><a class="archive-post-title" href= "/2018/03/18/180318DouBootUdisk/" >双启动U盘</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">02/25</span><a class="archive-post-title" href= "/2018/02/25/180225DISALTKB/" >禁用笔记本内置键盘</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/09</span><a class="archive-post-title" href= "/2018/01/09/180109WiFiDev/" >第六代Wi-Fi协议的前世今生</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2017 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/07</span><a class="archive-post-title" href= "/2017/10/07/171007BIOS&UEFI/" >BIOS与UEFI</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/14</span><a class="archive-post-title" href= "/2017/08/14/170814phoneChargingDev/" >手机充电技术发展史</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/10</span><a class="archive-post-title" href= "/2017/08/10/170810WZD&Sina/" >王志东和新浪</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/08</span><a class="archive-post-title" href= "/2017/08/08/170808MBR/" >MBR分区表</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/03</span><a class="archive-post-title" href= "/2017/07/03/170703Filqlo/" >Filqlo时钟屏保</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/12</span><a class="archive-post-title" href= "/2017/05/12/170512DiskAB/" >电脑的AB盘去哪了？</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/09</span><a class="archive-post-title" href= "/2017/05/09/170509BackupDrivers/" >驱动备份(免第三方)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/07</span><a class="archive-post-title" href= "/2017/05/07/170507Android/" >安卓刷机基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/04</span><a class="archive-post-title" href= "/2017/05/04/170504PageFiles/" >虚拟内存</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/03</span><a class="archive-post-title" href= "/2017/05/03/170503CHKDSK/" >CHKDSK使用方法</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/02</span><a class="archive-post-title" href= "/2017/05/02/170502DISADPOST/" >关闭硬盘开机自检</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/18</span><a class="archive-post-title" href= "/2017/04/18/170418FAT32toNTFS/" >FAT32无损转换为NTFS</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/14</span><a class="archive-post-title" href= "/2017/04/14/170414win10ShowSec/" >win10时间栏显示秒</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="硬盘"><span class="iconfont-archer">&#xe606;</span>硬盘</span>
+    
+        <span class="sidebar-tag-name" data-tags="Windows"><span class="iconfont-archer">&#xe606;</span>Windows</span>
+    
+        <span class="sidebar-tag-name" data-tags="操作系统"><span class="iconfont-archer">&#xe606;</span>操作系统</span>
+    
+        <span class="sidebar-tag-name" data-tags="驱动"><span class="iconfont-archer">&#xe606;</span>驱动</span>
+    
+        <span class="sidebar-tag-name" data-tags="屏保"><span class="iconfont-archer">&#xe606;</span>屏保</span>
+    
+        <span class="sidebar-tag-name" data-tags="笔记本键盘"><span class="iconfont-archer">&#xe606;</span>笔记本键盘</span>
+    
+        <span class="sidebar-tag-name" data-tags="装系统"><span class="iconfont-archer">&#xe606;</span>装系统</span>
+    
+        <span class="sidebar-tag-name" data-tags="编程"><span class="iconfont-archer">&#xe606;</span>编程</span>
+    
+        <span class="sidebar-tag-name" data-tags="小程序"><span class="iconfont-archer">&#xe606;</span>小程序</span>
+    
+        <span class="sidebar-tag-name" data-tags="历史"><span class="iconfont-archer">&#xe606;</span>历史</span>
+    
+        <span class="sidebar-tag-name" data-tags="新浪"><span class="iconfont-archer">&#xe606;</span>新浪</span>
+    
+        <span class="sidebar-tag-name" data-tags="王志东"><span class="iconfont-archer">&#xe606;</span>王志东</span>
+    
+        <span class="sidebar-tag-name" data-tags="硬件"><span class="iconfont-archer">&#xe606;</span>硬件</span>
+    
+        <span class="sidebar-tag-name" data-tags="安卓"><span class="iconfont-archer">&#xe606;</span>安卓</span>
+    
+        <span class="sidebar-tag-name" data-tags="手机"><span class="iconfont-archer">&#xe606;</span>手机</span>
+    
+        <span class="sidebar-tag-name" data-tags="充电"><span class="iconfont-archer">&#xe606;</span>充电</span>
+    
+        <span class="sidebar-tag-name" data-tags="WiFi"><span class="iconfont-archer">&#xe606;</span>WiFi</span>
+    
+        <span class="sidebar-tag-name" data-tags="环境搭建"><span class="iconfont-archer">&#xe606;</span>环境搭建</span>
+    
+        <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
+    
+        <span class="sidebar-tag-name" data-tags="Ubuntu"><span class="iconfont-archer">&#xe606;</span>Ubuntu</span>
+    
+        <span class="sidebar-tag-name" data-tags="树莓派"><span class="iconfont-archer">&#xe606;</span>树莓派</span>
+    
+        <span class="sidebar-tag-name" data-tags="多媒体"><span class="iconfont-archer">&#xe606;</span>多媒体</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="教程"><span class="iconfont-archer">&#xe60a;</span>教程</span>
+    
+        <span class="sidebar-category-name" data-categories="科普"><span class="iconfont-archer">&#xe60a;</span>科普</span>
+    
+        <span class="sidebar-category-name" data-categories="分享"><span class="iconfont-archer">&#xe60a;</span>分享</span>
+    
+        <span class="sidebar-category-name" data-categories="记录"><span class="iconfont-archer">&#xe60a;</span>记录</span>
+    
+        <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "TinyChen"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+        <div class="site-search">
+  <div class="algolia-popup popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="iconfont-archer">&#xe609;</i>
+    </span>
+  </div>
+</div>
+        <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.8.0/dist/instantsearch.min.js" defer></script>
+        <script src="/scripts/search.js" defer></script>
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+
