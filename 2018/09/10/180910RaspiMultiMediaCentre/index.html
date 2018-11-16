@@ -429,7 +429,7 @@ height:50vh;
 
 sudo mkdir /home/pi/share
 #创建用于挂载移动硬盘的目录
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image001.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image001.png" alt=""></p>
 <pre><code>sudo umont /dev/sda1
 #有些系统会自动挂载，因此先使用umont命令取消挂载移动硬盘
 #后面的/dev/sda1是硬盘在此系统中对应的编号，可以使用 df -h命令查看，或者直接使用硬盘名代替
@@ -442,7 +442,7 @@ sudo chmod 777 /home/pi/share
 
 sudo chmod 777 /home/pi
 #目录的上级目录也需要赋予读写权限
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image002.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image002.png" alt=""></p>
 <pre><code>sudo vim /etc/fstab
 #编辑/etc/fstab文件实现开机自动挂载硬盘
 
@@ -454,17 +454,17 @@ sudo chmod 777 /home/pi
 #第四列是文件系统的参数，defaults表示同时具有rw, suid, dev, exec, auto, nouser, async等默认参数的设置
 #第五列是能否被dump备份命令作用：dump是一个用来作为备份的命令。通常这个参数的值为0或者1，0表示不备份
 #第六列是是否检验扇区：开机的过程中，系统默认会以fsck检验我们系统是否为完整（clean）。0表示不要检验
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image003.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image003.png" alt=""></p>
 <h3 id="安装Samba"><a href="#安装Samba" class="headerlink" title="安装Samba"></a>安装Samba</h3><pre><code>sudo apt-get update
 #首先更新一下系统源
 
 sudo apt-get install samba samba-common-bin
 #安装samba-common版本
 #samba-common：这个套件则主要提供了 SAMBA 的主要设定档(smb.conf) 、 smb.conf 语法检验的测试程序 ( testparm )等等；
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image004.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image004.png" alt=""></p>
 <pre><code>sudo vim /etc/samba/smb.conf
 #编辑配置文件，在文件中加入下列内容
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image005.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image005.png" alt=""></p>
 <pre><code>security = share
 #开放security权限等级为share
 #share---不需要提供用户名和密码。
@@ -486,7 +486,7 @@ browseable = yes
 #browseable------是yes/否no在浏览资源中显示共享目录，若为否则必须指定共享路径才能存取
 writable = yes  
 #writable--------是yes/否no不以只读方式共享当与read only发生冲突时，无视read only
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image006.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image006.png" alt=""></p>
 <pre><code>sudo smbpasswd -a pi
 #新建一个名为pi的用户，然后会提示输入两次密码
 #smbpasswd命令的一些用法如下
@@ -499,24 +499,24 @@ writable = yes
 
 #设置完用户名和密码后输入下列命令激活用户
 sudo smbpasswd -e pi
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image007.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image007.png" alt=""></p>
 <pre><code>#然后重启samba服务即可生效
 sudo /etc/init.d/samba restart
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image008.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image008.png" alt=""></p>
 <pre><code>#最后还是要设置开机启动
 sudo vim /etc/rc.local
 
 #在下面添加如下代码
 sudo /etc/init.d/samba restart
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image009.png" alt=""></p>
-<h3 id="添加网络映射"><a href="#添加网络映射" class="headerlink" title="添加网络映射"></a>添加网络映射</h3><p>添加网络映射主要是方便访问，可以将共享的samba文件夹添加到我的电脑中。首先右键我的电脑，点击添加网络映射/Add a network location<img src="http://p95to5vmm.bkt.clouddn.com/image010.png" alt=""></p>
-<p>输入共享的文件夹路径，然后命名，最后即可完成。<img src="http://p95to5vmm.bkt.clouddn.com/image011.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image012.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image013.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image009.png" alt=""></p>
+<h3 id="添加网络映射"><a href="#添加网络映射" class="headerlink" title="添加网络映射"></a>添加网络映射</h3><p>添加网络映射主要是方便访问，可以将共享的samba文件夹添加到我的电脑中。首先右键我的电脑，点击添加网络映射/Add a network location<img src="http://qiniuyun.tiny777.com/image010.png" alt=""></p>
+<p>输入共享的文件夹路径，然后命名，最后即可完成。<img src="http://qiniuyun.tiny777.com/image011.png" alt=""><img src="http://qiniuyun.tiny777.com/image012.png" alt=""><img src="http://qiniuyun.tiny777.com/image013.png" alt=""></p>
 <h2 id="miniDLNA-1"><a href="#miniDLNA-1" class="headerlink" title="miniDLNA"></a>miniDLNA</h2><h3 id="安装miniDLNA"><a href="#安装miniDLNA" class="headerlink" title="安装miniDLNA"></a>安装miniDLNA</h3><pre><code>sudo apt-get update
 #先更新一下安装源
 
 sudo apt-get install minidlna
 #安装minidlna
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image014.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image014.png" alt=""></p>
 <pre><code>#安装完后编辑配置文件
 sudo vim /etc/minidlna.conf
 
@@ -530,7 +530,7 @@ db_dir=/home/pi/share/dlnadb
 #配置minidlna的数库数据的存放目录 
 log_dir=/home/pi/share/dlnalog  
 #配置日志目录 
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image015.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image015.png" alt=""></p>
 <pre><code>#然后建立对应的文件夹并给予对应的权限
 sudo mkdir /home/pi/share/Music
 sudo mkdir /home/pi/share/Picture
@@ -549,20 +549,20 @@ sudo /etc/init.d/minidlna restart
 
 #再使用下列命令查看dlna状态
 sudo /etc/init.d/minidlna status
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image016.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image016.png" alt=""></p>
 <pre><code>#最后修改开机启动文件
 sudo vim /etc/rc.local
 #在后面加入以下代码
 sudo /etc/init.d/minidlna restart
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image017.png" alt=""></p>
-<h3 id="添加DLNA设备"><a href="#添加DLNA设备" class="headerlink" title="添加DLNA设备"></a>添加DLNA设备</h3><p>点击我的电脑左上方的流媒体<br><img src="http://p95to5vmm.bkt.clouddn.com/image018.png" alt=""></p>
-<p>系统会自动搜索到局域网中的支持DLNA的设备，点击添加，等待添加完成。<br><img src="http://p95to5vmm.bkt.clouddn.com/image019.png" alt=""></p>
-<p>打开支持DLNA或者是流媒体播放的软件，就能看到树莓派中的流媒体文件。<br><img src="http://p95to5vmm.bkt.clouddn.com/image020.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image017.png" alt=""></p>
+<h3 id="添加DLNA设备"><a href="#添加DLNA设备" class="headerlink" title="添加DLNA设备"></a>添加DLNA设备</h3><p>点击我的电脑左上方的流媒体<br><img src="http://qiniuyun.tiny777.com/image018.png" alt=""></p>
+<p>系统会自动搜索到局域网中的支持DLNA的设备，点击添加，等待添加完成。<br><img src="http://qiniuyun.tiny777.com/image019.png" alt=""></p>
+<p>打开支持DLNA或者是流媒体播放的软件，就能看到树莓派中的流媒体文件。<br><img src="http://qiniuyun.tiny777.com/image020.png" alt=""></p>
 <h2 id="下载机-1"><a href="#下载机-1" class="headerlink" title="下载机"></a>下载机</h2><h3 id="安装transmission"><a href="#安装transmission" class="headerlink" title="安装transmission"></a>安装transmission</h3><pre><code>sudo apt-get update
 #先更新一下安装源
 sudo apt-get install transmission-daemon
 #然后安装transmission
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image021.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image021.png" alt=""></p>
 <pre><code>#创建目录用于存放下载文件
 sudo mkdir /home/pi/share/Downloads/Incomplete  
 #存放未下载完成的文件
@@ -576,7 +576,7 @@ sudo chgrp debian-transmission /home/pi/share/Downloads/complete
 #赋予文件夹权限
 sudo chmod 777 /home/pi/share/Downloads/Incomplete 
 sudo chmod 777 /home/pi/share/Downloads/complete 
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image022.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image022.png" alt=""></p>
 <pre><code>#修改配置文件
 sudo vim /etc/transmission-daemon/settings.json
 
@@ -595,12 +595,12 @@ sudo vim /etc/transmission-daemon/settings.json
 #最后依次执行下面的两条命令完成重启服务
 sudo service transmission-daemon reload
 sudo service transmission-daemon restart
-</code></pre><p>最后我们访问树莓派的IP再加上9091端口就能登录到下载界面。<img src="http://p95to5vmm.bkt.clouddn.com/image023.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image024.png" alt=""><img src="http://p95to5vmm.bkt.clouddn.com/image025.png" alt=""></p>
+</code></pre><p>最后我们访问树莓派的IP再加上9091端口就能登录到下载界面。<img src="http://qiniuyun.tiny777.com/image023.png" alt=""><img src="http://qiniuyun.tiny777.com/image024.png" alt=""><img src="http://qiniuyun.tiny777.com/image025.png" alt=""></p>
 <h3 id="安装Aria2"><a href="#安装Aria2" class="headerlink" title="安装Aria2"></a>安装Aria2</h3><h4 id="安装Aria2-1"><a href="#安装Aria2-1" class="headerlink" title="安装Aria2"></a>安装Aria2</h4><pre><code>sudo apt-get update
 #更新一下安装源
 sudo apt-get install aria2
 #安装aria2
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image026.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image026.png" alt=""></p>
 <pre><code>#在/etc目录下创建aria2目录用来存放配置文件：
 sudo mkdir /etc/aria2
 
@@ -609,7 +609,7 @@ sudo touch /etc/aria2/aria2.session
 
 #创建配置文件
 sudo vim /etc/aria2/aria2.conf
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image027.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image027.png" alt=""></p>
 <pre><code>#在该文件中输入以下内容：
 
 dir=/home/pi/share/Downloads
@@ -625,7 +625,7 @@ input-file=/etc/aria2/aria2.session
 save-session=/etc/aria2/aria2.session 
 max-concurrent-downloads=3
 #设置最大同时下载的任务数
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image028.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image028.png" alt=""></p>
 <pre><code>#启动aria2
 sudo aria2c --conf-path=/etc/aria2/aria2.conf
 
@@ -638,15 +638,15 @@ sudo vim /etc/rc.local
 
 #在文件的最后面添加这一行
 sudo aria2c --conf-path=/etc/aria2/aria2.conf －D
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image029.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image029.png" alt=""></p>
 <h4 id="安装appache"><a href="#安装appache" class="headerlink" title="安装appache"></a>安装appache</h4><pre><code>#安装appach
 sudo apt-get install apache2
 
 #修改/var/www/html的权限
 chmod 777 /var/www/html
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image030.png" alt=""><br><img src="http://p95to5vmm.bkt.clouddn.com/image031.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image030.png" alt=""><br><img src="http://qiniuyun.tiny777.com/image031.png" alt=""></p>
 <h4 id="安装yaaw"><a href="#安装yaaw" class="headerlink" title="安装yaaw"></a>安装yaaw</h4><p>从<a href="https://github.com/binux/yaaw下载yaaw，点击右下角的Download" target="_blank" rel="noopener">https://github.com/binux/yaaw下载yaaw，点击右下角的Download</a> Zip, 下载后将解压后的文件夹内容拷贝到/var/www/html文件夹下。这时在浏览器内输入树莓派的IP，如果出现以下页面，则表示已经正常工作了。</p>
-<p><strong>点击左上方的add就可以进行下载。</strong><br><img src="http://p95to5vmm.bkt.clouddn.com/image032.png" alt=""></p>
+<p><strong>点击左上方的add就可以进行下载。</strong><br><img src="http://qiniuyun.tiny777.com/image032.png" alt=""></p>
 <h2 id="自动备份-1"><a href="#自动备份-1" class="headerlink" title="自动备份"></a>自动备份</h2><h3 id="创建自动执行文件"><a href="#创建自动执行文件" class="headerlink" title="创建自动执行文件"></a>创建自动执行文件</h3><p>使用记事本新建一个文件，里面输入下列代码，然后保存并更改文件名后缀为bat执行文件。</p>
 <pre><code>@echo off
 echo Backuping D:\MyBlog\source\_posts---------&gt;192.168.8.106\share\Backup
@@ -662,7 +662,7 @@ exit
 <p>以上参数可以根据需要添加，推荐都加上最好。</p>
 <h3 id="设置定时任务"><a href="#设置定时任务" class="headerlink" title="设置定时任务"></a>设置定时任务</h3><p><strong>然后我们打开”控制面板”—“计划任务”添加计划任务，计划任务里的执行目标为该批处理文件，设定在什么时候执行则由个人决定。</strong></p>
 <p>执行效果示例如下：</p>
-<p><img src="http://p95to5vmm.bkt.clouddn.com/image033.png" alt=""></p>
+<p><img src="http://qiniuyun.tiny777.com/image033.png" alt=""></p>
 <h2 id="状态监控-1"><a href="#状态监控-1" class="headerlink" title="状态监控"></a>状态监控</h2><p>按照针脚跳线连接好LCD1602和树莓派并调节好LCD1602的对比度，使用python编写代码，控制1602输出相关信息，具体代码如下：</p>
 <p><strong>将下面这个文件保存为lcd1602.py</strong></p>
 <pre><code>#!/usr/bin/python
@@ -983,7 +983,7 @@ sleep(5)
 sudo vim /etc/rc.local
 #将此命令添加到文件最后
 sudo python /home/pi/1602/1602.py
-</code></pre><p><img src="http://p95to5vmm.bkt.clouddn.com/image034.png" alt=""></p>
+</code></pre><p><img src="http://qiniuyun.tiny777.com/image034.png" alt=""></p>
 <h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><p><strong>重启之后就可以尽情地享用树莓派打造的多媒体中心了，虽然树莓派3B+只有USB2.0接口，但是只要搭配上百兆lan口的路由器，局域网内流畅观看40G左右大小的一部电影还是毫无问题的。</strong></p>
 <p>如果有更高的需求，还是建议上更好的路由器和NAS吧。</p>
 
@@ -1481,28 +1481,6 @@ top:50vh;
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 26
@@ -1671,11 +1649,13 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="硬盘"><span class="iconfont-archer">&#xe606;</span>硬盘</span>
     
-        <span class="sidebar-tag-name" data-tags="驱动"><span class="iconfont-archer">&#xe606;</span>驱动</span>
+        <span class="sidebar-tag-name" data-tags="操作系统"><span class="iconfont-archer">&#xe606;</span>操作系统</span>
     
         <span class="sidebar-tag-name" data-tags="屏保"><span class="iconfont-archer">&#xe606;</span>屏保</span>
     
-        <span class="sidebar-tag-name" data-tags="操作系统"><span class="iconfont-archer">&#xe606;</span>操作系统</span>
+        <span class="sidebar-tag-name" data-tags="驱动"><span class="iconfont-archer">&#xe606;</span>驱动</span>
+    
+        <span class="sidebar-tag-name" data-tags="历史"><span class="iconfont-archer">&#xe606;</span>历史</span>
     
         <span class="sidebar-tag-name" data-tags="笔记本键盘"><span class="iconfont-archer">&#xe606;</span>笔记本键盘</span>
     
@@ -1689,17 +1669,15 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="JAVA"><span class="iconfont-archer">&#xe606;</span>JAVA</span>
     
-        <span class="sidebar-tag-name" data-tags="硬件"><span class="iconfont-archer">&#xe606;</span>硬件</span>
-    
         <span class="sidebar-tag-name" data-tags="Ubuntu"><span class="iconfont-archer">&#xe606;</span>Ubuntu</span>
+    
+        <span class="sidebar-tag-name" data-tags="硬件"><span class="iconfont-archer">&#xe606;</span>硬件</span>
     
         <span class="sidebar-tag-name" data-tags="数据库"><span class="iconfont-archer">&#xe606;</span>数据库</span>
     
         <span class="sidebar-tag-name" data-tags="MySQL"><span class="iconfont-archer">&#xe606;</span>MySQL</span>
     
         <span class="sidebar-tag-name" data-tags="Tomcat"><span class="iconfont-archer">&#xe606;</span>Tomcat</span>
-    
-        <span class="sidebar-tag-name" data-tags="历史"><span class="iconfont-archer">&#xe606;</span>历史</span>
     
         <span class="sidebar-tag-name" data-tags="新浪"><span class="iconfont-archer">&#xe606;</span>新浪</span>
     
@@ -1752,13 +1730,13 @@ jsonContent:
     
         <span class="sidebar-category-name" data-categories="教程"><span class="iconfont-archer">&#xe60a;</span>教程</span>
     
-        <span class="sidebar-category-name" data-categories="分享"><span class="iconfont-archer">&#xe60a;</span>分享</span>
-    
         <span class="sidebar-category-name" data-categories="科普"><span class="iconfont-archer">&#xe60a;</span>科普</span>
     
-        <span class="sidebar-category-name" data-categories="记录"><span class="iconfont-archer">&#xe60a;</span>记录</span>
+        <span class="sidebar-category-name" data-categories="分享"><span class="iconfont-archer">&#xe60a;</span>分享</span>
     
         <span class="sidebar-category-name" data-categories="杂谈"><span class="iconfont-archer">&#xe60a;</span>杂谈</span>
+    
+        <span class="sidebar-category-name" data-categories="记录"><span class="iconfont-archer">&#xe60a;</span>记录</span>
     
     </div>
     <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
