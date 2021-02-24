@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="使用ceph-deploy部署ceph集群并配置ceph-dashboard。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ceph系列02-使用ceph-deploy部署ceph集群">
+<meta property="og:url" content="https://tinychen.com/20200410-ceph02-ceph-deploy-deploy-ceph/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="使用ceph-deploy部署ceph集群并配置ceph-dashboard。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106171539.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/20200410214907.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410224047.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410230047.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410230904.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410231120.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410232126.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410233919.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200411001630.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200411002213747.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200411021220.png">
+<meta property="article:published_time" content="2020-04-10T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-10T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="graduation">
+<meta property="article:tag" content="ceph">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106171539.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200410-ceph02-ceph-deploy-deploy-ceph/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Ceph系列02-使用ceph-deploy部署ceph集群 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200410-ceph02-ceph-deploy-deploy-ceph/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ceph系列02-使用ceph-deploy部署ceph集群
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-04-10 10:00:00" itemprop="dateCreated datePublished" datetime="2020-04-10T10:00:00+08:00">2020-04-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index">
+                    <span itemprop="name">devops</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.7k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106171539.jpg"></p>
+<p>使用ceph-deploy部署ceph集群并配置ceph-dashboard。</p>
+<a id="more"></a>
+
+<h1 id="1、准备工作"><a href="#1、准备工作" class="headerlink" title="1、准备工作"></a>1、准备工作</h1><h2 id="1-1-关闭selinux（所有节点）"><a href="#1-1-关闭selinux（所有节点）" class="headerlink" title="1.1 关闭selinux（所有节点）"></a>1.1 关闭selinux（所有节点）</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">setenforce 0</span><br><span class="line">sed -i 's/^SELINUX=enforcing$/SELINUX=disabled/' /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 也可以直接修改/etc/selinux/config文件</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2-配置ntp时间同步（所有节点）"><a href="#1-2-配置ntp时间同步（所有节点）" class="headerlink" title="1.2 配置ntp时间同步（所有节点）"></a>1.2 配置ntp时间同步（所有节点）</h2><p>具体的操作可以参考<a href="https://tinychen.com/20191026-NTP-servers/">之前的文章</a>。</p>
+<h2 id="1-3-安装epel源"><a href="#1-3-安装epel源" class="headerlink" title="1.3 安装epel源"></a>1.3 安装epel源</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install -y https:&#x2F;&#x2F;dl.fedoraproject.org&#x2F;pub&#x2F;epel&#x2F;epel-release-latest-7.noarch.rpm</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-4-导入repo仓库"><a href="#1-4-导入repo仓库" class="headerlink" title="1.4 导入repo仓库"></a>1.4 导入repo仓库</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOM &gt; &#x2F;etc&#x2F;yum.repos.d&#x2F;ceph.repo</span><br><span class="line">[ceph-noarch]</span><br><span class="line">name&#x3D;Ceph noarch packages</span><br><span class="line">baseurl&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;rpm-&#123;ceph-stable-release&#125;&#x2F;el7&#x2F;noarch</span><br><span class="line">enabled&#x3D;1</span><br><span class="line">gpgcheck&#x3D;1</span><br><span class="line">type&#x3D;rpm-md</span><br><span class="line">gpgkey&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;keys&#x2F;release.asc</span><br><span class="line">EOM</span><br></pre></td></tr></table></figure>
+
+<p>注意这里的{ceph-stable-release}要换成对应的版本号，如我这里就是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt; EOM &gt; &#x2F;etc&#x2F;yum.repos.d&#x2F;ceph.repo</span><br><span class="line">[ceph-noarch]</span><br><span class="line">name&#x3D;Ceph noarch packages</span><br><span class="line">baseurl&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;rpm-octopus&#x2F;el7&#x2F;noarch</span><br><span class="line">enabled&#x3D;1</span><br><span class="line">gpgcheck&#x3D;1</span><br><span class="line">type&#x3D;rpm-md</span><br><span class="line">gpgkey&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;keys&#x2F;release.asc</span><br><span class="line">EOM</span><br></pre></td></tr></table></figure>
+
+<p>然后更新yum repo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum clean all</span><br><span class="line">yum repolist</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-5-安装python工具"><a href="#1-5-安装python工具" class="headerlink" title="1.5 安装python工具"></a>1.5 安装python工具</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install python-setuptools</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-6-安装ceph-deploy"><a href="#1-6-安装ceph-deploy" class="headerlink" title="1.6 安装ceph-deploy"></a>1.6 安装ceph-deploy</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo yum update</span><br><span class="line">sudo yum install ceph-deploy</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/20200410214907.png"></p>
+<p>注意这里的版本为2.0.1要比epel中的1.5.x要新一些，后面的repo也应该是刚刚导入的ceph repo</p>
+<h2 id="1-7-创建ceph部署用户（所有节点）"><a href="#1-7-创建ceph部署用户（所有节点）" class="headerlink" title="1.7 创建ceph部署用户（所有节点）"></a>1.7 创建ceph部署用户（所有节点）</h2><p>这里我们需要创建一个用户专门用来给ceph-deploy部署，使用ceph-deploy部署的时候只需要加上<code>--username</code>选项即可指定用户，需要注意的是：</p>
+<ul>
+<li>不建议使用root</li>
+<li>不能使用ceph为用户名，因为后面的部署中需要用到该用户名，如果系统中已存在该用户则会先删除掉该用户，然后就会导致部署失败</li>
+<li>该用户需要具备超级用户权限（sudo），并且不需要输入密码使用sudo权限</li>
+<li>所有的节点均需要创建该用户</li>
+<li>该用户需要在ceph集群中的所有机器之间免密ssh登录</li>
+</ul>
+<p>创建新用户</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo useradd -d &#x2F;home&#x2F;&#123;username&#125; -m &#123;username&#125;</span><br><span class="line">sudo passwd &#123;username&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置sudo权限并设置免密</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;&#123;username&#125; ALL &#x3D; (root) NOPASSWD:ALL&quot; | sudo tee &#x2F;etc&#x2F;sudoers.d&#x2F;&#123;username&#125;</span><br><span class="line">sudo chmod 0440 &#x2F;etc&#x2F;sudoers.d&#x2F;&#123;username&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果我们的节点已经设置了ssh免密登录，可以直接把免密登录用户的ssh文件夹复制到新建的用户目录下，这里以root用户为例。{username}请替换成需要新建的用户名。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo cp -R &#x2F;root&#x2F;.ssh&#x2F; &#x2F;home&#x2F;&#123;username&#125;&#x2F;</span><br><span class="line">sudo chown &#123;username&#125;:&#123;username&#125; &#x2F;home&#x2F;&#123;username&#125;&#x2F;.ssh&#x2F; -R</span><br></pre></td></tr></table></figure>
+
+<p>编辑deploy节点的ssh文件</p>
+<p>我们可以通过编辑deploy节点的ssh配置文件来指定登录到ceph其他节点的用户：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Host node1</span><br><span class="line">   Hostname node1</span><br><span class="line">   User &#123;username&#125;</span><br><span class="line">Host node2</span><br><span class="line">   Hostname node2</span><br><span class="line">   User &#123;username&#125;</span><br><span class="line">Host node3</span><br><span class="line">   Hostname node3</span><br><span class="line">   User &#123;username&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在我这里替换成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Host ceph71</span><br><span class="line">   Hostname ceph71</span><br><span class="line">   User cephDeploy</span><br><span class="line">Host ceph72</span><br><span class="line">   Hostname ceph72</span><br><span class="line">   User cephDeploy</span><br><span class="line">Host ceph73</span><br><span class="line">   Hostname ceph73</span><br><span class="line">   User cephDeploy</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-8-防火墙中放行端口"><a href="#1-8-防火墙中放行端口" class="headerlink" title="1.8 防火墙中放行端口"></a>1.8 防火墙中放行端口</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo firewall-cmd --zone&#x3D;public --add-service&#x3D;ceph-mon --permanent</span><br><span class="line"># on monitors</span><br><span class="line"></span><br><span class="line">sudo firewall-cmd --zone&#x3D;public --add-service&#x3D;ceph --permanent</span><br><span class="line"># on OSDs and MDSs</span><br><span class="line"></span><br><span class="line">sudo firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+
+<p>也可以直接关闭或禁用防火墙</p>
+<h2 id="1-9-安装yum插件"><a href="#1-9-安装yum插件" class="headerlink" title="1.9 安装yum插件"></a>1.9 安装yum插件</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install yum-plugin-priorities</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Ensure that your package manager has priority/preferences packages installed and enabled. On CentOS, you may need to install EPEL. On RHEL, you may need to enable optional repositories.</p>
+</blockquote>
+<h1 id="2、部署ceph"><a href="#2、部署ceph" class="headerlink" title="2、部署ceph"></a>2、部署ceph</h1><h2 id="2-1-创建部署目录"><a href="#2-1-创建部署目录" class="headerlink" title="2.1 创建部署目录"></a>2.1 创建部署目录</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[cephDeploy@ceph71 ~]$ mkdir my-cluster</span><br><span class="line">[cephDeploy@ceph71 ~]$ cd my-cluster</span><br><span class="line">[cephDeploy@ceph71 my-cluster]$ pwd</span><br><span class="line">&#x2F;home&#x2F;cephDeploy&#x2F;my-cluster</span><br></pre></td></tr></table></figure>
+
+<p>由于部署过程中会生成许多文件，这里我们专门创建一个目录用于存放。</p>
+<h2 id="2-2-初始化mon节点"><a href="#2-2-初始化mon节点" class="headerlink" title="2.2 初始化mon节点"></a>2.2 初始化mon节点</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">[cephDeploy@ceph71 my-cluster]$ ceph-deploy new ceph71</span><br><span class="line">[ceph_deploy.conf][DEBUG ] found configuration file at: &#x2F;home&#x2F;cephDeploy&#x2F;.cephdeploy.conf</span><br><span class="line">[ceph_deploy.cli][INFO  ] Invoked (2.0.1): &#x2F;usr&#x2F;bin&#x2F;ceph-deploy new ceph71</span><br><span class="line">[ceph_deploy.cli][INFO  ] ceph-deploy options:</span><br><span class="line">[ceph_deploy.cli][INFO  ]  username                      : None</span><br><span class="line">[ceph_deploy.cli][INFO  ]  func                          : &lt;function new at 0x7f7f15a43e60&gt;</span><br><span class="line">[ceph_deploy.cli][INFO  ]  verbose                       : False</span><br><span class="line">[ceph_deploy.cli][INFO  ]  overwrite_conf                : False</span><br><span class="line">[ceph_deploy.cli][INFO  ]  quiet                         : False</span><br><span class="line">[ceph_deploy.cli][INFO  ]  cd_conf                       : &lt;ceph_deploy.conf.cephdeploy.Conf instance at 0x7f7f151ba950&gt;</span><br><span class="line">[ceph_deploy.cli][INFO  ]  cluster                       : ceph</span><br><span class="line">[ceph_deploy.cli][INFO  ]  ssh_copykey                   : True</span><br><span class="line">[ceph_deploy.cli][INFO  ]  mon                           : [&#39;ceph71&#39;]</span><br><span class="line">[ceph_deploy.cli][INFO  ]  public_network                : None</span><br><span class="line">[ceph_deploy.cli][INFO  ]  ceph_conf                     : None</span><br><span class="line">[ceph_deploy.cli][INFO  ]  cluster_network               : None</span><br><span class="line">[ceph_deploy.cli][INFO  ]  default_release               : False</span><br><span class="line">[ceph_deploy.cli][INFO  ]  fsid                          : None</span><br><span class="line">[ceph_deploy.new][DEBUG ] Creating new cluster named ceph</span><br><span class="line">[ceph_deploy.new][INFO  ] making sure passwordless SSH succeeds</span><br><span class="line">[ceph71][DEBUG ] connection detected need for sudo</span><br><span class="line">[ceph71][DEBUG ] connected to host: ceph71 </span><br><span class="line">[ceph71][DEBUG ] detect platform information from remote host</span><br><span class="line">[ceph71][DEBUG ] detect machine type</span><br><span class="line">[ceph71][DEBUG ] find the location of an executable</span><br><span class="line">[ceph71][INFO  ] Running command: sudo &#x2F;usr&#x2F;sbin&#x2F;ip link show</span><br><span class="line">[ceph71][INFO  ] Running command: sudo &#x2F;usr&#x2F;sbin&#x2F;ip addr show</span><br><span class="line">[ceph71][DEBUG ] IP addresses found: [u&#39;240e:f8:a903:2455:5054:ff:fe99:871&#39;, u&#39;192.168.122.71&#39;, u&#39;192.168.100.71&#39;]</span><br><span class="line">[ceph_deploy.new][DEBUG ] Resolving host ceph71</span><br><span class="line">[ceph_deploy.new][DEBUG ] Monitor ceph71 at 192.168.122.71</span><br><span class="line">[ceph_deploy.new][DEBUG ] Monitor initial members are [&#39;ceph71&#39;]</span><br><span class="line">[ceph_deploy.new][DEBUG ] Monitor addrs are [&#39;192.168.122.71&#39;]</span><br><span class="line">[ceph_deploy.new][DEBUG ] Creating a random mon key...</span><br><span class="line">[ceph_deploy.new][DEBUG ] Writing monitor keyring to ceph.mon.keyring...</span><br><span class="line">[ceph_deploy.new][DEBUG ] Writing initial config to ceph.conf...</span><br><span class="line">[cephDeploy@ceph71 my-cluster]$ </span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-指定网卡"><a href="#2-3-指定网卡" class="headerlink" title="2.3 指定网卡"></a>2.3 指定网卡</h2><p>由于我们这里的虚拟机每台都有两个网卡，因此我们需要指定ceph集群用于通信的网卡所在的网段</p>
+<p><img src="https://resource.tinychen.com/20200410224047.png"></p>
+<h2 id="2-4-安装ceph"><a href="#2-4-安装ceph" class="headerlink" title="2.4 安装ceph"></a>2.4 安装ceph</h2><p>在所有的节点上都安装ceph</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy install ceph71 ceph72 ceph73</span><br></pre></td></tr></table></figure>
+
+<p>初始化mon</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy mon create-initial</span><br></pre></td></tr></table></figure>
+
+<p>顺利执行后会在当前目录下生成一系列相关的密钥文件</p>
+<p><img src="https://resource.tinychen.com/20200410230047.png"></p>
+<p>使用ceph-deploy复制配置文件和密钥</p>
+<blockquote>
+<p>Use <code>ceph-deploy</code> to copy the configuration file and admin key to your admin node and your Ceph Nodes so that you can use the <code>ceph</code> CLI without having to specify the monitor address and <code>ceph.client.admin.keyring</code> each time you execute a command.</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy admin ceph71 ceph72 ceph73</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/20200410230904.png"></p>
+<h2 id="2-5-部署manager"><a href="#2-5-部署manager" class="headerlink" title="2.5 部署manager"></a>2.5 部署manager</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy mgr create ceph71</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/20200410231120.png"></p>
+<h2 id="2-6-添加OSD"><a href="#2-6-添加OSD" class="headerlink" title="2.6 添加OSD"></a>2.6 添加OSD</h2><p>这里我们添加三个节点上面的共计6个硬盘到ceph集群中作为osd</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ceph-deploy osd create --data &#x2F;dev&#x2F;vdb ceph71</span><br><span class="line">ceph-deploy osd create --data &#x2F;dev&#x2F;vdb ceph72</span><br><span class="line">ceph-deploy osd create --data &#x2F;dev&#x2F;vdb ceph73</span><br><span class="line">ceph-deploy osd create --data &#x2F;dev&#x2F;vdc ceph71</span><br><span class="line">ceph-deploy osd create --data &#x2F;dev&#x2F;vdc ceph72</span><br><span class="line">ceph-deploy osd create --data &#x2F;dev&#x2F;vdc ceph73</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-7-检测结果"><a href="#2-7-检测结果" class="headerlink" title="2.7 检测结果"></a>2.7 检测结果</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看ceph集群状态</span></span><br><span class="line">sudo ceph health</span><br><span class="line">sudo ceph -s</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/20200410232126.png"></p>
+<p><img src="https://resource.tinychen.com/20200410233919.png"></p>
+<h1 id="3、配置dashboard"><a href="#3、配置dashboard" class="headerlink" title="3、配置dashboard"></a>3、配置dashboard</h1><p>详细的官网部署文档链接：<a target="_blank" rel="noopener" href="https://docs.ceph.com/docs/master/mgr/dashboard/">https://docs.ceph.com/docs/master/mgr/dashboard/</a></p>
+<h2 id="3-1-启用dashboard"><a href="#3-1-启用dashboard" class="headerlink" title="3.1 启用dashboard"></a>3.1 启用dashboard</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph mgr module enable dashboard</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-禁用ssl加密"><a href="#3-2-禁用ssl加密" class="headerlink" title="3.2 禁用ssl加密"></a>3.2 禁用ssl加密</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph config set mgr mgr&#x2F;dashboard&#x2F;ssl false</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-重启ceph-dashboard"><a href="#3-3-重启ceph-dashboard" class="headerlink" title="3.3 重启ceph-dashboard"></a>3.3 重启ceph-dashboard</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ceph mgr module disable dashboard</span><br><span class="line">ceph mgr module enable dashboard</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-4-配置IP和端口"><a href="#3-4-配置IP和端口" class="headerlink" title="3.4 配置IP和端口"></a>3.4 配置IP和端口</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ceph config set mgr mgr&#x2F;dashboard&#x2F;$name&#x2F;server_addr $IP</span><br><span class="line">$ ceph config set mgr mgr&#x2F;dashboard&#x2F;$name&#x2F;server_port $PORT</span><br><span class="line">$ ceph config set mgr mgr&#x2F;dashboard&#x2F;$name&#x2F;ssl_server_port $PORT</span><br></pre></td></tr></table></figure>
+
+<p>到我这里是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;server_addr 192.168.100.71</span><br><span class="line">ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;server_port 8080</span><br><span class="line">ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;ssl_server_port 8443</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-5-创建dashboard用户"><a href="#3-5-创建dashboard用户" class="headerlink" title="3.5 创建dashboard用户"></a>3.5 创建dashboard用户</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ceph dashboard ac-user-create &lt;username&gt; &lt;password&gt; administrator</span><br></pre></td></tr></table></figure>
+
+<p>到我这里是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ceph71 my-cluster]# ceph dashboard set-login-credentials tinychen tinychen</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/20200411001630.png"></p>
+<p><img src="https://resource.tinychen.com/image-20200411002213747.png"></p>
+<p>登录后可以看到首页</p>
+<p><img src="https://resource.tinychen.com/20200411021220.png"></p>
+<p>最后可以看到的界面如上。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200201-ceph01-ceph-introduction\" rel="bookmark">Ceph系列01-Ceph简介</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190612-centos-update-kernel\" rel="bookmark">CentOS升级Linux内核</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190712-centos7-install-zabbix42\" rel="bookmark">在CentOS7上安装Zabbix4.2监控系统</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190716-centos7-install-k8s\" rel="bookmark">在CentOS7上部署单Master节点k8s集群(v1.15)</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190715-k8s-concepts-intro\" rel="bookmark">k8s重要概念及各组件简介</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/graduation/" rel="tag"># graduation</a>
+              <a href="/tags/ceph/" rel="tag"># ceph</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200409-tomcat03-jmeter-nio-nio2-apr/" rel="prev" title="Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试">
+      <i class="fa fa-chevron-left"></i> Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200414-iptables-principle-introduction/" rel="next" title="iptables的四表五链与NAT工作原理">
+      iptables的四表五链与NAT工作原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">1、准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E5%85%B3%E9%97%ADselinux%EF%BC%88%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%EF%BC%89"><span class="nav-text">1.1 关闭selinux（所有节点）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E9%85%8D%E7%BD%AEntp%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%EF%BC%88%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%EF%BC%89"><span class="nav-text">1.2 配置ntp时间同步（所有节点）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E5%AE%89%E8%A3%85epel%E6%BA%90"><span class="nav-text">1.3 安装epel源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-%E5%AF%BC%E5%85%A5repo%E4%BB%93%E5%BA%93"><span class="nav-text">1.4 导入repo仓库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-%E5%AE%89%E8%A3%85python%E5%B7%A5%E5%85%B7"><span class="nav-text">1.5 安装python工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-%E5%AE%89%E8%A3%85ceph-deploy"><span class="nav-text">1.6 安装ceph-deploy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-7-%E5%88%9B%E5%BB%BAceph%E9%83%A8%E7%BD%B2%E7%94%A8%E6%88%B7%EF%BC%88%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%EF%BC%89"><span class="nav-text">1.7 创建ceph部署用户（所有节点）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-8-%E9%98%B2%E7%81%AB%E5%A2%99%E4%B8%AD%E6%94%BE%E8%A1%8C%E7%AB%AF%E5%8F%A3"><span class="nav-text">1.8 防火墙中放行端口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-9-%E5%AE%89%E8%A3%85yum%E6%8F%92%E4%BB%B6"><span class="nav-text">1.9 安装yum插件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E9%83%A8%E7%BD%B2ceph"><span class="nav-text">2、部署ceph</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E5%88%9B%E5%BB%BA%E9%83%A8%E7%BD%B2%E7%9B%AE%E5%BD%95"><span class="nav-text">2.1 创建部署目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E5%88%9D%E5%A7%8B%E5%8C%96mon%E8%8A%82%E7%82%B9"><span class="nav-text">2.2 初始化mon节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E6%8C%87%E5%AE%9A%E7%BD%91%E5%8D%A1"><span class="nav-text">2.3 指定网卡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E5%AE%89%E8%A3%85ceph"><span class="nav-text">2.4 安装ceph</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-%E9%83%A8%E7%BD%B2manager"><span class="nav-text">2.5 部署manager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-%E6%B7%BB%E5%8A%A0OSD"><span class="nav-text">2.6 添加OSD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-7-%E6%A3%80%E6%B5%8B%E7%BB%93%E6%9E%9C"><span class="nav-text">2.7 检测结果</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E9%85%8D%E7%BD%AEdashboard"><span class="nav-text">3、配置dashboard</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E5%90%AF%E7%94%A8dashboard"><span class="nav-text">3.1 启用dashboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E7%A6%81%E7%94%A8ssl%E5%8A%A0%E5%AF%86"><span class="nav-text">3.2 禁用ssl加密</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E9%87%8D%E5%90%AFceph-dashboard"><span class="nav-text">3.3 重启ceph-dashboard</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-%E9%85%8D%E7%BD%AEIP%E5%92%8C%E7%AB%AF%E5%8F%A3"><span class="nav-text">3.4 配置IP和端口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-%E5%88%9B%E5%BB%BAdashboard%E7%94%A8%E6%88%B7"><span class="nav-text">3.5 创建dashboard用户</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

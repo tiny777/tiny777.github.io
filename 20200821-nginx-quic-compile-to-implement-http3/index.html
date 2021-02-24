@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP&#x2F;3协议。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用nginx-quic支持HTTP&#x2F;3">
+<meta property="og:url" content="https://tinychen.com/20200821-nginx-quic-compile-to-implement-http3/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP&#x2F;3协议。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106165522.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/20200824172016.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200824172013.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200824172009.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200824172003.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200824171955.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200824171950.png">
+<meta property="article:published_time" content="2020-08-21T07:00:00.000Z">
+<meta property="article:modified_time" content="2020-08-21T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106165522.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200821-nginx-quic-compile-to-implement-http3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>使用nginx-quic支持HTTP/3 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200821-nginx-quic-compile-to-implement-http3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用nginx-quic支持HTTP/3
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-08-21 15:00:00" itemprop="dateCreated datePublished" datetime="2020-08-21T15:00:00+08:00">2020-08-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>19k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>17 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106165522.jpg"></p>
+<p>本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP/3协议。</p>
+<a id="more"></a>
+
+<h1 id="1、背景介绍"><a href="#1、背景介绍" class="headerlink" title="1、背景介绍"></a>1、背景介绍</h1><p>nginx官方从1.19版本开始，新建立了一个分支，专门用来对QUIC进行支持，官网的链接<a target="_blank" rel="noopener" href="https://quic.nginx.org/">点这里</a>。注意该项目还处于早期的alpha版本，非常不建议用于生产环境。</p>
+<blockquote>
+<p>The code is at an early alpha level of quality and should not be used in production.</p>
+</blockquote>
+<p>nginx-quic的安装包可以在下面这里找到，由于还处于开发阶段，项目更新得非常快。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;hg.nginx.org&#x2F;nginx-quic&#x2F;shortlog&#x2F;quic</span><br></pre></td></tr></table></figure>
+
+<p>从官网的readme文件我们可以了解到，<strong>截止到2020年8月21日，nginx-quic项目目前只支持<code>h3-27</code>、<code>h3-28</code>、<code>h3-29</code>三个版本</strong>，再早期的草案版本并不支持，不过目前更新的速度非常快，变动也很大。</p>
+<blockquote>
+<p>Currently we support IETF-QUIC draft-27, draft-28, draft-29.<br>Earlier drafts are NOT supported as they have incompatible wire format.</p>
+</blockquote>
+<p>考虑到浏览器的兼容性，接下来我们主要基于h3-27版本进行测试。</p>
+<p>同时需要注意的是openssl官方版本<a target="_blank" rel="noopener" href="https://www.openssl.org/blog/blog/2020/02/17/QUIC-and-OpenSSL/">目前并不支持quic协议</a>，官方于2020年2月给出的原因是目前quic并不稳定，还有很多版本需要迭代确定，它们需要优先把精力放在openssl3.0版本的开发上，等到openssl3.0版本开发完成了再来进行quic的支持。</p>
+<blockquote>
+<p>So in conclusion; QUIC is on our minds, but it will not be included in the OpenSSL 3.0 release. We expect more tangible action to happen after we’ve released OpenSSL 3.0.</p>
+</blockquote>
+<p>所以<strong>我们这里需要用到谷歌自己使用的openssl分支版本boringssl</strong>，这是谷歌对应的<a target="_blank" rel="noopener" href="https://github.com/google/boringssl">开源的自用的openssl版本</a>，谷歌官方表示boringssl这个项目虽然开源了，但是并不建议大家在生产环境上广泛使用，因为它是根据谷歌自身的需求进行调整的，有些API可能并不稳定。</p>
+<h1 id="2、编译安装nginx-quic"><a href="#2、编译安装nginx-quic" class="headerlink" title="2、编译安装nginx-quic"></a>2、编译安装nginx-quic</h1><p>这里我们使用了<strong>CentOS7</strong>来进行编译安装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@TINY-DESKTOP &#x2F;root]# lsb_release -a</span><br><span class="line">LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch</span><br><span class="line">Distributor ID: CentOS</span><br><span class="line">Description:    CentOS Linux release 7.8.2003 (Core)</span><br><span class="line">Release:        7.8.2003</span><br><span class="line">Codename:       Core</span><br></pre></td></tr></table></figure>
+
+<p>首先我们在系统中使用yum安装基本的编译工具，注意此次使用的很多软件工具和依赖都是需要较新版本的，因此后面会进行大量的编译安装，<strong>请确保机器拥有足够的性能（可能需要编译gcc）和良好的网络</strong>。主要需要使用到的工具软件的安装步骤如下：</p>
+<h2 id="2-1-yum安装依赖"><a href="#2-1-yum安装依赖" class="headerlink" title="2.1 yum安装依赖"></a>2.1 yum安装依赖</h2><p>需要注意的是这里安装所需要的软件很多，这里并不能全部列出来，但是除了列出来的软件对新版本有要求外，别的都可以直接使用yum进行安装，当然也可以自己根据需要编译安装新版本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install &quot;Development Tools&quot;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需要注意的是网上有部分教程会让我们去安装<code>build-essential</code>，而这个套件在centos中是不存在的，我们直接安装Development Tools套件即可</p>
+</blockquote>
+<h2 id="2-2-编译安装cmake"><a href="#2-2-编译安装cmake" class="headerlink" title="2.2 编译安装cmake"></a>2.2 编译安装cmake</h2><p>cmake的版本必须要在3.0以上，cmake可以到这里下载<code>https://cmake.org/download/</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;github.com&#x2F;Kitware&#x2F;CMake&#x2F;releases&#x2F;download&#x2F;v3.18.2&#x2F;cmake-3.18.2.tar.gz</span><br><span class="line">tar -zxvf cmake-3.18.2.tar.gz</span><br><span class="line">.&#x2F;bootstrap</span><br><span class="line">gmake</span><br><span class="line">make</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line">cmake --version</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="2-3-编译安装perl"><a href="#2-3-编译安装perl" class="headerlink" title="2.3 编译安装perl"></a>2.3 编译安装perl</h2><p>perl的安装包可以从这里<code>www.cpan.org/src</code>下载。perl的版本需要尽可能新，否则可能会出现问题，这里使用的是5.32.0的稳定版本（截止2020-08-21）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;www.cpan.org&#x2F;src&#x2F;5.0&#x2F;perl-5.32.0.tar.gz</span><br><span class="line">tar -zxvf perl-5.32.0.tar.gz</span><br><span class="line">cd perl-5.32.0&#x2F;</span><br><span class="line">.&#x2F;Configure -des -Dprefix&#x3D;&#x2F;usr&#x2F;local&#x2F;perl</span><br><span class="line">make -j8</span><br><span class="line">make test</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"># 注意最后检查一下系统默认的perl是否为我们新安装的perl</span><br><span class="line">perl -v</span><br><span class="line"></span><br><span class="line"># 如果不是则需要进行修改</span><br><span class="line"># 查看默认的perl</span><br><span class="line">which perl | xargs file</span><br><span class="line"></span><br><span class="line"># 替换新安装的perl和原来的perl</span><br><span class="line">mv &#x2F;usr&#x2F;bin&#x2F;perl &#x2F;usr&#x2F;bin&#x2F;perl.5.16.3</span><br><span class="line"># 需要注意新安装的perl目录要根据前面编译的时候指定的目录来确定</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;perl&#x2F;bin&#x2F;perl &#x2F;usr&#x2F;bin&#x2F;perl</span><br><span class="line"># 再次检查</span><br><span class="line">perl -v</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="2-4-安装golang"><a href="#2-4-安装golang" class="headerlink" title="2.4 安装golang"></a>2.4 安装golang</h2><p>golang的安装配置比较简单，我们从<code>https://golang.org/dl</code>直接下载最新的稳定版本即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;golang.org&#x2F;dl&#x2F;go1.15.linux-amd64.tar.gz</span><br><span class="line">tar -zxvf go1.15.linux-amd64.tar.gz -C &#x2F;usr&#x2F;local</span><br><span class="line"># 修改系统默认的go文件</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;go&#x2F;bin&#x2F;go &#x2F;usr&#x2F;bin&#x2F;go</span><br></pre></td></tr></table></figure>
+
+<p>接下来的go环境变量同学们可以根据自己的实际需求进行配置。对于我个人而言，我直接在<code>/etc/profile</code>中添加下面的配置然后source生效即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export GOROOT&#x3D;&#x2F;usr&#x2F;local&#x2F;go</span><br><span class="line">export GOBIN&#x3D;$GOROOT&#x2F;bin</span><br><span class="line">export PATH&#x3D;$PATH:$GOBIN</span><br><span class="line">export GOPATH&#x3D;&#x2F;home&#x2F;gopath</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="2-5-编译安装gcc"><a href="#2-5-编译安装gcc" class="headerlink" title="2.5 编译安装gcc"></a>2.5 编译安装gcc</h2><p>CentOS7默认的gcc的版本太久了，编译boringssl的时候会报错，我们手动编译安装新版本的gcc，这里使用的是10.2.0的版本。gcc的版本可以在这里下载<code>http://ftp.gnu.org/gnu/gcc/</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">wget http:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;gcc&#x2F;gcc-10.2.0&#x2F;gcc-10.2.0.tar.gz</span><br><span class="line">tar -zxvf gcc-10.2.0.tar.gz</span><br><span class="line">cd gcc-10.2.0&#x2F;</span><br><span class="line"># 解压完成后需要下载四个依赖，我们执行脚本即可直接下载，服务器网络不好的同学也可以手动下载</span><br><span class="line">.&#x2F;contrib&#x2F;download_prerequisites</span><br><span class="line"># 创建一个专门用来编译的目录</span><br><span class="line">mkdir gcc-build-10.2.0</span><br><span class="line">cd gcc-build-10.2.0&#x2F;</span><br><span class="line"># 这里需要对c和c++进行支持，为了节省时间禁用掉了交叉编译</span><br><span class="line">. ..&#x2F;configure -enable-checking&#x3D;release -enable-languages&#x3D;c,c++ -disable-multilib</span><br><span class="line"># 接下来这里需要很久</span><br><span class="line">make -j8</span><br><span class="line">make install</span><br><span class="line"></span><br><span class="line"># 安装完成之后我们需要替换原来的cc文件和c++文件，确保它们的版本都是最新的版本</span><br><span class="line"># 一般来说原来系统的cc文件和c++文件都在&#x2F;usr&#x2F;bin&#x2F;目录下，而我们编译安装的cc文件和c++文件在&#x2F;usr&#x2F;local&#x2F;bin&#x2F;</span><br><span class="line">cd &#x2F;usr&#x2F;bin&#x2F;</span><br><span class="line">mv &#x2F;usr&#x2F;bin&#x2F;cc &#x2F;usr&#x2F;bin&#x2F;cc.4.8.5</span><br><span class="line">mv &#x2F;usr&#x2F;bin&#x2F;c++ &#x2F;usr&#x2F;bin&#x2F;c++.4.8.5</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;bin&#x2F;gcc &#x2F;usr&#x2F;bin&#x2F;cc</span><br><span class="line">ln -s &#x2F;usr&#x2F;local&#x2F;bin&#x2F;c++ &#x2F;usr&#x2F;bin&#x2F;c++</span><br><span class="line"># 最后检查版本</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;cc -v</span><br><span class="line">&#x2F;usr&#x2F;bin&#x2F;c++ -v</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>gcc下载的依赖内容如下，有需要的同学自取</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@TINY-DESKTOP &#x2F;home&#x2F;gcc-10.2.0]# .&#x2F;contrib&#x2F;download_prerequisites</span><br><span class="line">2020-08-21 21:28:24 URL:http:&#x2F;&#x2F;gcc.gnu.org&#x2F;pub&#x2F;gcc&#x2F;infrastructure&#x2F;gmp-6.1.0.tar.bz2 [2383840&#x2F;2383840] -&gt; &quot;.&#x2F;gmp-6.1.0.tar.bz2&quot; [1]</span><br><span class="line">2020-08-21 21:28:26 URL:http:&#x2F;&#x2F;gcc.gnu.org&#x2F;pub&#x2F;gcc&#x2F;infrastructure&#x2F;mpfr-3.1.4.tar.bz2 [1279284&#x2F;1279284] -&gt; &quot;.&#x2F;mpfr-3.1.4.tar.bz2&quot; [1]</span><br><span class="line">2020-08-21 21:28:28 URL:http:&#x2F;&#x2F;gcc.gnu.org&#x2F;pub&#x2F;gcc&#x2F;infrastructure&#x2F;mpc-1.0.3.tar.gz [669925&#x2F;669925] -&gt; &quot;.&#x2F;mpc-1.0.3.tar.gz&quot; [1]</span><br><span class="line">2020-08-21 21:28:30 URL:http:&#x2F;&#x2F;gcc.gnu.org&#x2F;pub&#x2F;gcc&#x2F;infrastructure&#x2F;isl-0.18.tar.bz2 [1658291&#x2F;1658291] -&gt; &quot;.&#x2F;isl-0.18.tar.bz2&quot; [1]</span><br><span class="line">gmp-6.1.0.tar.bz2: OK</span><br><span class="line">mpfr-3.1.4.tar.bz2: OK</span><br><span class="line">mpc-1.0.3.tar.gz: OK</span><br><span class="line">isl-0.18.tar.bz2: OK</span><br><span class="line">All prerequisites downloaded successfully.</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="2-6-编译安装boringssl"><a href="#2-6-编译安装boringssl" class="headerlink" title="2.6 编译安装boringssl"></a>2.6 编译安装boringssl</h2><p>谷歌官方建议我们使用<code>ninja</code>来编译安装boringssl，因此我们需要先安装一个<code>ninja</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;github.com&#x2F;ninja-build&#x2F;ninja&#x2F;releases&#x2F;download&#x2F;v1.10.1&#x2F;ninja-linux.zip</span><br><span class="line">unzip ninja-linux.zip</span><br><span class="line">cp -r ninja &#x2F;usr&#x2F;bin&#x2F;</span><br><span class="line">which ninja</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 注意这里的git仓库很大，大概在250MB左右，请确保编译安装服务器的网络良好</span><br><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;google&#x2F;boringssl.git</span><br><span class="line">cd boringssl&#x2F;</span><br><span class="line"># 建立一个专门用于编译的文件夹</span><br><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake -GNinja ..</span><br><span class="line">ninja</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意在执行cmake这一步的时候正常情况下检测到的gcc文件和perl库版本应该是我们之前编译安装好的新版本，如果不对的话需要再次检查</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># cmake -GNinja ..</span><br><span class="line">-- The C compiler identification is GNU 10.2.0</span><br><span class="line">-- Detecting C compiler ABI info</span><br><span class="line">-- Detecting C compiler ABI info - done</span><br><span class="line">-- Check for working C compiler: &#x2F;usr&#x2F;bin&#x2F;cc - skipped</span><br><span class="line">-- Detecting C compile features</span><br><span class="line">-- Detecting C compile features - done</span><br><span class="line">-- The CXX compiler identification is GNU 10.2.0</span><br><span class="line">-- Detecting CXX compiler ABI info</span><br><span class="line">-- Detecting CXX compiler ABI info - done</span><br><span class="line">-- Check for working CXX compiler: &#x2F;usr&#x2F;bin&#x2F;c++ - skipped</span><br><span class="line">-- Detecting CXX compile features</span><br><span class="line">-- Detecting CXX compile features - done</span><br><span class="line">-- Found Perl: &#x2F;usr&#x2F;bin&#x2F;perl (found version &quot;5.32.0&quot;)</span><br><span class="line">-- Checking for module &#39;libunwind-generic&#39;</span><br><span class="line">--   No package &#39;libunwind-generic&#39; found</span><br><span class="line">libunwind not found. Disabling unwind tests.</span><br><span class="line">-- The ASM compiler identification is GNU</span><br><span class="line">-- Found assembler: &#x2F;usr&#x2F;bin&#x2F;cc</span><br><span class="line">-- Configuring done</span><br><span class="line">-- Generating done</span><br><span class="line">-- Build files have been written to: &#x2F;root&#x2F;boringssl&#x2F;build</span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+<h2 id="2-7-编译nginx"><a href="#2-7-编译nginx" class="headerlink" title="2.7 编译nginx"></a>2.7 编译nginx</h2><p>剩下的nginx的编译安装步骤就和正常的nginx编译安装一致，这里不再赘述，模块可以根据自己的需求进行安装，开启HTTP/3模块需要使用<code>--with-http_v3_module --with-cc-opt=&quot;-I../boringssl-master/include&quot; --with-ld-opt=&quot;-L../boringssl-master/build/ssl -L../boringssl-master/build/crypto&quot;</code>参数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd nginx-quic&#x2F;</span><br><span class="line">.&#x2F;auto&#x2F;configure --prefix&#x3D;&#x2F;home&#x2F;nginx --with-http_ssl_module --with-http_v2_module --with-http_v3_module --with-cc-opt&#x3D;&quot;-I..&#x2F;boringssl-master&#x2F;include&quot; --with-ld-opt&#x3D;&quot;-L..&#x2F;boringssl-master&#x2F;build&#x2F;ssl -L..&#x2F;boringssl-master&#x2F;build&#x2F;crypto&quot;</span><br><span class="line">make </span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后我们检测nginx的参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># nginx -V</span><br><span class="line">nginx version: nginx&#x2F;1.19.2</span><br><span class="line">built by gcc 10.2.0 (GCC)</span><br><span class="line">built with OpenSSL 1.1.0 (compatible; BoringSSL) (running with BoringSSL)</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix&#x3D;&#x2F;home&#x2F;nginx --with-http_ssl_module --with-http_v2_module --with-debug --with-http_v3_module --with-cc-opt&#x3D;-I..&#x2F;boringssl&#x2F;include --with-ld-opt&#x3D;&#39;-L..&#x2F;boringssl&#x2F;build&#x2F;ssl -L..&#x2F;boringssl&#x2F;build&#x2F;crypto&#39;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3、配置nginx-quic"><a href="#3、配置nginx-quic" class="headerlink" title="3、配置nginx-quic"></a>3、配置nginx-quic</h1><ul>
+<li>由于HTTP/3需要使用udp协议端口，请注意开放对应的防火墙</li>
+<li>http2监听的是443的tcp端口，而http3监听的是udp端口</li>
+<li>nginx中添加了<code>$http3</code>和<code>$quic</code>变量，可以添加到日志中，这样就可以看到是否使用了HTTP/3来进行访问了</li>
+<li>如果有多个server_name，在不指定IP的情况下，只需要在任意一个配置了<code>listen 443 http3 quic reuseport;</code>那么其他所有server_name都会开启HTTP3，并且不需要再添加该配置否则会报错（不知道后续会不会把报错去掉），如果需要部分server_name开启HTTP/3，请指定监听IP。</li>
+<li>http3增加了<code>http3_max_field_size</code>、<code>http3_max_table_capacity</code>、<code>http3_max_blocked_streams</code>、<code>http3_max_concurrent_pushes</code>、 <code>http3_push</code>、<code>http3_push_preload</code>这六个变量来控制http3的性能</li>
+</ul>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">443</span> ssl http2;</span><br><span class="line">        <span class="attribute">listen</span> <span class="number">443</span> http3 quic reuseport;</span><br><span class="line">        <span class="comment"># UDP listener for QUIC+HTTP/3</span></span><br><span class="line"></span><br><span class="line">        <span class="attribute">server_name</span> tinychen.com www.tinychen.com;</span><br><span class="line"></span><br><span class="line">        <span class="attribute">add_header</span> Strict-Transport-Security <span class="string">"max-age=63072000; includeSubDomains; preload"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="attribute">resolver</span> <span class="number">127.0.0.1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="attribute">ssl_protocols</span> TLSv1.<span class="number">2</span> TLSv1.<span class="number">3</span>;</span><br><span class="line">        <span class="attribute">ssl_ecdh_curve</span> X25519:P-<span class="number">256</span>:P-<span class="number">384</span>;</span><br><span class="line">        <span class="attribute">ssl_ciphers</span> TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-<span class="number">256</span>-GCM-SHA384:TLS13-AES-<span class="number">128</span>-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-CHACHA20-POLY1305:EECDH+CHACHA20:EECDH+AES128;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 该选项用于开启address validation，但是会和0-RTT冲突</span></span><br><span class="line">        <span class="comment">#quic_retry on;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 开启 TLS 1.3 0-RTT</span></span><br><span class="line">        <span class="attribute">ssl_early_data</span> <span class="literal">on</span>;</span><br><span class="line">        <span class="comment"># 添加 Early-Data 头告知后端, 防止重放攻击</span></span><br><span class="line">        <span class="attribute">proxy_set_header</span> Early-Data <span class="variable">$ssl_early_data</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 参考nginx官方目前支持的http3版本，我们添加对应的header</span></span><br><span class="line">        <span class="attribute">add_header</span> Alt-Svc <span class="string">'h3-27=":443"; h3-28=":443"; h3-29=":443"; ma=86400; quic=":443"'</span>;</span><br><span class="line"></span><br><span class="line">		......</span><br><span class="line">		</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="4、测试"><a href="#4、测试" class="headerlink" title="4、测试"></a>4、测试</h1><p>目前的主流浏览器只有Firefox和Chrome支持了HTTP/3协议。并且两者支持程度并不高，Firefox是默认禁用，Chrome是默认开启部分，因此配置起来有点麻烦。</p>
+<h2 id="4-1-HTTP-3-CHECK"><a href="#4-1-HTTP-3-CHECK" class="headerlink" title="4.1 HTTP/3 CHECK"></a>4.1 HTTP/3 CHECK</h2><p><code>http3check.net</code>网站提供了网站的<code>HTTP/3</code>支持检测</p>
+<p><img src="https://resource.tinychen.com/20200824172016.png"></p>
+<h2 id="4-2-Firefox开启HTTP-3"><a href="#4-2-Firefox开启HTTP-3" class="headerlink" title="4.2 Firefox开启HTTP/3"></a>4.2 Firefox开启HTTP/3</h2><p>对于firefox要求版本在75+，我们直接使用最新版本进行测试：</p>
+<p><img src="https://resource.tinychen.com/20200824172013.png"></p>
+<p>在firefox中开启http3比较简单，我们直接在地址栏中输入<code>about:config</code>,然后搜索<code>http3</code>，将<code>network.http.http3.enabled</code>设置为<code>true</code>，接着重启浏览器。</p>
+<p><img src="https://resource.tinychen.com/20200824172009.png"></p>
+<p>再次访问tinychen.com就可以看到使用了HTTP/3协议进行访问，在后台的日志中也能看到对应的请求使用了<code>quic</code>和<code>h3-27</code>。（日志中的IP地址已做脱敏处理）。</p>
+<p><img src="https://resource.tinychen.com/20200824172003.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F; HTTP&#x2F;3 | - | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;css&#x2F;main.css HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;font-awesome&#x2F;css&#x2F;font-awesome.min.css HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;pace&#x2F;pace-theme-material.min.css HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;pace&#x2F;pace.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;canvas-nest&#x2F;canvas-nest.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;anime.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;velocity&#x2F;velocity.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;velocity&#x2F;velocity.ui.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;utils.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;motion.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;schemes&#x2F;pisces.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;next-boot.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;local-search.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.011 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:14:40:47 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;font-awesome&#x2F;fonts&#x2F;fontawesome-webfont.woff2?v&#x3D;4.7.0 HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F;lib&#x2F;font-awesome&#x2F;css&#x2F;font-awesome.min.css | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko&#x2F;20100101 Firefox&#x2F;79.0 | 0.014 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-3-Chrome开启HTTP-3"><a href="#4-3-Chrome开启HTTP-3" class="headerlink" title="4.3 Chrome开启HTTP/3"></a>4.3 Chrome开启HTTP/3</h2><p>nginx的官网提示说Chrome需要<strong>83+版本</strong>才支持HTTP/3，实测在部分网站（如<code>google.com</code>）确实可以使用HTTP/3的某些草案版本，但是Chrome目前来说默认还是不支持<code>h3-27协议</code>，我们需要手动开启。对于windows系统而言，我们使用命令行+指定参数的方式开启<code>h3-27</code>的支持：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Program Files (x86)\Google\Chrome\Application&gt; .\chrome.exe --enable-quic --quic-version&#x3D;h3-27</span><br><span class="line">PS C:\Program Files (x86)\Google\Chrome\Application&gt; .\chrome.exe --enable-quic --quic-version&#x3D;h3-27 --origin-to-force-quic-on&#x3D;tinychen.com:443</span><br></pre></td></tr></table></figure>
+
+<p>上面使用了powershell来启动chrome，为了保证效果，还使用了<code>--origin-to-force-quic-on</code>来强行指定域名和端口。</p>
+<p>本次测试的chrome版本如下：</p>
+<p><img src="https://resource.tinychen.com/20200824171955.png"></p>
+<p>测试效果如下：</p>
+<p><img src="https://resource.tinychen.com/20200824171950.png"></p>
+<p>除了本次的测试网站tinychen.com外，我们还可以看到谷歌的大部分网站也都开启了HTTP/3。</p>
+<p>同样的我们在后台日志中也能看到对应的访问日志（日志中的IP地址已做脱敏处理）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:26 +0800] | 200 | tinychen.com | GET &#x2F; HTTP&#x2F;3 | - | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;css&#x2F;main.css HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;font-awesome&#x2F;css&#x2F;font-awesome.min.css HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;pace&#x2F;pace-theme-material.min.css HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;pace&#x2F;pace.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;canvas-nest&#x2F;canvas-nest.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;anime.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;velocity&#x2F;velocity.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;velocity&#x2F;velocity.ui.min.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;utils.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;motion.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;schemes&#x2F;pisces.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;next-boot.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;js&#x2F;local-search.js HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F; | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.000 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br><span class="line">0.0.0.0 | [24&#x2F;Aug&#x2F;2020:15:01:27 +0800] | 200 | tinychen.com | GET &#x2F;lib&#x2F;font-awesome&#x2F;fonts&#x2F;fontawesome-webfont.woff2?v&#x3D;4.7.0 HTTP&#x2F;3 | https:&#x2F;&#x2F;tinychen.com&#x2F;lib&#x2F;font-awesome&#x2F;css&#x2F;font-awesome.min.css | Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;84.0.4147.135 Safari&#x2F;537.36 | 0.015 | TLSv1.3 | TLS_AES_128_GCM_SHA256 | quic | h3-27</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190829-http-to-nginx\" rel="bookmark">个人博客web服务器换用nginx</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx04-http-map-module\" rel="bookmark">Nginx篇04——map模块</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200323-nginx06-sendfile\" rel="bookmark">Nginx篇06——Sendfile指令及其原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx05-upstream-keepalive\" rel="bookmark">Nginx篇05——http长连接和keeplive</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200519-nginx-enable-http2-tls13\" rel="bookmark">nginx启用HTTP2和TLSv1.3</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200718-wsl-access-is-denied/" rel="prev" title="wsl access is denied">
+      <i class="fa fa-chevron-left"></i> wsl access is denied
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200902-megacli-command-introduction/" rel="next" title="Megacli常用命令整理">
+      Megacli常用命令整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-text">1、背景介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx-quic"><span class="nav-text">2、编译安装nginx-quic</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-yum%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="nav-text">2.1 yum安装依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85cmake"><span class="nav-text">2.2 编译安装cmake</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85perl"><span class="nav-text">2.3 编译安装perl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E5%AE%89%E8%A3%85golang"><span class="nav-text">2.4 安装golang</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85gcc"><span class="nav-text">2.5 编译安装gcc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85boringssl"><span class="nav-text">2.6 编译安装boringssl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-7-%E7%BC%96%E8%AF%91nginx"><span class="nav-text">2.7 编译nginx</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E9%85%8D%E7%BD%AEnginx-quic"><span class="nav-text">3、配置nginx-quic</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E6%B5%8B%E8%AF%95"><span class="nav-text">4、测试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-HTTP-3-CHECK"><span class="nav-text">4.1 HTTP&#x2F;3 CHECK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Firefox%E5%BC%80%E5%90%AFHTTP-3"><span class="nav-text">4.2 Firefox开启HTTP&#x2F;3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-Chrome%E5%BC%80%E5%90%AFHTTP-3"><span class="nav-text">4.3 Chrome开启HTTP&#x2F;3</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="app.json文件用来对微信小程序进行全局配置，决定页面文件的路径、窗口表现、设置网络超时时间、设置多 tab 和debug模式五方面的配置。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小程序之app.json">
+<meta property="og:url" content="https://tinychen.com/20180718-tiny-program-02/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="app.json文件用来对微信小程序进行全局配置，决定页面文件的路径、窗口表现、设置网络超时时间、设置多 tab 和debug模式五方面的配置。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%281%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%282%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%283%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%284%29.png">
+<meta property="article:published_time" content="2018-07-18T07:00:00.000Z">
+<meta property="article:modified_time" content="2018-07-18T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%281%29.png">
+
+<link rel="canonical" href="https://tinychen.com/20180718-tiny-program-02/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>小程序之app.json | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20180718-tiny-program-02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          小程序之app.json
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-07-18 15:00:00" itemprop="dateCreated datePublished" datetime="2018-07-18T15:00:00+08:00">2018-07-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/others/" itemprop="url" rel="index">
+                    <span itemprop="name">others</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>app.json文件用来对微信小程序进行全局配置，决定页面文件的路径、窗口表现、设置网络超时时间、设置多 tab 和debug模式五方面的配置。</p>
+<a id="more"></a>
+<p>下面我们通过一个Demo来对其进行深入的了解。</p>
+<h1 id="1、Demo"><a href="#1、Demo" class="headerlink" title="1、Demo"></a>1、Demo</h1><p>先看一下微信官方给出的一些说明。</p>
+<table>
+<thead>
+<tr>
+<th align="left">属性</th>
+<th align="left">类型</th>
+<th align="center">必填</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">pages</td>
+<td align="left">String Array</td>
+<td align="center">是</td>
+<td align="left">设置页面路径</td>
+</tr>
+<tr>
+<td align="left">window</td>
+<td align="left">Object</td>
+<td align="center">否</td>
+<td align="left">设置默认页面的窗口表现</td>
+</tr>
+<tr>
+<td align="left">tabBar</td>
+<td align="left">Object</td>
+<td align="center">否</td>
+<td align="left">设置底部 tab 的表现</td>
+</tr>
+<tr>
+<td align="left">networkTimeout</td>
+<td align="left">Object</td>
+<td align="center">否</td>
+<td align="left">设置网络超时时间</td>
+</tr>
+<tr>
+<td align="left">debug</td>
+<td align="left">Boolean</td>
+<td align="center">否</td>
+<td align="left">设置是否开启 debug 模式</td>
+</tr>
+</tbody></table>
+<p>再来看一段包含了上述五个部分的代码。</p>
+<pre><code>&#123;
+  &quot;pages&quot;: [
+    &quot;pages/index/index&quot;,
+    &quot;pages/logs/logs&quot;,
+    &quot;pages/mine/mine&quot;,
+    &quot;pages/resume/resume&quot;,
+    &quot;pages/share/share&quot;
+  ],
+
+  &quot;window&quot;: &#123;
+    &quot;backgroundTextStyle&quot;: &quot;light&quot;,
+    &quot;navigationBarBackgroundColor&quot;: &quot;#fff&quot;,
+    &quot;navigationBarTitleText&quot;: &quot;SchoolHunting&quot;,
+    &quot;navigationBarTextStyle&quot;: &quot;black&quot;
+  &#125;,
+
+  &quot;tabBar&quot;: &#123;
+    &quot;list&quot;: [
+      &#123;
+        &quot;pagePath&quot;: &quot;pages/index/index&quot;,
+        &quot;text&quot;: &quot;首页&quot;,
+        &quot;iconPath&quot;: &quot;images/tabBar/index.png&quot;,
+        &quot;selectedIconPath&quot;: &quot;images/tabBar/index_sel.png&quot;
+      &#125;,
+
+      &#123;
+        &quot;pagePath&quot;:&quot;pages/share/share&quot;,
+        &quot;text&quot;: &quot;分享&quot;,
+        &quot;iconPath&quot;: &quot;images/tabBar/share.png&quot;,
+        &quot;selectedIconPath&quot;: &quot;images/tabBar/share_sel.png&quot;
+      &#125;,
+
+      &#123;
+        &quot;pagePath&quot;:&quot;pages/resume/resume&quot;,
+        &quot;text&quot;: &quot;简历&quot;,
+        &quot;iconPath&quot;: &quot;images/tabBar/resume.png&quot;,
+        &quot;selectedIconPath&quot;: &quot;images/tabBar/resume_sel.png&quot;
+      &#125;,
+
+      &#123;
+        &quot;pagePath&quot;: &quot;pages/mine/mine&quot;,
+        &quot;text&quot;: &quot;我的&quot;,
+        &quot;iconPath&quot;: &quot;images/tabBar/mine.png&quot;,
+        &quot;selectedIconPath&quot;: &quot;images/tabBar/mine.png&quot;
+      &#125;
+    ]
+&#125;,
+
+&quot;networkTimeout&quot;: &#123;
+      &quot;request&quot;: 10000,
+      &quot;downloadFile&quot;: 10000
+&#125;,
+
+&quot;debug&quot;: true
+&#125;
+</code></pre>
+<h1 id="2、pages：页面文件的路径"><a href="#2、pages：页面文件的路径" class="headerlink" title="2、pages：页面文件的路径"></a>2、pages：页面文件的路径</h1><ul>
+<li><p>接受一个数组，每一项都是字符串，来指定小程序由哪些页面组成。</p>
+</li>
+<li><p>每一项代表对应页面的【路径+文件名】信息，数组的第一项代表小程序的初始页面。</p>
+</li>
+<li><p><strong>小程序中新增/减少页面，都需要对 pages 数组进行修改，在IDE的文件目录新建pages的时候IDE会提醒是否自动更新app.json中的pages字段。</strong></p>
+</li>
+<li><p>文件名不需要写文件后缀，因为框架会自动去寻找路径下 .json, .js, .wxml, .wxss 四个文件进行整合。</p>
+</li>
+</ul>
+<h1 id="3、window：窗口表现"><a href="#3、window：窗口表现" class="headerlink" title="3、window：窗口表现"></a>3、window：窗口表现</h1><p>主要会用到的是<strong>navigationBarTitleText</strong>这个变量，变量设置的是小程序界面上方显示的名称，一般设置成小程序的名称，其余变量是对其的样式设置。<a target="_blank" rel="noopener" href="https://developers.weixin.qq.com/miniprogram/dev/framework/config.html">可以点击这里查看官方的详细说明。</a></p>
+<h1 id="4、tabBar：设置多bar"><a href="#4、tabBar：设置多bar" class="headerlink" title="4、tabBar：设置多bar"></a>4、tabBar：设置多bar</h1><ul>
+<li><p>tabBar字段主要是设置小程序的Bar，<strong>最少为两个，最多为五个。</strong></p>
+</li>
+<li><p>position变量可以设置Bar的位置是在下面（bottom）还是在上方（top），需要额外注意的是，当设置为上方（top）时，不会显示图标Icon。</p>
+</li>
+<li><p>list作为数组，其中的变量pagePath和text设置bar对应的页面路径和名称，iconPath和selectediconPath是未选中状态和选中状态的两个图标的路径，不设置则无，只设置其中一个则另一个也相同，<strong>建议要设置两个且最好用相同图标不同颜色（黑灰或黑彩）来进行区分。</strong></p>
+</li>
+</ul>
+<p>这里给出两张对比图。</p>
+<p><img src="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%281%29.png"></p>
+<p><img src="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%282%29.png"></p>
+<h1 id="5、networkTimeout：设置网络超时时间"><a href="#5、networkTimeout：设置网络超时时间" class="headerlink" title="5、networkTimeout：设置网络超时时间"></a>5、networkTimeout：设置网络超时时间</h1><p><strong>主要是四个网络请求的超时设置（request、connectSocket、uploadFile和downloadFile），</strong>单位是毫秒（ms），一秒等于一千毫秒，<strong>默认的时间是60000ms即一分钟。</strong></p>
+<h1 id="6、debug：debug模式"><a href="#6、debug：debug模式" class="headerlink" title="6、debug：debug模式"></a>6、debug：debug模式</h1><p>这个比较简单，debug这个变量本身是个布尔型，默认值也是true（开启状态）。</p>
+<p>debug模式开启之后，在开发者工具的控制台面板，调试信息以 info 的形式给出，其信息有Page的注册，页面路由，数据更新，事件触发 。 可以帮助开发者快速定位一些常见的问题。</p>
+<p>这里同样给出两张对比图。</p>
+<p><img src="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%283%29.png"></p>
+<p><img src="https://resource.tinychen.com/%E5%B0%8F%E7%A8%8B%E5%BA%8F%E4%B9%8Bapp.json%20%284%29.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180717-tiny-program-01\" rel="bookmark">小程序之HelloWorld</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180803-jdk-install\" rel="bookmark">JDK安装与环境变量配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180824-androidstudio-install\" rel="bookmark">Android Studio配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20181112-win-install-tomcat\" rel="bookmark">Windows上Apache Tomcat的安装配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190413-centos-install-python\" rel="bookmark">CentOS配置Python3开发环境</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/code/" rel="tag"># code</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20180717-tiny-program-01/" rel="prev" title="小程序之HelloWorld">
+      <i class="fa fa-chevron-left"></i> 小程序之HelloWorld
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20180803-jdk-install/" rel="next" title="JDK安装与环境变量配置">
+      JDK安装与环境变量配置 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81Demo"><span class="nav-text">1、Demo</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81pages%EF%BC%9A%E9%A1%B5%E9%9D%A2%E6%96%87%E4%BB%B6%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="nav-text">2、pages：页面文件的路径</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81window%EF%BC%9A%E7%AA%97%E5%8F%A3%E8%A1%A8%E7%8E%B0"><span class="nav-text">3、window：窗口表现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81tabBar%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%A4%9Abar"><span class="nav-text">4、tabBar：设置多bar</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81networkTimeout%EF%BC%9A%E8%AE%BE%E7%BD%AE%E7%BD%91%E7%BB%9C%E8%B6%85%E6%97%B6%E6%97%B6%E9%97%B4"><span class="nav-text">5、networkTimeout：设置网络超时时间</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6%E3%80%81debug%EF%BC%9Adebug%E6%A8%A1%E5%BC%8F"><span class="nav-text">6、debug：debug模式</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

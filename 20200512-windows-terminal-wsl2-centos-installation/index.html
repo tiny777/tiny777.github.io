@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要用于记录在Windows上使用WSL2和centos系统打造一个免费高效的shell终端的配置过程以及界面优化过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows Terminal + WSL2 + CENTOS 配置Windows命令终端">
+<meta property="og:url" content="https://tinychen.com/20200512-windows-terminal-wsl2-centos-installation/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要用于记录在Windows上使用WSL2和centos系统打造一个免费高效的shell终端的配置过程以及界面优化过程。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106171408.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512173616462.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512165547180.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512165727475.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512165903786.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512163823071.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512170313104.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512170408786.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512154515195.png">
+<meta property="article:published_time" content="2020-05-12T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-12T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="ssh">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="wsl">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106171408.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200512-windows-terminal-wsl2-centos-installation/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Windows Terminal + WSL2 + CENTOS 配置Windows命令终端 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200512-windows-terminal-wsl2-centos-installation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows Terminal + WSL2 + CENTOS 配置Windows命令终端
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-12 10:00:00" itemprop="dateCreated datePublished" datetime="2020-05-12T10:00:00+08:00">2020-05-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/others/" itemprop="url" rel="index">
+                    <span itemprop="name">others</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>5 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106171408.jpg"></p>
+<p>本文主要用于记录在Windows上使用WSL2和centos系统打造一个免费高效的shell终端的配置过程以及界面优化过程。</p>
+<a id="more"></a>
+
+<h1 id="1、选型分析"><a href="#1、选型分析" class="headerlink" title="1、选型分析"></a>1、选型分析</h1><p>之前一直都是使用termius和windows来进行ssh管理，但是最近termius要过期了（没钱续费），不用盗版（版权意识），ssh的Agent Forwarding功能是个人刚需且为termius的付费版才有的功能，所以开始研究windows上免费的ssh客户端管理工具或者是方式。</p>
+<p>（mac系统用户可以跳过这篇文章）首先考虑到了mac，因为mac系统是类unix系统，在命令行终端操作上要比windows好太多，但是没钱买mac，所以pass</p>
+<p>然后如果直接使用linux系统的话虽然shell的问题很容易解决，但是其他的办公软件无法使用或者很难用；如果用虚拟机跑linux，启动麻烦，耗费性能，文件管理也十分麻烦；所以pass</p>
+<p>还有就是各种windows上的各种免费第三方工具，如powershell、GitBash、cmder等等，能实现一定的Linux命令和shell功能，但是相比原生linux还是功能残缺。</p>
+<p><strong>但是如果只要管理各种ssh客户端的话很多免费工具已经足够优秀了，</strong>而笔者本次除了管理ssh之外还想要实现一定的shell功能，因此最后锁定Windows10上面的2004版本的wsl2工具，用它来运行一个linux系统，虽然是残缺的Linux，但是在shell功能和ssh功能上和直接运行Linux并无差异。唯一需要注意的就是windows的版本要比较新。</p>
+<p><img src="https://resource.tinychen.com/image-20200512173616462.png"></p>
+<blockquote>
+<p>WSL 2 is only available in Windows 10 builds 18917 or higher</p>
+</blockquote>
+<h1 id="2、安装wsl"><a href="#2、安装wsl" class="headerlink" title="2、安装wsl"></a>2、安装wsl</h1><p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">windows官网的安装教程</a>比较详细，并且wsl的安装启用比较简单，我们可以直接使用管理员模式的powershell通过命令行来启用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart</span><br><span class="line">dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart</span><br></pre></td></tr></table></figure>
+
+<p>命令顺利执行完后需要重启，这时候输入<code>wsl --help</code>就可以看到wsl已经安装成功。</p>
+<h1 id="3、安装centos"><a href="#3、安装centos" class="headerlink" title="3、安装centos"></a>3、安装centos</h1><p>Windows的应用商店中有一些不错的linux发行版，包括很多同学都很喜欢的ubuntu，但是个人比较熟悉使用centos，而应用商店中的centos是要收费的，不过好在github上面有CENTOS官方开源的安装包，我们这里使用github上的安装包进行安装。</p>
+<p>如果使用应用商店中的发行版直接点击安装即可。随后便可以跳过下面的centos的安装部分。</p>
+<p>首先我们去<a target="_blank" rel="noopener" href="https://github.com/CentOS/sig-cloud-instance-images/">centos的GitHub页面</a>下载对应的安装包：</p>
+<p><img src="https://resource.tinychen.com/image-20200512165547180.png"></p>
+<p>注意这里要切换分支进行下载，以<code>centos7-x86.64</code>为例，这里对应的就是最新的<code>centos7.8</code>系统，我们只需要下载对应的<code>tar.xz</code>压缩包即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/CentOS/sig-cloud-instance-images/blob/CentOS-7-x86_64/docker/centos-7-x86_64-docker.tar.xz</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image-20200512165727475.png"></p>
+<p>接着我们以管理员身份打开一个powershell窗口：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装 Chocolatey</span></span><br><span class="line">Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装 LxRunOffline</span></span><br><span class="line">choco install lxrunoffline</span><br></pre></td></tr></table></figure>
+
+<p>注意这里安装完成之后需要重启powershell来进行下一步的安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LxRunOffline install -n 自定义系统名称 -d 安装目录路径 -f tar.xz安装包路径</span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意windows系统命令行中的文件路径和linux系统差别很大</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 比如我这里的安装命令就是</span></span><br><span class="line">LxRunOffline.exe install -n centos -d D:/centos -f .\centos-7-x86_64-docker.tar.xz</span><br><span class="line"><span class="meta">#</span><span class="bash"> 将centos安装到D盘的centos文件夹下，并且命名为centos</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来就可以使用下述两种方式尝试启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LxRunOffline run -n 自定义系统名称</span><br><span class="line">wsl -d 自定义系统名称</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image-20200512165903786.png"></p>
+<h1 id="4、升级centos为wsl2"><a href="#4、升级centos为wsl2" class="headerlink" title="4、升级centos为wsl2"></a>4、升级centos为wsl2</h1><p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/wsl/wsl2-install">windows官网教程</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 列出已经安装的wsl的信息</span></span><br><span class="line">wsl -l -v</span><br><span class="line"><span class="meta">#</span><span class="bash"> 将对应的wsl设为wsl2，注意&lt;Distro&gt;要和上面查询到的信息一致</span></span><br><span class="line">wsl --set-version &lt;Distro&gt; 2</span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置默认使用的发行版</span></span><br><span class="line">wsl -s &lt;Distro&gt;</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image-20200512163823071.png"></p>
+<h1 id="5、配置windows-terminal"><a href="#5、配置windows-terminal" class="headerlink" title="5、配置windows terminal"></a>5、配置windows terminal</h1><p>使用windows的cmd或者powershell都可以直接输入wsl命令进入到wsl系统中进行操作，但是由于这两者的界面比较丑，因此我们这里使用可以定制更多参数的windows terminal来进行替换。</p>
+<p>不过windows terminal目前来说属于比较轻量级的产品，如果需要更多的功能可以考虑一下其他的软件，这里额外推荐一个免费的全平台终端<code>terminus</code>，<strong>注意比收费的termius要多一个字母n</strong>，也是<a target="_blank" rel="noopener" href="https://github.com/Eugeny/terminus">github</a>上面的一个开源项目，免费高效且内置多种主题和少量还可以的插件。</p>
+<h2 id="5-1-安装windows-terminal"><a href="#5-1-安装windows-terminal" class="headerlink" title="5.1 安装windows terminal"></a>5.1 安装windows terminal</h2><p>windows terminal直接使用win10自带的应用商店即可搜索下载安装。</p>
+<h2 id="5-2-安装powerline-fonts"><a href="#5-2-安装powerline-fonts" class="headerlink" title="5.2 安装powerline/fonts"></a>5.2 安装powerline/fonts</h2><p>powerline/fonts是<a target="_blank" rel="noopener" href="https://github.com/powerline/fonts">github</a>上面的一个项目，涵盖了较多的字体，windows本身内置的字体可能在shell中显示不太美观，所以这里我们需要在windows系统中和wsl中都安装字体。</p>
+<p>首先在wsl中使用git拉取项目并且安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/powerline/fonts.git --depth=1</span><br><span class="line">cd fonts</span><br><span class="line">./install.sh</span><br></pre></td></tr></table></figure>
+
+<p>在Windows中也需要安装该字体，以UbuntuMono为例，同样是下载之后进入到对应的文件夹中手动安装所有的ttf字体即可：</p>
+<p><img src="https://resource.tinychen.com/image-20200512170313104.png"></p>
+<p>（注意尽量以管理员身份为本机所有用户安装）</p>
+<p><img src="https://resource.tinychen.com/image-20200512170408786.png"></p>
+<h2 id="5-3-配置iTerm2-Color-Schemes"><a href="#5-3-配置iTerm2-Color-Schemes" class="headerlink" title="5.3 配置iTerm2-Color-Schemes"></a>5.3 配置iTerm2-Color-Schemes</h2><p>主题的效果我们可以在<a target="_blank" rel="noopener" href="https://iterm2colorschemes.com/">官网</a>进行预览，配置参数我们可以在对应的<a target="_blank" rel="noopener" href="https://github.com/mbadolato/iTerm2-Color-Schemes/tree/master/windowsterminal">GitHub</a>中找到。需要注意的是要找到对应的<code>windows terminal</code>目录中的配置。</p>
+<h2 id="5-4-配置setting-json"><a href="#5-4-配置setting-json" class="headerlink" title="5.4 配置setting.json"></a>5.4 配置setting.json</h2><p>setting.json的参数非常多，我们可以根据自己的习惯设定显示界面和快捷键等操作，并且还可以添加背景图片，自定义不同shell的图标icon和主题等用以区分不同的shell避免误操作。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// To view the default settings, hold "alt" while clicking on the "Settings" button.</span></span><br><span class="line"><span class="comment">// For documentation on these settings, see: https://aka.ms/terminal-documentation</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"$schema"</span>: <span class="string">"https://aka.ms/terminal-profiles-schema"</span>,</span><br><span class="line"></span><br><span class="line">    <span class="attr">"defaultProfile"</span>: <span class="string">"&#123;aabae64a-7cf7-5add-b5d6-744e54ab56d6&#125;"</span>, <span class="comment">//设定默认启动使用的shell。这里使用后面对应的guid</span></span><br><span class="line">    <span class="attr">"initialRows"</span>: <span class="number">40</span>, <span class="comment">//初始化窗口的行数</span></span><br><span class="line">    <span class="attr">"initialCols"</span>: <span class="number">150</span>,<span class="comment">//初始化窗口的列数</span></span><br><span class="line">    <span class="attr">"alwaysShowTabs"</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">"showTerminalTitleInTitlebar"</span>: <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">    <span class="attr">"profiles"</span>:</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="attr">"defaults"</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Put settings here that you want to apply to all profiles           </span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"list"</span>:</span><br><span class="line">        [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">"guid"</span>: <span class="string">"&#123;07b52e3e-de2c-5db4-bd2d-ba144ed6c273&#125;"</span>,</span><br><span class="line">                <span class="attr">"hidden"</span>: <span class="literal">false</span>,</span><br><span class="line">                <span class="attr">"name"</span>: <span class="string">"Ubuntu-20.04"</span>,</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"Windows.Terminal.Wsl"</span>,</span><br><span class="line">                <span class="attr">"fontFace"</span>: <span class="string">"Fira Mono for Powerline"</span>,</span><br><span class="line">                <span class="attr">"fontSize"</span>: <span class="number">12</span>,</span><br><span class="line">                <span class="attr">"colorScheme"</span>: <span class="string">"Ubuntu"</span>,  <span class="comment">//这里的color要和后面的schemes中的一致</span></span><br><span class="line">                <span class="attr">"useAcrylic"</span> : <span class="literal">false</span>,    <span class="comment">// 是否启用窗口透明度，效果类似毛玻璃特效</span></span><br><span class="line">                <span class="attr">"acrylicOpacity"</span> : <span class="number">0.6</span> <span class="comment">// 窗口透明度</span></span><br><span class="line">            &#125;</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">"guid"</span>: <span class="string">"&#123;aabae64a-7cf7-5add-b5d6-744e54ab56d6&#125;"</span>,</span><br><span class="line">                <span class="attr">"hidden"</span>: <span class="literal">false</span>,</span><br><span class="line">                <span class="attr">"name"</span>: <span class="string">"centos"</span>,</span><br><span class="line">                <span class="attr">"source"</span>: <span class="string">"Windows.Terminal.Wsl"</span>,</span><br><span class="line">                <span class="attr">"fontFace"</span>: <span class="string">"Fira Mono for Powerline"</span>,</span><br><span class="line">                <span class="attr">"fontSize"</span>: <span class="number">12</span>,</span><br><span class="line">                <span class="attr">"colorScheme"</span>: <span class="string">"Atom"</span>,</span><br><span class="line">                <span class="attr">"useAcrylic"</span> : <span class="literal">true</span>,    <span class="comment">// 窗口透明度</span></span><br><span class="line">                <span class="attr">"acrylicOpacity"</span> : <span class="number">0.8</span> <span class="comment">// 窗口透明度</span></span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">// Make changes here to the cmd.exe profile</span></span><br><span class="line">                <span class="attr">"guid"</span>: <span class="string">"&#123;0caa0dad-35be-5f56-a8ff-afceeeaa6101&#125;"</span>,</span><br><span class="line">                <span class="attr">"name"</span>: <span class="string">"cmd"</span>,</span><br><span class="line">                <span class="attr">"commandline"</span>: <span class="string">"cmd.exe"</span>,</span><br><span class="line">                <span class="attr">"hidden"</span>: <span class="literal">false</span>,</span><br><span class="line">                <span class="attr">"fontSize"</span>: <span class="number">12</span>,</span><br><span class="line">                <span class="attr">"colorScheme"</span>: <span class="string">"MaterialDark"</span>,</span><br><span class="line">                <span class="attr">"useAcrylic"</span> : <span class="literal">false</span>,    <span class="comment">// 窗口透明度</span></span><br><span class="line">                <span class="attr">"acrylicOpacity"</span> : <span class="number">0.5</span> <span class="comment">// 窗口透明度</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Add custom color schemes to this array</span></span><br><span class="line">    <span class="attr">"schemes"</span>: [</span><br><span class="line">        &#123;          </span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"Atom"</span>,</span><br><span class="line">            <span class="attr">"black"</span>: <span class="string">"#000000"</span>,</span><br><span class="line">            <span class="attr">"red"</span>: <span class="string">"#fd5ff1"</span>,</span><br><span class="line">            <span class="attr">"green"</span>: <span class="string">"#87c38a"</span>,</span><br><span class="line">            <span class="attr">"yellow"</span>: <span class="string">"#ffd7b1"</span>,</span><br><span class="line">            <span class="attr">"blue"</span>: <span class="string">"#85befd"</span>,</span><br><span class="line">            <span class="attr">"purple"</span>: <span class="string">"#b9b6fc"</span>,</span><br><span class="line">            <span class="attr">"cyan"</span>: <span class="string">"#85befd"</span>,</span><br><span class="line">            <span class="attr">"white"</span>: <span class="string">"#e0e0e0"</span>,</span><br><span class="line">            <span class="attr">"brightBlack"</span>: <span class="string">"#000000"</span>,</span><br><span class="line">            <span class="attr">"brightRed"</span>: <span class="string">"#fd5ff1"</span>,</span><br><span class="line">            <span class="attr">"brightGreen"</span>: <span class="string">"#94fa36"</span>,</span><br><span class="line">            <span class="attr">"brightYellow"</span>: <span class="string">"#f5ffa8"</span>,</span><br><span class="line">            <span class="attr">"brightBlue"</span>: <span class="string">"#96cbfe"</span>,</span><br><span class="line">            <span class="attr">"brightPurple"</span>: <span class="string">"#b9b6fc"</span>,</span><br><span class="line">            <span class="attr">"brightCyan"</span>: <span class="string">"#85befd"</span>,</span><br><span class="line">            <span class="attr">"brightWhite"</span>: <span class="string">"#e0e0e0"</span>,</span><br><span class="line">            <span class="attr">"background"</span>: <span class="string">"#161719"</span>,</span><br><span class="line">            <span class="attr">"foreground"</span>: <span class="string">"#c5c8c6"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"keybindings"</span>: [<span class="comment">//这里可以设置快捷键</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"command"</span> : <span class="string">"copy"</span>,</span><br><span class="line">            <span class="attr">"keys"</span> : </span><br><span class="line">            [</span><br><span class="line">                <span class="string">"ctrl+c"</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"command"</span> : <span class="string">"paste"</span>,</span><br><span class="line">            <span class="attr">"keys"</span> : </span><br><span class="line">            [</span><br><span class="line">                <span class="string">"ctrl+v"</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-5-ssh-config"><a href="#5-5-ssh-config" class="headerlink" title="5.5 ssh_config"></a>5.5 ssh_config</h2><p>最后我们再搭配ssh自带的ssh_config来添加各种自定义ssh参数，如果需要在这上面开启ssh的Agent Forwarding功能，个人习惯是单独创建一个脚本并且在bash中设置alias快捷操作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 脚本内容示例</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 开启ssh Agent Forwarding</span></span><br><span class="line">eval `ssh-agent`</span><br><span class="line"><span class="meta">#</span><span class="bash"> 将要使用的ssh key添加到ssh-add中</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果后面不指明文件则使用默认的~/.ssh/id_rsa</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 也可以一次添加多个</span></span><br><span class="line">ssh-add ~/.ssh/id_rsa</span><br><span class="line">ssh user@host</span><br></pre></td></tr></table></figure>
+
+<p>然后在bashrc文件中添加alias即可快速操作，对应的ssh_config参数可以使用man ssh_config命令来查看。</p>
+<p>这里贴出几个常用的参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Host example.host.com</span><br><span class="line"><span class="meta">#</span><span class="bash"> ssh远程客户端的别名，可以直接通过ssh example.host.com来进行连接</span></span><br><span class="line">    HostName 192.168.1.1</span><br><span class="line"><span class="meta">#</span><span class="bash"> ssh远程客户端的ip地址</span></span><br><span class="line">    User root</span><br><span class="line"><span class="meta">#</span><span class="bash"> ssh远程的用户</span></span><br><span class="line">    Port 22</span><br><span class="line"><span class="meta">#</span><span class="bash"> ssh的端口</span></span><br><span class="line">    IdentityFile ~/.ssh/id_rsa</span><br><span class="line"><span class="meta">#</span><span class="bash"> ssh的认证密钥</span></span><br><span class="line">    ForwardAgent yes</span><br><span class="line"><span class="meta">#</span><span class="bash"> 是否开启Agent Forwarding，默认不开启</span></span><br><span class="line">    AddKeysToAgent yes</span><br><span class="line"><span class="meta">#</span><span class="bash"> 是否自动将 key 加入到 ssh-agent，值可以为 no(default)/confirm/ask/yes</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 如果是 yes，key 和密码都将读取文件并以加入到 agent ，就像 ssh-add。其他分别是询问、确认、不加入的意思。添加到 ssh-agent 意味着将私钥和密码交给它管理，让它来进行身份认证。    </span></span><br></pre></td></tr></table></figure>
+
+<h1 id="6、效果展示"><a href="#6、效果展示" class="headerlink" title="6、效果展示"></a>6、效果展示</h1><p>wsl2使用的应该是windows定制的内核（目前我的系统内核是<code>4.19.84-microsoft-standard</code>），同时无法使用systemd工具，但是作为terminal来使用已经是绰绰有余了，命令的丰富程度也要远胜于powershell、gitbash和其他的第三方命令行，安装一些常用命令的方便程度也要远胜于cygwin等。windows系统的硬盘也会直接挂载在wsl中的<code>/mnt</code>目录下，可以直接使用Linux的sed、awk、paste等命令来对windows下的文本进行操作。</p>
+<p><img src="https://resource.tinychen.com/image-20200512154515195.png"></p>
+<blockquote>
+<p>注意在默认情况下会把系统本身的硬盘也挂载到<code>/mnt</code>目录下，注意不要误操作rm命令</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190709-multi-ssh\" rel="bookmark">多主机间实现SSH免密登录</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200912-ssh-config-introduction\" rel="bookmark">ssh常用配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20201116-linux-modify-ssh-login-banner\" rel="bookmark">linux中设置ssh登录时显示的banner</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20201203-ssh-add-google-authenticator\" rel="bookmark">给ssh服务添加谷歌双重认证</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20201222-centos8-install-fail2ban\" rel="bookmark">给ssh服务添加fail2ban安全认证</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+              <a href="/tags/ssh/" rel="tag"># ssh</a>
+              <a href="/tags/linux/" rel="tag"># linux</a>
+              <a href="/tags/wsl/" rel="tag"># wsl</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200511-wireshark-analysis-pop3/" rel="prev" title="Wireshark对pop3抓包分析">
+      <i class="fa fa-chevron-left"></i> Wireshark对pop3抓包分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200513-wireshark-analysis-imap/" rel="next" title="Wireshark对IMAP抓包分析">
+      Wireshark对IMAP抓包分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E9%80%89%E5%9E%8B%E5%88%86%E6%9E%90"><span class="nav-text">1、选型分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%AE%89%E8%A3%85wsl"><span class="nav-text">2、安装wsl</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E5%AE%89%E8%A3%85centos"><span class="nav-text">3、安装centos</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%8D%87%E7%BA%A7centos%E4%B8%BAwsl2"><span class="nav-text">4、升级centos为wsl2</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E9%85%8D%E7%BD%AEwindows-terminal"><span class="nav-text">5、配置windows terminal</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E5%AE%89%E8%A3%85windows-terminal"><span class="nav-text">5.1 安装windows terminal</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E5%AE%89%E8%A3%85powerline-fonts"><span class="nav-text">5.2 安装powerline&#x2F;fonts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E9%85%8D%E7%BD%AEiTerm2-Color-Schemes"><span class="nav-text">5.3 配置iTerm2-Color-Schemes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4-%E9%85%8D%E7%BD%AEsetting-json"><span class="nav-text">5.4 配置setting.json</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-5-ssh-config"><span class="nav-text">5.5 ssh_config</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6%E3%80%81%E6%95%88%E6%9E%9C%E5%B1%95%E7%A4%BA"><span class="nav-text">6、效果展示</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

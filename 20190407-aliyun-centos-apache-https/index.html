@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="记录一下给Hexo博客配置https域名过程中踩的各种坑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里云轻量级应用服务器CentOS系统Apache配置Https">
+<meta property="og:url" content="https://tinychen.com/20190407-aliyun-centos-apache-https/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="记录一下给Hexo博客配置https域名过程中踩的各种坑。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/V86YoJAf1O9h.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/PCNH2aBNwo5T.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/vaezJD4QVjtk.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/8SPnmycdcig1.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/zsLtXQPJy8JQ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/W9J2DCU9jI3s.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190407/wKz3bxESUmvW.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/dPXnVqobh7Er.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/QTIlgANAT4sn.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/TW5JLvUOCKDc.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/GqIHot50UgPD.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/L2RWziR8m2kT.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/x6jUOPJ0dTks.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/Vzy8oMhQxVrQ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/pj1wWPbyUbdv.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/E3iYqx2ohyuF.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/DWjiOTE3pJKJ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190408/a4AX9fsON750.png">
+<meta property="article:published_time" content="2019-04-07T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-04-07T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190407/V86YoJAf1O9h.png">
+
+<link rel="canonical" href="https://tinychen.com/20190407-aliyun-centos-apache-https/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>阿里云轻量级应用服务器CentOS系统Apache配置Https | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190407-aliyun-centos-apache-https/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          阿里云轻量级应用服务器CentOS系统Apache配置Https
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-04-07 15:00:00" itemprop="dateCreated datePublished" datetime="2019-04-07T15:00:00+08:00">2019-04-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>记录一下给Hexo博客配置https域名过程中踩的各种坑。</p>
+<a id="more"></a>
+
+<h1 id="1、申请证书"><a href="#1、申请证书" class="headerlink" title="1、申请证书"></a>1、申请证书</h1><p>SSL的证书基本可以分为申请的和自己创建的，阿里云上面有免费的可以申请，本着多一事不如少一事的原则（其实是太菜了），果断选择阿里云的SSL证书申请。</p>
+<p>▼点击<strong>SSL证书（应用安全）</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/V86YoJAf1O9h.png"></p>
+<p>▼选择免费的那个。</p>
+<p><img src="https://resource.tinychen.com/blog/20190407/PCNH2aBNwo5T.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/vaezJD4QVjtk.png"></p>
+<p>▼填写一些申请的信息。</p>
+<p><img src="https://resource.tinychen.com/blog/20190407/8SPnmycdcig1.png"></p>
+<p>▼然后需要进行信息验证，一般都是DNS验证，如果是在阿里云购买的域名，会自动添加DNS解析验证，其他的就需要到域名管理里面手动添加了。</p>
+<p><img src="https://resource.tinychen.com/blog/20190407/zsLtXQPJy8JQ.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/W9J2DCU9jI3s.png"></p>
+<p>▼提交成功之后耐心等待一下，很快就会申请通过。</p>
+<p><img src="https://resource.tinychen.com/blog/20190407/wKz3bxESUmvW.png"></p>
+<h1 id="2、安装Apache和openssl"><a href="#2、安装Apache和openssl" class="headerlink" title="2、安装Apache和openssl"></a>2、安装Apache和openssl</h1><h2 id="2-1-安装Apache"><a href="#2-1-安装Apache" class="headerlink" title="2.1 安装Apache"></a>2.1 安装Apache</h2><p>由于是在apache服务器上面搭建的博客，所以我的服务器已经安装好了apache，输入下列命令可以查看apache的版本信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">httpd -v</span><br><span class="line"><span class="comment"># 输入该命令查看apache的版本信息</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190408/dPXnVqobh7Er.png"></p>
+<p>如果没有安装apache的话，可以选择手动下载安装包安装或者是使用yum进行安装，不同的安装方式生成的文件目录会有一些不太一样，这对后面的SSL证书配置有着很大的影响。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install httpd</span><br><span class="line"><span class="comment"># 使用yum安装apache，这样安装的httpd的默认目录是在/etc/httpd文件夹里面</span></span><br></pre></td></tr></table></figure>
+
+<p>接着再安装一些必要的工具和扩展</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install gcc* make* apr apr-util pcre apr-devel apr-util-devel  pcre-devel</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install httpd-manual mod_ssl mod_perl mod_auth_mysql</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-安装openssl"><a href="#2-2-安装openssl" class="headerlink" title="2.2 安装openssl"></a>2.2 安装openssl</h2><p>接着是使用yum安装openssl模块。如果有特殊需求的，可以到官网下载openssl自行编译，在这里只需要使用yum进行安装即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install openssl openssl-devel</span><br></pre></td></tr></table></figure>
+
+<p>查看openssl版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl version -a</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190408/QTIlgANAT4sn.png"></p>
+<p>确认安装好apache和openssl之后，我们进入下一步。</p>
+<h1 id="3、上传证书到服务器"><a href="#3、上传证书到服务器" class="headerlink" title="3、上传证书到服务器"></a>3、上传证书到服务器</h1><p>阿里云那边的证书申请好之后，我们下载证书到自己的电脑里面，解压可以得到类似这样子的三个文件。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/TW5JLvUOCKDc.png"></p>
+<p>图中的是默认的名字，改不改都可以，不要搞混了就行，接下来我们把它们上传到服务器中的apache的安装目录下面，给他们专门新建一个cert文件夹。</p>
+<p>首先我们在服务器中给他新建一个目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/httpd/cert</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然后把本机的证书上传到服务器，我们可以直接使用scp命令上传文件，也可以使用Xshell中的Xftp来传输，还有其他的各种方式也都可以，反正传上去了就行。</p>
+<p>我这里使用scp命令为例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># scp命令的最基本用法是：</span></span><br><span class="line">scp fileLocation username@hostIP: DestinationLocation</span><br><span class="line"><span class="comment"># 以在桌面传送一个文件到/etc/httpd/cert目录为例（此时我是在桌面直接打开gitbash）</span></span><br><span class="line">scp 1692315_tiny777.com.key root@47.107.188.168:/etc/httpd/cert</span><br></pre></td></tr></table></figure>
+
+<h1 id="4、开启443端口"><a href="#4、开启443端口" class="headerlink" title="4、开启443端口"></a>4、开启443端口</h1><p>https默认是使用443端口进行监听，虽然阿里云默认是开启了443端口的，但是为了保险起见，我们还是确认一下。</p>
+<p>点开阿里云的控制台，点击轻量级应用服务器。如下图所示：</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/GqIHot50UgPD.png"></p>
+<h1 id="5、配置ssl"><a href="#5、配置ssl" class="headerlink" title="5、配置ssl"></a>5、配置ssl</h1><h2 id="5-1-启用ssl模块支持"><a href="#5-1-启用ssl模块支持" class="headerlink" title="5.1 启用ssl模块支持"></a>5.1 启用ssl模块支持</h2><p>这里就是比较坑的地方了，<a target="_blank" rel="noopener" href="https://help.aliyun.com/knowledge_detail/95493.html?spm=5176.2020520154.cas.26.15e456a71TICkj">阿里云的帮助文档</a>说的可能是别的方式安装的apache服务器，和我的情况不太一样。但是思路却还是正确的。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/L2RWziR8m2kT.png"></p>
+<p>这两步，第一步的主要作用是开启apache的ssl模块支持，第二步则是Include代码ssl的配置文件使其生效。</p>
+<p>使用yum安装的apache有一些不太一样，相对应的配置文件都在<code>/etc/httpd/conf.modules.d</code>这个目录下面，我们接下来主要会用到的就是这个<code>00-ssl.conf</code>和<code>00-base.conf</code>文件。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/x6jUOPJ0dTks.png"></p>
+<p>打开<code>00-ssl.conf</code>就能看到对应阿里云教程里面的第一步操作，启用ssl模块支持。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/Vzy8oMhQxVrQ.png"></p>
+<p>接下来我们在<code>/etc/httpd/conf/httpd.conf</code>这个文件里面，可以找到这一行（在56行左右的位置）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Include conf.modules.d/*.conf</span><br></pre></td></tr></table></figure>
+
+<p>这一行代码的意思就是Include了整个<code>conf.modules.d</code>文件夹里面的所有<code>conf</code>后缀的文件，这个<code>00-ssl.conf</code>文件当然也不例外。</p>
+<h2 id="5-2-配置ssl"><a href="#5-2-配置ssl" class="headerlink" title="5.2 配置ssl"></a>5.2 配置ssl</h2><p>完成上面的两步操作之后，我们就要配置ssl的配置文件了。我们再看阿里云的文档。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/pj1wWPbyUbdv.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 SSL 协议支持协议，去掉不安全的协议</span></span><br><span class="line">SSLProtocol all -SSLv2 -SSLv3</span><br><span class="line"><span class="comment"># 修改加密套件如下</span></span><br><span class="line">SSLCipherSuite HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM</span><br><span class="line">SSLHonorCipherOrder on</span><br><span class="line"><span class="comment"># 证书公钥配置</span></span><br><span class="line">SSLCertificateFile cert/a_public.crt</span><br><span class="line"><span class="comment"># 证书私钥配置</span></span><br><span class="line">SSLCertificateKeyFile cert/a.key</span><br><span class="line"><span class="comment"># 证书链配置，如果该属性开头有 '#'字符，请删除掉</span></span><br><span class="line">SSLCertificateChainFile cert/a_chain.crt</span><br></pre></td></tr></table></figure>
+
+<p>还是一样的问题，路径不太正确，我们这里找到的文件路径是<code>/etc/httpd/conf.d/ssl.conf</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/E3iYqx2ohyuF.png"></p>
+<p>在更改配置文件之前，为了保险起见，咱们先备份一下，以备不时之需。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp ssl.conf ssl.conf.bak</span><br></pre></td></tr></table></figure>
+
+<p>这里再给出我自己的<code>ssl.conf</code>文件和大家交流一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Listen 443</span><br><span class="line">&lt;VirtualHost *:443&gt;</span><br><span class="line"></span><br><span class="line">DocumentRoot <span class="string">"/var/www/html"</span></span><br><span class="line">ServerName tiny777.com</span><br><span class="line">ServerAlias www.tiny777.com</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">SSLEngine on</span><br><span class="line"></span><br><span class="line">SSLProtocol all -SSLv2 -SSLv3</span><br><span class="line"></span><br><span class="line">SSLCertificateFile /etc/httpd/cert/1692315_tiny777.com_public.crt</span><br><span class="line"></span><br><span class="line">SSLCertificateKeyFile /etc/httpd/cert/1692315_tiny777.com.key</span><br><span class="line"></span><br><span class="line">SSLCertificateChainFile /etc/httpd/cert/1692315_tiny777.com_chain.crt</span><br><span class="line"></span><br><span class="line">DirectoryIndex index.html index.htm index.php</span><br><span class="line">&lt;Directory <span class="string">"/var/www/html"</span>&gt;</span><br><span class="line">     Options Indexes FollowSymLinks</span><br><span class="line">     AllowOverride None</span><br><span class="line">     Require all granted</span><br><span class="line">&lt;/Directory&gt;</span><br><span class="line">&lt;/VirtualHost&gt;</span><br></pre></td></tr></table></figure>
+
+<p>理论上这个时候重启apache服务已经可以输入https加上我们的域名来开启https访问了，但是这个时候的https和http相互独立，默认是访问http的域名，我们需要开启http域名自动跳转到https域名。</p>
+<h2 id="5-3-自动跳转到https"><a href="#5-3-自动跳转到https" class="headerlink" title="5.3 自动跳转到https"></a>5.3 自动跳转到https</h2><p>保险起见，我们坚持一下自动跳转需要用到的rewrite模块是否开启了，还是在之前说的<code>/etc/httpd/conf.d/00-base.conf</code>文件里面查找一下rewrite模块，确定已经启用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LoadModule rewrite_module modules/mod_rewrite.so</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190408/DWjiOTE3pJKJ.png"></p>
+<p>接下来我们定位到这个目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /etc/httpd/conf</span><br></pre></td></tr></table></figure>
+
+<p>更改<code>httpd.conf</code>文件，在最后面加入这几行代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">RewriteEngine on</span><br><span class="line">RewriteCond %&#123;SERVER_PORT&#125; !^443$</span><br><span class="line">RewriteRule ^.*$ https://%&#123;SERVER_NAME&#125;%&#123;REQUEST_URI&#125; [L,R=301]</span><br></pre></td></tr></table></figure>
+
+<p>最后我们重启apache服务，就能开启域名的https访问了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart httpd.service</span><br></pre></td></tr></table></figure>
+
+<p>最终效果如下：</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/a4AX9fsON750.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190829-http-to-nginx\" rel="bookmark">个人博客web服务器换用nginx</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20181112-win-install-tomcat\" rel="bookmark">Windows上Apache Tomcat的安装配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190608-wireshark-stu\" rel="bookmark">Wireshark抓包分析校园网登录过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx04-http-map-module\" rel="bookmark">Nginx篇04——map模块</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200323-nginx06-sendfile\" rel="bookmark">Nginx篇06——Sendfile指令及其原理</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+              <a href="/tags/centos/" rel="tag"># centos</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190405-delete-3d-objects/" rel="prev" title="删除Windows中的3D对象文件夹">
+      <i class="fa fa-chevron-left"></i> 删除Windows中的3D对象文件夹
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190409-iperf3/" rel="next" title="iperf3安装配置使用踩坑记录">
+      iperf3安装配置使用踩坑记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E7%94%B3%E8%AF%B7%E8%AF%81%E4%B9%A6"><span class="nav-text">1、申请证书</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%AE%89%E8%A3%85Apache%E5%92%8Copenssl"><span class="nav-text">2、安装Apache和openssl</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E5%AE%89%E8%A3%85Apache"><span class="nav-text">2.1 安装Apache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E5%AE%89%E8%A3%85openssl"><span class="nav-text">2.2 安装openssl</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E4%B8%8A%E4%BC%A0%E8%AF%81%E4%B9%A6%E5%88%B0%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">3、上传证书到服务器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%BC%80%E5%90%AF443%E7%AB%AF%E5%8F%A3"><span class="nav-text">4、开启443端口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E9%85%8D%E7%BD%AEssl"><span class="nav-text">5、配置ssl</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E5%90%AF%E7%94%A8ssl%E6%A8%A1%E5%9D%97%E6%94%AF%E6%8C%81"><span class="nav-text">5.1 启用ssl模块支持</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E9%85%8D%E7%BD%AEssl"><span class="nav-text">5.2 配置ssl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E8%87%AA%E5%8A%A8%E8%B7%B3%E8%BD%AC%E5%88%B0https"><span class="nav-text">5.3 自动跳转到https</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

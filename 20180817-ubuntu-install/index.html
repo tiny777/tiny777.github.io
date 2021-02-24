@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="Ubuntu18.04发布了很长一段时间了，基本上系统本身也趋于稳定，那么我们现在来尝试一下在已经存在win10系统的情况下安装Ubuntu18.04。本文使用的是单硬盘+GPT分区表配置方案，也是目前的主流方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Win10下安装Ubuntu双系统">
+<meta property="og:url" content="https://tinychen.com/20180817-ubuntu-install/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="Ubuntu18.04发布了很长一段时间了，基本上系统本身也趋于稳定，那么我们现在来尝试一下在已经存在win10系统的情况下安装Ubuntu18.04。本文使用的是单硬盘+GPT分区表配置方案，也是目前的主流方案。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%281%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%282%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%283%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%284%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%285%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%286%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%287%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%288%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%289%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2810%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2811%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2812%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2813%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2814%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2816%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2817%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2818%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2819%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2820%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2821%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2822%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2823%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/UbuntuInstall%20%2824%29.png">
+<meta property="article:published_time" content="2018-08-17T07:00:00.000Z">
+<meta property="article:modified_time" content="2018-08-17T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="ubuntu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/UbuntuInstall%20%281%29.png">
+
+<link rel="canonical" href="https://tinychen.com/20180817-ubuntu-install/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Win10下安装Ubuntu双系统 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20180817-ubuntu-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Win10下安装Ubuntu双系统
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-08-17 15:00:00" itemprop="dateCreated datePublished" datetime="2018-08-17T15:00:00+08:00">2018-08-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Ubuntu18.04发布了很长一段时间了，基本上系统本身也趋于稳定，那么我们现在来尝试一下在已经存在win10系统的情况下安装Ubuntu18.04。本文使用的是单硬盘+GPT分区表配置方案，也是目前的主流方案。</p>
+<a id="more"></a>
+
+<h1 id="1、下载Ubuntu18-04及相关工具"><a href="#1、下载Ubuntu18-04及相关工具" class="headerlink" title="1、下载Ubuntu18.04及相关工具"></a>1、下载Ubuntu18.04及相关工具</h1><h2 id="1-1-下载Ubuntu"><a href="#1-1-下载Ubuntu" class="headerlink" title="1.1 下载Ubuntu"></a>1.1 下载Ubuntu</h2><p>Ubuntu已经有了中文官网，而且在国内也能正常访问，因此下载相对简单。需要注意的是，<strong>Ubuntu18.04只有64位的版本。</strong></p>
+<p>这是下载链接：        <a target="_blank" rel="noopener" href="http://releases.ubuntu.com/18.04/">http://releases.ubuntu.com/18.04/</a></p>
+<p>▼我们下载图中的第一个后缀为desktop-amd64的iso镜像文件。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%281%29.png"></p>
+<h2 id="1-2-下载UltraISO"><a href="#1-2-下载UltraISO" class="headerlink" title="1.2 下载UltraISO"></a>1.2 下载UltraISO</h2><p>使用搜索引擎搜索下载UltraISO并安装，关于UltraISO的使用可以参考一下小七之前发过的文章<a target="_blank" rel="noopener" href="http://tiny777.com/2018/03/18/180318DouBootUdisk/">（双启动U盘）</a>。</p>
+<p><img src="https://resource.tinychen.com/UbuntuInstall%20%282%29.png"></p>
+<h2 id="1-3-准备U盘和硬盘分区"><a href="#1-3-准备U盘和硬盘分区" class="headerlink" title="1.3 准备U盘和硬盘分区"></a>1.3 准备U盘和硬盘分区</h2><p>准备一个8G左右的U盘即可，USB3.0最好，没有的话2.0的U盘也可以。</p>
+<p><strong>硬盘上需要划分出一块空白空间，最少应该要有20G左右，小七这里划分了50G左右的空间。如果只是想尝试一下Ubuntu的话，预留20到30G是比较合适的。</strong></p>
+<p>具体的划分空间操作可以使用windows系统自带的磁盘管理进行压缩操作，也可以使用DiskGenius进行分区，操作十分简单，这里不再赘述。</p>
+<h1 id="2、刻录安装U盘"><a href="#2、刻录安装U盘" class="headerlink" title="2、刻录安装U盘"></a>2、刻录安装U盘</h1><p>▼如图所示，打开UltraISO后，<strong>点击左上角的文件-&gt;打开，选择刚刚下载好的ISO镜像文件。</strong><br><img src="https://resource.tinychen.com/UbuntuInstall%20%283%29.png"></p>
+<p>▼再点击<strong>上方菜单栏的启动-&gt;写入硬盘，</strong>硬盘驱动器要选择对应的U盘，不能选错，然后点击<strong>便捷启动-&gt;写入新的驱动器引导扇区-&gt;Syslinux</strong>。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%284%29.png"></p>
+<p>▼接下来点击写入，就会对U盘进行格式化并将ISO文件刻录到U盘里面。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%285%29.png"></p>
+<h1 id="3、进入安装界面"><a href="#3、进入安装界面" class="headerlink" title="3、进入安装界面"></a>3、进入安装界面</h1><p>刻录完成之后，我们<strong>重启电脑进入BIOS或者是快捷启动菜单选择启动项，</strong>一般来说都是ESC/F1/F2/F8/F9/F11/F12等按键，具体会因笔记本的型号不同或是台式机的主板不同而不同，<strong>进入之后我们选择对应的UEFI启动项，名称应该是对应的U盘型号。</strong><br><img src="https://resource.tinychen.com/UbuntuInstall%20%286%29.png"></p>
+<blockquote>
+<p>小七注：有些电脑可能需要关闭BIOS设置中的Security Boot选项才能顺利使用U盘启动。</p>
+</blockquote>
+<p>▼到这里我们选择Try Ubuntu without install，这样可以先看一下Ubuntu的界面UI和各种操作，当然也可以直接选择下面的Install Ubuntu。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%287%29.png"></p>
+<p>▼接下来就进入到了Ubuntu的界面，这里除了还没有对应的Ubuntu硬盘分区之外，其他的基本没有太大差别，我们点击桌面的Install Ubuntu 18.04.1LTS进行安装。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%288%29.png"></p>
+<h1 id="4、开始安装"><a href="#4、开始安装" class="headerlink" title="4、开始安装"></a>4、开始安装</h1><p><strong>接下来到分区之前都是一些简单的设置，我们根据实际需要选择即可。</strong></p>
+<h2 id="4-1-语言设置"><a href="#4-1-语言设置" class="headerlink" title="4.1 语言设置"></a>4.1 语言设置</h2><p>▼语言选择中文<br><img src="https://resource.tinychen.com/UbuntuInstall%20%289%29.png"></p>
+<h2 id="4-2-键盘设置"><a href="#4-2-键盘设置" class="headerlink" title="4.2 键盘设置"></a>4.2 键盘设置</h2><p>▼键盘布局选择汉语<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2810%29.png"></p>
+<h2 id="4-3-网络设置"><a href="#4-3-网络设置" class="headerlink" title="4.3 网络设置"></a>4.3 网络设置</h2><p>▼WiFi暂时先不要连接<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2811%29.png"></p>
+<h2 id="4-4-系统安装分区"><a href="#4-4-系统安装分区" class="headerlink" title="4.4 系统安装分区"></a>4.4 系统安装分区</h2><p>▼<strong>安装类型选择其他选项</strong><br><img src="https://resource.tinychen.com/UbuntuInstall%20%2812%29.png"></p>
+<p>▼如图所示，硬盘上的分区多数是NTFS分区，这是windows系统使用的分区，而上方的EFI分区则是使用UEFI+GPT分区表模式下产生的用于记录系统引导文件的分区<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2813%29.png"></p>
+<p>一般来说，Ubuntu的安装分区可以分为三种情况：</p>
+<h3 id="4-4-1-第一种"><a href="#4-4-1-第一种" class="headerlink" title="4.4.1 第一种"></a>4.4.1 第一种</h3><p><strong>简单粗暴，只分一个    / （主分区），将所有的空间全部分到这个分区里面。</strong></p>
+<p>这种方案比较适合刚入门Ubuntu的萌新，想先体验上手一下Ubuntu，不需要担心分区的设置合理情况。</p>
+<h3 id="4-4-2-第二种"><a href="#4-4-2-第二种" class="headerlink" title="4.4.2 第二种"></a>4.4.2 第二种</h3><p><strong>分两个，Swap交换分区和/主分区，swap分区一般根据内存大小来分，剩下的全部给/主分区</strong></p>
+<p><strong>Swap交换分区其实就是虚拟内存分区</strong>，如果电脑内存比较小（小于8G）而且平时需要用到较多内存的话可以划分大一点（4G左右），如果平时内存足够用可以划分小一点，几百M到一两G都是没问题的。</p>
+<p>有兴趣的同学可以点击这里跳转到小七之前的博客了解一下。<a target="_blank" rel="noopener" href="http://tiny777.com/2017/05/04/170504PageFiles/">（虚拟内存）</a></p>
+<h3 id="4-4-3-第三种"><a href="#4-4-3-第三种" class="headerlink" title="4.4.3 第三种"></a>4.4.3 第三种</h3><p><strong>分四个，/boot引导分区、/home用户分区、swap交换分区和 / 主分区</strong><br><strong>/boot（引导分区）：</strong>相当于windows的efi分区，大小设置为200M即可，也可以更大一点；</p>
+<p><strong>/（主分区）：</strong>用于存放Ubuntu系统，相当于windows的C盘，一般来说10到15G就够了。</p>
+<p><strong>Swap(交换分区）：</strong>虚拟内存分区，大小参看第二种分法。</p>
+<p><strong>/home（用户分区）：</strong>存储用户的各种数据，剩下的硬盘空间有多大就分多大给这个分区</p>
+<p>这里小七选择第二种分区方案，一来是因为小七这里只划了50G来安装Ubuntu，硬盘本身的空间就不大，分太多区不太好；二来就是小七自己也没有什么分区的习惯（windows下也只是分了两个盘）。<br>▼如图所示，给交换分区（Swap）分2G（这台电脑的内存是16G，不需要分太大的交换空间）<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2814%29.png"></p>
+<p>▼如图所示，剩下的空间全部分给    /    主分区<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2816%29.png"></p>
+<p><img src="https://resource.tinychen.com/UbuntuInstall%20%2817%29.png"></p>
+<p>▼确认无误后点击确认。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2818%29.png"></p>
+<h2 id="4-5-设置区域"><a href="#4-5-设置区域" class="headerlink" title="4.5 设置区域"></a>4.5 设置区域</h2><p>▼设置区域，选择中国，默认城市是上海。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2819%29.png"></p>
+<h2 id="4-6-设置用户名"><a href="#4-6-设置用户名" class="headerlink" title="4.6 设置用户名"></a>4.6 设置用户名</h2><p>▼设置用户名和密码，也可以不设置，但是最好还是设置一下，一些超级用户操作需要输入密码解锁权限，没有密码的话会比较麻烦。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2820%29.png"></p>
+<p>▼接下来就静静地等待安装完成。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2821%29.png"></p>
+<p>▼安装完成后会提示重启进入系统。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2822%29.png"></p>
+<h1 id="5、重启系统"><a href="#5、重启系统" class="headerlink" title="5、重启系统"></a>5、重启系统</h1><p>▼重启后我们再进入启动选项可以看到Ubuntu已经在默认的第一个启动项中，如果平时使用windows比较多的可以把第一个改回windows。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2823%29.png"></p>
+<p>▼如图所示即可进入Ubuntu系统，下面的第三个就是windows系统。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2824%29.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20181109-ubuntu-change-time\" rel="bookmark">Ubuntu18.04与Win10时间不一致</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190604-linux-install-mpi\" rel="bookmark">Linux安装MPI</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190605-linux-use-ali-source\" rel="bookmark">Ubuntu18.04和CentOS7更换阿里源</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190614-ubuntu-update-kernel\" rel="bookmark">Ubuntu18.04升级Linux内核</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20191023-bash-completion-ignore-case\" rel="bookmark">配置bash补全忽略大小写</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ubuntu/" rel="tag"># ubuntu</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20180814-raidon-2-ahci/" rel="prev" title="硬盘RaidOn模式无损转换为AHCI模式">
+      <i class="fa fa-chevron-left"></i> 硬盘RaidOn模式无损转换为AHCI模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20180824-androidstudio-install/" rel="next" title="Android Studio配置">
+      Android Studio配置 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E4%B8%8B%E8%BD%BDUbuntu18-04%E5%8F%8A%E7%9B%B8%E5%85%B3%E5%B7%A5%E5%85%B7"><span class="nav-text">1、下载Ubuntu18.04及相关工具</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E4%B8%8B%E8%BD%BDUbuntu"><span class="nav-text">1.1 下载Ubuntu</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E4%B8%8B%E8%BD%BDUltraISO"><span class="nav-text">1.2 下载UltraISO</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E5%87%86%E5%A4%87U%E7%9B%98%E5%92%8C%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA"><span class="nav-text">1.3 准备U盘和硬盘分区</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%88%BB%E5%BD%95%E5%AE%89%E8%A3%85U%E7%9B%98"><span class="nav-text">2、刻录安装U盘</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E8%BF%9B%E5%85%A5%E5%AE%89%E8%A3%85%E7%95%8C%E9%9D%A2"><span class="nav-text">3、进入安装界面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%BC%80%E5%A7%8B%E5%AE%89%E8%A3%85"><span class="nav-text">4、开始安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E8%AF%AD%E8%A8%80%E8%AE%BE%E7%BD%AE"><span class="nav-text">4.1 语言设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E9%94%AE%E7%9B%98%E8%AE%BE%E7%BD%AE"><span class="nav-text">4.2 键盘设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E7%BD%91%E7%BB%9C%E8%AE%BE%E7%BD%AE"><span class="nav-text">4.3 网络设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%88%86%E5%8C%BA"><span class="nav-text">4.4 系统安装分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-1-%E7%AC%AC%E4%B8%80%E7%A7%8D"><span class="nav-text">4.4.1 第一种</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-2-%E7%AC%AC%E4%BA%8C%E7%A7%8D"><span class="nav-text">4.4.2 第二种</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-3-%E7%AC%AC%E4%B8%89%E7%A7%8D"><span class="nav-text">4.4.3 第三种</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-5-%E8%AE%BE%E7%BD%AE%E5%8C%BA%E5%9F%9F"><span class="nav-text">4.5 设置区域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-6-%E8%AE%BE%E7%BD%AE%E7%94%A8%E6%88%B7%E5%90%8D"><span class="nav-text">4.6 设置用户名</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E9%87%8D%E5%90%AF%E7%B3%BB%E7%BB%9F"><span class="nav-text">5、重启系统</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

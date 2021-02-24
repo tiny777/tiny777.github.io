@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="RHEL7中的ACL的简单介绍。 1、ACL简介ACL是Access Control List的缩写，主要的目的是在提供传统的owner，group，others的read(r)，write(w)，execute(x) 权限之外的细部权限设定。 ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。ACL主要可以针对以下三者：  使用者（user">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RHEL7的ACL简介">
+<meta property="og:url" content="https://tinychen.com/20190711-rhel7-acl/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="RHEL7中的ACL的简单介绍。 1、ACL简介ACL是Access Control List的缩写，主要的目的是在提供传统的owner，group，others的read(r)，write(w)，execute(x) 权限之外的细部权限设定。 ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。ACL主要可以针对以下三者：  使用者（user">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190711/L8jsUw36k13x.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190710/tc5cvq601YfM.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190711/2b52XYa9ye38.png">
+<meta property="article:published_time" content="2019-07-11T03:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-11T03:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190711/L8jsUw36k13x.png">
+
+<link rel="canonical" href="https://tinychen.com/20190711-rhel7-acl/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>RHEL7的ACL简介 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190711-rhel7-acl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RHEL7的ACL简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-11 11:00:00" itemprop="dateCreated datePublished" datetime="2019-07-11T11:00:00+08:00">2019-07-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>RHEL7中的ACL的简单介绍。</p>
+<h1 id="1、ACL简介"><a href="#1、ACL简介" class="headerlink" title="1、ACL简介"></a>1、ACL简介</h1><p><code>ACL</code>是<code>Access Control List</code>的缩写，主要的目的是在提供传统的<code>owner</code>，<code>group</code>，<code>others</code>的<code>read(r)</code>，<code>write(w)</code>，<code>execute(x)</code> 权限之外的细部权限设定。</p>
+<p>ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。<br>ACL主要可以针对以下三者：</p>
+<ul>
+<li>使用者（user）：可以针对使用者来设定权限</li>
+<li>群组（group）：针对群组为对象来设定其权限</li>
+<li>默认属性（mask）：还可以针对在该目录下在建立新文件/目录时，规范新数据的默认权限</li>
+</ul>
+<a id="more"></a>
+
+<p>也就是说，如果你有一个目录，需要给一堆人使用，每个人或每个群组所需要的权限并不相同时，在过去，传统的Linux三种身份的三种权限是无法达到的，<strong>因为基本上，传统的Linux权限只能针对一个用户、一个群组及非此群组的其他人设定权限而己，无法针对单一用户或个人来设计权限。</strong>而ACL的出现就是为了解决这个问题，实现更加细化的账户文件权限控制。</p>
+<h1 id="2、setfacl"><a href="#2、setfacl" class="headerlink" title="2、setfacl"></a>2、setfacl</h1><p><strong><code>ACL</code>的实现主要是通过<code>setfacl</code>和<code>getfacl</code>命令来操作。</strong></p>
+<ul>
+<li><code>getfacl</code>：取得某个文件/目录的ACL设定项目</li>
+<li><code>setfacl</code>：设定某个文件/目录的ACL规范</li>
+</ul>
+<blockquote>
+<p><code>getfacl</code>的使用和<code>setfacl</code>一样，主要是用来查看acl权限，因此我们主要来看一下<code>setfacl</code>的用法。</p>
+</blockquote>
+<p><code>setfacl</code>的英文全称是<code>set file access control list </code>,即“设置文件访问控制列表”。改命令可以更精确的控制权限的分配，比如让某一个用户对某一个文件具有某种权限。</p>
+<p>ACL指文件的所有者、所属组、其他人的读/写/执行之外的特殊的权限， 对于需要特殊权限的使用状况有一定帮助。 如，某一个文件，不让单一的某个用户访问。</p>
+<p><strong>语法格式：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setfacl [-bkndRLP] &#123; -m|-M|-x|-X ... &#125; file ...</span><br></pre></td></tr></table></figure>
+
+<p>我们输入<code>setfacl -h</code>查看一下帮助文档，可以看到里面的参数比较多</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">setfacl 2.2.51 -- <span class="built_in">set</span> file access control lists</span><br><span class="line">Usage: setfacl [-bkndRLP] &#123; -m|-M|-x|-X ... &#125; file ...</span><br><span class="line">  -m, --modify=acl        modify the current ACL(s) of file(s)</span><br><span class="line">  -M, --modify-file=file  <span class="built_in">read</span> ACL entries to modify from file</span><br><span class="line">  -x, --remove=acl        remove entries from the ACL(s) of file(s)</span><br><span class="line">  -X, --remove-file=file  <span class="built_in">read</span> ACL entries to remove from file</span><br><span class="line">  -b, --remove-all        remove all extended ACL entries</span><br><span class="line">  -k, --remove-default    remove the default ACL</span><br><span class="line">      --<span class="built_in">set</span>=acl           <span class="built_in">set</span> the ACL of file(s), replacing the current ACL</span><br><span class="line">      --<span class="built_in">set</span>-file=file     <span class="built_in">read</span> ACL entries to <span class="built_in">set</span> from file</span><br><span class="line">      --mask              <span class="keyword">do</span> recalculate the effective rights mask</span><br><span class="line">  -n, --no-mask           don<span class="string">'t recalculate the effective rights mask</span></span><br><span class="line"><span class="string">  -d, --default           operations apply to the default ACL</span></span><br><span class="line"><span class="string">  -R, --recursive         recurse into subdirectories</span></span><br><span class="line"><span class="string">  -L, --logical           logical walk, follow symbolic links</span></span><br><span class="line"><span class="string">  -P, --physical          physical walk, do not follow symbolic links</span></span><br><span class="line"><span class="string">      --restore=file      restore ACLs (inverse of `getfacl -R'</span>)</span><br><span class="line">      --<span class="built_in">test</span>              <span class="built_in">test</span> mode (ACLs are not modified)</span><br><span class="line">  -v, --version           <span class="built_in">print</span> version and <span class="built_in">exit</span></span><br><span class="line">  -h, --<span class="built_in">help</span>              this <span class="built_in">help</span> text</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里需要说明一下，-m和-M以及-x和-X的区别就在于，<strong>小写字母是后面直接跟需要设置的acl规则，而大写字母则是在后面跟着一个文件，文件里面写着acl规则，</strong>后者适用于比较复杂的acl规则设定情况。</p>
+</blockquote>
+<p>接下来我们看一些比较常用的选项参数：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">setfacl [-bkRd] [&#123;-ml-x）ac1参数]目标文件名选项与参数：</span><br><span class="line">-m：设定后续的ac1参数给文件使用，不可与-x合用；</span><br><span class="line">-x：删除后续的ac1参数，不可与-m合用；</span><br><span class="line">-b：移除[所有的]ACL设定参数；</span><br><span class="line">-k：移除[预设的]ACL参数，关于所谓的预设]参数于后续范例中介绍；</span><br><span class="line">-R：递归设定acl，亦即包括次目录都会被设定起来；</span><br><span class="line">-d：设定预设ac1参数]的意思！只对目录有效，在该目录新建的数据会引用此默认值</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="3、实例示范"><a href="#3、实例示范" class="headerlink" title="3、实例示范"></a>3、实例示范</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置用户tinychen对acltest1有读写执行权限</span></span><br><span class="line">setfacl -m u:tinychen:rwx acltest1</span><br><span class="line"><span class="comment"># 设置用户tinychen对acltest2无任何权限</span></span><br><span class="line">setfacl -m u:tinychen:- acltest2</span><br><span class="line"><span class="comment"># 设置用户组tinychen对acltest3无任何权限</span></span><br><span class="line">setfacl -m g:tinychen:- acltest3</span><br></pre></td></tr></table></figure>
+
+<p>设定了ACL权限之后，我们查看该文件权限的时候会发现多了一个<code>+</code>号。</p>
+<p><img src="https://resource.tinychen.com/blog/20190711/L8jsUw36k13x.png"></p>
+<p><strong>然后我们使用<code>getfacl</code>命令查看文件的权限:</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20190710/tc5cvq601YfM.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除acltest1的所有acl权限设置</span></span><br><span class="line">setfacl -b acltest1</span><br><span class="line">getfacl acltest1</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/2b52XYa9ye38.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190310-centos-install-mysql\" rel="bookmark">CentOS7安装MySQL</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190317-centos-install-jdk\" rel="bookmark">CentOS配置JDK环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190407-aliyun-centos-apache-https\" rel="bookmark">阿里云轻量级应用服务器CentOS系统Apache配置Https</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190413-centos-install-python\" rel="bookmark">CentOS配置Python3开发环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190521-centos-install-mariadb\" rel="bookmark">CentOS7安装MariaDB</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190710-rhel7-cron/" rel="prev" title="RHEL7中的CRON简介">
+      <i class="fa fa-chevron-left"></i> RHEL7中的CRON简介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190712-centos7-install-zabbix42/" rel="next" title="在CentOS7上安装Zabbix4.2监控系统">
+      在CentOS7上安装Zabbix4.2监控系统 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81ACL%E7%AE%80%E4%BB%8B"><span class="nav-text">1、ACL简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81setfacl"><span class="nav-text">2、setfacl</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E5%AE%9E%E4%BE%8B%E7%A4%BA%E8%8C%83"><span class="nav-text">3、实例示范</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

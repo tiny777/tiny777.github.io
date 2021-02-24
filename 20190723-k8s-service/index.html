@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="简单介绍一下k8s中的Service组件。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在k8s中的Service简介">
+<meta property="og:url" content="https://tinychen.com/20190723-k8s-service/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="简单介绍一下k8s中的Service组件。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/P9LU7PSYuWCX.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/g4EDrExzjTyM.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/naCMoORvomnL.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/Qxcmbfvgz5OV.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/DvxtRHLUuVum.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/JCiKR2H5uBhM.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/fxjkNMdBIUF0.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/h4Bd7IBFQjoG.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/JeaNq64gqmpG.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/IIYnXUyxiDkL.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/Fxbv9dHLo0QQ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/VVldLTbs4PbY.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/EcxMr38HWqqS.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/ATIjgIhqAAxK.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/5LhvE8622rSf.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/xBo6fK5W6cW8.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/NBFeLpK5c0a1.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/hYpBcXWYVJyp.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/qzQIsQiEafSA.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/sez3VyymGdY7.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190723/3y4OejGxkAFl.png">
+<meta property="article:published_time" content="2019-07-23T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-23T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="graduation">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190723/P9LU7PSYuWCX.png">
+
+<link rel="canonical" href="https://tinychen.com/20190723-k8s-service/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>在k8s中的Service简介 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190723-k8s-service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在k8s中的Service简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-23 15:00:00" itemprop="dateCreated datePublished" datetime="2019-07-23T15:00:00+08:00">2019-07-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index">
+                    <span itemprop="name">devops</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>5 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>简单介绍一下k8s中的Service组件。</p>
+<a id="more"></a>
+
+<h1 id="1、Service简介"><a href="#1、Service简介" class="headerlink" title="1、Service简介"></a>1、Service简介</h1><p>老规矩，我们先来看一下<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/service/">官网对service的描述</a>：</p>
+<blockquote>
+<p>Kubernetes <code>Pod</code> 是有生命周期的，它们可以被创建，也可以被销毁，然而一旦被销毁生命就永远结束。 通过 <code>ReplicaSets</code> 能够动态地创建和销毁 <code>Pod</code>（例如，需要进行扩缩容，或者执行 滚动升级）。 每个 <code>Pod</code> 都会获取它自己的 IP 地址，即使这些 IP 地址不总是稳定可依赖的。 这会导致一个问题：在 Kubernetes 集群中，如果一组 <code>Pod</code>（称为 backend）为其它 <code>Pod</code> （称为 frontend）提供服务，那么那些 frontend 该如何发现，并连接到这组 <code>Pod</code> 中的哪些 backend 呢？</p>
+<p><strong>关于 <code>Service</code></strong></p>
+<p>Kubernetes <code>Service</code> 定义了这样一种抽象：逻辑上的一组 <code>Pod</code>，一种可以访问它们的策略 —— 通常称为微服务。 这一组 <code>Pod</code> 能够被 <code>Service</code> 访问到，通常是通过 <code>Label Selector</code>（查看下面了解，为什么可能需要没有 selector 的 <code>Service</code>）实现的。</p>
+<p>举个例子，考虑一个图片处理 backend，它运行了3个副本。这些副本是可互换的 —— frontend 不需要关心它们调用了哪个 backend 副本。 然而组成这一组 backend 程序的 <code>Pod</code> 实际上可能会发生变化，frontend 客户端不应该也没必要知道，而且也不需要跟踪这一组 backend 的状态。 <code>Service</code> 定义的抽象能够解耦这种关联。</p>
+<p>对 Kubernetes 集群中的应用，Kubernetes 提供了简单的 <code>Endpoints</code> API，只要 <code>Service</code> 中的一组 <code>Pod</code> 发生变更，应用程序就会被更新。 对非 Kubernetes 集群中的应用，Kubernetes 提供了基于 VIP 的网桥的方式访问 <code>Service</code>，再由 <code>Service</code> 重定向到 backend <code>Pod</code>。</p>
+</blockquote>
+<p>官网的这段话可能有些不好理解，我们用最简单的web服务器软件apache举个例子。一般来说，我们在一台电脑上安装了apache服务之后，它默认监听的是80端口（http），也就是说我们如果需要访问这个apache服务，我们只需要使用浏览器访问这台电脑的IP地址加上80端口号即可，对于其他的应用也是一样，一般都是以主机IP加上应用的监听端口来进行访问。</p>
+<p>那么在k8s的集群中，我们都知道应用服务被打包成容器，而容器放在<code>pod</code>中运行，每个<code>pod</code>都会被分配到一个IP地址，当然我们还是可以按照上述的方式来访问这些<code>pod</code>里面的服务，但是，一个应用往往会部署多个<code>pod</code>（保证可靠性和健壮性），而不同的<code>pod</code>也会因为需求的不同或者节点宕机等原因被销毁或者新建（对应又是新的IP），所以k8s定义了<code>service</code>这一层抽象层，用来解决这个问题，将同一应用下的一组pod进行打包，然后通过<code>service</code>来进行统一访问（主要通过<code>label</code>来实现），用户只需要访问<code>service</code>这一层，而不需要在意<code>service</code>之后的<code>pod</code>是怎么调度运行的。也就是说，<code>service</code>会负责把用户的访问请求转发到<code>pod</code>对应的端口上，或者是说<code>service</code>会将<code>pod</code>对应的端口和<code>service</code>上暴露给用户访问的端口建立映射关系。</p>
+<h1 id="2、使用service"><a href="#2、使用service" class="headerlink" title="2、使用service"></a>2、使用service</h1><p>接下来我们来尝试着使用一下service。</p>
+<p>首先我们创建一个pod，对应的配置文件如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">http-deployment</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">httpd</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">httpd</span></span><br><span class="line">        <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">80</span></span><br><span class="line">          <span class="attr">protocol:</span> <span class="string">TCP</span></span><br></pre></td></tr></table></figure>
+
+<p>需要特别注意的是这里我们使用了一个<code>labels</code>，使用这个配置文件创建的<code>pod</code>都会带上一个<code>app=httpd</code>的<code>labels</code>，这个是后面创建的<code>service</code>用来区分<code>pod</code>的。</p>
+<p>这里我们使用curl直接对部署的三个pod进行访问，可以看到都是能够访问成功的。</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/P9LU7PSYuWCX.png"></p>
+<p>接下来我们创建一个service，配置文件如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">http-service</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">httpd</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">protocol:</span> <span class="string">TCP</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">7777</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置将创建一个名称为 “http-service” 的 <code>Service</code> 对象，它会将请求代理到使用 TCP 端口 80，并且具有<code>标签(labels)</code> <code>&quot;app=httpd&quot;</code> 的 <code>Pod</code> 上。 这个 <code>Service</code> 将被指派一个 IP 地址（通常称为 “Cluster IP”），它会被服务的代理使用（见下面）。 该 <code>Service</code> 的 selector 将会持续评估，处理结果将被 POST 到一个名称为 <code>“http-service”</code> 的 <code>Endpoints</code> 对象上。</p>
+<p>需要注意的是， <code>Service</code> 能够将一个接收端口映射到任意的 <code>targetPort</code>。 默认情况下，<code>targetPort</code> 将被设置为与 <code>port</code> 字段相同的值。 </p>
+<p><img src="https://resource.tinychen.com/blog/20190723/g4EDrExzjTyM.png"></p>
+<p>创建成功之后我们可以使用下面的这个命令来查看<code>service</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get service -o wide</span><br></pre></td></tr></table></figure>
+
+<p>这里我们可以看到这个<code>service</code>被分配了一个<code>10.96.16.218</code>的IP地址（这个IP地址称为<code>ClusterIP</code>），服务对应的端口号是<code>7777</code>。我们试着使用curl来对其进行访问。</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/naCMoORvomnL.png"></p>
+<p>这里可以看到是可以成功访问的。</p>
+<p>我们再来看一下详细的情况：</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/Qxcmbfvgz5OV.png"></p>
+<p>这里可以看到已经和上面的三个pods的80端口建立了映射关系。</p>
+<h1 id="3、ipvs和iptables"><a href="#3、ipvs和iptables" class="headerlink" title="3、ipvs和iptables"></a>3、ipvs和iptables</h1><p>我们现在已经知道，<code>service</code>这个抽象层是将这个<code>service</code>的IP（<code>10.96.16.218</code>）的7777端口和<code>Endpoints</code>的pod的80端口建立映射关系来实现这个抽象的。那么这个映射关系的建立，就是由<code>iptables</code>来实现的，而<code>ipvs</code>在这里也能实现一样的功能，但是更加强大，我们可以将它简单看作是<code>iptables</code>的增强版。</p>
+<h2 id="3-1-ipvs和iptables的区别"><a href="#3-1-ipvs和iptables的区别" class="headerlink" title="3.1 ipvs和iptables的区别"></a>3.1 ipvs和iptables的区别</h2><p>k8s中默认使用的是<code>iptables</code>，但是<code>ipvs</code>要更加强大，</p>
+<ul>
+<li><code>ipvs</code> 为大型集群提供了更好的可扩展性和性能</li>
+<li><code>ipvs</code> 支持比 <code>iptables</code> 更复杂的复制均衡算法（最小负载、最少连接、加权等等）</li>
+<li><code>ipvs</code> 支持服务器健康检查和连接重试等功能</li>
+</ul>
+<p><strong><code>ipvs</code> (IP Virtual Server)</strong> 实现了传输层负载均衡，也就是我们常说的4层<code>LAN</code>交换（基于TCP四层(IP+端口)的负载均衡软件），作为 Linux 内核的一部分。<code>ipvs</code>运行在主机上，在真实服务器集群前充当负载均衡器。<code>ipvs</code>可以将基于<code>TCP</code>和<code>UDP</code>的服务请求转发到真实服务器上，并使真实服务器的服务在单个 IP 地址上显示为虚拟服务。</p>
+<p><code>ipvs</code>是在<code>kubernetes v1.8</code>版本中引进的，小七这里使用的是<code>v1.15</code>版本，<a href="https://tinychen.com/20190718-centos7-install-k8s-ha/">之前配置的时候</a>就是使用了<code>ipvs</code>来替换<code>iptables</code>。</p>
+<h2 id="3-2-查看ipvs"><a href="#3-2-查看ipvs" class="headerlink" title="3.2 查看ipvs"></a>3.2 查看ipvs</h2><p><strong>不管是<code>ipvs</code>还是<code>iptables</code>，都是需要<code>root</code>权限才能查看</strong>，因此我们需要在命令前加上<code>sudo</code>或者是切换到<code>root</code>用户。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ipvsadm -ln</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190723/DvxtRHLUuVum.png"></p>
+<p>从这里的规则中我们可以看到。<code>ipvs</code>将对<code>10.96.16.218:7777</code>的访问转发到下面对应的三个IP地址的80端口上。</p>
+<p>接下来我们对这个deployment进行修改，将副本数量从3改到6，再看这个ipvs规则的变化</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/JCiKR2H5uBhM.png"></p>
+<p>副本数量增加到了6个，对应的<code>ipvs</code>规则也完成了更新：</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/fxjkNMdBIUF0.png"></p>
+<p>接下来我们删除掉这个service，可以看到ipvs中的规则并没有进行删除</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/h4Bd7IBFQjoG.png"></p>
+<p>这里我们可以知道，k8s对ipvs的规则可以说是只增不减。</p>
+<blockquote>
+<p>这里留一个坑，后面再开一篇来详细研究一下<code>ipvs</code></p>
+</blockquote>
+<h2 id="3-3-使用DNS访问"><a href="#3-3-使用DNS访问" class="headerlink" title="3.3 使用DNS访问"></a>3.3 使用DNS访问</h2><p>实际上，k8s集群中内置有dns解析服务，我们可以通过<code>&lt;SERVICE_NAME&gt;.&lt;NAMESPACE_NAME&gt;</code>来对service进行访问。</p>
+<blockquote>
+<p><code>v1.11</code>版本之后，<code>coredns</code>取    代<code>kube-dns</code>成为k8s中默认的dns解析服务器。</p>
+</blockquote>
+<p>我们在pod中运行一个shell来实验一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl run busybox --rm -ti --image&#x3D;busybox &#x2F;bin&#x2F;sh</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190723/JeaNq64gqmpG.png"></p>
+<p><code>busybox</code>对<code>nslookup</code>的支持似乎有些问题，不一定能成功查询到<code>dns</code>，而且并没有内置<code>curl</code>命令，我们只能用<code>wget</code>来进行访问。<strong>事实上<code>wget</code>能成功就说明<code>dns</code>服务是正常的。</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20190723/IIYnXUyxiDkL.png"></p>
+<p>然后我们使用它的测试版本，这时候<code>nslookup</code>命令正常了，<code>wget</code>命令又不正常了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl run dig --rm -it --image&#x3D;docker.io&#x2F;azukiapp&#x2F;dig &#x2F;bin&#x2F;sh</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190723/Fxbv9dHLo0QQ.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190723/VVldLTbs4PbY.png"></p>
+<p>这里面的<code>10.96.0.10</code>地址正是我们的<code>coredns</code>的地址：</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/EcxMr38HWqqS.png"></p>
+<h1 id="4、外网访问service"><a href="#4、外网访问service" class="headerlink" title="4、外网访问service"></a>4、外网访问service</h1><h2 id="4-1-NodePort简介"><a href="#4-1-NodePort简介" class="headerlink" title="4.1 NodePort简介"></a>4.1 NodePort简介</h2><p>前面我们已经可以通过clusterIP来访问service了，但是显然这只能局限于在k8s集群内的主机进行，集群外的机器无法对其进行访问，这显然是不行的。我们先看一下官网给出的解决方案：</p>
+<blockquote>
+<p>对一些应用（如 Frontend）的某些部分，可能希望通过外部（Kubernetes 集群外部）IP 地址暴露 Service。</p>
+<p>Kubernetes <code>ServiceTypes</code> 允许指定一个需要的类型的 Service，默认是 <code>ClusterIP</code> 类型。</p>
+<p><code>Type</code> 的取值以及行为如下：</p>
+<ul>
+<li><code>ClusterIP</code>：通过集群的内部 IP 暴露服务，选择该值，服务只能够在集群内部可以访问，这也是默认的 <code>ServiceType</code>。</li>
+<li><code>NodePort</code>：通过每个 Node 上的 IP 和静态端口（<code>NodePort</code>）暴露服务。<code>NodePort</code> 服务会路由到 <code>ClusterIP</code> 服务，这个 <code>ClusterIP</code> 服务会自动创建。通过请求 <code>&lt;NodeIP&gt;:&lt;NodePort&gt;</code>，可以从集群的外部访问一个 <code>NodePort</code> 服务。</li>
+<li><code>LoadBalancer</code>：使用云提供商的负载局衡器，可以向外部暴露服务。外部的负载均衡器可以路由到 <code>NodePort</code> 服务和 <code>ClusterIP</code> 服务。</li>
+<li><code>ExternalName</code>：通过返回 <code>CNAME</code> 和它的值，可以将服务映射到 <code>externalName</code> 字段的内容（例如， <code>foo.bar.example.com</code>）。 没有任何类型代理被创建，这只有 Kubernetes 1.7 或更高版本的 <code>kube-dns</code> 才支持。</li>
+</ul>
+</blockquote>
+<p><strong>可以看到，这里我们主要将用到的就是NodePort了。</strong></p>
+<p>如果设置 <code>type</code> 的值为 <code>&quot;NodePort&quot;</code>，Kubernetes master 将从给定的配置范围内（默认：30000-32767）分配端口，每个 Node 将从该端口（每个 Node 上的同一端口）代理到 <code>Service</code>。该端口将通过 <code>Service</code> 的 <code>spec.ports[*].nodePort</code>字段被指定。</p>
+<p>如果需要指定的端口号，可以配置 <code>nodePort</code> 的值，系统将分配这个端口，否则调用 API 将会失败（比如，需要关心端口冲突的可能性）。</p>
+<p>这可以让开发人员自由地安装他们自己的负载均衡器，并配置 Kubernetes 不能完全支持的环境参数，或者直接暴露一个或多个 Node 的 IP 地址。</p>
+<p>需要注意的是，Service 将能够通过 <code>&lt;NodeIP&gt;:spec.ports[*].nodePort</code> 和<code>spec.clusterIp:spec.ports[*].port</code> 而对外可见。</p>
+<h2 id="4-2-自动分配端口"><a href="#4-2-自动分配端口" class="headerlink" title="4.2 自动分配端口"></a>4.2 自动分配端口</h2><p>接下来我们来修改一下刚刚的service配置文件，先尝试一下让master自动分配一个端口。</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/ATIjgIhqAAxK.png"></p>
+<p>然后我们重新应用一下该配置文件，就能看到分配的端口：</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/5LhvE8622rSf.png"></p>
+<p>我们查看ipvs规则，可以看到本机对应的IP都已经建立了相应的映射转发规则</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/xBo6fK5W6cW8.png"></p>
+<p>正好小七用的是虚拟机，使用集群外的电脑用浏览器访问<strong>任意一个master节点</strong>均可：</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/NBFeLpK5c0a1.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190723/hYpBcXWYVJyp.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190723/qzQIsQiEafSA.png"></p>
+<h2 id="4-3-手动指定端口"><a href="#4-3-手动指定端口" class="headerlink" title="4.3 手动指定端口"></a>4.3 手动指定端口</h2><p>我们在下面的port选项中添加<code>nodePort: 32333</code>，然后重新应用配置文件。</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/sez3VyymGdY7.png"></p>
+<p>使用浏览器尝试访问：</p>
+<p><img src="https://resource.tinychen.com/blog/20190723/3y4OejGxkAFl.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190716-centos7-install-k8s\" rel="bookmark">在CentOS7上部署单Master节点k8s集群(v1.15)</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190722-k8s-controller\" rel="bookmark">在k8s中的controller简介</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190718-centos7-install-k8s-ha\" rel="bookmark">在CentOS7上部署高可用的k8s集群(v1.15)</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190801-k8s-del-n-add-node\" rel="bookmark">在k8s中删除和添加节点的方法</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190912-centos-install-docker\" rel="bookmark">在CentOS中安装特定版本的docker</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+              <a href="/tags/graduation/" rel="tag"># graduation</a>
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190722-k8s-controller/" rel="prev" title="在k8s中的controller简介">
+      <i class="fa fa-chevron-left"></i> 在k8s中的controller简介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190724-shell-intro/" rel="next" title="shell简介">
+      shell简介 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81Service%E7%AE%80%E4%BB%8B"><span class="nav-text">1、Service简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E4%BD%BF%E7%94%A8service"><span class="nav-text">2、使用service</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81ipvs%E5%92%8Ciptables"><span class="nav-text">3、ipvs和iptables</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-ipvs%E5%92%8Ciptables%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">3.1 ipvs和iptables的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E6%9F%A5%E7%9C%8Bipvs"><span class="nav-text">3.2 查看ipvs</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E4%BD%BF%E7%94%A8DNS%E8%AE%BF%E9%97%AE"><span class="nav-text">3.3 使用DNS访问</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%A4%96%E7%BD%91%E8%AE%BF%E9%97%AEservice"><span class="nav-text">4、外网访问service</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-NodePort%E7%AE%80%E4%BB%8B"><span class="nav-text">4.1 NodePort简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E8%87%AA%E5%8A%A8%E5%88%86%E9%85%8D%E7%AB%AF%E5%8F%A3"><span class="nav-text">4.2 自动分配端口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E6%89%8B%E5%8A%A8%E6%8C%87%E5%AE%9A%E7%AB%AF%E5%8F%A3"><span class="nav-text">4.3 手动指定端口</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

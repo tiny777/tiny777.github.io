@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="iperf3是一个开源的多平台测速工具，涵盖了Windows，Android，Linux，iOS，MacOS等主流操作系统。本文以Windows为例记录一下在使用iperf3的过程中踩的一些坑。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iperf3安装配置使用踩坑记录">
+<meta property="og:url" content="https://tinychen.com/20190409-iperf3/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="iperf3是一个开源的多平台测速工具，涵盖了Windows，Android，Linux，iOS，MacOS等主流操作系统。本文以Windows为例记录一下在使用iperf3的过程中踩的一些坑。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/nQNMimq33eJR.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/XHaoBwr7TWcF.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/bHbTUNIcSMq3.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/Hclr9E9sAH52.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/LOMoKE38VxL7.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/uPi43e35yWrI.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/noPLh9RNcmRK.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/qKSPQKwbj5Rj.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/9r2YeUdqAv47.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/QkC2whdCSVOB.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/5dHJYsVz93X4.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/vr4B6CFYQajn.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/H69YrIAxyBBd.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/RydkOKlCMPHQ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/Rk9qKNdtFHGC.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/ujRMzwrweyXA.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190409/1W8KpaYYEBWO.png">
+<meta property="article:published_time" content="2019-04-09T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-04-09T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="network">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190409/nQNMimq33eJR.png">
+
+<link rel="canonical" href="https://tinychen.com/20190409-iperf3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>iperf3安装配置使用踩坑记录 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190409-iperf3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          iperf3安装配置使用踩坑记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-04-09 15:00:00" itemprop="dateCreated datePublished" datetime="2019-04-09T15:00:00+08:00">2019-04-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3.4k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>iperf3是一个开源的多平台测速工具，涵盖了Windows，Android，Linux，iOS，MacOS等主流操作系统。本文以Windows为例记录一下在使用iperf3的过程中踩的一些坑。</p>
+<a id="more"></a>
+
+<h1 id="1、下载安装iperf3"><a href="#1、下载安装iperf3" class="headerlink" title="1、下载安装iperf3"></a>1、下载安装iperf3</h1><p>iperf3的官网提供了所有平台的下载方法，我们<a target="_blank" rel="noopener" href="https://iperf.fr/iperf-download.php">点击这里</a>跳转到官网。</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/nQNMimq33eJR.png"></p>
+<p>Windows分为32位和64位的，对应自己的系统版本下载，下载解压完成之后，将解压得到的文件复制到<code>%systemroot%</code>目录下，就能够直接使用了。</p>
+<p><strong>这里需要注意两点：</strong></p>
+<ol>
+<li>Windows的<code>%systemroot%</code>目录是<code>C:\Windows\System32</code></li>
+<li>不管是使用CMD还是Powershell，都必须要以管理员身份运行，否则无法正常使用</li>
+</ol>
+<h1 id="2、运行服务端-server"><a href="#2、运行服务端-server" class="headerlink" title="2、运行服务端(server)"></a>2、运行服务端(server)</h1><p>iperf3是一款c-s软件，即client-server软件，分为客户端和服务端，服务端需要一直运行，客户端才能够正常使用。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-help</span></span><br><span class="line"><span class="comment"># 查看所有的操作指令</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190409/XHaoBwr7TWcF.png"></p>
+<h2 id="2-1-运行与退出"><a href="#2-1-运行与退出" class="headerlink" title="2.1 运行与退出"></a>2.1 运行与退出</h2><p>最常见的运行服务端的命令是：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-s</span></span><br><span class="line"><span class="comment"># 这里的s就是server的意思</span></span><br></pre></td></tr></table></figure>
+
+<p>这种情况下默认监听的是5201端口</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/bHbTUNIcSMq3.png"></p>
+<p>按下ctrl+c就可以关闭服务端</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/Hclr9E9sAH52.png"></p>
+<p>如果是只运行一次测速就退出，可以这样：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-s</span> <span class="literal">-1</span></span><br><span class="line"><span class="comment"># 运行一次后自动退出服务端</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190409/LOMoKE38VxL7.png"></p>
+<h2 id="2-2-指定监听端口"><a href="#2-2-指定监听端口" class="headerlink" title="2.2 指定监听端口"></a>2.2 指定监听端口</h2><p>如果需要指定特定的监听端口，我们可以使用-p参数，这里的p就是port的意思。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-s</span> <span class="literal">-p</span> <span class="number">7777</span></span><br><span class="line"><span class="comment"># 手动指定监听端口为7777</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190409/uPi43e35yWrI.png"></p>
+<p>需要注意的是手动指定监听端口的时候不要和其他应用的端口冲突了，否则会无法运行服务或产生服务冲突。</p>
+<h2 id="2-3-守护进程模式"><a href="#2-3-守护进程模式" class="headerlink" title="2.3 守护进程模式"></a>2.3 守护进程模式</h2><p>如果需要服务端在后台运行而不被关闭，可以尝试使用守护进程模式。</p>
+<blockquote>
+<p>Daemon()程序是一直运行的服务端程序，又称为守护进程。通常在系统后台运行，没有控制终端，不与前台交互，Daemon程序一般作为系统服务使用。Daemon是长时间运行的进程，通常在系统启动后就运行，在系统关闭时才结束。一般说Daemon程序在后台运行，是因为它没有控制终端，无法和前台的用户交互。Daemon程序一般都作为服务程序使用，等待客户端程序与它通信。我们也把运行的Daemon程序称作守护进程。</p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-s</span> <span class="literal">-D</span></span><br><span class="line"><span class="comment"># 注意D一定要大写</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190409/noPLh9RNcmRK.png"></p>
+<p>这个时候iperf3以服务端模式在后台运行，该进程不会轻易被结束运行。</p>
+<p>使用<code>netstat</code>命令可以看到此时5201端口正在被使用。</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/qKSPQKwbj5Rj.png"></p>
+<p>如果需要关闭的话，我们可以使用<code>taskkill</code>指令。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tasklist | findstr iperf3</span><br><span class="line"><span class="comment"># Windows下的CMD无法使用grep命令可以使用findstr命令来代替</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">taskkill /PID <span class="number">9492</span> /F</span><br><span class="line"><span class="comment"># 这里的9492要改成查询到的对应的PID</span></span><br><span class="line"><span class="comment"># 由于是守护进程，所以需要强制终止</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190409/9r2YeUdqAv47.png"></p>
+<p>其他的一些指令大家可以自己继续尝试，小七就不再赘述。</p>
+<h1 id="3、运行客户端-Client"><a href="#3、运行客户端-Client" class="headerlink" title="3、运行客户端(Client)"></a>3、运行客户端(Client)</h1><p><strong>运行客户端的前提是有服务端在运行且我们知道服务端的IP并能正常访问服务端（有时候可能会被防火墙或其他杀软拦截）。</strong></p>
+<h2 id="3-1-简单测试"><a href="#3-1-简单测试" class="headerlink" title="3.1 简单测试"></a>3.1 简单测试</h2><p>因为外部设备所限，接下来小七同时在本机上运行服务端和客户端进行测速示例。</p>
+<p>最简单的使用方法就是：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-c</span> ServerhostIP</span><br><span class="line"><span class="comment"># hostIP为服务端的IP地址</span></span><br></pre></td></tr></table></figure>
+
+<p>由于这里小七是在本机上运行的服务端，因此使用本机的IP地址或者localhost或者127.0.0.1都可以。</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/QkC2whdCSVOB.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190409/5dHJYsVz93X4.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190409/vr4B6CFYQajn.png"></p>
+<p>主要的几个参数列这里解释一下，<code>Intervel</code>指的是时间间隔，<code>Transfer</code>则是对应时间段里面传输的数据总量，<code>Bandwidth</code>则是该时间段内的平均带宽。</p>
+<h2 id="3-2-自定义测试时间和输出格式"><a href="#3-2-自定义测试时间和输出格式" class="headerlink" title="3.2 自定义测试时间和输出格式"></a>3.2 自定义测试时间和输出格式</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-c</span> localhost <span class="literal">-i</span> <span class="number">2</span> <span class="literal">-t</span> <span class="number">30</span> -<span class="literal">-logfile</span> output.log</span><br></pre></td></tr></table></figure>
+
+<p>对于这一条指令，我们对后面的参数进行逐个解析。</p>
+<ul>
+<li><code>-i 2</code>的作用是每2秒输出一次测试结果，数字2可以按照需要改成不同的数字</li>
+<li><code>-t 30</code>的作用是连续测试30s的时间</li>
+<li><code>--logfile output.log</code>的作用是将测试的结果输出到当前目录的<code>output.log</code>文件里面，需要注意的是此时不会在控制台上输出测试信息</li>
+</ul>
+<p><img src="https://resource.tinychen.com/blog/20190409/H69YrIAxyBBd.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190409/RydkOKlCMPHQ.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190409/Rk9qKNdtFHGC.png"></p>
+<p>▲打开log文件可以看到对应的测试数据都保存在里面了</p>
+<p><strong>如果需要指定路径输出json文件，我们只需要使用<code>-J</code>并在文件名前面指定路径即可：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iperf3 <span class="literal">-c</span> localhost <span class="literal">-i</span> <span class="number">2</span> <span class="literal">-t</span> <span class="number">30</span> <span class="literal">-J</span> -<span class="literal">-logfile</span> C:\Users\Mr7th\Desktop\output.log</span><br><span class="line"><span class="comment"># 以Json格式将测试结果文件输出到桌面</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>下面为截取的部分json文件</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">"start"</span>:	&#123;</span><br><span class="line">		<span class="attr">"connected"</span>:	[&#123;</span><br><span class="line">				<span class="attr">"socket"</span>:	<span class="number">5</span>,</span><br><span class="line">				<span class="attr">"local_host"</span>:	<span class="string">"::1"</span>,</span><br><span class="line">				<span class="attr">"local_port"</span>:	<span class="number">7013</span>,</span><br><span class="line">				<span class="attr">"remote_host"</span>:	<span class="string">"::1"</span>,</span><br><span class="line">				<span class="attr">"remote_port"</span>:	<span class="number">5201</span></span><br><span class="line">			&#125;],</span><br><span class="line">		<span class="attr">"version"</span>:	<span class="string">"iperf 3.1.3"</span>,</span><br><span class="line">		<span class="attr">"system_info"</span>:	<span class="string">"CYGWIN_NT-10.0 Tiny-Surface 2.5.1(0.297/5/3) 2016-04-21 22:14 x86_64"</span>,</span><br><span class="line">		<span class="attr">"timestamp"</span>:	&#123;</span><br><span class="line">			<span class="attr">"time"</span>:	<span class="string">"Tue, 09 Apr 2019 11:40:34 GMT"</span>,</span><br><span class="line">			<span class="attr">"timesecs"</span>:	<span class="number">1554810034</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">"connecting_to"</span>:	&#123;</span><br><span class="line">			<span class="attr">"host"</span>:	<span class="string">"localhost"</span>,</span><br><span class="line">			<span class="attr">"port"</span>:	<span class="number">5201</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">"cookie"</span>:	<span class="string">"Tiny-Surface.1554810034.839053.017f3"</span>,</span><br><span class="line">		<span class="attr">"tcp_mss_default"</span>:	<span class="number">0</span>,</span><br><span class="line">		<span class="attr">"test_start"</span>:	&#123;</span><br><span class="line">			<span class="attr">"protocol"</span>:	<span class="string">"TCP"</span>,</span><br><span class="line">			<span class="attr">"num_streams"</span>:	<span class="number">1</span>,</span><br><span class="line">			<span class="attr">"blksize"</span>:	<span class="number">131072</span>,</span><br><span class="line">			<span class="attr">"omit"</span>:	<span class="number">0</span>,</span><br><span class="line">			<span class="attr">"duration"</span>:	<span class="number">30</span>,</span><br><span class="line">			<span class="attr">"bytes"</span>:	<span class="number">0</span>,</span><br><span class="line">			<span class="attr">"blocks"</span>:	<span class="number">0</span>,</span><br><span class="line">			<span class="attr">"reverse"</span>:	<span class="number">0</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="attr">"intervals"</span>:	[&#123;</span><br><span class="line">			<span class="attr">"streams"</span>:	[&#123;</span><br><span class="line">					<span class="attr">"socket"</span>:	<span class="number">5</span>,</span><br><span class="line">					<span class="attr">"start"</span>:	<span class="number">0</span>,</span><br><span class="line">					<span class="attr">"end"</span>:	<span class="number">2.000219</span>,</span><br><span class="line">					<span class="attr">"seconds"</span>:	<span class="number">2.000219</span>,</span><br><span class="line">					<span class="attr">"bytes"</span>:	<span class="number">1222770688</span>,</span><br><span class="line">					<span class="attr">"bits_per_second"</span>:	<span class="number">4.890547e+09</span>,</span><br><span class="line">					<span class="attr">"omitted"</span>:	<span class="literal">false</span></span><br><span class="line">				&#125;],</span><br><span class="line">			<span class="attr">"sum"</span>:	&#123;</span><br><span class="line">				<span class="attr">"start"</span>:	<span class="number">0</span>,</span><br><span class="line">				<span class="attr">"end"</span>:	<span class="number">2.000219</span>,</span><br><span class="line">				<span class="attr">"seconds"</span>:	<span class="number">2.000219</span>,</span><br><span class="line">				<span class="attr">"bytes"</span>:	<span class="number">1222770688</span>,</span><br><span class="line">				<span class="attr">"bits_per_second"</span>:	<span class="number">4.890547e+09</span>,</span><br><span class="line">				<span class="attr">"omitted"</span>:	<span class="literal">false</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;, &#123;</span><br><span class="line">			<span class="attr">"streams"</span>:	[&#123;</span><br><span class="line">					<span class="attr">"socket"</span>:	<span class="number">5</span>,</span><br><span class="line">					<span class="attr">"start"</span>:	<span class="number">2.000219</span>,</span><br><span class="line">					<span class="attr">"end"</span>:	<span class="number">4.000079</span>,</span><br><span class="line">					<span class="attr">"seconds"</span>:	<span class="number">1.999860</span>,</span><br><span class="line">					<span class="attr">"bytes"</span>:	<span class="number">1384644608</span>,</span><br><span class="line">					<span class="attr">"bits_per_second"</span>:	<span class="number">5.538966e+09</span>,</span><br><span class="line">					<span class="attr">"omitted"</span>:	<span class="literal">false</span></span><br><span class="line">				&#125;],</span><br><span class="line">			<span class="attr">"sum"</span>:	&#123;</span><br><span class="line">				<span class="attr">"start"</span>:	<span class="number">2.000219</span>,</span><br><span class="line">				<span class="attr">"end"</span>:	<span class="number">4.000079</span>,</span><br><span class="line">				<span class="attr">"seconds"</span>:	<span class="number">1.999860</span>,</span><br><span class="line">				<span class="attr">"bytes"</span>:	<span class="number">1384644608</span>,</span><br><span class="line">				<span class="attr">"bits_per_second"</span>:	<span class="number">5.538966e+09</span>,</span><br><span class="line">				<span class="attr">"omitted"</span>:	<span class="literal">false</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;,</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-使用反转模式-Reverse"><a href="#3-3-使用反转模式-Reverse" class="headerlink" title="3.3 使用反转模式(Reverse)"></a>3.3 使用反转模式(Reverse)</h2><p>默认情况下我们进行测试，<strong>都是客户端发送数据，服务器端接收数据，</strong>这种情况下相当于只对上行带宽进行了测试，如果我们需要检测下行带宽，只需要使用<code>-R</code>命令，即<strong>可变为客户端接收，服务器端发送。</strong></p>
+<p>这里我们采用手机作为服务器端进行测试。</p>
+<p>▼默认情况下，电脑作为客户端，主要是发送数据（上行带宽）。</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/ujRMzwrweyXA.png"></p>
+<p>▼使用反转模式(Reverse)，此时电脑仍然是客户端，只不过变成了接收数据（下行带宽）。</p>
+<p><img src="https://resource.tinychen.com/blog/20190409/1W8KpaYYEBWO.png"></p>
+<p>其他的一些指令，大家感兴趣的可以<a target="_blank" rel="noopener" href="https://iperf.fr/iperf-doc.php">点击这里</a>查看官方的说明文档。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190706-frp\" rel="bookmark">Frp内网穿透实现MS远程桌面和SSH</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200331-mstsc-deploy-tls-cert\" rel="bookmark">windows系统RDP远程桌面配置可信证书</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170418-fat32-to-ntfs\" rel="bookmark">FAT32无损转换为NTFS</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170503-chkdsk\" rel="bookmark">CHKDSK使用方法</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170414-win10-show-seconds\" rel="bookmark">win10时间栏显示秒</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"># windows</a>
+              <a href="/tags/network/" rel="tag"># network</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190407-aliyun-centos-apache-https/" rel="prev" title="阿里云轻量级应用服务器CentOS系统Apache配置Https">
+      <i class="fa fa-chevron-left"></i> 阿里云轻量级应用服务器CentOS系统Apache配置Https
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190411-fix-ssh-disconnect/" rel="next" title="SSH远程连接Linux主机超时自动断开">
+      SSH远程连接Linux主机超时自动断开 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85iperf3"><span class="nav-text">1、下载安装iperf3</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E8%BF%90%E8%A1%8C%E6%9C%8D%E5%8A%A1%E7%AB%AF-server"><span class="nav-text">2、运行服务端(server)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E8%BF%90%E8%A1%8C%E4%B8%8E%E9%80%80%E5%87%BA"><span class="nav-text">2.1 运行与退出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E6%8C%87%E5%AE%9A%E7%9B%91%E5%90%AC%E7%AB%AF%E5%8F%A3"><span class="nav-text">2.2 指定监听端口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B%E6%A8%A1%E5%BC%8F"><span class="nav-text">2.3 守护进程模式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E8%BF%90%E8%A1%8C%E5%AE%A2%E6%88%B7%E7%AB%AF-Client"><span class="nav-text">3、运行客户端(Client)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E7%AE%80%E5%8D%95%E6%B5%8B%E8%AF%95"><span class="nav-text">3.1 简单测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B5%8B%E8%AF%95%E6%97%B6%E9%97%B4%E5%92%8C%E8%BE%93%E5%87%BA%E6%A0%BC%E5%BC%8F"><span class="nav-text">3.2 自定义测试时间和输出格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E4%BD%BF%E7%94%A8%E5%8F%8D%E8%BD%AC%E6%A8%A1%E5%BC%8F-Reverse"><span class="nav-text">3.3 使用反转模式(Reverse)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

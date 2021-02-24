@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="CentOS7中搭建nginx+MySQL8+PHP7的LNMP环境，并且安装wordpress来作为网站服务器。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭建LNMP环境并配置wordpress网站">
+<meta property="og:url" content="https://tinychen.com/20191123-lnmp-install-wordpress/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="CentOS7中搭建nginx+MySQL8+PHP7的LNMP环境，并且安装wordpress来作为网站服务器。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210111102925.jpg">
+<meta property="og:image" content="https://resource.tinychen.com//20191123021459.png">
+<meta property="og:image" content="https://resource.tinychen.com//20191126102630.png">
+<meta property="og:image" content="https://resource.tinychen.com//20191123035102.png">
+<meta property="og:image" content="https://resource.tinychen.com//20191123035332.png">
+<meta property="og:image" content="https://resource.tinychen.com//20191123035607.png">
+<meta property="og:image" content="https://resource.tinychen.com//20191123035731.png">
+<meta property="article:published_time" content="2019-11-23T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-11-23T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="mysql">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210111102925.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20191123-lnmp-install-wordpress/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>搭建LNMP环境并配置wordpress网站 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20191123-lnmp-install-wordpress/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          搭建LNMP环境并配置wordpress网站
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-11-23 15:00:00" itemprop="dateCreated datePublished" datetime="2019-11-23T15:00:00+08:00">2019-11-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210111102925.jpg"></p>
+<p>CentOS7中搭建nginx+MySQL8+PHP7的LNMP环境，并且安装wordpress来作为网站服务器。</p>
+<a id="more"></a>
+
+<p>linux的安装非常的简单，一般的云主机厂商都可以直接部署安装，安装方法我们这里就不再赘述了。本文使用的是CentOS7.7版本。</p>
+<blockquote>
+<p>这里是wordpress的官网对于安装环境的要求：</p>
+<p>We recommend servers running version 7.3 or greater of <a target="_blank" rel="noopener" href="https://secure.php.net/">PHP</a> and <a target="_blank" rel="noopener" href="https://www.mysql.com/">MySQL</a> version 5.6 <em>OR</em> <a target="_blank" rel="noopener" href="https://mariadb.org/">MariaDB</a> version 10.0 or greater.<br>We also recommend either <a target="_blank" rel="noopener" href="https://httpd.apache.org/">Apache</a> or <a target="_blank" rel="noopener" href="https://nginx.org/">Nginx</a> as the most robust options for running WordPress, but neither is required.</p>
+</blockquote>
+<h1 id="1、安装nginx"><a href="#1、安装nginx" class="headerlink" title="1、安装nginx"></a>1、安装nginx</h1><p>nginx这里为了使用较新的版本，我们使用nginx官网提供的yum源来进行安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新建一个yum repo文件</span></span><br><span class="line">cat &gt;&gt; /etc/yum.repo.d/nginx.repo &lt;&lt; EOF</span><br><span class="line">[nginx] </span><br><span class="line">name=nginx repo </span><br><span class="line">baseurl=http://nginx.org/packages/mainline/centos/7/x86_64/</span><br><span class="line">gpgcheck=0 </span><br><span class="line">enabled=1 </span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用yum安装nginx</span></span><br><span class="line">yum clean all</span><br><span class="line">yum repolist</span><br><span class="line">yum install nginx -y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动nginx并设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> nginx.service</span><br><span class="line">systemctl start nginx.service</span><br></pre></td></tr></table></figure>
+
+<h1 id="2、安装PHP7-3"><a href="#2、安装PHP7-3" class="headerlink" title="2、安装PHP7.3"></a>2、安装PHP7.3</h1><p>centos系统源中自带的php版本较旧，这里我们需要使用epel源和<a target="_blank" rel="noopener" href="https://rpms.remirepo.net/">remi源</a>来安装新版本的php。截止写这篇文章的时候php官网的稳定版本是7.3,7.4版本虽然已经发布但是好像还没有到稳定版。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用yum来安装epel源</span></span><br><span class="line">yum install epel-release</span><br><span class="line"><span class="comment"># 这里使用清华镜像源的remi源</span></span><br><span class="line">rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm</span><br><span class="line"><span class="comment"># 启用remi源中的php73</span></span><br><span class="line">yum install yum-utils</span><br><span class="line">yum-config-manager --<span class="built_in">enable</span> remi-php73</span><br><span class="line">yum install php73 php-fpm php-opcache php-cli php-gd php-curl php-mysql php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip</span><br></pre></td></tr></table></figure>
+
+
+
+<p>安装完成之后我们查看一下php的版本，然后建立软链接把php指向php73。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看php73的版本信息</span></span><br><span class="line">[root@aliyun ~]<span class="comment"># php73 -v</span></span><br><span class="line">PHP 7.3.12 (cli) (built: Nov 19 2019 10:24:51) ( NTS )</span><br><span class="line">Copyright (c) 1997-2018 The PHP Group</span><br><span class="line">Zend Engine v3.3.12, Copyright (c) 1998-2018 Zend Technologies</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确定php73的执行文件位置</span></span><br><span class="line">[root@aliyun ~]<span class="comment"># which php73</span></span><br><span class="line">/usr/bin/php73</span><br><span class="line"></span><br><span class="line"><span class="comment"># 建立软链接将php指向php73</span></span><br><span class="line">[root@aliyun ~]<span class="comment"># ln -s /usr/bin/php73 /usr/bin/php</span></span><br><span class="line"><span class="comment"># 查看php指令对应的版本信息</span></span><br><span class="line">[root@aliyun ~]<span class="comment"># php -v</span></span><br><span class="line">PHP 7.3.12 (cli) (built: Nov 19 2019 10:24:51) ( NTS )</span><br><span class="line">Copyright (c) 1997-2018 The PHP Group</span><br><span class="line">Zend Engine v3.3.12, Copyright (c) 1998-2018 Zend Technologies</span><br></pre></td></tr></table></figure>
+
+<h1 id="3、安装MYSQL8"><a href="#3、安装MYSQL8" class="headerlink" title="3、安装MYSQL8"></a>3、安装MYSQL8</h1><p>wordpress官网要求的数据库可以是MySQL或者是MariaDB，这里我们使用MySQL8。</p>
+<p>详细的安装教程之前已经写过博客了，需要的同学可以查看这篇文章：</p>
+<p><a href="https://tinychen.com/20190310-centos-install-mysql/">CentOS7安装MySQL</a></p>
+<p><a href="https://tinychen.com/20191122-mysql8-reset-passwd/">MySQL8重置root密码</a></p>
+<p>接下来就是在mysql中创建一个数据库和用户用来给wordpress使用。</p>
+<p>首先我们使用root用户登录mysql，然后执行下面的命令来创建一个名为wordpress的数据库和一个wordpress的用户：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE wordpress;</span><br><span class="line">CREATE USER <span class="string">'wordpress'</span> IDENTIFIED BY <span class="string">'一个复杂的密码'</span>;</span><br><span class="line">GRANT ALL PRIVILEGES ON wordpress.* TO wordpress;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这里的grant语句的授权方式和之前的mysql版本有些不太一样，还需要注意一下。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create database wordpress;</span><br><span class="line">Query OK, 1 row affected (0.01 sec)</span><br><span class="line">mysql&gt; CREATE USER &#39;wordpress&#39; IDENTIFIED BY &#39;一个复杂的密码&#39;;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line">mysql&gt; GRANT ALL PRIVILEGES ON wordpress.* TO wordpress;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">[root@aliyun ~]# mysql -u wordpress -p</span><br><span class="line">Enter password: </span><br><span class="line">Welcome to the MySQL monitor.  Commands end with ; or \g.</span><br><span class="line">Your MySQL connection id is 10</span><br><span class="line">Server version: 8.0.18 MySQL Community Server - GPL</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2019, Oracle and&#x2F;or its affiliates. All rights reserved.</span><br><span class="line"></span><br><span class="line">Oracle is a registered trademark of Oracle Corporation and&#x2F;or its</span><br><span class="line">affiliates. Other names may be trademarks of their respective</span><br><span class="line">owners.</span><br><span class="line"></span><br><span class="line">Type &#39;help;&#39; or &#39;\h&#39; for help. Type &#39;\c&#39; to clear the current input statement.</span><br><span class="line"></span><br><span class="line">mysql&gt; show databases;</span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| information_schema |</span><br><span class="line">| wordpress          |</span><br><span class="line">+--------------------+</span><br><span class="line">2 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; </span><br></pre></td></tr></table></figure>
+
+<h1 id="4、安装wordpress"><a href="#4、安装wordpress" class="headerlink" title="4、安装wordpress"></a>4、安装wordpress</h1><p>接下来的wordpress的配置就比较简单了，我们先去<a target="_blank" rel="noopener" href="https://wordpress.org/download/">官网</a>下载最新版本的wordpress，解压之后配置一下配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用wget指令下载并使用tar -zxvf参数进行解压</span></span><br><span class="line">wget https://wordpress.org/latest.tar.gz</span><br><span class="line">tar -zxvf wordpress-5.3-zh_CN.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们需要对配置文件进行编辑，按照官网所述，我们最好将<code>wp-config-sample.php</code>复制成<code>wp-config.php</code>然后再进行编辑，不复制直接编辑<code>wp-config-sample.php</code>也是可以自动生成新的<code>wp-config.php</code>，但是出于备份一份源配置文件模板的考虑，最好还是复制一下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp wp-config-sample.php wp-config.php </span><br><span class="line">vim wp-config.php </span><br></pre></td></tr></table></figure>
+
+<p>这里我们填入前面创建的数据库用户名和密码以及对应的数据库。</p>
+<p><img src="https://resource.tinychen.com//20191123021459.png"></p>
+<p>接下来这一步就是根据主机生成独一无二的密钥。这里我们使用<code>curl</code>命令来访问这个链接生成密钥并保持到<code>key.txt</code>文件中，然后把<code>key.txt</code>的文件里面的内容复制替换掉里面的<code>define</code>部分。</p>
+<p><img src="https://resource.tinychen.com//20191126102630.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -s https:&#x2F;&#x2F;api.wordpress.org&#x2F;secret-key&#x2F;1.1&#x2F;salt&#x2F; &gt; key.txt</span><br></pre></td></tr></table></figure>
+
+<p>然后我们将整个解压出来的wordpress文件夹移动到我们的web服务器的目录下面，这里我使用的目录是<code>/etc/nginx/wordpress</code>，这里在后面的nginx配置文件中会用到。接下来我们对nginx进行配置。</p>
+<p>下面的是我的nginx配置文件，文件位于<code>/etc/nginx/nginx.conf</code>，注意里面的目录和域名要换成自己对应的目录和域名，以及这里还额外配置了https证书加密认证和http强制跳转https，具体的操作和解释已经在这篇博客<a target="_blank" rel="noopener" href="https://tiny777.github.io/190829httpd2Nginx/">（个人博客web服务器换用nginx）</a>里面有解释，有需要的同学可以看看。</p>
+<p><img src="https://resource.tinychen.com//20191123035102.png"></p>
+<p>我们使用root用户登录mysql，然后更新wordpress用户的加密方式为<code>mysql_native_password</code>，然后刷新配置即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 更改用户密码的加密形式</span><br><span class="line">ALTER USER &#39;wordpress&#39;@&#39;%&#39; IDENTIFIED WITH mysql_native_password BY &#39;你的用户密码&#39;;</span><br><span class="line">&#x2F;&#x2F; 刷新MySQL的系统权限相关表</span><br><span class="line">FLUSH PRIVILEGES;</span><br></pre></td></tr></table></figure>
+
+<p>再次登录就会发现已经可以连接数据库并正常设置了，简单配置过后就可以开始正常运行了。</p>
+<p><img src="https://resource.tinychen.com//20191123035332.png"></p>
+<p>设置过后就可以登录后台进行管理，登录的链接就是域名后面加上<code>/wp-admin/</code></p>
+<p><img src="https://resource.tinychen.com//20191123035607.png"></p>
+<p>使用默认主题的首页。</p>
+<p><img src="https://resource.tinychen.com//20191123035731.png"></p>
+<p>这就是wordpress的LNMP版本安装配置过程，整体还是相对简单，没有太大的难度，相对于hexo而言，wordpress的安装显得复杂很多，整体也可能被人诟病十分臃肿，但是两者各有各的好，wordpress的插件和主题丰富程度确实要比hexo强很多，但是不管是用哪个，坚持写作才是最重要的！</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190310-centos-install-mysql\" rel="bookmark">CentOS7安装MySQL</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190521-centos-install-mariadb\" rel="bookmark">CentOS7安装MariaDB</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20191122-mysql8-reset-passwd\" rel="bookmark">MySQL8重置root密码</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190829-http-to-nginx\" rel="bookmark">个人博客web服务器换用nginx</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190309-mysql-base-know\" rel="bookmark">MySQL数据库基本概念</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+              <a href="/tags/centos/" rel="tag"># centos</a>
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20191122-mysql8-reset-passwd/" rel="prev" title="MySQL8重置root密码">
+      <i class="fa fa-chevron-left"></i> MySQL8重置root密码
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20191203-win10-extreperf-mode/" rel="next" title="win10开启卓越电源性能计划">
+      win10开启卓越电源性能计划 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E5%AE%89%E8%A3%85nginx"><span class="nav-text">1、安装nginx</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%AE%89%E8%A3%85PHP7-3"><span class="nav-text">2、安装PHP7.3</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E5%AE%89%E8%A3%85MYSQL8"><span class="nav-text">3、安装MYSQL8</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%AE%89%E8%A3%85wordpress"><span class="nav-text">4、安装wordpress</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

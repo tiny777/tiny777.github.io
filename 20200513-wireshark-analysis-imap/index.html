@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要使用Wireshark对邮件客户端使用IMAP协议接收邮件的过程进行抓包分析并使用telnet命令进行简单操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wireshark对IMAP抓包分析">
+<meta property="og:url" content="https://tinychen.com/20200513-wireshark-analysis-imap/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要使用Wireshark对邮件客户端使用IMAP协议接收邮件的过程进行抓包分析并使用telnet命令进行简单操作。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106171353.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200513153605340.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200513175632166.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200513154801579.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200513154645248.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200514104230070.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200515173802081.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200515174121534.png">
+<meta property="article:published_time" content="2020-05-13T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-13T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="wireshark">
+<meta property="article:tag" content="mail">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106171353.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200513-wireshark-analysis-imap/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Wireshark对IMAP抓包分析 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200513-wireshark-analysis-imap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Wireshark对IMAP抓包分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-13 10:00:00" itemprop="dateCreated datePublished" datetime="2020-05-13T10:00:00+08:00">2020-05-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>5 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106171353.jpg"></p>
+<p>本文主要使用Wireshark对邮件客户端使用IMAP协议接收邮件的过程进行抓包分析并使用telnet命令进行简单操作。</p>
+<a id="more"></a>
+
+<h1 id="1、IMAP简介"><a href="#1、IMAP简介" class="headerlink" title="1、IMAP简介"></a>1、IMAP简介</h1><p>IMAP和POP3两个协议基本上是目前支持和使用最广泛的邮件接收协议，IMAP和POP3相比有着许多优点，参考<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%9B%A0%E7%89%B9%E7%BD%91%E4%BF%A1%E6%81%AF%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE">wiki</a>和后面的抓包结果进行分析，这里列出一些后面抓包的时候可以验证的优点：</p>
+<ul>
+<li><p><strong>支持连接和断开两种操作模式</strong></p>
+<p>和POP3协议在接收完邮件之后就和服务器断开连接不同，IMAP协议可以一直和服务器保持连接从而使得接收新邮件的延迟大大降低。</p>
+</li>
+<li><p><strong>支持多个客户同时连接到一个邮箱</strong></p>
+<p>POP3协议假定邮箱当前的连接是唯一的连接。相反，IMAP4协议允许多个用户同时访问邮箱同时提供一种机制让客户能够感知其他当前连接到这个邮箱的用户所做的操作。</p>
+</li>
+<li><p><strong>支持在服务器保留消息状态信息</strong></p>
+<p>通过使用在IMAP4协议中定义的标志客户端可以跟踪消息状态，例如邮件是否被读取，回复，或者删除。这些标识存储在服务器，所以多个客户在不同时间访问一个邮箱可以感知其他用户所做的操作。</p>
+</li>
+<li><p><strong>支持在服务器上访问多个邮箱</strong></p>
+<p>IMAP4客户端可以在服务器上创建，重命名，或删除邮箱（通常以文件夹形式显现给用户）。支持多个邮箱还允许服务器提供对于共享和公共文件夹的访问。</p>
+</li>
+<li><p><strong>支持访问消息中的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/MIME">MIME</a>部分和部分获取。</strong></p>
+<p>几乎所有的Internet邮件都是以MIME格式传输的。MIME允许消息包含一个树型结构，这个树型结构的叶子节点都是单一内容类型而非叶子节点都是多块类型的组合。IMAP4协议允许客户端获取任何独立的MIME部分和获取信息的一部分或者全部。这些机制使得用户无需下载附件就可以浏览消息内容或者在获取内容的同时浏览。</p>
+</li>
+</ul>
+<h1 id="2、抓包分析"><a href="#2、抓包分析" class="headerlink" title="2、抓包分析"></a>2、抓包分析</h1><p>MUA中的设置如下，同样不使用加密协议方便分析数据。</p>
+<p><img src="https://resource.tinychen.com/image-20200513153605340.png"></p>
+<p>配置完成开始抓包之后发现邮箱大师有多线程并发收件的操作，这也算是利用了IMAP协议的能够允许多个客户端连接到同一个服务器的特点，但是显然不利于我们分析串行模式下单个连接收件的完整过程，不过也可以对比多个连接之间的差异。</p>
+<p>由于建立IMAP通信连接必须要登录，所以我们只需要查看报文就可以知道一共并行发起了多少个连接，在这次的报文中一共发现了有三个LOGIN的请求报文，因此可以判断应该一共先后发起了三个连接，其中第三个连接是在第一个连接结束之后发起的，具体分析如下：</p>
+<p>可以看到最开始几乎同时发起了两个IMAP连接：</p>
+<p><img src="https://resource.tinychen.com/image-20200513175632166.png"></p>
+<h2 id="2-1-第一个连接"><a href="#2-1-第一个连接" class="headerlink" title="2.1 第一个连接"></a>2.1 第一个连接</h2><p>我们先来对第一个连接进行分析：</p>
+<p><img src="https://resource.tinychen.com/image-20200513154801579.png"></p>
+<p>首先我们可以确定IMAP的传输层协议也是使用的TCP协议，同样这里略去TCP三握四挥的分析，直接看IMAP相关部分的报文：</p>
+<p><img src="https://resource.tinychen.com/image-20200513154645248.png"></p>
+<ul>
+<li><p>客户端与IMAP服务器在TCP三次握手之后建立连接</p>
+</li>
+<li><p>IMAP服务器返回OK信息，并说明自身邮件系统的类型为coremail</p>
+</li>
+<li><p>客户端发送CAPABILITY命令查询可用的命令，这个和POP3中的CAPA命令功能相同</p>
+</li>
+<li><p>IMAP服务器返回可以执行的命令</p>
+</li>
+<li><p>客户端发送ID命令，附带了MUA和OS的相关信息</p>
+</li>
+<li><p>IMAP服务器返回ID字符串，同样附带了邮件服务器的相关信息</p>
+</li>
+<li><p>客户端发送LOGIN命令进行登录，双引号内的为邮箱账号，后面加一个空格然后紧跟着的是密码</p>
+</li>
+<li><p>IMAP服务器返回OK指令提示登录成功</p>
+</li>
+<li><p>客户端发送LIST命令查询该账号内的邮件信息，但是可能命令的格式不对，并没有查询到任何有用的信息</p>
+</li>
+<li><p>IMAP服务器返回查询结果为空：</p>
+<p>如果把查询命令换为<code>LIST &quot;&quot; &quot;*&quot;</code>则可以查询到该账号的所有邮箱文件夹：</p>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/image-20200514104230070.png"></p>
+<ul>
+<li><p>客户端发送NOOP指令，与之前的POP3协议类似，NOOP指令的作用应该是用于保持连接，默认相当于无操作，但是在此次连接还没使用过SELECT命令并且是第一次发送NOOP指令的时候，IMAP服务器会返回该账号下所有目录的邮件总数</p>
+</li>
+<li><p>IMAP服务器返回OK指令并且返回了邮件总数、</p>
+</li>
+<li><p>客户端使用SELECT指令，并且选中了INBOX文件夹（一般对应收件箱），相当于在数据库中选中了一个数据表</p>
+</li>
+<li><p>然后连接就莫名没了</p>
+</li>
+</ul>
+<h2 id="2-2-第二个连接"><a href="#2-2-第二个连接" class="headerlink" title="2.2 第二个连接"></a>2.2 第二个连接</h2><p>第二次连接的数据包较长，我们截取部分客户端发送的请求：</p>
+<p><img src="https://resource.tinychen.com/image-20200515173802081.png"></p>
+<p>对比第一次连接，主要有以下不同点：</p>
+<ul>
+<li>使用了<code>XLIST &quot;&quot; &quot;*&quot;</code>查询到了邮件账号下的所有文件夹（收件箱、发件箱、草稿箱、垃圾箱、垃圾邮件等）</li>
+<li>依次使用<code>SELECT</code>命令和<code>UID SEARCH UID </code>命令来对每个文件夹进行操作，进而获取到该账号对应的文件夹下的<strong>所有邮件的总数和对应的UID</strong></li>
+</ul>
+<h2 id="2-3-第三个连接"><a href="#2-3-第三个连接" class="headerlink" title="2.3 第三个连接"></a>2.3 第三个连接</h2><p>从wireshark上对数据包标记的序号来看，第三个连接是在第一个连接结束之后才发起的。对应的客户端主要操作如下：</p>
+<p><img src="https://resource.tinychen.com/image-20200515174121534.png"></p>
+<p>上面的内容重复操作较多，主要就是对每个文件夹都进行SELECT，然后获取里面的邮件具体内容，主要的核心操作有以下两个</p>
+<ul>
+<li><code>UID FETCH 1557156839:1557156846 (UID FLAGS RFC822.SIZE BODYSTRUCTURE INTERNALDATE BODY.PEEK[HEADER.FIELDS (Date Subject From Sender Reply-To To Cc Bcc Message-ID References In-Reply-To X-MailMaster-ShowOneRcpt X-CUSTOM-MAIL-MASTER-SENT-ID Disposition-Notification-To X-CM-CTRLMSGS)])</code></li>
+<li><code>UID FETCH 1557156844 BODY.PEEK[1]</code></li>
+</ul>
+<p>上面两个请求命令中的<code>1557156844</code>就是在第一个连接中使用UID SEARCH命令查询到的邮件的UID，这里使用了<code>UID FETCH</code>命令来获取邮件的对应内容。由于前面我们提到邮件的格式是符合MIME标准的，而IMAP协议又是允许MUA下载符合MIME标准的部分邮件内容，因此这两条UID命令就是<strong>用于获取对应的邮件的特定部分的内容</strong>。</p>
+<h2 id="2-4-小结"><a href="#2-4-小结" class="headerlink" title="2.4 小结"></a>2.4 小结</h2><p>在换了另一个测试账号进行同样的抓包操作之后我发现两次的数据请求操作几乎是一模一样的，都是有三个连接，操作也和上面相同。由此可以分析IMAP协议的可操作性要比POP3强很多，因此在具体的功能实现上对于不同的MUA而言也有不同。</p>
+<h1 id="3、telnet操作"><a href="#3、telnet操作" class="headerlink" title="3、telnet操作"></a>3、telnet操作</h1><p>同样的我们也可以telnet到邮件服务器的143端口来进行命令操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">[root@www coremail]# telnet localhost 143</span><br><span class="line">Trying 127.0.0.1...</span><br><span class="line">Connected to localhost.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br><span class="line">* OK Coremail System IMap Server Ready(126com[c92b4e18679ada4069d0bde6e2528ad1])</span><br><span class="line">C1 LOGIN &quot;test02@coremail.cn&quot; password</span><br><span class="line">C1 OK LOGIN completed</span><br><span class="line">C2 LIST &quot;&quot; &quot;&quot;</span><br><span class="line">* LIST (\Noselect) &quot;&#x2F;&quot; &quot;&quot;</span><br><span class="line">C2 OK LIST Completed</span><br><span class="line">C3 LIST &quot;&quot; &quot;*&quot;</span><br><span class="line">* LIST () &quot;&#x2F;&quot; &quot;INBOX&quot;</span><br><span class="line">* LIST (\Drafts) &quot;&#x2F;&quot; &quot;Drafts&quot;</span><br><span class="line">* LIST (\Sent) &quot;&#x2F;&quot; &quot;Sent Items&quot;</span><br><span class="line">* LIST (\Trash) &quot;&#x2F;&quot; &quot;Trash&quot;</span><br><span class="line">* LIST (\Junk) &quot;&#x2F;&quot; &quot;Junk E-mail&quot;</span><br><span class="line">* LIST () &quot;&#x2F;&quot; &quot;Virus Items&quot;</span><br><span class="line">C3 OK LIST Completed</span><br><span class="line">C4 SELECT INBOX</span><br><span class="line">* 8 EXISTS</span><br><span class="line">* 0 RECENT</span><br><span class="line">* OK [UIDVALIDITY 1] UIDs valid</span><br><span class="line">* FLAGS (\Answered \Seen \Deleted \Draft \Flagged)</span><br><span class="line">* OK [PERMANENTFLAGS (\Answered \Seen \Deleted \Draft \Flagged)] Limited</span><br><span class="line">C4 OK [READ-WRITE] SELECT completed</span><br><span class="line">C5 UID SEARCH 1:*</span><br><span class="line">* SEARCH 1557156839 1557156840 1557156841 1557156842 1557156843 1557156844 1557156845 1557156846</span><br><span class="line">C5 OK SEARCH completed</span><br><span class="line">C6 UID FETCH 1557156839</span><br><span class="line">C6 BAD Parse command error</span><br><span class="line">C7 UID FETCH 1557156839 FULL</span><br><span class="line">* 1 FETCH (UID 1557156839 INTERNALDATE &quot; 6-May-2019 23:33:59 +0800&quot; FLAGS (\Seen) ENVELOPE (&quot;Mon, 6 May 2019 23:33:59 +0800 (GMT+08:00)&quot; &quot;&#x3D;?UTF-8?B?5qyi6L+O5L2&#x2F;55SoQ29yZW1haWznlLXlrZDpgq7ku7bns7vnu58vV2VsY29tZSB0byB0aGUgQ29yZW1haWwgZS1tYWlsIHN5c3RlbQ&#x3D;&#x3D;?&#x3D;&quot; ((NIL NIL &quot;postmaster&quot; &quot;coremail.cn&quot;)) ((NIL NIL &quot;postmaster&quot; &quot;coremail.cn&quot;)) ((NIL NIL &quot;postmaster&quot; &quot;coremail.cn&quot;)) ((NIL NIL &quot;test02&quot; &quot;coremail.cn&quot;)) NIL NIL NIL &quot;&lt;1106604853.1.1557156839490@www.example.com&gt;&quot;) BODY ((&quot;text&quot; &quot;html&quot; (&quot;charset&quot; &quot;UTF-8&quot;) NIL NIL &quot;quoted-printable&quot; 7274 152) &quot;related&quot;) RFC822.SIZE 7959)</span><br><span class="line">C7 OK Fetch completed</span><br><span class="line">C8 UID FETCH 1557156846 FULL</span><br><span class="line">* 8 FETCH (UID 1557156846 INTERNALDATE &quot; 8-May-2019 09:43:11 +0800&quot; FLAGS (\Seen) ENVELOPE (&quot;Wed, 8 May 2019 09:43:11 +0800 (CST)&quot; &quot;&#x3D;?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbCBBdXRoZW50aWNhdGVk?&#x3D;&quot; ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMiI&#x3D;?&#x3D;&quot; NIL &quot;test02&quot; &quot;coremail.cn&quot;)) NIL NIL NIL &quot;&lt;5CD2342F.000006.02460@coremail.cn&gt;&quot;) BODY (&quot;TEXT&quot; &quot;PLAIN&quot; NIL NIL NIL &quot;7BIT&quot; 0 0) RFC822.SIZE 656)</span><br><span class="line">C8 OK Fetch completed</span><br><span class="line">C9 UID FETCH 1557156844 FULL</span><br><span class="line">* 6 FETCH (UID 1557156844 INTERNALDATE &quot; 8-May-2019 16:59:38 +0800&quot; FLAGS (\Seen) ENVELOPE (&quot;Wed, 8 May 2019 16:59:38 +0800 (CST)&quot; &quot;&#x3D;?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbA&#x3D;&#x3D;?&#x3D;&quot; ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMiI&#x3D;?&#x3D;&quot; NIL &quot;test02&quot; &quot;coremail.cn&quot;)) NIL NIL NIL &quot;&lt;5CD29A7A.000004.02460@coremail.cn&gt;&quot;) BODY (&quot;TEXT&quot; &quot;PLAIN&quot; NIL NIL NIL &quot;7BIT&quot; 0 0) RFC822.SIZE 642)</span><br><span class="line">C9 OK Fetch completed</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200507-wireshark-analysis-smtp\" rel="bookmark">Wireshark对SMTP抓包分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200511-wireshark-analysis-pop3\" rel="bookmark">Wireshark对pop3抓包分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190608-wireshark-stu\" rel="bookmark">Wireshark抓包分析校园网登录过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190609-wireshark-dhcp\" rel="bookmark">Wireshark抓包分析DHCP以及路由干扰过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200508-rfc8314-465-587-part-translation\" rel="bookmark">RFC8314文档中对465端口和587端口的阐述</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/wireshark/" rel="tag"># wireshark</a>
+              <a href="/tags/mail/" rel="tag"># mail</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200512-windows-terminal-wsl2-centos-installation/" rel="prev" title="Windows Terminal + WSL2 + CENTOS 配置Windows命令终端">
+      <i class="fa fa-chevron-left"></i> Windows Terminal + WSL2 + CENTOS 配置Windows命令终端
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200519-nginx-enable-http2-tls13/" rel="next" title="nginx启用HTTP2和TLSv1.3">
+      nginx启用HTTP2和TLSv1.3 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81IMAP%E7%AE%80%E4%BB%8B"><span class="nav-text">1、IMAP简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90"><span class="nav-text">2、抓包分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E7%AC%AC%E4%B8%80%E4%B8%AA%E8%BF%9E%E6%8E%A5"><span class="nav-text">2.1 第一个连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E7%AC%AC%E4%BA%8C%E4%B8%AA%E8%BF%9E%E6%8E%A5"><span class="nav-text">2.2 第二个连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E7%AC%AC%E4%B8%89%E4%B8%AA%E8%BF%9E%E6%8E%A5"><span class="nav-text">2.3 第三个连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E5%B0%8F%E7%BB%93"><span class="nav-text">2.4 小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81telnet%E6%93%8D%E4%BD%9C"><span class="nav-text">3、telnet操作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

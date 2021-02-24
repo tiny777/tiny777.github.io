@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要使用Wireshark对邮件客户端使用POP3协议收取邮件的过程进行抓包分析并使用telnet命令进行简单操作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wireshark对pop3抓包分析">
+<meta property="og:url" content="https://tinychen.com/20200511-wireshark-analysis-pop3/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要使用Wireshark对邮件客户端使用POP3协议收取邮件的过程进行抓包分析并使用telnet命令进行简单操作。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106171418.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200511131942318.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512175133929.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512175211845.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512175514439.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512175824004.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200512180145244.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200513095810521.png">
+<meta property="article:published_time" content="2020-05-11T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-11T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="wireshark">
+<meta property="article:tag" content="mail">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106171418.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200511-wireshark-analysis-pop3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Wireshark对pop3抓包分析 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200511-wireshark-analysis-pop3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Wireshark对pop3抓包分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-11 10:00:00" itemprop="dateCreated datePublished" datetime="2020-05-11T10:00:00+08:00">2020-05-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>12 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106171418.jpg"></p>
+<p>本文主要使用Wireshark对邮件客户端使用POP3协议收取邮件的过程进行抓包分析并使用telnet命令进行简单操作。</p>
+<a id="more"></a>
+
+<h1 id="1、POP3简介"><a href="#1、POP3简介" class="headerlink" title="1、POP3简介"></a>1、POP3简介</h1><p><strong>邮局协议</strong>（英语：<strong>P</strong>ost <strong>O</strong>ffice <strong>P</strong>rotocol，缩写：<strong>POP</strong>）属于TCP/IP协议族中的一员，由<em>RFC 1939</em>定义。<strong>此协议主要用于支持使用客户端远程管理在服务器上的电子邮件。</strong>最新版本为POP3，全名“<strong>Post Office Protocol - Version 3</strong>”，而提供了SSL加密的POP3协议被称为<strong>POP3S</strong>。</p>
+<p>POP支持离线邮件处理。其具体过程是：发件人将邮件发送到服务器上，收件人客户端使用MUA以连接服务器，并下载所有未阅读的电子邮件。这种离线访问模式是一种存储转发服务，将邮件从邮件服务器端送到个人客户端上，可以是PC或者手机等多种设备。旧版的POP3协议在邮件被下载后，会删除掉邮件服务器上的邮件。改进的POP3协议可以在配置中选择可以“只下载邮件，服务器端并不删除”，也是目前POP3的主流操作方式。</p>
+<h1 id="2、抓包环境"><a href="#2、抓包环境" class="headerlink" title="2、抓包环境"></a>2、抓包环境</h1><p>抓包工具还是使用的wireshark，测试的协议是POP3，默认端口110，同样地为了方便分析数据没有使用TLS/SSL加密，但是结果都问题不大。</p>
+<p>测试的账号登录之后自动同步了收件箱中已有的5封邮件，然后我又给测试账号发了一封邮件，因此抓包的时候MUA客户端上应该是只有本地已缓存的5封已读邮件和服务器端尚未下载的1封未读邮件，这样比较符合实际的情况。</p>
+<p>开启wireshark监听对应的网卡，设定Filter为邮件服务器的IP并且设定协议为pop基本就能抓取到需要的数据包，然后我们再Follow这条POP数据流对应的TCP stream就可以看到下面的完整信息。</p>
+<p><img src="https://resource.tinychen.com/image-20200511131942318.png"></p>
+<p>毫无意外地可以看到TCP的三握四挥，这里不作赘述。</p>
+<h1 id="3、POP3数据包分析"><a href="#3、POP3数据包分析" class="headerlink" title="3、POP3数据包分析"></a>3、POP3数据包分析</h1><p>首先我们可以看到在客户端和服务端TCP三次握手建立连接后，服务端发送报文给客户端告知顺利和POP3服务器建立连接：</p>
+<p><img src="https://resource.tinychen.com/image-20200512175133929.png"></p>
+<p>接下来客户端发送了一个CAPA命令：</p>
+<p><img src="https://resource.tinychen.com/image-20200512175211845.png"></p>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E9%83%B5%E5%B1%80%E5%8D%94%E5%AE%9A">wiki</a>里面有列出常用的POP3命令，但是却并没有CAPA这条命令，顺着下面的参考文档查了一下，在RFC的文档<a target="_blank" rel="noopener" href="https://tools.ietf.org/rfc/rfc2449.txt">RFC2449</a>中找到了比较详细的定义：</p>
+<blockquote>
+<p>Section 3 describes the CAPA response using [ABNF].  When a<br>   capability response describes an optional command, the <capa-tag><br>   SHOULD be identical to the command keyword.  CAPA response tags are<br>   case-insensitive.</p>
+<p>​        CAPA</p>
+<p>​        Arguments:<br>​            none</p>
+<p>​        Restrictions:<br>​            none</p>
+<p>​        Discussion:<br>​            An -ERR response indicates the capability command is not<br>​            implemented and the client will have to probe for<br>​            capabilities as before.</p>
+<p>​            An +OK response is followed by a list of capabilities, one<br>​            per line.  Each capability name MAY be followed by a single<br>​            space and a space-separated list of parameters.  Each<br>​            capability line is limited to 512 octets (including the<br>​            CRLF).  The capability list is terminated by a line<br>​            containing a termination octet (“.”) and a CRLF pair.</p>
+<p>​         Possible Responses:<br>​             +OK -ERR</p>
+</blockquote>
+<p>也就是说客户端发送CAPA命令主要是用于获取POP3服务端可以执行的命令，然后POP3服务器果然就返回了对应的<code>+OK response</code>和<code>Capability list follows</code></p>
+<p><img src="https://resource.tinychen.com/image-20200512175514439.png"></p>
+<p>接下来客户端开始传输账号密码用于登录，可以看到在登录成功之后，POP3服务端返回了消息提示有6封邮件（6 messages）和邮件的总大小（25568 bytes），然后客户端发送UTF8命令指定编码方式，收到服务端返回的确认消息后再发送STAT命令来请求服务器发回关于邮箱的统计资料（此处为邮件总数和总字节数）。</p>
+<p><img src="https://resource.tinychen.com/image-20200512175824004.png"></p>
+<p>紧接着客户端继续发送UIDL命令，POP3服务器端返回邮件的唯一标识符，<strong>POP3会话的每个标识符都将是唯一的，并且是全局始终唯一</strong>。即同一封邮件在每次通信的时候的标识符都是不变的，这样就有利于MUA将本地存储的邮件和服务器端的邮件进行对比从而知道哪些邮件还没有被下载到本地。    </p>
+<p>获取邮件标识符后，客户端会发送LIST命令查询邮件数量和每个邮件的大小，这里我们可以看到邮件的总数量和总大小是和上面的STAT命令查询的一致的。</p>
+<p><img src="https://resource.tinychen.com/image-20200512180145244.png"></p>
+<p>前面我们说过在抓包之前MUA中是存着5封邮件并且第6封邮件是未读的，因此这时客户端就会发送RETR请求获取第6封邮件的信息：</p>
+<p><img src="https://resource.tinychen.com/image-20200513095810521.png"></p>
+<p>服务器首先返回一条信息表示OK，并且说明这封邮件的大小是1199个字节，然后开始传输整封邮件的内容，整个邮件内容包含了标准的一些邮件信息（主题、正文、收发件人、时间等）和一些对应的邮件系统的专属信息。</p>
+<p>最后邮件以<code>.</code>结束传输，客户端发送QUIT请求，服务端返回OK结束本次传输。</p>
+<h1 id="4、telnet操作"><a href="#4、telnet操作" class="headerlink" title="4、telnet操作"></a>4、telnet操作</h1><p>和之前的SMTP一样，我们也可以使用telnet命令对服务器的110端口进行操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">[root@www coremail]# telnet localhost 110</span><br><span class="line">Trying 127.0.0.1...</span><br><span class="line">Connected to localhost.</span><br><span class="line">Escape character is &#39;^]&#39;.</span><br><span class="line">+OK Welcome to coremail Mail Pop3 Server (126coms[c92b4e18679ada4069d0bde6e2528ad1s])</span><br><span class="line">CAPA</span><br><span class="line">+OK Capability list follows</span><br><span class="line">TOP</span><br><span class="line">USER</span><br><span class="line">PIPELINING</span><br><span class="line">UIDL</span><br><span class="line">LANG</span><br><span class="line">UTF8</span><br><span class="line">SASL PLAIN</span><br><span class="line">STLS</span><br><span class="line">.</span><br><span class="line">USER test01@coremail.cn</span><br><span class="line">+OK core mail</span><br><span class="line">PASS password</span><br><span class="line">+OK 6 message(s) [25568 byte(s)]</span><br><span class="line">UTF8</span><br><span class="line">+OK UTF-8 OK</span><br><span class="line">STAT</span><br><span class="line">+OK 6 25568</span><br><span class="line">UIDL</span><br><span class="line">+OK 6 25568</span><br><span class="line">1 1tbiAQACE10Y3LsAAAAAsy</span><br><span class="line">2 1tbiAQACE10Y3LsAAAACsw</span><br><span class="line">3 1tbiAQACE10Y3LsAAAADsx</span><br><span class="line">4 1tbiAQACE10Y3LsAAAAEs2</span><br><span class="line">5 1tbiAQACE10Y3LsAAAAFs3</span><br><span class="line">6 1tbiAQACE10Y3LsAAAAGs0</span><br><span class="line">.</span><br><span class="line">LIST</span><br><span class="line">+OK 6 25568</span><br><span class="line">1 7959</span><br><span class="line">2 1199</span><br><span class="line">3 6445</span><br><span class="line">4 6469</span><br><span class="line">5 2297</span><br><span class="line">6 1199</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+<p>到这里的操作是和之前一样的，实际上我们还可以使用RETR命令查看任意一封邮件的内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br></pre></td><td class="code"><pre><span class="line">RETR 5</span><br><span class="line">+OK 2297 octets</span><br><span class="line">Received: from TINYDESKTOP (unknown [10.228.12.149])</span><br><span class="line">        by www.example.com (Coremail) with SMTP id AQAAfwBXc7qLVrZeWAAAAA--.16S2;</span><br><span class="line">        Sat, 09 May 2020 15:06:51 +0800 (CST)</span><br><span class="line">From: &quot;Microsoft Outlook&quot; &lt;test01@coremail.cn&gt;</span><br><span class="line">Sender: test01@coremail.cn</span><br><span class="line">To: &lt;test01@coremail.cn&gt;</span><br><span class="line">Subject: &#x3D;?utf-8?B?TWljcm9zb2Z0IE91dGxvb2sg5rWL6K+V5raI5oGv?&#x3D;</span><br><span class="line">MIME-Version: 1.0</span><br><span class="line">Content-Type: multipart&#x2F;alternative;</span><br><span class="line">        boundary&#x3D;&quot;----&#x3D;_NextPart_000_0000_01D62613.778669A0&quot;</span><br><span class="line">X-CM-TRANSID:AQAAfwBXc7qLVrZeWAAAAA--.16S2</span><br><span class="line">Message-Id:&lt;5EB6568B.000001.04520@coremail.cn&gt;</span><br><span class="line">X-Coremail-Antispam: 1UD129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73</span><br><span class="line">        VFW2AGmfu7bjvjm3AaLaJ3UjIYCTnIWjp_UUUYK7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E</span><br><span class="line">        6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AEw4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28Cjx</span><br><span class="line">        kF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVWUJVWUCwA2z4x0Y4vE2Ix0cI8I</span><br><span class="line">        cVCY1x0267AKxVWUJVW8JwA2z4x0Y4vEx4A2jsIE14v26r1j6r4UM28EF7xvwVC2z280aV</span><br><span class="line">        CY1x0267AKxVWUJVW8JwAac4AC62xK8xCEY4vEwIxC4wAS0I0E0xvYzxvE52x082IY62kv</span><br><span class="line">        0487Mc02F40E4c8EcI0Er2xKeI8DMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67</span><br><span class="line">        AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lF7I21c0EjII2zVCS</span><br><span class="line">        5cI20VAGYxC7M4xvF2IEb7IF0Fy264kE64k0F24lw4CEF2IF47xS0VAv8wCF04k20xvY0x</span><br><span class="line">        0EwIxGrwCF04k20xvE0xIIj40Ec7CjxwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02</span><br><span class="line">        F40E14v26r106r1rMI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jr0_Jr</span><br><span class="line">        ylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7Cj</span><br><span class="line">        xVAFwI0_Jr0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6rW3Jr0E3s1lIxAIcVC2z280aVAFwI</span><br><span class="line">        0_Jr0_Gr1lIxAIcVC2z280aVCY1x0267AKxVWUJVW8JbIYCTnIWIevJa73UjIFyTuYvjfU</span><br><span class="line">        jiiSDUUUU</span><br><span class="line">Date: Sat, 9 May 2020 15:06:51 +0800 (CST)</span><br><span class="line">X-CM-SenderInfo: hwhv3imr6f02phpdxzgofq&#x2F;</span><br><span class="line"></span><br><span class="line">This is a multipart message in MIME format.</span><br><span class="line"></span><br><span class="line">------&#x3D;_NextPart_000_0000_01D62613.778669A0</span><br><span class="line">Content-Type: text&#x2F;plain;</span><br><span class="line">        charset&#x3D;&quot;utf-8&quot;</span><br><span class="line">Content-Transfer-Encoding: base64</span><br><span class="line"></span><br><span class="line">6L+Z5piv5Zyo5rWL6K+V5L2g55qE5biQ5oi36K6+572u5pe2IE1pY3Jvc29mdCBPdXRsb29rIOiH</span><br><span class="line">quWKqOWPkemAgeeahOeUteWtkOmCruS7tuOAgg0K</span><br><span class="line"></span><br><span class="line">------&#x3D;_NextPart_000_0000_01D62613.778669A0</span><br><span class="line">Content-Type: text&#x2F;html;</span><br><span class="line">        charset&#x3D;&quot;utf-8&quot;</span><br><span class="line">Content-Transfer-Encoding: base64</span><br><span class="line"></span><br><span class="line">PGh0bWw+PGJvZHk+PHA+6L+Z5piv5Zyo5rWL6K+V5L2g55qE5biQ5oi36K6+572u5pe2IE1pY3Jv</span><br><span class="line">c29mdCBPdXRsb29rIOiHquWKqOWPkemAgeeahOeUteWtkOmCruS7tuOAgg0KPC9wPjwvYm9keT48</span><br><span class="line">L2h0bWw+</span><br><span class="line"></span><br><span class="line">------&#x3D;_NextPart_000_0000_01D62613.778669A0--</span><br><span class="line">.</span><br><span class="line">RETR 6</span><br><span class="line">+OK 1199 octets</span><br><span class="line">Received: by ajax-webmail-www.example.com (Coremail) ; Sat, 9 May 2020</span><br><span class="line"> 15:35:01 +0800 (GMT+08:00)</span><br><span class="line">X-Originating-IP: [10.228.12.149]</span><br><span class="line">Date: Sat, 9 May 2020 15:35:01 +0800 (GMT+08:00)</span><br><span class="line">X-CM-HeaderCharset: UTF-8</span><br><span class="line">From: test02@coremail.cn</span><br><span class="line">To: test01@coremail.cn</span><br><span class="line">Subject: awesome pop</span><br><span class="line">X-Priority: 3</span><br><span class="line">X-Mailer: Coremail Webmail Server Version XT5.0.8a build 20190308(983496cf)</span><br><span class="line"> Copyright (c) 2002-2020 www.mailtech.cn 126com</span><br><span class="line">Content-Type: multipart&#x2F;alternative;</span><br><span class="line">        boundary&#x3D;&quot;----&#x3D;_Part_5_1271853342.1589009701828&quot;</span><br><span class="line">MIME-Version: 1.0</span><br><span class="line">Message-ID: &lt;4d02717c.1.171f85bdbc6.Coremail.test02@coremail.cn&gt;</span><br><span class="line">X-Coremail-Locale: zh_CN</span><br><span class="line">X-CM-TRANSID:AQAAfwAXM7olXbZeXAAAAA--.0W</span><br><span class="line">X-CM-SenderInfo: hwhv3ims6f02phpdxzgofq&#x2F;1tbiAQADCV0Y3LsAAwAIsi</span><br><span class="line">X-Coremail-Antispam: 1Ur529EdanIXcx71UUUUU7IcSsGvfJ3GIAIbVAYFVCjjxCrMI</span><br><span class="line">        AIbVAFxVCF77xC64kEw24lV2xY67C26IkvcIIF6IxKo4kEV4DvcSsGvfC2KfnxnUU&#x3D;&#x3D;</span><br><span class="line"></span><br><span class="line">------&#x3D;_Part_5_1271853342.1589009701828</span><br><span class="line">Content-Type: text&#x2F;plain; charset&#x3D;UTF-8</span><br><span class="line">Content-Transfer-Encoding: 7bit</span><br><span class="line"></span><br><span class="line">This is for pop test!</span><br><span class="line">------&#x3D;_Part_5_1271853342.1589009701828</span><br><span class="line">Content-Type: text&#x2F;html; charset&#x3D;UTF-8</span><br><span class="line">Content-Transfer-Encoding: 7bit</span><br><span class="line"></span><br><span class="line">This is for pop test!</span><br><span class="line">------&#x3D;_Part_5_1271853342.1589009701828--</span><br><span class="line">.</span><br><span class="line">RETR 4</span><br><span class="line">+OK 6469 octets</span><br><span class="line">Received: from TINY-DESKTOP (unknown [10.228.12.149])</span><br><span class="line">        by www.example.com (Coremail) with SMTP id AQAAfwCngFa5lNFcYQAAAA--.16S2;</span><br><span class="line">        Tue, 07 May 2019 22:22:50 +0800 (CST)</span><br><span class="line">Date: Thu, 7 May 2020 14:22:46 +0800</span><br><span class="line">From: test02 &lt;test02@coremail.cn&gt;</span><br><span class="line">To: &#x3D;?utf-8?Q?test01&#x3D;40coremail.cn?&#x3D; &lt;test01@coremail.cn&gt;</span><br><span class="line">Message-ID: &lt;305443E1-9258-4260-AA18-1A5CDFBD60EE@coremail.cn&gt;</span><br><span class="line">Subject: smtp test</span><br><span class="line">X-Mailer: MailMasterPC&#x2F;4.14.1.1004 (Windows 10 RS5)</span><br><span class="line">X-CUSTOM-MAIL-MASTER-SENT-ID: 710FAD56-B1F1-48B7-B72F-543A5E51C5F2</span><br><span class="line">MIME-Version: 1.0</span><br><span class="line">Content-Type: text&#x2F;html; charset&#x3D;&quot;utf-8&quot;</span><br><span class="line">Content-Transfer-Encoding: base64</span><br><span class="line">X-CM-TRANSID:AQAAfwCngFa5lNFcYQAAAA--.16S2</span><br><span class="line">X-Coremail-Antispam: 1UD129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73</span><br><span class="line">        VFW2AGmfu7bjvjm3AaLaJ3UjIYCTnIWjp_UUUol7kC6x804xWl14x267AKxVWUJVW8JwAF</span><br><span class="line">        c2x0x2IEx4CE42xK8VAvwI8IcIk0rVWUJVWUGwAFIxvE14AKwVWUJVWUGwA2jI8I6cxK62</span><br><span class="line">        vIxIIY0VWkZVCq3wA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK021l84ACjcxK6xII</span><br><span class="line">        jxv20xvE14v26r1j6r1xM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r1j6r4UM28EF7xvwV</span><br><span class="line">        C2z280aVAFwI0_Jr0_Gr1l84ACjcxK6I8E87Iv6xkF7I0E14v26r1j6r4UM2vYz4IE04k2</span><br><span class="line">        4VAvwVAKI4IrM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVAqjxCE14ACF2xKxwAqx4</span><br><span class="line">        xG6xAIxVCFxsxG0wAqx4xG6I80eVA0xI0YY7vIx2IE14AGzxvEb7x7Mc02F40Ex7xS62Iq</span><br><span class="line">        YxC26I8Yz20kMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72</span><br><span class="line">        CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7</span><br><span class="line">        M4xvF2IEb7IF0Fy264kE64k0F24lFcxC0VAqx4xG64AKrs4lw4CE7480Y4vE14AKx2xKxV</span><br><span class="line">        C2ax8xMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAF</span><br><span class="line">        wI0_JrI_JrWlx2IqxVCjr7xvwVAFwI0_Jr0_Jr4lx4CE17CEb7AF67AKxVWUJVWUXwCIc4</span><br><span class="line">        0Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AK</span><br><span class="line">        xVWUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Wr1j6rW3Jr1lIxAIcVC2z280aVAFwI0_Jr</span><br><span class="line">        0_Gr1lIxAIcVC2z280aVCY1x0267AKxVWUJVW8JwCE64xvF2IEb7IF0Fy7YxBIdaVFxhVj</span><br><span class="line">        vjDU0xZFpf9x0zEzBTiUUUUU&#x3D;</span><br><span class="line">X-CM-SenderInfo: hwhv3ims6f02phpdxzgofq&#x2F;</span><br><span class="line"></span><br><span class="line">PGh0bWw+DQo8aGVhZD4NCiAgICA8bWV0YSBodHRwLWVxdWl2PSdDb250ZW50LVR5cGUnIGNvbnRl</span><br><span class="line">bnQ9J3RleHQvaHRtbDsgY2hhcnNldD1VVEYtOCc+DQo8L2hlYWQ+DQo8Ym9keT4NCjxzdHlsZT4N</span><br><span class="line">CiAgICBmb250ew0KICAgICAgICBsaW5lLWhlaWdodDogMS42Ow0KICAgIH0NCiAgICB1bCxvbHsN</span><br><span class="line">CiAgICAgICAgcGFkZGluZy1sZWZ0OiAyMHB4Ow0KICAgICAgICBsaXN0LXN0eWxlLXBvc2l0aW9u</span><br><span class="line">OiBpbnNpZGU7DQogICAgfQ0KPC9zdHlsZT4NCjxkaXYgc3R5bGUgPSAnZm9udC1mYW1pbHk65b6u</span><br><span class="line">6L2v6ZuF6buRLFZlcmRhbmEsJnF1b3Q7TWljcm9zb2Z0IFlhaGVpJnF1b3Q7LFNpbVN1bixzYW5z</span><br><span class="line">LXNlcmlmO2ZvbnQtc2l6ZToxNHB4OyBsaW5lLWhlaWdodDoxLjY7Jz4NCiAgICA8ZGl2ID48L2Rp</span><br><span class="line">dj48ZGl2PgogICAgPGRpdj4KICAgICAgICA8c3Bhbj5zbXRwIHRlc3QKICAgICAgICA8L3NwYW4+</span><br><span class="line">PC9kaXY+CiAgICA8ZGl2PgogICAgICAgIDxzcGFuPgogICAgICAgICAgICA8YnI+CiAgICAgICAg</span><br><span class="line">PC9zcGFuPgogICAgPC9kaXY+CiAgICA8ZGl2IGlkPSJudGVzLXBjbWFjLXNpZ25hdHVyZSIgc3R5</span><br><span class="line">bGU9ImZvbnQtZmFtaWx5Oiflvq7ova&#x2F;pm4Xpu5EnIj4KICAgICAKICAgIDxkaXYgc3R5bGU9ImZv</span><br><span class="line">bnQtc2l6ZToxNHB4OyBwYWRkaW5nOiAwOyAgbWFyZ2luOjA7bGluZS1oZWlnaHQ6MTRweDsiPgog</span><br><span class="line">ICAgICAgIDxkaXYgc3R5bGU9InBhZGRpbmctYm90dG9tOjZweDttYXJnaW4tYm90dG9tOjEwcHg7</span><br><span class="line">Ym9yZGVyLWJvdHRvbToxcHggc29saWQgI2U2ZTZlNjtkaXNwbGF5OmlubGluZS1ibG9jazsiPgog</span><br><span class="line">ICAgICAgICAgICAgICAgICAgIDxhIGhyZWY9Imh0dHBzOi8vbWFhcy5tYWlsLjE2My5jb20vZGFz</span><br><span class="line">aGktd2ViLWV4dGVuZC9odG1sL3Byb1NpZ25hdHVyZS5odG1sP2Z0bElkPTEmYW1wO25hbWU9dGVz</span><br><span class="line">dDAyJmFtcDt1aWQ9dGVzdDAyJTQwY29yZW1haWwuY24mYW1wO2ljb25Vcmw9aHR0cHMlM0ElMkYl</span><br><span class="line">MkZtYWlsLW9ubGluZS5ub3Nkbi4xMjcubmV0JTJGcWl5ZWxvZ28lMkZkZWZhdWx0QXZhdGFyLnBu</span><br><span class="line">ZyZhbXA7aXRlbXM9JTVCJTIydGVzdDAyJTQwY29yZW1haWwuY24lMjIlNUQiIHN0eWxlPSJkaXNw</span><br><span class="line">bGF5OmJsb2NrO2JhY2tncm91bmQ6I2ZmZjsgbWF4LXdpZHRoOiA0MDBweDsgX3dpZHRoOiA0MDBw</span><br><span class="line">eDtwYWRkaW5nOjE1cHggMCAxMHB4IDA7dGV4dC1kZWNvcmF0aW9uOiBub25lOyBvdXRsaW5lOm5v</span><br><span class="line">bmU7LXdlYmtpdC10YXAtaGlnaGxpZ2h0LWNvbG9yOnRyYW5zcGFyZW50Oy13ZWJraXQtdGV4dC1z</span><br><span class="line">aXplLWFkanVzdDpub25lICFpbXBvcnRhbnQ7dGV4dC1zaXplLWFkanVzdDpub25lICFpbXBvcnRh</span><br><span class="line">bnQ7Ij4KICAgICAgICAgICAgPHRhYmxlIGNlbGxwYWRkaW5nPSIwIiBzdHlsZT0id2lkdGg6IDEw</span><br><span class="line">MCU7IG1heC13aWR0aDogMTAwJTsgdGFibGUtbGF5b3V0OiBmaXhlZDsgYm9yZGVyLWNvbGxhcHNl</span><br><span class="line">OiBjb2xsYXBzZTtjb2xvcjogIzliOWVhMTtmb250LXNpemU6IDE0cHg7bGluZS1oZWlnaHQ6MS4z</span><br><span class="line">Oy13ZWJraXQtdGV4dC1zaXplLWFkanVzdDpub25lICFpbXBvcnRhbnQ7dGV4dC1zaXplLWFkanVz</span><br><span class="line">dDpub25lICFpbXBvcnRhbnQ7Ij4KICAgICAgICAgICAgICAgIDx0Ym9keSBzdHlsZT0iZm9udC1m</span><br><span class="line">YW1pbHk6ICdQaW5nRmFuZyBTQycsICdIaXJhZ2lubyBTYW5zIEdCJywnV2VuUXVhbllpIE1pY3Jv</span><br><span class="line">IEhlaScsICdNaWNyb3NvZnQgWWFoZWknLCAn5b6u6L2v6ZuF6buRJywgdmVyZGFuYSAhaW1wb3J0</span><br><span class="line">YW50OyB3b3JkLXdyYXA6YnJlYWstd29yZDsgd29yZC1icmVhazpicmVhay1hbGw7LXdlYmtpdC10</span><br><span class="line">ZXh0LXNpemUtYWRqdXN0Om5vbmUgIWltcG9ydGFudDt0ZXh0LXNpemUtYWRqdXN0Om5vbmUgIWlt</span><br><span class="line">cG9ydGFudDsiPgogICAgICAgICAgICAgICAgICAgIDx0cj4KICAgICAgICAgICAgICAgICAgICAg</span><br><span class="line">ICAgICAgIDx0ZCB3aWR0aD0iMzgiIHN0eWxlPSJwYWRkaW5nOjA7IGJveC1zaXppbmc6IGJvcmRl</span><br><span class="line">ci1ib3g7IHdpZHRoOiAzOHB4OyI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgPGlt</span><br><span class="line">ZyB3aWR0aD0iMzgiIGhlaWdodD0iMzgiIHN0eWxlPSJ2ZXJ0aWNhbC1hbGlnbjptaWRkbGU7IHdp</span><br><span class="line">ZHRoOiAzOHB4OyBoZWlnaHQ6IDM4cHg7IGJvcmRlci1yYWRpdXM6NTAlOyIgc3JjPSJodHRwczov</span><br><span class="line">L21haWwtb25saW5lLm5vc2RuLjEyNy5uZXQvcWl5ZWxvZ28vZGVmYXVsdEF2YXRhci5wbmciPgog</span><br><span class="line">ICAgICAgICAgICAgICAgICAgICAgICAgICAgPC90ZD4KICAgICAgICAgICAgICAgICAgICAgICAg</span><br><span class="line">ICAgIDx0ZCBzdHlsZT0icGFkZGluZzogMCAwIDAgMTBweDsgY29sb3I6ICMzMTM1M2I7Ij4KICAg</span><br><span class="line">ICAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6IDE2cHg7</span><br><span class="line">Zm9udC13ZWlnaHQ6Ym9sZDsgd2lkdGg6MTAwJTsgd2hpdGUtc3BhY2U6IG5vd3JhcDsgb3ZlcmZs</span><br><span class="line">b3c6aGlkZGVuO3RleHQtb3ZlcmZsb3c6IGVsbGlwc2lzOyI+dGVzdDAyPC9kaXY+CiAgICAgICAg</span><br><span class="line">ICAgICAgICAgICAgICAgICAgICA8L3RkPgogICAgICAgICAgICAgICAgICAgIDwvdHI+CiAgICAg</span><br><span class="line">ICAgICAgICAgICAgICAgICAgIDx0ciB3aWR0aD0iMTAwJSIgc3R5bGU9ImZvbnQtc2l6ZTogMTRw</span><br><span class="line">eCAhaW1wb3J0YW50OyB3aWR0aDogMTAwJTsiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAg</span><br><span class="line">PHRkIGNvbHNwYW49IjIiIHN0eWxlPSJwYWRkaW5nOjEwcHggMCAwIDA7IGZvbnQtc2l6ZToxNHB4</span><br><span class="line">ICFpbXBvcnRhbnQ7IHdpZHRoOiAxMDAlOyI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg</span><br><span class="line">ICAgICAgIDxkaXYgc3R5bGU9IndpZHRoOiAxMDAlO2ZvbnQtc2l6ZTogMTRweCAhaW1wb3J0YW50</span><br><span class="line">O3dvcmQtd3JhcDpicmVhay13b3JkO3dvcmQtYnJlYWs6YnJlYWstYWxsOyI+dGVzdDAyQGNvcmVt</span><br><span class="line">YWlsLmNuPC9kaXY+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8L3RkPgogICAgICAgICAg</span><br><span class="line">ICAgICAgICAgICAgICA8L3RyPgogICAgICAgICAgICAgICAgPC90Ym9keT4KICAgICAgICAgICAg</span><br><span class="line">PC90YWJsZT4KICAgICAgICA8L2E+CiAgICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KICAgIDxkaXYg</span><br><span class="line">c3R5bGU9ImZvbnQtc2l6ZToxMnB4O2NvbG9yOiNiNWI5YmQ7bGluZS1oZWlnaHQ6MThweDsiPgog</span><br><span class="line">ICAgICAgIDxzcGFuPuetvuWQjeeUsTwvc3Bhbj4KICAgICAgICA8YSBzdHlsZT0idGV4dC1kZWNv</span><br><span class="line">cmF0aW9uOiBub25lO2NvbG9yOiM0MTk2ZmY7cGFkZGluZzowIDVweDsiIGhyZWY9Imh0dHBzOi8v</span><br><span class="line">bWFpbC4xNjMuY29tL2Rhc2hpL2RscHJvLmh0bWw&#x2F;ZnJvbT1tYWlsODEiPue9keaYk+mCrueuseWk</span><br><span class="line">p+W4iDwvYT4KICAgICAgICA8c3Bhbj7lrprliLY8L3NwYW4+CiAgICA8L2Rpdj4KIDwvZGl2Pgo8</span><br><span class="line">L2Rpdj48IS0t8J+YgC0tPg0KPC9kaXY+DQo8L2JvZHk+DQo8L2h0bWw+</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+<p>发送NOOP命令并无实际作用，主要是用于和服务器保持数据连接不要中断。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NOOP</span><br><span class="line">+OK core mail</span><br></pre></td></tr></table></figure>
+<p>我们还可以使用DELE命令来删除指定的邮件，删除后使用LIST查看效果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">DELE 4</span><br><span class="line">+OK core mail</span><br><span class="line">LIST</span><br><span class="line">+OK 5 19099</span><br><span class="line">1 7959</span><br><span class="line">2 1199</span><br><span class="line">3 6445</span><br><span class="line">5 2297</span><br><span class="line">6 1199</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+<p>还可以使用RSET命令来进行撤销删除的操作并且使用LIST命令查看效果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">RSET</span><br><span class="line">+OK core mail</span><br><span class="line">LIST</span><br><span class="line">+OK 6 25568</span><br><span class="line">1 7959</span><br><span class="line">2 1199</span><br><span class="line">3 6445</span><br><span class="line">4 6469</span><br><span class="line">5 2297</span><br><span class="line">6 1199</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+
+<p>最后使用QUIT命令断开连接退出系统：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">QUIT</span><br><span class="line">+OK core mail</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200507-wireshark-analysis-smtp\" rel="bookmark">Wireshark对SMTP抓包分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200513-wireshark-analysis-imap\" rel="bookmark">Wireshark对IMAP抓包分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190608-wireshark-stu\" rel="bookmark">Wireshark抓包分析校园网登录过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190609-wireshark-dhcp\" rel="bookmark">Wireshark抓包分析DHCP以及路由干扰过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200508-rfc8314-465-587-part-translation\" rel="bookmark">RFC8314文档中对465端口和587端口的阐述</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/wireshark/" rel="tag"># wireshark</a>
+              <a href="/tags/mail/" rel="tag"># mail</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200508-rfc8314-465-587-part-translation/" rel="prev" title="RFC8314文档中对465端口和587端口的阐述">
+      <i class="fa fa-chevron-left"></i> RFC8314文档中对465端口和587端口的阐述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200512-windows-terminal-wsl2-centos-installation/" rel="next" title="Windows Terminal + WSL2 + CENTOS 配置Windows命令终端">
+      Windows Terminal + WSL2 + CENTOS 配置Windows命令终端 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81POP3%E7%AE%80%E4%BB%8B"><span class="nav-text">1、POP3简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E6%8A%93%E5%8C%85%E7%8E%AF%E5%A2%83"><span class="nav-text">2、抓包环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81POP3%E6%95%B0%E6%8D%AE%E5%8C%85%E5%88%86%E6%9E%90"><span class="nav-text">3、POP3数据包分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81telnet%E6%93%8D%E4%BD%9C"><span class="nav-text">4、telnet操作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

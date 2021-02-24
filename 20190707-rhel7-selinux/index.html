@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="RHEL7中的SELinux简单介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RHEL7的SELinux简介">
+<meta property="og:url" content="https://tinychen.com/20190707-rhel7-selinux/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="RHEL7中的SELinux简单介绍。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190707/hzW6RgLKHPPa.png">
+<meta property="article:published_time" content="2019-07-07T04:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-07T04:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190707/hzW6RgLKHPPa.png">
+
+<link rel="canonical" href="https://tinychen.com/20190707-rhel7-selinux/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>RHEL7的SELinux简介 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190707-rhel7-selinux/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RHEL7的SELinux简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-07 12:00:00" itemprop="dateCreated datePublished" datetime="2019-07-07T12:00:00+08:00">2019-07-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>5 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>RHEL7中的SELinux简单介绍。</p>
+<a id="more"></a>
+
+<h1 id="1、SELinux简介"><a href="#1、SELinux简介" class="headerlink" title="1、SELinux简介"></a>1、SELinux简介</h1><p>SELinux，Security Enhanced Linux 的缩写，也就是安全强化的 Linux，是由美国国家安全局（NSA）联合其他安全机构（比如 SCC 公司）共同开发的，旨在增强传统 Linux 操作系统的安全性，解决传统 Linux 系统中自主访问控制（DAC）系统中的各种权限问题（如 root 权限过高等）。</p>
+<p>SELinux 项目在 2000 年以 GPL 协议的形式开源，当 Red Hat 在其 Linux 发行版本中包括了 SELinux 之后，SELinux 才逐步变得流行起来。现在，SELinux 已经被许多组织广泛使用，几乎所有的 Linux  内核 2.6 以上版本，都集成了 SELinux 功能。  </p>
+<blockquote>
+<p>对于 SELinux，初学者可以这么理解，它是部署在 Linux 上用于增强系统安全的功能模块。</p>
+</blockquote>
+<p>我们知道，传统的 Linux 系统中，默认权限是对文件或目录的所有者、所属组和其他人的读、写和执行权限进行控制，这种控制方式称为<strong>自主访问控制（DAC）方式</strong>；而在 SELinux 中，采用的是<strong>强制访问控制（MAC）系统</strong>，也就是控制一个进程对具体文件系统上面的文件或目录是否拥有访问权限，而判断进程是否可以访问文件或目录的依据，取决于 SELinux 中设定的很多策略规则。</p>
+<p>说到这里，读者有必要详细地了解一下这两个访问控制系统的特点：</p>
+<p>不过，系统中有这么多的进程，也有这么多的文件，如果手工来进行分配和指定，那么工作量过大。所以 SELinux 提供了很多的默认策略规则，这些策略规则已经设定得比较完善，我们稍后再来学习如何查看和管理这些策略规则。</p>
+<ul>
+<li><strong>自主访问控制系统（Discretionary Access Control，DAC）</strong>是 Linux 的默认访问控制方式，也就是依据用户的身份和该身份对文件及目录的 rwx 权限来判断是否可以访问。不过，在 DAC 访问控制的实际使用中我们也发现了一些问题：<ol>
+<li>root 权限过高，rwx 权限对 root 用户并不生效，一旦 root 用户被窃取或者 root 用户本身的误操作，都是对 Linux 系统的致命威胁。</li>
+<li>Linux 默认权限过于简单，只有所有者、所属组和其他人的身份，权限也只有读、写和执行权限，并不利于权限细分与设定。</li>
+<li>不合理权限的分配会导致严重后果，比如给系统敏感文件或目录设定 777 权限，或给敏感文件设定特殊权限——SetUID 权限等。</li>
+</ol>
+</li>
+<li><strong>强制访问控制（Mandatory Access Control，MAC）</strong>是通过 SELinux 的默认策略规则来控制特定的进程对系统的文件资源的访问。也就是说，即使你是 root 用户，但是当你访问文件资源时，如果使用了不正确的进程，那么也是不能访问这个文件资源的。</li>
+</ul>
+<p>这样一来，SELinux 控制的就不单单只是用户及权限，还有进程。每个进程能够访问哪个文件资源，以及每个文件资源可以被哪些进程访问，都靠 SELinux 的规则策略来确定。</p>
+<h1 id="2、SELinux作用"><a href="#2、SELinux作用" class="headerlink" title="2、SELinux作用"></a>2、SELinux作用</h1><blockquote>
+<p>注意，在 SELinux 中，Linux 的默认权限还是有作用的，也就是说，一个用户要能访问一个文件，既要求这个用户的权限符合 rwx 权限，也要求这个用户的进程符合 SELinux 的规定。</p>
+</blockquote>
+<p>不过，系统中有这么多的进程，也有这么多的文件，如果手工来进行分配和指定，那么工作量过大。所以 SELinux 提供了很多的默认策略规则，这些策略规则已经设定得比较完善，我们稍后再来学习如何查看和管理这些策略规则。</p>
+<blockquote>
+<p>为了使读者清楚地了解 SELinux 所扮演的角色，这里举一个例子，假设 apache 上发现了一个漏洞，使得某个远程用户可以访问系统的敏感文件（如 /etc/shadow）。如果我们的 Linux 中启用了 SELinux，那么，因为 apache 服务的进程并不具备访问 /etc/shadow 的权限，所以这个远程用户通过 apache 访问 /etc/shadow文件就会被 SELinux 所阻挡，起到保护 Linux 系统的作用  。</p>
+</blockquote>
+<blockquote>
+<p>需要注意的是，SELinux 的 MAC 并不会完全取代 DAC，恰恰相反，对于 Linux 系统安全来说，它是一个额外的安全层，换句话说，当使用 SELinux 时，DAC 仍然被使用，且会首先被使用，如果允许访问，再使用 SELinux 策略；反之，如果 DAC 规则拒绝访问，则根本无需使用 SELinux 策略。<br>例如，若用户尝试对没有执行权限（rw-）的文件进行执行操作，那么传统的 DAC 规则就会拒绝用户访问，因此，也就无需再使用 SELinux 策略。</p>
+</blockquote>
+<p>相比传统的 Linux DAC 安全控制方式，SELinux 具有诸多好处，比如说：</p>
+<ul>
+<li>它使用的是 MAC 控制方式，这被认为是最强的访问控制方式；</li>
+<li>它赋予了主体（用户或进程）最小的访问特权，这也就意味着，每个主体仅被赋予了完成相关任务所必须的一组有限的权限。通过赋予最小访问特权，可以防止主体对其他用户或进程产生不利的影响；</li>
+<li>SELinux 管理过程中，每个进程都有自己的运行区域（称为域），各进程仅运行在自己的域内，无法访问其他进程和文件，除非被授予了特殊权限。</li>
+<li>SELinux 可以调整到 Permissive 模式，此模式允许查看在系统上执行 SELinux 后所产生的印象。在 Permissive 模式中，SELinux 仍然会记录它所认为的安全漏洞，但并不会阻止它们。</li>
+</ul>
+<p>其实，想要了解 SELinux 的优点，最直接的办法就是查看当 Linux 系统上没有运行 SELinux 时会发生什么事情。</p>
+<ol>
+<li>根据相关的所有者和所属组的rwx权限，可以访问任何文件或目录；</li>
+<li>完成存在安全隐患的活动，比如允许上传文件或更改系统显示；</li>
+<li>可以监听任何端口的传入请求。</li>
+</ol>
+<p>但在一个受 SELinux 约束的系统上，httpd 守护进程受到了更加严格的控制。仍然使用上面的示例，httped仅能监听 SELinux 允许其监听的端口。SELinux 还可以防止 httpd 访问任何没有正确设置安全上下文的文件，并拒绝没有再 SELinux 中显式启用的不安全活动。</p>
+<p><strong>因此，从本质上讲，SELinux 最大程序上限制了 Linux 系统中的恶意代码活动。</strong></p>
+<h1 id="3、SELinux工作模式"><a href="#3、SELinux工作模式" class="headerlink" title="3、SELinux工作模式"></a>3、SELinux工作模式</h1><h2 id="3-1-基本概念解释"><a href="#3-1-基本概念解释" class="headerlink" title="3.1 基本概念解释"></a>3.1 基本概念解释</h2><p>在解释 SELinux 的工作模式之前，先解释几个概念。</p>
+<ul>
+<li><p><strong>主体（Subject）</strong>：就是想要访问文件或目录资源的进程。想要得到资源，基本流程是这样的：由用户调用命令，由命令产生进程，由进程去访问文件或目录资源。在自主访问控制系统中（Linux 默认权限中），靠权限控制的主体是用户；而在强制访问控制系统中（SELinux 中），靠策略规则控制的主体则是进程。</p>
+</li>
+<li><p><strong>目标（Object）</strong>：这个概念比较明确，就是需要访问的文件或目录资源。</p>
+</li>
+<li><p><strong>策略（Policy）</strong>：Linux 系统中进程与文件的数量庞大，那么限制进程是否可以访问文件的 SELinux 规则数量就更加烦琐，如果每个规则都需要管理员手工设定，那么 SELinux 的可用性就会极低。还好我们不用手工定义规则，SELinux 默认定义了两个策略，规则都已经在这两个策略中写好了，默认只要调用策略就可以正常使用了。这两个默认策略如下</p>
+<ul>
+<li><strong>targeted：这是 SELinux 的默认策略，这个策略主要是限制网络服务的，对本机系统的限制极少。我们使用这个策略已经足够了。</strong></li>
+<li><strong>mls：多级安全保护策略，这个策略限制得更为严格。</strong></li>
+</ul>
+</li>
+<li><p><strong>安全上下文（Security Context）</strong>：每个进程、文件和目录都有自己的安全上下文，进程具体是否能够访问文件或目录，就要看这个安全上下文是否匹配。如果进程的安全上下文和文件或目录的安全上下文能够匹配，则该进程可以访问这个文件或目录。当然，判断进程的安全上下文和文件或目录的安全上下文是否匹配，则需要依靠策略中的规则。</p>
+<blockquote>
+<p>举个例子，我们需要找对象，男人可以看作主体，女人就是目标了。而男人是否可以追到女人（主体是否可以访问目标），主要看两个人的性格是否合适（主体和目标的安全上下文是否匹配）。不过，两个人的性格是否合适，是需要靠生活习惯、为人处世、家庭环境等具体的条件来进行判断的（安全上下文是否匹配是需要通过策略中的规则来确定的）。</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/blog/20190707/hzW6RgLKHPPa.png"></p>
+<p>解释一下这张示意图：当主体想要访问目标时，如果系统中启动了 SELinux，则主体的访问请求首先需要和 SELinux 中定义好的策略进行匹配。如果进程符合策略中定义好的规则，则允许访问，这时进程的安全上下文就可以和目标的安全上下文进行匹配；如果比较失败，则拒绝访问，并通过 AVC（Access Vector Cache，访问向量缓存，主要用于记录所有和 SELinux 相关的访问统计信息）生成拒绝访问信息。如果安全上下文匹配，则可以正常访问目标文件。当然，最终是否可以真正地访问到目标文件，还要匹配产生进程（主体）的用户是否对目标文件拥有合理的读、写、执行权限。</p>
+<p>我们在进行 SELinux 管理的时候，一般只会修改文件或目录的安全上下文，使其和访问进程的安全上下文匹配或不匹配，用来控制进程是否可以访问文件或目录资源；而很少会去修改策略中的具体规则，因为规则实在太多了，修改起来过于复杂。不过，我们是可以人为定义规则是否生效，用以控制规则的启用与关闭的。  </p>
+<h2 id="3-2-三种工作模式"><a href="#3-2-三种工作模式" class="headerlink" title="3.2 三种工作模式"></a>3.2 三种工作模式</h2><p><strong>SELinux 提供了 3 种工作模式：Disabled、Permissive 和 Enforcing，而每种模式都为 Linux 系统安全提供了不同的好处。</strong></p>
+<h3 id="Disable工作模式（关闭模式）"><a href="#Disable工作模式（关闭模式）" class="headerlink" title="Disable工作模式（关闭模式）"></a><strong>Disable工作模式（关闭模式）</strong></h3><p>在 Disable 模式中，SELinux 被关闭，默认的 DAC 访问控制方式被使用。对于那些不需要增强安全性的环境来说，该模式是非常有用的。</p>
+<blockquote>
+<p>例如，若从你的角度看正在运行的应用程序工作正常，但是却产生了大量的 SELinux AVC 拒绝消息，最终可能会填满日志文件，从而导致系统无法使用。在这种情况下，最直接的解决方法就是禁用 SELinux，当然，你也可以在应用程序所访问的文件上设置正确的安全上下文。</p>
+</blockquote>
+<p>需要注意的是，在禁用 SELinux 之前，需要考虑一下是否可能会在系统上再次使用 SELinux，如果决定以后将其设置为 <code>Enforcing</code> 或 <code>Permissive</code>，那么当下次重启系统时，系统将会通过一个自动 SELinux 文件重新进程标记。</p>
+<p>关闭 SELinux 的方式也很简单，只需编辑配置文件 <code>/etc/selinux/config</code>，并将文本中 <code>SELINUX=</code> 更改为 <code>SELINUX=disabled</code> 即可，重启系统后，SELinux 就被禁用了。</p>
+<h3 id="Permissive工作模式（宽容模式）"><a href="#Permissive工作模式（宽容模式）" class="headerlink" title="Permissive工作模式（宽容模式）"></a><strong>Permissive工作模式（宽容模式）</strong></h3><p>在 Permissive 模式中，SELinux 被启用，但安全策略规则并没有被强制执行。当安全策略规则应该拒绝访问时，访问仍然被允许。然而，此时会向日志文件发送一条消息，表示该访问应该被拒绝。</p>
+<p>SELinux Permissive 模式主要用于以下几种情况：</p>
+<ul>
+<li>审核当前的 SELinux 策略规则；</li>
+<li>测试新应用程序，看看将 SELinux 策略规则应用到这些程序时会有什么效果；</li>
+<li>解决某一特定服务或应用程序在 SELinux 下不再正常工作的故障。</li>
+</ul>
+<p>某些情况下，可使用 audit2allow 命令来读取 SELinux 审核日志并生成新的 SELinux 规则，从而有选择性地允许被拒绝的行为，而这也是一种在不禁用 SELinux 的情况下，让应用程序在 Linux 系统上工作的快速方法。</p>
+<h3 id="Enforcing工作模式（强制模式）"><a href="#Enforcing工作模式（强制模式）" class="headerlink" title="Enforcing工作模式（强制模式）"></a><strong>Enforcing工作模式（强制模式）</strong></h3><p>从此模式的名称就可以看出，在 Enforcing 模式中， SELinux 被启动，并强制执行所有的安全策略规则。</p>
+<h1 id="4、SELinux配置文件"><a href="#4、SELinux配置文件" class="headerlink" title="4、SELinux配置文件"></a>4、SELinux配置文件</h1><p>SELinux 配置只能由<code>root</code> 用户进行设置和修改。配置和策略文件位于 <code>/etc/selinux</code> 目录中，主配置文件位 <code>/etc/selinux/config</code> 文件，该文件中的内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/selinux/config</span></span><br><span class="line"><span class="comment"># This file controls the state of SELinux on the system.</span></span><br><span class="line"><span class="comment"># SELINUX= can take one of these three values：</span></span><br><span class="line"><span class="comment"># enforcing - SELinux security policy is enforced.</span></span><br><span class="line"><span class="comment"># permissive - SELinux prints warnings instead of enforcing.</span></span><br><span class="line"><span class="comment"># disabled - No SELinux policy is loaded.</span></span><br><span class="line">SELINUX=enforcing</span><br><span class="line"><span class="comment"># 指定SELinux的运行模式。有enforcing（强制模式）、permissive（宽容模式）、disabled（不生效）三种模式</span></span><br><span class="line"><span class="comment"># SELINUXTYPE= can take one of these two values：</span></span><br><span class="line"><span class="comment"># targeted - Targeted processes are protected，</span></span><br><span class="line"><span class="comment"># mls - Multi Level Security protection.</span></span><br><span class="line">SELINUXTYPE=targeted</span><br><span class="line"><span class="comment"># 指定SELinux的默认策略。有 targeted（针对性保护策略，是默认策略）和 mls（多级安全保护策略）两种策略</span></span><br></pre></td></tr></table></figure>
+
+<p>主配置文件中，除去以‘#’符号开头的注释行，有效配置参数仅有 2 行。其中，<code>SELinux=enforcing</code> 为 SELinux 默认的工作模式，有效值还可以是 permissive 和 disabled；<code>SELINUXTYPE=targeted</code> 用于指定 SELinux 的默认策略。</p>
+<p><strong>这里需要注意，如果从强制模式（enforcing）、宽容模式（permissive）切换到关闭模式（disabled），或者从关闭模式切换到其他两种模式，则必须重启 Linux 系统才能生效。但是强制模式和宽容模式这两种模式互相切换不用重启 Linux 系统就可以生效。</strong>这是因为 SELinux 是整合到 Linux 内核中的，所以必须重启才能正确关闭和启动。而且，如果从关闭模式切换到启动模式，那么重启 Linux 系统的速度会比较慢，那是因为需要重新写入安全上下文信息。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190310-centos-install-mysql\" rel="bookmark">CentOS7安装MySQL</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190317-centos-install-jdk\" rel="bookmark">CentOS配置JDK环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190407-aliyun-centos-apache-https\" rel="bookmark">阿里云轻量级应用服务器CentOS系统Apache配置Https</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190413-centos-install-python\" rel="bookmark">CentOS配置Python3开发环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190521-centos-install-mariadb\" rel="bookmark">CentOS7安装MariaDB</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190707-rhel7-break-passwd/" rel="prev" title="RHEL7破解ROOT密码">
+      <i class="fa fa-chevron-left"></i> RHEL7破解ROOT密码
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190708-rhel7-yum-repo/" rel="next" title="RHEL7的yum简介">
+      RHEL7的yum简介 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81SELinux%E7%AE%80%E4%BB%8B"><span class="nav-text">1、SELinux简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81SELinux%E4%BD%9C%E7%94%A8"><span class="nav-text">2、SELinux作用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81SELinux%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-text">3、SELinux工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E8%A7%A3%E9%87%8A"><span class="nav-text">3.1 基本概念解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E4%B8%89%E7%A7%8D%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-text">3.2 三种工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Disable%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%85%B3%E9%97%AD%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-text">Disable工作模式（关闭模式）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Permissive%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%AE%BD%E5%AE%B9%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-text">Permissive工作模式（宽容模式）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Enforcing%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%BC%BA%E5%88%B6%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-text">Enforcing工作模式（强制模式）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81SELinux%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">4、SELinux配置文件</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

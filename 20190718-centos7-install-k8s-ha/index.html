@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在VMware虚拟机中的CentOS7集群部署高可用的k8s集群环境(v1.15)。 这里有两篇基础知识的补充和单master节点集群的搭建过程，有需要的同学可以看一下。 k8s重要概念及各组件简介 在CentOS7上部署k8s集群(v1.15)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在CentOS7上部署高可用的k8s集群(v1.15)">
+<meta property="og:url" content="https://tinychen.com/20190718-centos7-install-k8s-ha/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="在VMware虚拟机中的CentOS7集群部署高可用的k8s集群环境(v1.15)。 这里有两篇基础知识的补充和单master节点集群的搭建过程，有需要的同学可以看一下。 k8s重要概念及各组件简介 在CentOS7上部署k8s集群(v1.15)">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190718/3WGsaJ3zAOPe.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/sqMD0W66d4AF.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/przVGhQPmirw.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/BM1ThaHUbcgV.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/bFdDgyBt897N.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/XQdoAPF9dvBU.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/ok3yVOxN6vYc.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/KMrEwDxiDf17.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/E50I4UqxbbuR.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/LHqaqwhqRgIj.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/c2MnYCxxCJiQ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/QnXPwJikRui0.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/Eo0C4JnfTGsg.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190717/Tt8eD0VvRoVw.png">
+<meta property="article:published_time" content="2019-07-18T03:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-18T03:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="graduation">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190718/3WGsaJ3zAOPe.png">
+
+<link rel="canonical" href="https://tinychen.com/20190718-centos7-install-k8s-ha/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>在CentOS7上部署高可用的k8s集群(v1.15) | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190718-centos7-install-k8s-ha/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在CentOS7上部署高可用的k8s集群(v1.15)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-18 11:00:00" itemprop="dateCreated datePublished" datetime="2019-07-18T11:00:00+08:00">2019-07-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index">
+                    <span itemprop="name">devops</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>14 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在VMware虚拟机中的CentOS7集群部署高可用的k8s集群环境(v1.15)。</p>
+<p>这里有两篇基础知识的补充和单master节点集群的搭建过程，有需要的同学可以看一下。</p>
+<p><a href="https://tinychen.com/20190715-k8s-concepts-intro/">k8s重要概念及各组件简介</a></p>
+<p><a href="https://tinychen.com/20190716-centos7-install-k8s/">在CentOS7上部署k8s集群(v1.15)</a></p>
+<a id="more"></a>
+
+<h1 id="1、前期工作"><a href="#1、前期工作" class="headerlink" title="1、前期工作"></a>1、前期工作</h1><h2 id="1-1-什么是高可用集群？"><a href="#1-1-什么是高可用集群？" class="headerlink" title="1.1 什么是高可用集群？"></a>1.1 什么是高可用集群？</h2><p>简单来说就是master节点不止一个的集群，我们知道k8s的node节点中，非master节点都需要听从master节点来进行任务的调度分配和负载均衡等操作，这样的好处就是我们只需要操作master节点就可以调度所有的node节点，坏处就是如果master节点崩了，那么整个集群也就崩掉了。所以这里的解决方案就是配置多个master节点，如果一个崩掉了还有别的备用备用节点顶上，不至于出现崩溃的情况。</p>
+<h2 id="1-2-集群机器"><a href="#1-2-集群机器" class="headerlink" title="1.2 集群机器"></a>1.2 集群机器</h2><p>这里必须要说一下，k8s对每个节点的机器配置的最低要求是2C2G，即两核心的CPU，2G的内存，低于这个配置也不是不能用，只是在初始化的时候会警告而已。这里小七采用的是虚拟机的方法（穷学生没有真机集群），具体的配置如下表。</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">配置</th>
+<th align="center">IP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">VIP</td>
+<td align="center">不需要虚拟机，留一个IP即可</td>
+<td align="center">192.168.100.10</td>
+</tr>
+<tr>
+<td align="center">master20</td>
+<td align="center">8C4G，CentOS7.6</td>
+<td align="center">192.168.100.20</td>
+</tr>
+<tr>
+<td align="center">master21</td>
+<td align="center">8C4G，CentOS7.6</td>
+<td align="center">192.168.100.21</td>
+</tr>
+<tr>
+<td align="center">master22</td>
+<td align="center">8C4G，CentOS7.6</td>
+<td align="center">192.168.100.22</td>
+</tr>
+<tr>
+<td align="center">node30</td>
+<td align="center">8C8G，CentOS7.6</td>
+<td align="center">192.168.100.30</td>
+</tr>
+<tr>
+<td align="center">node31</td>
+<td align="center">8C8G，CentOS7.6</td>
+<td align="center">192.168.100.31</td>
+</tr>
+<tr>
+<td align="center">node32</td>
+<td align="center">8C8G，CentOS7.6</td>
+<td align="center">192.168.100.32</td>
+</tr>
+</tbody></table>
+<p>真机用的是一块渣渣i7-8700和64G的内存，勉强能撑一下。</p>
+<h2 id="1-3-集群间免密登录"><a href="#1-3-集群间免密登录" class="headerlink" title="1.3 集群间免密登录"></a>1.3 集群间免密登录</h2><p>之前专门写过一篇文章，这里不再赘述。<a href="https://tinychen.com/20190709-multi-ssh/">多主机间实现SSH免密登录</a></p>
+<p>需要注意的是，在hosts文件中，我们还需要为<code>192.168.100.10</code>添加一下解析。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"192.168.100.10  kubernetes.haproxy.com"</span> &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<p>这里的<code>kubernetes.haproxy.com</code>可以改成别的名字，但是注意后面要用到，建议改成有意义的名字。</p>
+<h2 id="1-4-时间同步-所有机器"><a href="#1-4-时间同步-所有机器" class="headerlink" title="1.4 时间同步(所有机器)"></a>1.4 时间同步(所有机器)</h2><p>这里我们使用ntpdate来进行时间同步</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用yum安装ntpdate工具</span></span><br><span class="line">yum install ntpdate -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用阿里云的源同步时间</span></span><br><span class="line">ntpdate ntp1.aliyun.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最后查看一下时间</span></span><br><span class="line">hwclock</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>我们也可以在<code>/etc/cron.hourly/</code>下面直接新建一个文件，将<code>ntpdate ntp1.aliyun.com</code>这条命令写进去，这样cron就会每小时执行一次这个同步时间操作。<a href="https://tinychen.com/20190710-rhel7-cron/">关于cron可以点击这里了解。</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;EOF</span><br><span class="line">ntpdate ntp1.aliyun.com</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="1-5-升级内核-所有机器"><a href="#1-5-升级内核-所有机器" class="headerlink" title="1.5 升级内核(所有机器)"></a>1.5 升级内核(所有机器)</h2><p>建议直接升级centos官方的内核，这样兼容性最好。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看当前内核版本</span></span><br><span class="line">uname -r</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新yum源</span></span><br><span class="line">yum update -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 升级yum源中的最新版内核</span></span><br><span class="line">yum install -y kernel</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190718/3WGsaJ3zAOPe.png"></p>
+<p>此外我们还需要设置一下内核的namespace</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">grubby --args=<span class="string">"user_namespace.enable=1"</span> --update-kernel=<span class="string">"<span class="subst">$(grubby --default-kernel)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新加载内核</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-6-关闭防火墙-所有机器"><a href="#1-6-关闭防火墙-所有机器" class="headerlink" title="1.6 关闭防火墙(所有机器)"></a>1.6 关闭防火墙(所有机器)</h2><p>因为k8s涉及的端口非常多，我们先把防火墙关了，<strong>如果安装了iptable也先关掉。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 关闭centos7自带的firewall防火墙</span></span><br><span class="line">systemctl disable firewalld.service </span><br><span class="line">systemctl stop firewalld.service </span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="1-7-设置selinux-所有机器"><a href="#1-7-设置selinux-所有机器" class="headerlink" title="1.7 设置selinux(所有机器)"></a>1.7 设置selinux(所有机器)</h2><p><strong>来自官网的说明，必须把selinux改为permissive（直接生效无需重启）或者disabled（需要重启生效）</strong></p>
+<blockquote>
+<p>通过命令 <code>setenforce 0</code> 和 <code>sed ...</code> 可以将 SELinux 设置为 permissive 模式(将其禁用)。 只有执行这一操作之后，容器才能访问宿主的文件系统，进而能够正常使用 Pod 网络。您必须这么做，直到 kubelet 做出升级支持 SELinux 为止。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">setenforce 0</span><br><span class="line">sed -i <span class="string">'s/^SELINUX=enforcing$/SELINUX=permissive/'</span> /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以直接修改/etc/selinux/config文件</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>关于SELinux的简单介绍，<a href="https://tinychen.com/20190707-rhel7-selinux/">可以点击这里查看之前的博客。</a></p>
+</blockquote>
+<h2 id="1-8-关闭swap（所有机器）"><a href="#1-8-关闭swap（所有机器）" class="headerlink" title="1.8 关闭swap（所有机器）"></a>1.8 关闭swap（所有机器）</h2><p>k8s官方不推荐我们使用swap分区，所以这里我们也关闭掉。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">swapoff -a</span><br><span class="line"></span><br><span class="line">vim /etc/fstab</span><br><span class="line"><span class="comment"># 注释掉swap分区启动挂载的那一行</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="2、配置ipvs-所有机器"><a href="#2、配置ipvs-所有机器" class="headerlink" title="2、配置ipvs(所有机器)"></a>2、配置ipvs(所有机器)</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用yum源安装ipvs</span></span><br><span class="line">yum install ipvsadm ipset -y</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使配置生效</span></span><br><span class="line">sysctl --system</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加载模块</span></span><br><span class="line">modprobe -- ip_vs</span><br><span class="line">modprobe -- ip_vs_rr</span><br><span class="line">modprobe -- ip_vs_wrr</span><br><span class="line">modprobe -- ip_vs_sh</span><br><span class="line">modprobe -- nf_conntrack_ipv4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看是否加载</span></span><br><span class="line">lsmod | grep ip_vs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置开机自加载</span></span><br><span class="line">cat &lt;&lt;EOF &gt;&gt; /etc/rc.local</span><br><span class="line">modprobe -- ip_vs</span><br><span class="line">modprobe -- ip_vs_rr</span><br><span class="line">modprobe -- ip_vs_wrr</span><br><span class="line">modprobe -- ip_vs_sh</span><br><span class="line">modprobe -- nf_conntrack_ipv4</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">chmod +x /etc/rc.d/rc.local</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="3、配置k8s相关网络参数-所有机器"><a href="#3、配置k8s相关网络参数-所有机器" class="headerlink" title="3、配置k8s相关网络参数(所有机器)"></a>3、配置k8s相关网络参数(所有机器)</h1><p>接着我们需要编辑一个k8s的配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 需要设定/etc/sysctl.d/k8s.conf的系统参数。</span></span><br><span class="line">cat &lt;&lt;EOF &gt; /etc/sysctl.d/k8s.conf</span><br><span class="line">net.ipv4.tcp_keepalive_time = 600</span><br><span class="line">net.ipv4.tcp_keepalive_intvl = 30</span><br><span class="line">net.ipv4.tcp_keepalive_probes = 10</span><br><span class="line">net.ipv4.neigh.default.gc_stale_time = 120</span><br><span class="line">net.ipv4.conf.all.rp_filter = 0</span><br><span class="line">net.ipv4.conf.default.rp_filter = 0</span><br><span class="line">net.ipv4.conf.default.arp_announce = 2</span><br><span class="line">net.ipv4.conf.lo.arp_announce = 2</span><br><span class="line">net.ipv4.conf.all.arp_announce = 2</span><br><span class="line">net.ipv4.ip_forward = 1</span><br><span class="line">net.ipv4.tcp_max_tw_buckets = 5000</span><br><span class="line">net.ipv4.tcp_syncookies = 1</span><br><span class="line">net.ipv4.tcp_max_syn_backlog = 1024</span><br><span class="line">net.ipv4.tcp_synack_retries = 2</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line">net.netfilter.nf_conntrack_max = 2310720</span><br><span class="line">fs.inotify.max_user_watches=89100</span><br><span class="line">fs.may_detach_mounts = 1</span><br><span class="line">fs.file-max = 52706963</span><br><span class="line">fs.nr_open = 52706963</span><br><span class="line">net.bridge.bridge-nf-call-arptables = 1</span><br><span class="line">vm.swappiness = 0</span><br><span class="line">vm.overcommit_memory=1</span><br><span class="line">vm.panic_on_oom=0</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<h1 id="4、配置iptables-所有机器"><a href="#4、配置iptables-所有机器" class="headerlink" title="4、配置iptables(所有机器)"></a>4、配置iptables(所有机器)</h1><p>保险起见，我们还需要配置iptables</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt; /etc/sysctl.conf &lt;&lt;EOF</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">yum install -y bridge-utils.x86_64</span><br><span class="line">modprobe bridge</span><br><span class="line">modprobe br_netfilter</span><br><span class="line"></span><br><span class="line">sysctl -p</span><br><span class="line"></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+<h1 id="5、检查配置-所有机器"><a href="#5、检查配置-所有机器" class="headerlink" title="5、检查配置(所有机器)"></a>5、检查配置(所有机器)</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查系统内核和模块是否适合运行 docker (仅适用于 linux 系统)</span></span><br><span class="line">curl https://raw.githubusercontent.com/docker/docker/master/contrib/check-config.sh &gt; check-config.sh</span><br><span class="line"></span><br><span class="line">bash ./check-config.sh</span><br></pre></td></tr></table></figure>
+
+<p>这里只需要保证必要项通过就可以了。</p>
+<h1 id="6、安装docker-所有机器"><a href="#6、安装docker-所有机器" class="headerlink" title="6、安装docker(所有机器)"></a>6、安装docker(所有机器)</h1><h2 id="6-1-安装docker"><a href="#6-1-安装docker" class="headerlink" title="6.1 安装docker"></a>6.1 安装docker</h2><p>centos版本的decker-ce官方安装指导：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a></p>
+<p>这里我们主要是通过yum的方式来安装，如果出现无法连接docker官网的情况，建议检查一下网络，或者使用rpm的方式进行安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导入官网提供的repo</span></span><br><span class="line">sudo yum install -y yum-utils device-mapper-persistent-data lvm2</span><br><span class="line">sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装docker及其相关组件</span></span><br><span class="line">sudo yum install -y docker-ce docker-ce-cli containerd.io</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动docker</span></span><br><span class="line">sudo systemctl start docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 跑个helloworld看看</span></span><br><span class="line">sudo docker run hello-world</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最后我们还要设置一下开机启动</span></span><br><span class="line">sudo systemctl <span class="built_in">enable</span> docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-2-配置cgroup"><a href="#6-2-配置cgroup" class="headerlink" title="6.2 配置cgroup"></a>6.2 配置cgroup</h2><p>k8s推荐docker的cgroup驱动使用systemd，说是会更稳定，所以这里我们还需要修改一下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## Create /etc/docker directory.</span></span><br><span class="line">mkdir /etc/docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># Setup daemon.</span></span><br><span class="line">cat &gt; /etc/docker/daemon.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"exec-opts"</span>: [<span class="string">"native.cgroupdriver=systemd"</span>],</span><br><span class="line">  <span class="string">"log-driver"</span>: <span class="string">"json-file"</span>,</span><br><span class="line">  <span class="string">"log-opts"</span>: &#123;</span><br><span class="line">    <span class="string">"max-size"</span>: <span class="string">"100m"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"storage-driver"</span>: <span class="string">"overlay2"</span>,</span><br><span class="line">  <span class="string">"storage-opts"</span>: [</span><br><span class="line">    <span class="string">"overlay2.override_kernel_check=true"</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line"></span><br><span class="line"><span class="comment"># Restart Docker</span></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-3-配置普通用户"><a href="#6-3-配置普通用户" class="headerlink" title="6.3 配置普通用户"></a>6.3 配置普通用户</h2><p>默认情况下，普通用户需要使用sudo才能操作docker，我们这里需要进行一些修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换到普通用户</span></span><br><span class="line">su 普通用户名</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建docker组</span></span><br><span class="line">sudo groupadd docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前用户加入docker用户组</span></span><br><span class="line">sudo gpasswd -a <span class="variable">$&#123;USER&#125;</span> docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启docker服务</span></span><br><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="7、安装配置keepalived、haproxy-所有master节点"><a href="#7、安装配置keepalived、haproxy-所有master节点" class="headerlink" title="7、安装配置keepalived、haproxy(所有master节点)"></a>7、安装配置keepalived、haproxy(所有master节点)</h1><h2 id="7-1-安装"><a href="#7-1-安装" class="headerlink" title="7.1 安装"></a>7.1 安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用yum源直接安装</span></span><br><span class="line">yum install socat keepalived haproxy -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> haproxy</span><br><span class="line">systemctl <span class="built_in">enable</span> keepalived</span><br><span class="line"></span><br><span class="line"><span class="comment"># 备份一下原来的配置文件以防万一</span></span><br><span class="line">mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak</span><br><span class="line">mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-2-编辑haproxy配置文件"><a href="#7-2-编辑haproxy配置文件" class="headerlink" title="7.2 编辑haproxy配置文件"></a>7.2 编辑haproxy配置文件</h2><p>首先我们开启系统的日志功能</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;rsyslog.conf     #为其添加日志功能</span><br><span class="line"># Provides UDP syslog reception</span><br><span class="line">$ModLoad imudp</span><br><span class="line">$UDPServerRun 514                   ------&gt;启动udp，启动端口后将作为服务器工作</span><br><span class="line"> </span><br><span class="line"># Provides TCP syslog reception</span><br><span class="line">$ModLoad imtcp</span><br><span class="line">$InputTCPServerRun 514            ------&gt;启动tcp监听端口</span><br><span class="line">local2.*                                                &#x2F;var&#x2F;log&#x2F;haproxy.log</span><br></pre></td></tr></table></figure>
+
+<p>注意配置文件里面的IP要根据自己的master节点实际情况进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt; /etc/haproxy/haproxy.cfg &lt;&lt;EOF</span><br><span class="line">global</span><br><span class="line">    <span class="built_in">log</span>	127.0.0.1	local2</span><br><span class="line">    chroot      /var/lib/haproxy</span><br><span class="line">    pidfile     /var/run/haproxy.pid</span><br><span class="line">    maxconn     1024</span><br><span class="line">    user        haproxy</span><br><span class="line">    group       haproxy</span><br><span class="line">    daemon</span><br><span class="line">    nbproc      1</span><br><span class="line">    stats socket /var/lib/haproxy/stats</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">    mode                    tcp</span><br><span class="line">    <span class="built_in">log</span>                     global</span><br><span class="line">    option                  tcplog</span><br><span class="line">    option                  dontlognull</span><br><span class="line">    option                  redispatch</span><br><span class="line">    retries                 3</span><br><span class="line">    timeout queue           1m</span><br><span class="line">    timeout connect         10s</span><br><span class="line">    timeout client          1m</span><br><span class="line">    timeout server          1m</span><br><span class="line">    timeout check           10s</span><br><span class="line"></span><br><span class="line">listen stats</span><br><span class="line">    mode   	http</span><br><span class="line">    <span class="built_in">bind</span>	0.0.0.0:12345</span><br><span class="line">    stats   <span class="built_in">enable</span></span><br><span class="line">	<span class="built_in">log</span>		127.0.0.1	local2</span><br><span class="line">	stats	realm  Haproxy\ Statistics</span><br><span class="line">    stats   uri     /stats</span><br><span class="line">    stats   auth    admin:admin</span><br><span class="line">    stats   admin   <span class="keyword">if</span> TRUE</span><br><span class="line"></span><br><span class="line">frontend  k8s</span><br><span class="line">	<span class="built_in">bind</span>	0.0.0.0:8443</span><br><span class="line">    mode      tcp</span><br><span class="line">    maxconn      200</span><br><span class="line">    default_backend     k8s-https</span><br><span class="line"></span><br><span class="line">backend k8s-https</span><br><span class="line">    balance      roundrobin</span><br><span class="line">	mode	tcp</span><br><span class="line">    server master220 192.168.100.20:6443  check inter 10000 fall 2 rise 2 weight 1</span><br><span class="line">    server master221 192.168.100.21:6443  check inter 10000 fall 2 rise 2 weight 1</span><br><span class="line">    server master222 192.168.100.22:6443  check inter 10000 fall 2 rise 2 weight 1</span><br><span class="line"></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="7-3-编辑keepalived配置文件"><a href="#7-3-编辑keepalived配置文件" class="headerlink" title="7.3 编辑keepalived配置文件"></a>7.3 编辑keepalived配置文件</h2><p><strong>注意，三个节点keepalived配置文件存在区别：</strong></p>
+<ul>
+<li>router_id分别为master20、master21、master22</li>
+<li>state分别为MASTER、BACKUP、BACKUP</li>
+<li>priority分别为100、90、80</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt; /etc/keepalived/keepalived.conf &lt;&lt;EOF</span><br><span class="line">global_defs &#123;</span><br><span class="line">   router_id master20</span><br><span class="line">   script_user root</span><br><span class="line">   enable_script_security</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_script check_haproxy &#123;</span><br><span class="line">    script /etc/keepalived/check_haproxy.sh</span><br><span class="line">    interval 3</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    interface ens32</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.100.10/24</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;   </span><br><span class="line">        check_haproxy</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<p>此外我们还需要编辑一个检查的脚本来确保正常</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt; /etc/keepalived/check_haproxy.sh &lt;&lt;EOF</span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">NUM=`ps -C haproxy --no-header |wc -l`</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$NUM</span> -eq 0 ];<span class="keyword">then</span></span><br><span class="line">    systemctl stop keepalived</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="8、安装k8s-所有机器"><a href="#8、安装k8s-所有机器" class="headerlink" title="8、安装k8s(所有机器)"></a>8、安装k8s(所有机器)</h1><p>k8s官网提供的yum源并不太好用，我们这里使用阿里云的yum镜像源。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新建一个yum源</span></span><br><span class="line">cat &gt;&gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt;EOF</span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">repo_gpgcheck=1</span><br><span class="line">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="line">exclude=kube*</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">yum clean all</span><br><span class="line"></span><br><span class="line">yum repolist</span><br><span class="line"></span><br><span class="line">yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes</span><br><span class="line"><span class="comment"># 启动kubelet并设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet</span><br></pre></td></tr></table></figure>
+
+<p>关于SELinux的简单介绍，可以点击这里查看之前的博客。</p>
+<h2 id="9-1-获取默认配置文件"><a href="#9-1-获取默认配置文件" class="headerlink" title="9.1 获取默认配置文件"></a>9.1 获取默认配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获得默认配置文件。</span></span><br><span class="line">kubeadm config <span class="built_in">print</span> init-defaults &gt; kubeadm.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看需要的镜像</span></span><br><span class="line">kubeadm config images list --config kubeadm.conf</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/sqMD0W66d4AF.png"><br>不知道为啥这里显示的居然是1.14版本的，小七安装的明明是1.15版本，我们把<code>kubeadm.conf</code>里面的版本号改成1.15再查看</p>
+<p><img src="https://resource.tinychen.com/blog/20190717/przVGhQPmirw.png"></p>
+<h2 id="9-2-编辑自定义配置文件"><a href="#9-2-编辑自定义配置文件" class="headerlink" title="9.2 编辑自定义配置文件"></a>9.2 编辑自定义配置文件</h2><p>注意下面的ip地址和版本号需要根据实际情况来进行改动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置文件kubuadm_master20.conf</span></span><br><span class="line"></span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">kind: InitConfiguration</span><br><span class="line">localAPIEndpoint:</span><br><span class="line">  advertiseAddress: 192.168.100.20</span><br><span class="line">  bindPort: 6443</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">kind: ClusterConfiguration</span><br><span class="line">kubernetesVersion: v1.15.0</span><br><span class="line">controlPlaneEndpoint: <span class="string">"kubernetes.haproxy.com:8443"</span></span><br><span class="line">imageRepository: registry.aliyuncs.com/google_containers</span><br><span class="line">apiServer:</span><br><span class="line">  certSANs:</span><br><span class="line">  - <span class="string">"master20"</span></span><br><span class="line">  - <span class="string">"master21"</span></span><br><span class="line">  - <span class="string">"master22"</span></span><br><span class="line">  - 192.168.100.10</span><br><span class="line">  - 192.168.100.20</span><br><span class="line">  - 192.168.100.21</span><br><span class="line">  - 192.168.100.22</span><br><span class="line"></span><br><span class="line">networking:</span><br><span class="line">  podSubnet: <span class="string">"10.244.0.0/16"</span></span><br><span class="line">certificatesDir: /etc/kubernetes/pki</span><br><span class="line">clusterName: kubernetes</span><br><span class="line"></span><br><span class="line">etcd:</span><br><span class="line">  <span class="built_in">local</span>:</span><br><span class="line">    extraArgs:</span><br><span class="line">      listen-client-urls: <span class="string">"https://127.0.0.1:2379,https://192.168.100.20:2379"</span></span><br><span class="line">      advertise-client-urls: <span class="string">"https://192.168.100.20:2379"</span></span><br><span class="line">      listen-peer-urls: <span class="string">"https://192.168.100.20:2380"</span></span><br><span class="line">      initial-advertise-peer-urls: <span class="string">"https://192.168.100.20:2380"</span></span><br><span class="line">      initial-cluster: <span class="string">"master20=https://192.168.100.20:2380"</span></span><br><span class="line">      initial-cluster-state: new</span><br><span class="line">    serverCertSANs:</span><br><span class="line">      - master20</span><br><span class="line">      - 192.168.100.20</span><br><span class="line">    peerCertSANs:</span><br><span class="line">      - master20</span><br><span class="line">      - 192.168.100.20</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeproxy.config.k8s.io/v1alpha1</span><br><span class="line">kind: KubeProxyConfiguration</span><br><span class="line">mode: ipvs</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="9-3-初始化"><a href="#9-3-初始化" class="headerlink" title="9.3 初始化"></a>9.3 初始化</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拉取需要的镜像</span></span><br><span class="line">kubeadm config images pull --config kubuadm_master20.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化</span></span><br><span class="line">kubeadm init --config kubuadm_master20.conf</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/BM1ThaHUbcgV.png"></p>
+<p>这里的token需要记下来。然后我们需要切换到非root用户来进行配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chown $(id -u):$(id -g)</span><br><span class="line"> <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="comment"># 添加kubectl的自动补全功能</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"source &lt;(kubectl completion bash)"</span> &gt;&gt; ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+<h1 id="10、安装flannel网络（master20）"><a href="#10、安装flannel网络（master20）" class="headerlink" title="10、安装flannel网络（master20）"></a>10、安装flannel网络（master20）</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;coreos&#x2F;flannel&#x2F;master&#x2F;Documentation&#x2F;kube-flannel.yml</span><br></pre></td></tr></table></figure>
+
+<p>我们先下载一下配置文件，为了保险起见，我们手动指定网卡</p>
+<p><img src="https://resource.tinychen.com/blog/20190717/bFdDgyBt897N.png"></p>
+<p>然后我们执行初始化安装操作。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f kube-flannel.yml</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/XQdoAPF9dvBU.png"></p>
+<p>这时候我们再查看节点就会发现，coredns已经正常工作了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pods -A</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/ok3yVOxN6vYc.png"></p>
+<h1 id="11、分发证书（master20）"><a href="#11、分发证书（master20）" class="headerlink" title="11、分发证书（master20）"></a>11、分发证书（master20）</h1><p>我们在master20节点上编写一个脚本进行证书的分发，只需要分发到其他的master节点即可。<strong>注意里面的ip地址和用户名需要根据实际情况进行修改。</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt; districert &lt;&lt;EOF</span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="keyword">for</span> index <span class="keyword">in</span> 21 22; <span class="keyword">do</span></span><br><span class="line">  ip=192.168.100.<span class="variable">$&#123;index&#125;</span></span><br><span class="line">  ssh <span class="variable">$ip</span> <span class="string">"mkdir -p /etc/kubernetes/pki/etcd/; mkdir -p /home/tinychen/.kube/"</span></span><br><span class="line">  scp /etc/kubernetes/pki/ca.crt <span class="variable">$ip</span>:/etc/kubernetes/pki/ca.crt</span><br><span class="line">  scp /etc/kubernetes/pki/ca.key <span class="variable">$ip</span>:/etc/kubernetes/pki/ca.key</span><br><span class="line">  scp /etc/kubernetes/pki/sa.key <span class="variable">$ip</span>:/etc/kubernetes/pki/sa.key</span><br><span class="line">  scp /etc/kubernetes/pki/sa.pub <span class="variable">$ip</span>:/etc/kubernetes/pki/sa.pub</span><br><span class="line">  scp /etc/kubernetes/pki/front-proxy-ca.crt <span class="variable">$ip</span>:/etc/kubernetes/pki/front-proxy-ca.crt</span><br><span class="line">  scp /etc/kubernetes/pki/front-proxy-ca.key <span class="variable">$ip</span>:/etc/kubernetes/pki/front-proxy-ca.key</span><br><span class="line">  scp /etc/kubernetes/pki/etcd/ca.crt <span class="variable">$ip</span>:/etc/kubernetes/pki/etcd/ca.crt</span><br><span class="line">  scp /etc/kubernetes/pki/etcd/ca.key <span class="variable">$ip</span>:/etc/kubernetes/pki/etcd/ca.key</span><br><span class="line">  scp /etc/kubernetes/admin.conf <span class="variable">$ip</span>:/etc/kubernetes/admin.conf</span><br><span class="line">  scp /etc/kubernetes/admin.conf <span class="variable">$ip</span>:/home/tinychen/.kube/config</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<h1 id="12、配置master21"><a href="#12、配置master21" class="headerlink" title="12、配置master21"></a>12、配置master21</h1><h2 id="12-1-编辑自定义配置文件"><a href="#12-1-编辑自定义配置文件" class="headerlink" title="12.1 编辑自定义配置文件"></a>12.1 编辑自定义配置文件</h2><p>注意下面的ip地址和版本号需要根据实际情况来进行改动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置文件kubeadm_master21.conf</span></span><br><span class="line"></span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">kind: InitConfiguration</span><br><span class="line">localAPIEndpoint:</span><br><span class="line">  advertiseAddress: 192.168.100.21</span><br><span class="line">  bindPort: 6443</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">kind: ClusterConfiguration</span><br><span class="line">kubernetesVersion: v1.15.0</span><br><span class="line">controlPlaneEndpoint: <span class="string">"kubernetes.haproxy.com:8443"</span></span><br><span class="line">imageRepository: registry.aliyuncs.com/google_containers</span><br><span class="line">apiServer:</span><br><span class="line">  certSANs:</span><br><span class="line">  - <span class="string">"master20"</span></span><br><span class="line">  - <span class="string">"master21"</span></span><br><span class="line">  - <span class="string">"master22"</span></span><br><span class="line">  - 192.168.100.10</span><br><span class="line">  - 192.168.100.20</span><br><span class="line">  - 192.168.100.21</span><br><span class="line">  - 192.168.100.22</span><br><span class="line">networking:</span><br><span class="line">  podSubnet: <span class="string">"10.244.0.0/16"</span></span><br><span class="line">certificatesDir: /etc/kubernetes/pki</span><br><span class="line">clusterName: kubernetes</span><br><span class="line"></span><br><span class="line">etcd:</span><br><span class="line">  <span class="built_in">local</span>:</span><br><span class="line">    extraArgs:</span><br><span class="line">      listen-client-urls: <span class="string">"https://127.0.0.1:2379,https://192.168.100.21:2379"</span></span><br><span class="line">      advertise-client-urls: <span class="string">"https://192.168.100.21:2379"</span></span><br><span class="line">      listen-peer-urls: <span class="string">"https://192.168.100.21:2380"</span></span><br><span class="line">      initial-advertise-peer-urls: <span class="string">"https://192.168.100.21:2380"</span></span><br><span class="line">      initial-cluster: <span class="string">"master20=https://192.168.100.20:2380,master21=https://192.168.100.21:2380"</span></span><br><span class="line">      initial-cluster-state: existing</span><br><span class="line">    serverCertSANs:</span><br><span class="line">      - master21</span><br><span class="line">      - 192.168.100.21</span><br><span class="line">    peerCertSANs:</span><br><span class="line">      - master21</span><br><span class="line">      - 192.168.100.21</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeproxy.config.k8s.io/v1alpha1</span><br><span class="line">kind: KubeProxyConfiguration</span><br><span class="line">mode: ipvs</span><br></pre></td></tr></table></figure>
+
+<h2 id="12-2-配置非root用户"><a href="#12-2-配置非root用户" class="headerlink" title="12.2 配置非root用户"></a>12.2 配置非root用户</h2><p>前面我们在脚本那里已经创建好了文件夹，我们这里只需要修改权限和添加自动补全就好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo chown $(id -u):$(id -g)</span><br><span class="line"> <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="comment"># 添加kubectl的自动补全功能</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"source &lt;(kubectl completion bash)"</span> &gt;&gt; ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="12-3-初始化"><a href="#12-3-初始化" class="headerlink" title="12.3 初始化"></a>12.3 初始化</h2><p>注意这里的文件名和IP地址要根据实际情况进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置证书</span></span><br><span class="line">kubeadm init phase certs all --config kubeadm_master21.conf</span><br><span class="line"><span class="comment"># 配置etcd</span></span><br><span class="line">kubeadm init phase etcd <span class="built_in">local</span> --config kubeadm_master21.conf</span><br><span class="line"><span class="comment"># 生成kubelet配置文件</span></span><br><span class="line">kubeadm init phase kubeconfig kubelet --config kubeadm_master21.conf</span><br><span class="line"><span class="comment"># 启动kubelet</span></span><br><span class="line">kubeadm init phase kubelet-start --config kubeadm_master21.conf</span><br></pre></td></tr></table></figure>
+
+<p><strong>然后这一步要切换到非root用户</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将master21的etcd加入集群</span></span><br><span class="line">kubectl <span class="built_in">exec</span> -n kube-system etcd-master20 -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --endpoints=https://192.168.100.20:2379 member add master21 https://192.168.100.21:2380</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/KMrEwDxiDf17.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 kube-apiserver、kube-controller-manager、kube-scheduler</span></span><br><span class="line">kubeadm init phase kubeconfig all --config kubeadm_master21.conf</span><br><span class="line">kubeadm init phase control-plane all --config kubeadm_master21.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将节点标记为master</span></span><br><span class="line">kubeadm init phase mark-control-plane --config kubeadm_master21.conf</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/E50I4UqxbbuR.png"></p>
+<h1 id="13、配置master22"><a href="#13、配置master22" class="headerlink" title="13、配置master22"></a>13、配置master22</h1><h2 id="13-1-编辑自定义配置文件"><a href="#13-1-编辑自定义配置文件" class="headerlink" title="13.1 编辑自定义配置文件"></a>13.1 编辑自定义配置文件</h2><p>注意下面的ip地址和版本号需要根据实际情况来进行改动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置文件kubeadm_master22.conf</span></span><br><span class="line"></span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">kind: InitConfiguration</span><br><span class="line">localAPIEndpoint:</span><br><span class="line">  advertiseAddress: 192.168.100.22</span><br><span class="line">  bindPort: 6443</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">kind: ClusterConfiguration</span><br><span class="line">kubernetesVersion: v1.15.0</span><br><span class="line">controlPlaneEndpoint: <span class="string">"kubernetes.haproxy.com:8443"</span></span><br><span class="line">imageRepository: registry.aliyuncs.com/google_containers</span><br><span class="line">apiServer:</span><br><span class="line">  certSANs:</span><br><span class="line">  - <span class="string">"master20"</span></span><br><span class="line">  - <span class="string">"master21"</span></span><br><span class="line">  - <span class="string">"master22"</span></span><br><span class="line">  - 192.168.100.10</span><br><span class="line">  - 192.168.100.20</span><br><span class="line">  - 192.168.100.21</span><br><span class="line">  - 192.168.100.22</span><br><span class="line">networking:</span><br><span class="line">  podSubnet: <span class="string">"10.244.0.0/16"</span></span><br><span class="line">certificatesDir: /etc/kubernetes/pki</span><br><span class="line">clusterName: kubernetes</span><br><span class="line"></span><br><span class="line">etcd:</span><br><span class="line">  <span class="built_in">local</span>:</span><br><span class="line">    extraArgs:</span><br><span class="line">      listen-client-urls: <span class="string">"https://127.0.0.1:2379,https://192.168.100.22:2379"</span></span><br><span class="line">      advertise-client-urls: <span class="string">"https://192.168.100.22:2379"</span></span><br><span class="line">      listen-peer-urls: <span class="string">"https://192.168.100.22:2380"</span></span><br><span class="line">      initial-advertise-peer-urls: <span class="string">"https://192.168.100.22:2380"</span></span><br><span class="line">      initial-cluster: <span class="string">"master20=https://192.168.100.20:2380,master21=https://192.168.100.21:2380,master22=https://192.168.100.22:2380"</span></span><br><span class="line">      initial-cluster-state: existing</span><br><span class="line">    serverCertSANs:</span><br><span class="line">      - master22</span><br><span class="line">      - 192.168.100.22</span><br><span class="line">    peerCertSANs:</span><br><span class="line">      - master22</span><br><span class="line">      - 192.168.100.22</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeproxy.config.k8s.io/v1alpha1</span><br><span class="line">kind: KubeProxyConfiguration</span><br><span class="line">mode: ipvs</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="13-2-配置非root用户"><a href="#13-2-配置非root用户" class="headerlink" title="13.2 配置非root用户"></a>13.2 配置非root用户</h2><p>前面我们在脚本那里已经创建好了文件夹，我们这里只需要修改权限和添加自动补全就好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo chown $(id -u):$(id -g)</span><br><span class="line"> <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="comment"># 添加kubectl的自动补全功能</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"source &lt;(kubectl completion bash)"</span> &gt;&gt; ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="13-3-初始化"><a href="#13-3-初始化" class="headerlink" title="13.3 初始化"></a>13.3 初始化</h2><p>注意这里的文件名和IP地址要根据实际情况进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置证书</span></span><br><span class="line">kubeadm init phase certs all --config kubeadm_master22.conf</span><br><span class="line"><span class="comment"># 配置etcd</span></span><br><span class="line">kubeadm init phase etcd <span class="built_in">local</span> --config kubeadm_master22.conf</span><br><span class="line"><span class="comment"># 生成kubelet配置文件</span></span><br><span class="line">kubeadm init phase kubeconfig kubelet --config kubeadm_master22.conf</span><br><span class="line"><span class="comment"># 启动kubelet</span></span><br><span class="line">kubeadm init phase kubelet-start --config kubeadm_master22.conf</span><br></pre></td></tr></table></figure>
+
+<p><strong>然后这一步要切换到非root用户</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将master22的etcd加入集群</span></span><br><span class="line"></span><br><span class="line">kubectl <span class="built_in">exec</span> -n kube-system etcd-master20 -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --endpoints=https://192.168.100.20:2379 member add master22 https://192.168.100.22:2380</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 kube-apiserver、kube-controller-manager、kube-scheduler</span></span><br><span class="line">kubeadm init phase kubeconfig all --config kubeadm_master22.conf</span><br><span class="line">kubeadm init phase control-plane all --config kubeadm_master22.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将节点标记为master</span></span><br><span class="line">kubeadm init phase mark-control-plane --config kubeadm_master22.conf</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/LHqaqwhqRgIj.png"></p>
+<h1 id="14、添加node节点"><a href="#14、添加node节点" class="headerlink" title="14、添加node节点"></a>14、添加node节点</h1><p>node节点的添加我们只需要切换到root用户执行之前master20初始化成功提示的指令即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join kubernetes.haproxy.com:8443 --token m42q2v.y8sffomwkgjlhx8h \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:1829cbaf37e968b43f91e6f0b65e2f2b7985a2d3d17ec66f3af70e0d15db01de </span><br></pre></td></tr></table></figure>
+
+<h1 id="15、查看最终效果"><a href="#15、查看最终效果" class="headerlink" title="15、查看最终效果"></a>15、查看最终效果</h1><h2 id="查看节点"><a href="#查看节点" class="headerlink" title="查看节点"></a>查看节点</h2><p><img src="https://resource.tinychen.com/blog/20190717/c2MnYCxxCJiQ.png"></p>
+<h2 id="查看pods"><a href="#查看pods" class="headerlink" title="查看pods"></a>查看pods</h2><p><img src="https://resource.tinychen.com/blog/20190717/QnXPwJikRui0.png"></p>
+<h2 id="查看集群"><a href="#查看集群" class="headerlink" title="查看集群"></a>查看集群</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">exec</span> -n kube-system etcd-master20 \</span><br><span class="line"> -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt \</span><br><span class="line"> --cert-file /etc/kubernetes/pki/etcd/peer.crt \</span><br><span class="line"> --key-file /etc/kubernetes/pki/etcd/peer.key \</span><br><span class="line"> --endpoints=https://192.168.100.20:2379 member list</span><br></pre></td></tr></table></figure>
+
+
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/Eo0C4JnfTGsg.png"></p>
+<h2 id="查看ipvs情况"><a href="#查看ipvs情况" class="headerlink" title="查看ipvs情况"></a>查看ipvs情况</h2><p><img src="https://resource.tinychen.com/blog/20190717/Tt8eD0VvRoVw.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190716-centos7-install-k8s\" rel="bookmark">在CentOS7上部署单Master节点k8s集群(v1.15)</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190723-k8s-service\" rel="bookmark">在k8s中的Service简介</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190722-k8s-controller\" rel="bookmark">在k8s中的controller简介</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190801-k8s-del-n-add-node\" rel="bookmark">在k8s中删除和添加节点的方法</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190912-centos-install-docker\" rel="bookmark">在CentOS中安装特定版本的docker</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+              <a href="/tags/graduation/" rel="tag"># graduation</a>
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190716-centos7-install-k8s/" rel="prev" title="在CentOS7上部署单Master节点k8s集群(v1.15)">
+      <i class="fa fa-chevron-left"></i> 在CentOS7上部署单Master节点k8s集群(v1.15)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190722-k8s-controller/" rel="next" title="在k8s中的controller简介">
+      在k8s中的controller简介 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E5%89%8D%E6%9C%9F%E5%B7%A5%E4%BD%9C"><span class="nav-text">1、前期工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%EF%BC%9F"><span class="nav-text">1.1 什么是高可用集群？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E9%9B%86%E7%BE%A4%E6%9C%BA%E5%99%A8"><span class="nav-text">1.2 集群机器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E9%9B%86%E7%BE%A4%E9%97%B4%E5%85%8D%E5%AF%86%E7%99%BB%E5%BD%95"><span class="nav-text">1.3 集群间免密登录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">1.4 时间同步(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-%E5%8D%87%E7%BA%A7%E5%86%85%E6%A0%B8-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">1.5 升级内核(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-%E5%85%B3%E9%97%AD%E9%98%B2%E7%81%AB%E5%A2%99-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">1.6 关闭防火墙(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-7-%E8%AE%BE%E7%BD%AEselinux-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">1.7 设置selinux(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-8-%E5%85%B3%E9%97%ADswap%EF%BC%88%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8%EF%BC%89"><span class="nav-text">1.8 关闭swap（所有机器）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E9%85%8D%E7%BD%AEipvs-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">2、配置ipvs(所有机器)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E9%85%8D%E7%BD%AEk8s%E7%9B%B8%E5%85%B3%E7%BD%91%E7%BB%9C%E5%8F%82%E6%95%B0-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">3、配置k8s相关网络参数(所有机器)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E9%85%8D%E7%BD%AEiptables-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">4、配置iptables(所有机器)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E6%A3%80%E6%9F%A5%E9%85%8D%E7%BD%AE-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">5、检查配置(所有机器)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6%E3%80%81%E5%AE%89%E8%A3%85docker-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">6、安装docker(所有机器)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-%E5%AE%89%E8%A3%85docker"><span class="nav-text">6.1 安装docker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-%E9%85%8D%E7%BD%AEcgroup"><span class="nav-text">6.2 配置cgroup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-%E9%85%8D%E7%BD%AE%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7"><span class="nav-text">6.3 配置普通用户</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7%E3%80%81%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEkeepalived%E3%80%81haproxy-%E6%89%80%E6%9C%89master%E8%8A%82%E7%82%B9"><span class="nav-text">7、安装配置keepalived、haproxy(所有master节点)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-%E5%AE%89%E8%A3%85"><span class="nav-text">7.1 安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-%E7%BC%96%E8%BE%91haproxy%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">7.2 编辑haproxy配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-%E7%BC%96%E8%BE%91keepalived%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">7.3 编辑keepalived配置文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8%E3%80%81%E5%AE%89%E8%A3%85k8s-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">8、安装k8s(所有机器)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-%E8%8E%B7%E5%8F%96%E9%BB%98%E8%AE%A4%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">9.1 获取默认配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-%E7%BC%96%E8%BE%91%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">9.2 编辑自定义配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-3-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">9.3 初始化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10%E3%80%81%E5%AE%89%E8%A3%85flannel%E7%BD%91%E7%BB%9C%EF%BC%88master20%EF%BC%89"><span class="nav-text">10、安装flannel网络（master20）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11%E3%80%81%E5%88%86%E5%8F%91%E8%AF%81%E4%B9%A6%EF%BC%88master20%EF%BC%89"><span class="nav-text">11、分发证书（master20）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12%E3%80%81%E9%85%8D%E7%BD%AEmaster21"><span class="nav-text">12、配置master21</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-%E7%BC%96%E8%BE%91%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">12.1 编辑自定义配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-2-%E9%85%8D%E7%BD%AE%E9%9D%9Eroot%E7%94%A8%E6%88%B7"><span class="nav-text">12.2 配置非root用户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-3-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">12.3 初始化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#13%E3%80%81%E9%85%8D%E7%BD%AEmaster22"><span class="nav-text">13、配置master22</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#13-1-%E7%BC%96%E8%BE%91%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">13.1 编辑自定义配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-2-%E9%85%8D%E7%BD%AE%E9%9D%9Eroot%E7%94%A8%E6%88%B7"><span class="nav-text">13.2 配置非root用户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-3-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">13.3 初始化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14%E3%80%81%E6%B7%BB%E5%8A%A0node%E8%8A%82%E7%82%B9"><span class="nav-text">14、添加node节点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#15%E3%80%81%E6%9F%A5%E7%9C%8B%E6%9C%80%E7%BB%88%E6%95%88%E6%9E%9C"><span class="nav-text">15、查看最终效果</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%8A%82%E7%82%B9"><span class="nav-text">查看节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8Bpods"><span class="nav-text">查看pods</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E9%9B%86%E7%BE%A4"><span class="nav-text">查看集群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8Bipvs%E6%83%85%E5%86%B5"><span class="nav-text">查看ipvs情况</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

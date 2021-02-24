@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要包括tomcat服务器的目录结构、工作模式、整体架构、I&#x2F;O模型以及NIO、NIO2、APR三者的对比介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat篇02-整体架构和I&#x2F;O模型">
+<meta property="og:url" content="https://tinychen.com/20200402-tomcat02-structure-io-model/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要包括tomcat服务器的目录结构、工作模式、整体架构、I&#x2F;O模型以及NIO、NIO2、APR三者的对比介绍。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210111101701.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20200401/EurnK7y7obav.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20200331/9XL5OhCa6UtT.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20200401/FldbzwEHSxcO.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20200401/Qyp6hqzGjiDW.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200401104831691.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20200401/VjgcMc38VXw4.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200401115202.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402111850.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200401153247.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200401154934307.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402115511.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402115553.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402115623.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402151558.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402101103.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402102439.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200402102535.png">
+<meta property="article:published_time" content="2020-04-02T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-04-02T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="tomcat">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210111101701.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200402-tomcat02-structure-io-model/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Tomcat篇02-整体架构和I/O模型 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200402-tomcat02-structure-io-model/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tomcat篇02-整体架构和I/O模型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-04-02 10:00:00" itemprop="dateCreated datePublished" datetime="2020-04-02T10:00:00+08:00">2020-04-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>10 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210111101701.jpg"></p>
+<p>本文主要包括tomcat服务器的目录结构、工作模式、整体架构、I/O模型以及NIO、NIO2、APR三者的对比介绍。</p>
+<a id="more"></a>
+
+<h1 id="1、Tomcat的目录结构"><a href="#1、Tomcat的目录结构" class="headerlink" title="1、Tomcat的目录结构"></a>1、Tomcat的目录结构</h1><p>我们先来看一下tomcat8.5和tomcat9中的home目录中的文件：</p>
+<p><img src="https://resource.tinychen.com/blog/20200401/EurnK7y7obav.png"></p>
+<p>可以看到除掉一些说明文件之后，还有7个目录：</p>
+<table>
+<thead>
+<tr>
+<th align="center">目录名</th>
+<th align="center">用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">bin</td>
+<td align="center">存放用于启动及关闭的文件，以及其他一些脚本。其中，UNIX 系统专用的 <code>*.sh</code> 文件在功能上等同于 windows 系统专用的 <code>*.bat</code> 文件。因为 Win32 的命令行缺乏某些功能，所以又额外地加入了一些文件</td>
+</tr>
+<tr>
+<td align="center">conf</td>
+<td align="center">配置文件及相关的 DTD<em>（document type definition 文档类型定义，DTD文件一般和XML文件配合使用，主要是为了约束XML文件）</em>。其中最重要的文件是 server.xml，这是容器的主配置文件</td>
+</tr>
+<tr>
+<td align="center">lib</td>
+<td align="center">存放tomcat服务器自身和所有的web应用都可以访问的JAR文件</td>
+</tr>
+<tr>
+<td align="center">logs</td>
+<td align="center">日志文件的默认目录</td>
+</tr>
+<tr>
+<td align="center">temp</td>
+<td align="center">存放临时文件的默认目录</td>
+</tr>
+<tr>
+<td align="center">webapps</td>
+<td align="center">在tomcat上发布Java web应用的时候，默认把web应用的文件存放在这个目录</td>
+</tr>
+<tr>
+<td align="center">work</td>
+<td align="center">tomcat的工作目录，tomcat把运行时生成的一些工作文件存放在这个目录，如默认情况下tomcat会把编译JSP生成的Servlet类文件存放在这里</td>
+</tr>
+</tbody></table>
+<p>实际上除了主目录里有lib目录，在webapps目录下的web应用中的WEB-INF目录下也存在一个lib目录：</p>
+<p><img src="https://resource.tinychen.com/blog/20200331/9XL5OhCa6UtT.png"></p>
+<p>两者的区别在于：</p>
+<p>●　Tomcat主目录下的lib目录：存放的JAR文件<strong>不仅能被Tomcat访问，还能被所有在Tomcat中发布的Java Web应用访问</strong><br>●　webapps目录下的Java Web应用的lib目录：存放的JAR文件<strong>只能被当前Java Web应用访问</strong></p>
+<p>既然有多个lib目录，那么肯定就有使用的优先顺序，Tomcat类加载器的目录加载优先顺序如下：</p>
+<p>Tomcat的类加载器负责为Tomcat本身以及Java Web应用加载相关的类。假如Tomcat的类加载器要为一个Java Web应用加载一个类，类加载器会按照以下优先顺序到各个目录中去查找该类的.class文件，直到找到为止，如果所有目录中都不存在该类的.class文件，则会抛出异常：</p>
+<ol>
+<li>在Java Web应用的<code>WEB-INF/classes</code>目录下查找该类的.class文件</li>
+<li>在Java Web应用的<code>WEB-INF/lib</code>目录下的JAR文件中查找该类的.class文件</li>
+<li>在Tomcat的<code>lib</code>子目录下直接查找该类的.class文件</li>
+<li>在Tomcat的<code>lib</code>子目录下的JAR文件中查找该类的.class文件</li>
+</ol>
+<h1 id="2、Tomcat的工作模式"><a href="#2、Tomcat的工作模式" class="headerlink" title="2、Tomcat的工作模式"></a>2、Tomcat的工作模式</h1><p>Tomcat不仅可以单独运行，还可以与其他的Web服务器集成，作为其他Web服务器的进程内或进程外的servlet容器。集成的意义在于：对于不支持运行Java Servlet的其他Web服务器，可通过集成Tomcat来提供运行Servlet的功能。</p>
+<p>Tomcat有三种工作模式：</p>
+<ul>
+<li>第一种：Tomcat在一个Java虚拟机进程中独立运行，此时客户端直接和tomcat通信。Tomcat可看作是能运行Servlet的独立Web服务器。Servlet容器组件作为Web服务器中的一部分而存在。<strong>这是Tomcat的默认工作模式。</strong></li>
+</ul>
+<p><img src="https://resource.tinychen.com/blog/20200401/FldbzwEHSxcO.png"></p>
+<ul>
+<li><p>第二种：Tomcat运行在其他Web服务器的进程中，Tomcat不直接和客户端通信，仅仅为其他Web服务器处理客户端访问Servlet的请求。进程内的Servlet容器对于单进程、多线程的Web服务器非常合适，<strong>可以提供较高的运行速度，但缺乏伸缩性。</strong></p>
+<p>在这种模式下，Tomcat分为Web服务器插件和Servlet容器组件两部分。如下图所示，Web服务器插件在其他Web服务器进程的内部地址空间启动一个Java虚拟机，Servlet容器组件在此Java虚拟机中运行。如有客户端发出调用Servlet的请求，Web服务器插件获得对此请求的控制并将它转发<strong>（使用JNI通信机制）</strong>给Servlet容器组件。</p>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/blog/20200401/Qyp6hqzGjiDW.png"></p>
+<blockquote>
+<p>JNI（Java Native Interface）指的是Java本地调用接口，通过这一接口，Java程序可以和采用其他语言编写的本地程序进行通信。</p>
+</blockquote>
+<ul>
+<li><p>第三种：Tomcat在一个Java虚拟机进程中独立运行，但是它不直接和客户端通信，仅仅为与它集成的其他Web服务器处理客户端访问Servlet的请求。</p>
+<p>在这种模式下，Tomcat分为Web服务器插件和Servlet容器组件两部分。如下图所示，Web服务器插件在其他Web服务器的<strong>外部地址空间</strong>启动一个JVM进程，Servlet容器组件在此JVM中运行。如有客户端发出调用Servlet的请求，Web服务器插件获得对此请求的控制并将它转发（采用IPC通信机制）给Servlet容器。</p>
+<p><strong>进程外Servlet容器对客户请求的响应速度不如进程内Servlet容器，但进程外容器具有更好的伸缩性和稳定性。</strong></p>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/image-20200401104831691.png"></p>
+<blockquote>
+<p>IPC（Inter-Process Communication，进程间通信）是两个进程之间进行通信的一种机制。</p>
+</blockquote>
+<h1 id="3、Tomcat的整体架构"><a href="#3、Tomcat的整体架构" class="headerlink" title="3、Tomcat的整体架构"></a>3、Tomcat的整体架构</h1><p>我们先从tomcat的源码目录来分析一下tomcat的整体架构，前面我们配置jsvc运行tomcat的时候，我们知道tomcat中启动运行的最主要的类是<code>org.apache.catalina.startup.Bootstrap</code>，那么我们在tomcat的源码中的java目录下的org目录的apache目录可以找到主要的源码的相对应的类。</p>
+<p><img src="https://resource.tinychen.com/blog/20200401/VjgcMc38VXw4.png"></p>
+<p>图中的目录如果画成架构图，可以这样表示：</p>
+<p><img src="https://resource.tinychen.com/20200401115202.png"></p>
+<p>Tomcat 本质上就是一款Servlet 容器，因此<code>catalina</code>才是Tomcat的核心 ，其他模块都是为<code>catalina</code>提供支撑的。 </p>
+<ul>
+<li><code>coyote</code>模块主要负责链接通信，Tomcat作为http服务器，需要从socket中获得HTTP数据流；而Tomcat作为容器，只能处理封装好的<code>org.apache.coyote.Request</code>，因此从socket到Request之间的转换就交给<code>coyote</code>来负责了。因此，连接socket和容器之间的重任就交给了Coyote。简单说就是coyote来处理底层的socket，并将http请求、响应等字节流层面的东西，包装成Request和Response两个类（这两个类是tomcat定义的，而非servlet中的ServletRequest和ServletResponse），供容器使用；同时，为了能让我们编写的servlet能够得到ServletRequest，tomcat使用了facade模式，将比较底层、低级的Request包装成为ServletRequest（这一过程通常发生在Wrapper容器一级）</li>
+</ul>
+<p><img src="https://resource.tinychen.com/20200402111850.png"></p>
+<ul>
+<li><p><code>jasper</code>模块提供JSP引擎，在jsp文件被初次访问的时候做出响应，将jsp页面翻译成servlet请求，然后调用java编译器对servlet进行编译得到class文件，再调用jvm来执行class文件生成应答，最后把应答发送回客户端。</p>
+</li>
+<li><p><code>el</code>全名为Expression Language，也叫<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Unified_Expression_Language">JUEL</a>，主要在Java Web应用中用于将表达式嵌入到web页面</p>
+</li>
+<li><p><code>naming</code>提供JNDI 服务(Java Naming and Directory Interface,Java命名和目录接口)，为开发人员提供了查找和访问各种命名和目录服务的通用、统一的接口，由管理者将JNDI API映射为特定的命名服务和目录系统，使得Java应用程序可以和这些命名服务和目录服务之间进行交互。</p>
+</li>
+<li><p><code>juli</code>提供日志服务，JDK 所提供的默认 <code>java.util.logging</code> 实现功能太过局限，不能实现针对每一应用进行日志记录，因为配置是针对VM的。而<code>juli</code>通过自定义的 <code>LogManager</code> 能分辨运行在 Tomcat 上的不同 Web 应用（以及它们所用的不同的类加载器），还能针对每一应用进行私有的日志配置。</p>
+</li>
+</ul>
+<h1 id="4、Tomcat的I-O模型"><a href="#4、Tomcat的I-O模型" class="headerlink" title="4、Tomcat的I/O模型"></a>4、Tomcat的I/O模型</h1><h2 id="4-1-阻塞I-O处理模型"><a href="#4-1-阻塞I-O处理模型" class="headerlink" title="4.1 阻塞I/O处理模型"></a>4.1 阻塞I/O处理模型</h2><h3 id="4-1-1-单线程阻塞I-O模型"><a href="#4-1-1-单线程阻塞I-O模型" class="headerlink" title="4.1.1 单线程阻塞I/O模型"></a>4.1.1 单线程阻塞I/O模型</h3><p>单线程阻塞I/O模型是最简单的一种服务器I/O模型，单线程即同时只能处理一个客户端的请求，阻塞即该线程会一直等待，直到处理完成为止。对于多个客户端访问，必须要等到前一个客户端访问结束才能进行下一个访问的处理，请求一个一个排队，只提供一问一答服务。</p>
+<p><img src="https://resource.tinychen.com/20200401153247.png"></p>
+<p>如上图所示：这是一个同步阻塞服务器响应客户端访问的时间节点图。</p>
+<ul>
+<li>首先，服务器必须初始化一个套接字服务器，并绑定某个端口号并使之监听客户端的访问</li>
+<li>接着，客户端1调用服务器的服务，服务器接收到请求后对其进行处理，处理完后写数据回客户端1，整个过程都是在一个线程里面完成的</li>
+<li>最后，处理客户端2的请求并写数据回客户端2，期间就算客户端2在服务器处理完客户端1之前就进行请求，也要等服务器对客户端1响应完后才会对客户端2进行响应处理</li>
+</ul>
+<p><strong>这种模型的特点在于单线程和阻塞I/O。</strong>单线程即服务器端只有一个线程处理客户端的所有请求，客户端连接与服务器端的处理线程比是<code>n:1</code>，它无法同时处理多个连接，只能串行处理连接。而阻塞I/O是指服务器在读写数据时是阻塞的，读取客户端数据时要等待客户端发送数据并且把操作系统内核复制到用户进程中，这时才解除阻塞状态。写数据回客户端时要等待用户进程将数据写入内核并发送到客户端后才解除阻塞状态。<strong>这种阻塞带来了一个问题，服务器必须要等到客户端成功接收才能继续往下处理另外一个客户端的请求，在此期间线程将无法响应任何客户端请求。</strong></p>
+<p>该模型的特点：它是最简单的服务器模型，整个运行过程都只有一个线程，只能支持同时处理一个客户端的请求(如果有多个客户端访问，就必须排队等待)，<strong>服务器系统资源消耗较小，但并发能力低，容错能力差。</strong></p>
+<h3 id="4-1-2-多线程阻塞I-O模型"><a href="#4-1-2-多线程阻塞I-O模型" class="headerlink" title="4.1.2 多线程阻塞I/O模型"></a>4.1.2 多线程阻塞I/O模型</h3><p>多线程阻塞I/O模型在单线程阻塞I/O模型的基础上对其进行改进，加入多线程，提高并发能力，使其能够同时对多个客户端进行响应，多线程的核心就是利用多线程机制为每个客户端分配一个线程。</p>
+<p><img src="https://resource.tinychen.com/image-20200401154934307.png"></p>
+<p>如上图所示，服务器端开始监听客户端的访问，假如有两个客户端同时发送请求过来，服务器端在接收到客户端请求后分别创建两个线程对它们进行处理，每条线程负责一个客户端连接，直到响应完成。<strong>期间两个线程并发地为各自对应的客户端处理请求</strong>，包括读取客户端数据、处理客户端数据、写数据回客户端等操作。</p>
+<p><strong>这种模型的I/O操作也是阻塞的</strong>，因为每个线程执行到读取或写入操作时都将进入阻塞状态，直到读取到客户端的数据或数据成功写入客户端后才解除阻塞状态。尽管I/O操作阻塞，但这种模式比单线程处理的性能明显高了，它不用等到第一个请求处理完才处理第二个，而是并发地处理客户端请求，客户端连接与服务器端处理线程的比例是<code>1:1</code>。</p>
+<p>多线程阻塞I/O模型的特点：支持对多个客户端并发响应，处理能力得到大幅提高，有较大的并发量，但服务器系统资源消耗量较大，而且如果线程数过多，多线程之间会产生较大的线程切换成本，同时拥有较复杂的结构。</p>
+<h2 id="4-2-非阻塞I-O模型"><a href="#4-2-非阻塞I-O模型" class="headerlink" title="4.2 非阻塞I/O模型"></a>4.2 非阻塞I/O模型</h2><h3 id="4-2-1-非阻塞情况下的事件检测"><a href="#4-2-1-非阻塞情况下的事件检测" class="headerlink" title="4.2.1 非阻塞情况下的事件检测"></a>4.2.1 非阻塞情况下的事件检测</h3><p>在探讨单线程非阻塞I/O模型前必须要先了解非阻塞情况下套接字事件的检测机制，因为对于单线程非阻塞模型最重要的事情是检测哪些连接有感兴趣的事件发生。一般会有如下三种检测方式。</p>
+<blockquote>
+<p>此处“有感兴趣的事件发生”指的是需要进行读写数据等操作。</p>
+</blockquote>
+<h4 id="1-应用程序遍历套接字的事件检测"><a href="#1-应用程序遍历套接字的事件检测" class="headerlink" title="(1)应用程序遍历套接字的事件检测"></a>(1)应用程序遍历套接字的事件检测</h4><p>当多个客户端向服务器请求时，服务器端会保存一个套接字连接列表中，应用层线程对套接字列表轮询尝试读取或写入。如果成功则进行处理，如果失败则下次继续。这样不管有多少个套接字连接，它们都可以被一个线程管理，这很好地利用了阻塞的时间，处理能力得到提升。</p>
+<p>但这种模型需要在应用程序中遍历所有的套接字列表，同时需要处理数据的拼接，连接空闲时可能也会占用较多CPU资源，不适合实际使用。</p>
+<h4 id="2-内核遍历套接字的事件检测"><a href="#2-内核遍历套接字的事件检测" class="headerlink" title="(2)内核遍历套接字的事件检测"></a>(2)内核遍历套接字的事件检测</h4><p>这种方式将套接字的遍历工作交给了操作系统内核，把对套接字遍历的结果组织成一系列的事件列表并返回应用层处理。对于应用层，它们需要处理的对象就是这些事件，这是一种事件驱动的非阻塞方式。</p>
+<p>服务器端有多个客户端连接，应用层向内核请求读写事件列表。内核遍历所有套接字并生成对应的可读列表readList和可写列表writeList。readList和writeList则标明了每个套接字是否可读/可写。应用层遍历读写事件列表readList和writeList，做相应的读写操作。</p>
+<p>内核遍历套接字时已经不用在应用层对所有套接字进行遍历，将遍历工作下移到内核层，这种方式有助于提高检测效率。<strong>然而，它需要将所有连接的可读事件列表和可写事件列表传到应用层，假如套接字连接数量变大，列表从内核复制到应用层也是不小的开销。</strong>另外，当活跃连接较少时，<strong>内核与应用层之间存在很多无效的数据副本</strong>，因为它将活跃和不活跃的连接状态都复制到应用层中。</p>
+<h4 id="3-内核基于回调的事件检测"><a href="#3-内核基于回调的事件检测" class="headerlink" title="(3)内核基于回调的事件检测"></a>(3)内核基于回调的事件检测</h4><p>通过遍历的方式检测套接字是否可读可写是一种效率比较低的方式，不管是在应用层中遍历还是在内核中遍历。所以需要另外一种机制来优化遍历的方式，那就是<strong>回调函数</strong>。内核中的套接字都对应一个回调函数，当客户端往套接字发送数据时，内核从网卡接收数据后就会调用回调函数，在回调函数中维护事件列表，应用层获取此事件列表即可得到所有感兴趣的事件。</p>
+<p><strong>内核基于回调的事件检测方式有两种</strong></p>
+<h5 id="方式一："><a href="#方式一：" class="headerlink" title="方式一："></a><strong>方式一：</strong></h5><p>第一种是用<code>可读列表readList</code>和<code>可写列表writeList</code>标记读写事件，<strong>套接字的数量与<code>readList</code>和<code>writeList</code>两个列表的长度一样</strong>。</p>
+<ul>
+<li><p>服务器端有多个客户端套接字连接</p>
+</li>
+<li><p>当客户端发送数据过来时，内核从网卡复制数据成功后调用回调函数将<code>readList/writeList</code>对应的元素标记为可读/可写</p>
+</li>
+<li><p>应用层发送请求读、写事件列表，内核返回包含了事件标识的<code>readList</code>和<code>writeList</code>事件列表，此时返回的两个列表内容大致如下</p>
+<table>
+<thead>
+<tr>
+<th align="center">套接字</th>
+<th align="center">readList</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">……</td>
+<td align="center">……</td>
+</tr>
+<tr>
+<td align="center">n</td>
+<td align="center">……</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center">套接字</th>
+<th align="center">writeList</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">0</td>
+</tr>
+<tr>
+<td align="center">……</td>
+<td align="center">……</td>
+</tr>
+<tr>
+<td align="center">n</td>
+<td align="center">……</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>应用程序接着分表遍历读事件列表readList和写事件列表writeList，对置为1的元素对应的套接字进行读或写操作</p>
+</li>
+<li><p>这样就避免了遍历套接字的操作，但仍然有大量无用的数据(状态为0的元素)从内核复制到应用层中。从上面的表格中我们可以看到实际上有用的数据只是在List中被标记为1的数据（意味着可读或可写），其他的数据并没有传送回去的必要。</p>
+</li>
+</ul>
+<h5 id="方式二："><a href="#方式二：" class="headerlink" title="方式二："></a><strong>方式二：</strong></h5><ul>
+<li><p>服务器端有多个客户端套接字连接。</p>
+</li>
+<li><p>应用层告诉内核每个套接字感兴趣的事件，这时候直接发送一个列表给内核</p>
+<table>
+<thead>
+<tr>
+<th align="center">套接字</th>
+<th align="center">操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">read</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">write</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">read</td>
+</tr>
+<tr>
+<td align="center">……</td>
+<td align="center">……</td>
+</tr>
+<tr>
+<td align="center">n</td>
+<td align="center">……</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>接着，当客户端发送数据过来时，对应会有一个回调函数，内核从网卡复制数据成功后即调回调函数将套接字1作为可读事件event1加入到事件列表，同样地，内核发现网卡可写时就将套接字2作为可写事件event2添加到事件列表中</p>
+</li>
+<li><p>应用层向内核请求读、写事件列表，内核将包含了event1和event2的事件列表返回应用层，此时的列表内容大致如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">套接字</th>
+<th align="center">可以进行的操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">read</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">write</td>
+</tr>
+</tbody></table>
+<p>注意这时不能进行读写操作的套接字是不会被记录到列表中返回给应用层的，这就大大地减少了数据的传输量。</p>
+</li>
+<li><p>应用层通过遍历事件列表得知哪些套接字可以进行哪些操作，然后执行对应的操作。</p>
+</li>
+</ul>
+<p>上面两种方式由操作系统内核维护客户端的所有连接并通过回调函数不断更新事件列表，而应用层线程只要遍历这些事件列表即可知道可读取或可写入的连接，进而对这些连接进行读写操作，极大提高了检测效率，自然处理能力也更强。</p>
+<h3 id="4-2-2-单线程非阻塞I-O模型"><a href="#4-2-2-单线程非阻塞I-O模型" class="headerlink" title="4.2.2 单线程非阻塞I/O模型"></a>4.2.2 单线程非阻塞I/O模型</h3><p>单线程非阻塞I/O模型最重要的一个特点是，在调用读取或写入接口后立即返回，而不会进入阻塞状态。虽然只有一个线程，但是它通过把非阻塞读写操作与上面几种检测机制配合就可以实现对多个连接的及时处理，而不会因为某个连接的阻塞操作导致其他连接无法处理。在客户端连接大多数都保持活跃的情况下，这个线程会一直循环处理这些连接，它很好地利用了阻塞的时间，大大提高了这个线程的执行效率。</p>
+<p>单线程非阻塞I/O模型的主要优势体现在对多个连接的管理，一般在同时需要处理多个连接的发场景中会使用非阻塞NIO模式，此模型下只通过一个线程去维护和处理连接，这样大大提高了机器的效率。一般服务器端才会使用NIO模式，而对于客户端，出于方便及习惯，可使用阻塞模式的套接字进行通信。</p>
+<h3 id="4-2-3-多线程非阻塞I-O模型"><a href="#4-2-3-多线程非阻塞I-O模型" class="headerlink" title="4.2.3 多线程非阻塞I/O模型"></a>4.2.3 多线程非阻塞I/O模型</h3><p>在多核的机器上可以通过多线程继续提高机器效率。最朴实、最自然的做法就是将客户端连接按组分配给若干线程，每个线程负责处理对应组内的连接。比如有4个客户端访问服务器，服务器将套接字1和套接字2交由线程1管理，而线程2则管理套接字3和套接字4，通过事件检测及非阻塞读写就可以让每个线程都能高效处理。</p>
+<p><strong>多线程非阻塞I/O模式让服务器端处理能力得到很大提高，它充分利用机器的CPU，适合用于处理高并发的场景，但它也让程序更复杂，更容易出现问题（死锁、数据不一致等经典并发问题）。</strong></p>
+<h3 id="4-2-4-Reactor模式"><a href="#4-2-4-Reactor模式" class="headerlink" title="4.2.4 Reactor模式"></a>4.2.4 Reactor模式</h3><p>最经典的多线程非阻塞I/O模型方式是Reactor模式。首先看单线程下的Reactor，Reactor将服务器端的整个处理过程分成若干个事件，例如分为接收事件、读事件、写事件、执行事件等。Reactor通过事件检测机制将这些事件分发给不同处理器去处理。在整个过程中只要有待处理的事件存在，即可以让Reactor线程不断往下执行，而不会阻塞在某处，所以处理效率很高。</p>
+<p><img src="https://resource.tinychen.com/20200402115511.png"></p>
+<p><strong>基于单线程Reactor模型，根据实际使用场景，把它改进成多线程模式。常见的有两种方式：一种是在耗时的process处理器中引入多线程，如使用线程池；另一种是直接使用多个Reactor实例，每个Reactor实例对应一个线程。</strong></p>
+<p>Reactor模式的一种改进方式如下图所示。其整体结构基本上与单线程的Reactor类似，只是引入了一个线程池。由于对连接的接收、对数据的读取和对数据的写入等操作基本上都耗时较少，因此把它们都放到Reactor线程中处理。然而，对于逻辑处理可能比较耗时的工作，可以在process处理器中引入线程池，process处理器自己不执行任务，而是交给线程池，从而在Reactor线程中避免了耗时的操作。将耗时的操作转移到线程池中后，尽管Reactor只有一个线程，它也能保证Reactor的高效。</p>
+<p><img src="https://resource.tinychen.com/20200402115553.png"></p>
+<p>Reactor模式的另一种改进方式如下图所示。其中有多个Reactor实例，每个Reactor实例对应一个线程。因为接收事件是相对于服务器端而言的，所以客户端的连接接收工作统一由一个accept处理器负责，accept处理器会将接收的客户端连接均匀分配给所有Reactor实例，每个Reactor实例负责处理分配到该Reactor上的客户端连接，包括连接的读数据、写数据和逻辑处理。这就是多Reactor实例的原理。</p>
+<p><img src="https://resource.tinychen.com/20200402115623.png"></p>
+<h2 id="4-3-Tomcat的I-O模型"><a href="#4-3-Tomcat的I-O模型" class="headerlink" title="4.3 Tomcat的I/O模型"></a>4.3 Tomcat的I/O模型</h2><p>Tomcat支持的I/O模型如下表（自8.5/9.0 版本起，Tomcat移除了对BIO的支持），在 8.0 之前 ， Tomcat 默认采用的I/O方式为 BIO ， 之后改为 NIO。 无论 NIO、NIO2 还是 APR， 在性能方面均优于以往的BIO。</p>
+<table>
+<thead>
+<tr>
+<th>IO模型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NIO</td>
+<td>同步非阻塞I/O，采用Java NIO类库实现</td>
+</tr>
+<tr>
+<td>NIO2</td>
+<td>异步非阻塞I/O，采用JDK 7最新的NIO2类库实现</td>
+</tr>
+<tr>
+<td>APR</td>
+<td>采用Apache可移植运行库实现，是C/C++编写的本地库，需要单独安装APR库</td>
+</tr>
+</tbody></table>
+<p><img src="https://resource.tinychen.com/20200402151558.png"></p>
+<h3 id="4-3-1-NIO（New-I-O-APIs、同步非阻塞）"><a href="#4-3-1-NIO（New-I-O-APIs、同步非阻塞）" class="headerlink" title="4.3.1 NIO（New I/O APIs、同步非阻塞）"></a>4.3.1 NIO（New I/O APIs、同步非阻塞）</h3><p><strong>Tomcat中的NIO模型是使用的JAVA的NIO类库，其内部的IO实现是同步的（也就是在用户态和内核态之间的数据交换上是同步机制），采用基于selector实现的异步事件驱动机制（这里的异步指的是selector这个实现模型是使用的异步机制）。</strong>而对于Java来说，非阻塞I/O的实现完全是基于操作系统内核的非阻塞I/O，它将操作系统的非阻塞I/O的差异屏蔽并提供统一的API，让我们不必关心操作系统。JDK会帮我们选择非阻塞I/O的实现方式。</p>
+<blockquote>
+<p>这里需要提一下同步异步和阻塞非阻塞的概念：</p>
+<p><strong>同步和异步关注的是消息通信机制</strong>，同步异步指的是应用程序<strong>发起的调用请求</strong>和<strong>获得的返回值</strong>是否一起返回，如果一起返回就是同步，否则就是异步，异步可以通过回调函数等方式实现。</p>
+<p><strong>阻塞和非阻塞关注的是程序在等待调用结果时的状态</strong>，应用程序发起调用请求之后不能干别的事情直到请求处理完成了就是阻塞，否则就是非阻塞。</p>
+<p><strong>所以我个人认为，对于阻塞I/O谈同步异步是没有太大意义的，因为此时进程已经阻塞，想要去干别的事情必须得等请求处理完，而请求处理完必然会得到返回值。</strong></p>
+<p>上面我们提到得内核基于回调得事件检测方式二就是典型的异步非阻塞I/O模型。</p>
+</blockquote>
+<h3 id="4-3-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）"><a href="#4-3-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）" class="headerlink" title="4.3.2 NIO2（New I/O APIs 2、异步非阻塞、AIO）"></a>4.3.2 NIO2（New I/O APIs 2、异步非阻塞、AIO）</h3><p>NIO2和前者相比的最大不同就在于引入了异步通道来实现异步IO操作，因此也叫AIO（Asynchronous I/O）。NIO.2 的异步通道 APIs 提供方便的、平台独立的执行异步操作的标准方法。这使得应用程序开发人员能够以更清晰的方式来编写程序，而不必定义自己的 Java 线程，此外，还可通过使用底层 OS 所支持的异步功能来提高性能。如同其他 Java API 一样，API 可利用的 OS 自有异步功能的数量取决于其对该平台的支持程度。</p>
+<p>异步通道提供支持连接、读取、以及写入之类非锁定操作的连接，并提供对已启动操作的控制机制。Java 7 中用于 Java Platform（NIO.2）的 More New I/O APIs，通过在 <code>java.nio.channels</code> 包中增加四个异步通道类，从而增强了 Java 1.4 中的 New I/O APIs（NIO），这些类在风格上与 NIO 通道 API 很相似。他们共享相同的方法与参数结构体，并且大多数对于 NIO 通道类可用的参数，对于新的异步版本仍然可用。主要区别在于新通道可使一些操作异步执行。</p>
+<p>异步通道 API 提供两种对已启动异步操作的监测与控制机制。第一种是通过返回一个 <code>java.util.concurrent.Future</code> 对象来实现，它将会建模一个挂起操作，并可用于查询其状态以及获取结果。第二种是通过传递给操作一个新类的对象，<code>java.nio.channels.CompletionHandler</code>，来完成，它会定义在操作完毕后所执行的处理程序方法。每个异步通道类为每个操作定义 API 副本，这样可采用任一机制。</p>
+<h3 id="4-3-3-APR"><a href="#4-3-3-APR" class="headerlink" title="4.3.3 APR"></a>4.3.3 APR</h3><p><strong>Apache可移植运行时（Apache Portable Runtime，APR）</strong>是Apache HTTP服务器的支持库，最初，APR是作为Apache HTTP服务器的一部分而存在的，后来成为一个单独的项目。其他的应用程序可以使用APR来实现平台无关性（跨平台）。APR提供了一组映射到下层操作系统的API，如果操作系统不支持某个特定的功能，APR将提供一个模拟的实现。这样程序员使用APR编写真正可在不同平台上移植的程序。</p>
+<h3 id="4-3-4-Tomcat配置APR"><a href="#4-3-4-Tomcat配置APR" class="headerlink" title="4.3.4 Tomcat配置APR"></a>4.3.4 Tomcat配置APR</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 首先使用yum来安装apr</span><br><span class="line">yum install apr apr-devel</span><br><span class="line"></span><br><span class="line"># 进入tomcat目录下对tomcat-native进行解压</span><br><span class="line">cd &#x2F;home&#x2F;tomcat9&#x2F;bin&#x2F;</span><br><span class="line">tar -zxvf tomcat-native.tar.gz </span><br><span class="line">cd tomcat-native-1.2.23-src&#x2F;native&#x2F;</span><br><span class="line"># 编译安装</span><br><span class="line">.&#x2F;configure </span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>顺利安装完成后会显示apr的lib库路径，一般都是<code>/usr/local/apr/lib</code></p>
+<p><img src="https://resource.tinychen.com/20200402101103.png"></p>
+<p>安装完成之后我们还需要修改环境变量和配置参数</p>
+<p>这里我们使用的是systemd调用jsvc来启动tomcat，所以我们直接在systemd对应的tomcat的unit文件中的<code>ExecStart</code>中添加一个路径参数<code>-Djava.library.path=/usr/local/apr/lib</code>指向apr库的路径：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ExecStart&#x3D;&#x2F;home&#x2F;tomcat9&#x2F;bin&#x2F;jsvc \</span><br><span class="line">        -user tomcat \</span><br><span class="line">        -nodetach \</span><br><span class="line">        -java-home $&#123;JAVA_HOME&#125; \</span><br><span class="line">        -pidfile $&#123;CATALINA_BASE&#125;&#x2F;tomcat.pid \</span><br><span class="line">        -classpath $&#123;CATALINA_HOME&#125;&#x2F;bin&#x2F;bootstrap.jar:$&#123;CATALINA_HOME&#125;&#x2F;bin&#x2F;tomcat-juli.jar \</span><br><span class="line">        -outfile $&#123;CATALINA_BASE&#125;&#x2F;logs&#x2F;catalina.out \</span><br><span class="line">        -errfile $&#123;CATALINA_BASE&#125;&#x2F;logs&#x2F;catalina.err \</span><br><span class="line">        -Dcatalina.home&#x3D;$&#123;CATALINA_HOME&#125; \</span><br><span class="line">        -Dcatalina.base&#x3D;$&#123;CATALINA_BASE&#125; \</span><br><span class="line">        -Djava.io.tmpdir&#x3D;$&#123;CATALINA_TMPDIR&#125; \</span><br><span class="line">        -Djava.util.logging.manager&#x3D;org.apache.juli.ClassLoaderLogManager \</span><br><span class="line">        -Djava.util.logging.config.file&#x3D;$&#123;CATALINA_BASE&#125;&#x2F;conf&#x2F;logging.properties \</span><br><span class="line">        -Djava.library.path&#x3D;&#x2F;usr&#x2F;local&#x2F;apr&#x2F;lib \</span><br><span class="line">        org.apache.catalina.startup.Bootstrap</span><br></pre></td></tr></table></figure>
+
+<p>然后我们在tomcat的home目录下的conf子目录中对server.xml文件进行修改</p>
+<p>把8080端口对应的配置修改成apr：（其他端口配置也类似）</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">"8080"</span> <span class="attr">protocol</span>=<span class="string">"org.apache.coyote.http11.Http11AprProtocol"</span></span></span><br><span class="line"><span class="tag">           <span class="attr">connectionTimeout</span>=<span class="string">"20000"</span></span></span><br><span class="line"><span class="tag">           <span class="attr">redirectPort</span>=<span class="string">"8443"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>重启tomcat服务我们从tomcat的日志中就可以看到协议已经从默认的NIO变成了apr。</p>
+<p><img src="https://resource.tinychen.com/20200402102439.png"></p>
+<p><img src="https://resource.tinychen.com/20200402102535.png"></p>
+<h3 id="4-3-5-三者之间的区别："><a href="#4-3-5-三者之间的区别：" class="headerlink" title="4.3.5 三者之间的区别："></a>4.3.5 三者之间的区别：</h3><p>NIO性能是最差的这是毋庸置疑的，如果是考虑到高并发的情况，显然异步非阻塞I/O模式的NIO2和APR库在性能上更有优势，实际上NIO2的性能表现也和APR不相上下，但是NIO2要求Tomcat的版本要在8.0以上，而APR只需要5.5以上即可，但是APR需要额外配置库环境，相对于内置集成的NIO2来说APR这个操作比较麻烦，两者各有优劣。具体使用哪个还是需要结合实际业务需求和环境进行测试才能决定。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20181112-win-install-tomcat\" rel="bookmark">Windows上Apache Tomcat的安装配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200409-tomcat03-jmeter-nio-nio2-apr\" rel="bookmark">Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200504-tomcat04-deploy-manager-serverxml\" rel="bookmark">Tomcat篇04-部署和管理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200608-http2-introduction\" rel="bookmark">HTTP2的特性解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200327-tomcat01-brief-introduction-installation\" rel="bookmark">Tomcat篇01-概念简介和守护进程配置</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/tomcat/" rel="tag"># tomcat</a>
+              <a href="/tags/web/" rel="tag"># web</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200331-mstsc-deploy-tls-cert/" rel="prev" title="windows系统RDP远程桌面配置可信证书">
+      <i class="fa fa-chevron-left"></i> windows系统RDP远程桌面配置可信证书
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200405-centos-create-kvm-vm/" rel="next" title="创建KVM虚拟机">
+      创建KVM虚拟机 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81Tomcat%E7%9A%84%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-text">1、Tomcat的目录结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81Tomcat%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-text">2、Tomcat的工作模式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81Tomcat%E7%9A%84%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">3、Tomcat的整体架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81Tomcat%E7%9A%84I-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4、Tomcat的I&#x2F;O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E9%98%BB%E5%A1%9EI-O%E5%A4%84%E7%90%86%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.1 阻塞I&#x2F;O处理模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-1-%E5%8D%95%E7%BA%BF%E7%A8%8B%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.1.1 单线程阻塞I&#x2F;O模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-2-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.1.2 多线程阻塞I&#x2F;O模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E9%9D%9E%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.2 非阻塞I&#x2F;O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-1-%E9%9D%9E%E9%98%BB%E5%A1%9E%E6%83%85%E5%86%B5%E4%B8%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E6%A3%80%E6%B5%8B"><span class="nav-text">4.2.1 非阻塞情况下的事件检测</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E9%81%8D%E5%8E%86%E5%A5%97%E6%8E%A5%E5%AD%97%E7%9A%84%E4%BA%8B%E4%BB%B6%E6%A3%80%E6%B5%8B"><span class="nav-text">(1)应用程序遍历套接字的事件检测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%86%85%E6%A0%B8%E9%81%8D%E5%8E%86%E5%A5%97%E6%8E%A5%E5%AD%97%E7%9A%84%E4%BA%8B%E4%BB%B6%E6%A3%80%E6%B5%8B"><span class="nav-text">(2)内核遍历套接字的事件检测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%86%85%E6%A0%B8%E5%9F%BA%E4%BA%8E%E5%9B%9E%E8%B0%83%E7%9A%84%E4%BA%8B%E4%BB%B6%E6%A3%80%E6%B5%8B"><span class="nav-text">(3)内核基于回调的事件检测</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9A"><span class="nav-text">方式一：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9A"><span class="nav-text">方式二：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-2-%E5%8D%95%E7%BA%BF%E7%A8%8B%E9%9D%9E%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.2.2 单线程非阻塞I&#x2F;O模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-3-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E9%9D%9E%E9%98%BB%E5%A1%9EI-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.2.3 多线程非阻塞I&#x2F;O模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-4-Reactor%E6%A8%A1%E5%BC%8F"><span class="nav-text">4.2.4 Reactor模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-Tomcat%E7%9A%84I-O%E6%A8%A1%E5%9E%8B"><span class="nav-text">4.3 Tomcat的I&#x2F;O模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-1-NIO%EF%BC%88New-I-O-APIs%E3%80%81%E5%90%8C%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9E%EF%BC%89"><span class="nav-text">4.3.1 NIO（New I&#x2F;O APIs、同步非阻塞）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-2-NIO2%EF%BC%88New-I-O-APIs-2%E3%80%81%E5%BC%82%E6%AD%A5%E9%9D%9E%E9%98%BB%E5%A1%9E%E3%80%81AIO%EF%BC%89"><span class="nav-text">4.3.2 NIO2（New I&#x2F;O APIs 2、异步非阻塞、AIO）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-3-APR"><span class="nav-text">4.3.3 APR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-4-Tomcat%E9%85%8D%E7%BD%AEAPR"><span class="nav-text">4.3.4 Tomcat配置APR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-5-%E4%B8%89%E8%80%85%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB%EF%BC%9A"><span class="nav-text">4.3.5 三者之间的区别：</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

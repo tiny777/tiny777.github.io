@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="RHEL7中的rpm和yum的简单介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RHEL7的yum简介">
+<meta property="og:url" content="https://tinychen.com/20190708-rhel7-yum-repo/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="RHEL7中的rpm和yum的简单介绍。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190708/PpfaSN8jr03X.png">
+<meta property="article:published_time" content="2019-07-08T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-08T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190708/PpfaSN8jr03X.png">
+
+<link rel="canonical" href="https://tinychen.com/20190708-rhel7-yum-repo/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>RHEL7的yum简介 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190708-rhel7-yum-repo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RHEL7的yum简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-08 15:00:00" itemprop="dateCreated datePublished" datetime="2019-07-08T15:00:00+08:00">2019-07-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>3.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>3 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>RHEL7中的rpm和yum的简单介绍。</p>
+<a id="more"></a>
+
+<h1 id="1、RPM和dpkg简介"><a href="#1、RPM和dpkg简介" class="headerlink" title="1、RPM和dpkg简介"></a>1、RPM和dpkg简介</h1><p>目前在Linux界软件安装方式最常见的有两种，分别是：</p>
+<ul>
+<li>dpkg<br>  这个机制最早是由Debian Linux社群所开发出来的，透过dpkg的机制，Debian提供的软件就能够简单的安装起来，同时还能提供安装后的软件信息，实在非常不错。只要是衍生于Debian的其他Linux distributions大多使用dpkg这个机制来管理软件的，包括B2D，Ubuntu等等。</li>
+<li>RPM<br>  这个机制最早是由Red Hat 这家公司开发出来的，后来实在很好用，因此很多distributions就使用这个机制来作为软件安装的管理方式。包括Fedora，CentOS，SuSE等等知名的开发商都是用的RPM。</li>
+</ul>
+<p>如前所述，不论dpkg/rpm这些机制或多或少都会有软件依赖的问题，那该如何解决呢？其实前面不是谈到过每个软件文件都有提供对应依赖的的检查吗？那么如果我们将每个软件对应依赖的数据做成列表，等到实际软件安装时，若发生需要安装依赖的情况，例如安装A需要先安装B与C，而安装B则需要安装D与E时，那么当你要安装A，通过查询依赖的数据列表，管理机制自动去取得B，C，D，E来同时安装，就可以很方便的解决依赖的了。</p>
+<p>在dpkg管理机制上就开发出APT的在线升级机制，RPM则依开发商的不同，有Red Hat系统的yum，SuSE系统的Yast Online Update（YOU）等。</p>
+<table>
+<thead>
+<tr>
+<th align="center">distribution代表</th>
+<th align="center">软件管理机制</th>
+<th align="center">使用指令</th>
+<th align="center">在线升级机制（指令）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Red Hat/Fedora</td>
+<td align="center">RPM</td>
+<td align="center">rpm</td>
+<td align="center">yum(yum)</td>
+</tr>
+<tr>
+<td align="center">Debian/Ubuntu</td>
+<td align="center">dpkg</td>
+<td align="center">dpkg</td>
+<td align="center">apt(apt-get)</td>
+</tr>
+</tbody></table>
+<h1 id="2、RPM和SRPM"><a href="#2、RPM和SRPM" class="headerlink" title="2、RPM和SRPM"></a>2、RPM和SRPM</h1><h2 id="2-1-RPM"><a href="#2-1-RPM" class="headerlink" title="2.1 RPM"></a>2.1 RPM</h2><p>RPM全名是<strong>RedHat Package Manager</strong>，简称RPM。顾名思义，当初这个软件管理的机制是由Red Hat 这家公司发展出来的。RPM是以一种数据库记录的方式来将你所需要的软件安装到你的Linux系统的一套管理机制。</p>
+<p>RPM最大的特点就是将你要安装的软件先编译过，并且打包成为RPM机制的包装文件，透过包装好的软件里头默认的数据库记录，记录这个软件要安装的时候必须具备的依赖软件，当安装在你的Linux主机时，RPM会先依照软件里头的数据查询Linux主机的所需依赖软件是否满足，若满足则予以安装，若不满足则不予安装。那么安装的时候就将该软件的信息整个写入RPM的数据库中，以便未来的查询、验证与卸载！这样一来的优点是：</p>
+<ul>
+<li>由于已经编译完成并且打包完毕，所以软件传输与安装上很方便（不需要再重新编译）；</li>
+<li>由于软件的信息都已经记录在Linux主机的数据库上，很方便查询、升级与卸载。</li>
+</ul>
+<p>由于RPM文件是已经编译完成了的，所以，该软件文件几乎只能安装在原本默认的硬件与操作系统版本中。也就是说，你的主机系统环境必须要与当初建立这个软件文件的主机环境相同才行！</p>
+<blockquote>
+<p>举例来说，rp-pppoe这个ADSL拨接软件，他必须要在ppp这个软件存在的环境下才能进行安装！如果你的主机并没有ppp这个软件，那么很抱歉，除非你先安装ppp否则rp-pppoe就是不让你安装的（当然你可以强制安装，但是通常都会有点问题发生就是了！）。</p>
+</blockquote>
+<h2 id="2-2-SRPM"><a href="#2-2-SRPM" class="headerlink" title="2.2 SRPM"></a>2.2 SRPM</h2><p>SRPM就是<strong>Source RPM</strong>的意思，也就是这个RPM文件里面含有源码。<strong>也就是说这个SRPM所提供的软件内容并没有经过编译，它提供的是原始码。</strong></p>
+<p>通常SRPM的扩展名是以<code>***src.rpm</code>这种格式来命名的。<strong>需要注意的是，虽然RPM提供的是原始码，但是他仍然含有该软件所需要的依赖软件说明、以及所有RPM文件所提供的数据。同时，他与RPM不同的是，他也提供了参数配置文件（就是<code>configure</code>与<code>makefile</code>）。</strong>所以，如果我们下载的是SRPM，那么要安装该软件时，你就必须要：</p>
+<ul>
+<li>先将该软件以RPM管理的方式编译，此时SRPM会被编译成为RPM文件；</li>
+<li>然后将编译完成的RPM文件安装到Linux系统当中</li>
+</ul>
+<blockquote>
+<p>通常一个软件在释出的时候，都会同时释出该软件的RPM与SRPM。我们现在知道RPM文件必须要在相同的Linux环境下才能够安装，而SRPM既然是原始码的格式，我们可以修改SRPM内的参数配置文件，然后重新编译产生能适合我们Linux环境的RPM文件。</p>
+</blockquote>
+<h2 id="2-3-x86和noarch"><a href="#2-3-x86和noarch" class="headerlink" title="2.3 x86和noarch"></a>2.3 x86和noarch</h2><p>一般对应的rpm包会有不同的几种平台对应，下表列出了比较常见的一些平台，需要注意的是，现在基本已经全部步入了64位时代(主要是服务器、桌面端和移动端)，==主打服务器端的CentOS7已经不再发布32位版本，因此在CentOS7上面见到的主要是<code>x86_64</code>和<code>noarch</code>。==</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>i386</td>
+<td>几乎适用于所有的x86平台，不论是旧的pentum或者是新的Intel Core2与K8系列的CPU等等，都可以正常的工作。那个i指的是Intel兼容的CPU的意思。386就是CPU的等级。</td>
+</tr>
+<tr>
+<td>i586</td>
+<td>就是针对586等级的计算机进行优化编译。那是哪些CPU呢？包括pentum第一代MMXCPU，AMD的K5，K6系列CPU（socket7插脚）等等的CPU都算是这个等级；</td>
+</tr>
+<tr>
+<td>i686</td>
+<td>在pentunll以后的Intel系列CPU，及K7以后等级的CPU都属于这个686等级！由于目前市面上几乎仅剩P-ll以后等级的硬件平台，因此很多distributions都直接释出这种等级的RPM文件。</td>
+</tr>
+<tr>
+<td>x86_64</td>
+<td>针对64位的CPU进行优化编译设定，包括Intel的Core 2以上等级CPU，以及AMD的Athlon64以后等级的CPU，都属于这一类型的硬件平台。</td>
+</tr>
+<tr>
+<td>noarch</td>
+<td>noarch是no architecture的缩写，说明这个包可以在各个不同的cpu上使用。一般来说，这种类型的RPM文件，里面应该没有binary program存在，较常出现的就是属于shell script方面的软件。</td>
+</tr>
+</tbody></table>
+<h1 id="3、Yum"><a href="#3、Yum" class="headerlink" title="3、Yum"></a>3、Yum</h1><h2 id="3-1-yum简介"><a href="#3-1-yum简介" class="headerlink" title="3.1 yum简介"></a>3.1 yum简介</h2><p>当客户端有升级、安装的需求时，yum会向软件库要求清单的更新，等到清单更新到本机的<br><code>/var/cache/yum</code>里面后，等一下更新时就会用这个本机清单与本机的RPM数据库进行比较，这样就知道该下载什么软件。接下来yum会跑到软件库服务器（<code>yum server</code>）下载所需要的软件（因为有记录软件所在的网址），然后再透过RPM的机制开始安装软件。这就是yum安装软件的整个流程。</p>
+<p>yum的repo文件一般在<code>/etc/yum.repo.d/</code>目录下，如图所示就是小七的CentOS7中的yum repo list</p>
+<p><img src="https://resource.tinychen.com/blog/20190708/PpfaSN8jr03X.png"></p>
+<h2 id="3-2-yum-update和upgrade"><a href="#3-2-yum-update和upgrade" class="headerlink" title="3.2 yum update和upgrade"></a>3.2 yum update和upgrade</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 升级所有包同时也升级软件和系统内核</span></span><br><span class="line">yum update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只升级所有包，不升级软件和系统内核</span></span><br><span class="line">yum upgrade</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-yum-repo文件构成"><a href="#3-3-yum-repo文件构成" class="headerlink" title="3.3 yum repo文件构成"></a>3.3 yum repo文件构成</h2><p>一般来说，一个<code>yum repo</code>文件由下面的几部分构成</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 必须是独一无二的ID来标记这个yum repo，如果重复了，后面的会覆盖掉前面的</span></span><br><span class="line">[serverid]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加一段文字来描述这个yum repo</span></span><br><span class="line">name=Description</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置资源库的地址，可以是http或者ftp等多种形式</span></span><br><span class="line">baseurl=&#123;ftp://|http://|file://&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># enabled=1开启本地更新模式</span></span><br><span class="line">enabled=&#123;1|0&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># gpgcheck=1表示检查；可以不检查gpgcheck=0</span></span><br><span class="line">gpgcheck=&#123;1|0&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查的key；如果上面不检查这一行可以不写</span></span><br><span class="line"><span class="comment"># gpgkey的地址也可以是http或者ftp等多种形式</span></span><br><span class="line">gpgkey=</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190310-centos-install-mysql\" rel="bookmark">CentOS7安装MySQL</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190317-centos-install-jdk\" rel="bookmark">CentOS配置JDK环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190407-aliyun-centos-apache-https\" rel="bookmark">阿里云轻量级应用服务器CentOS系统Apache配置Https</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190413-centos-install-python\" rel="bookmark">CentOS配置Python3开发环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190521-centos-install-mariadb\" rel="bookmark">CentOS7安装MariaDB</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190707-rhel7-selinux/" rel="prev" title="RHEL7的SELinux简介">
+      <i class="fa fa-chevron-left"></i> RHEL7的SELinux简介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190708-rhel7-change-init-level/" rel="next" title="CentOS7修改默认启动级别">
+      CentOS7修改默认启动级别 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81RPM%E5%92%8Cdpkg%E7%AE%80%E4%BB%8B"><span class="nav-text">1、RPM和dpkg简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81RPM%E5%92%8CSRPM"><span class="nav-text">2、RPM和SRPM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-RPM"><span class="nav-text">2.1 RPM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-SRPM"><span class="nav-text">2.2 SRPM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-x86%E5%92%8Cnoarch"><span class="nav-text">2.3 x86和noarch</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81Yum"><span class="nav-text">3、Yum</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-yum%E7%AE%80%E4%BB%8B"><span class="nav-text">3.1 yum简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-yum-update%E5%92%8Cupgrade"><span class="nav-text">3.2 yum update和upgrade</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-yum-repo%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90"><span class="nav-text">3.3 yum repo文件构成</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要记录了一些常见的HTTP状态码，内容参考维基百科。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见的HTTP状态码">
+<meta property="og:url" content="https://tinychen.com/20200717-http-code-introduction/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要记录了一些常见的HTTP状态码，内容参考维基百科。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106170859.jpg">
+<meta property="article:published_time" content="2020-07-17T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-07-17T03:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106170859.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200717-http-code-introduction/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>常见的HTTP状态码 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200717-http-code-introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          常见的HTTP状态码
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-07-17 11:00:00" itemprop="dateCreated datePublished" datetime="2020-07-17T11:00:00+08:00">2020-07-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106170859.jpg"></p>
+<p>本文主要记录了一些常见的HTTP状态码，内容参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">维基百科</a>。</p>
+<a id="more"></a>
+
+<h1 id="1、标准扩展码"><a href="#1、标准扩展码" class="headerlink" title="1、标准扩展码"></a>1、标准扩展码</h1><h2 id="1-1-1xx-Informational-信息化"><a href="#1-1-1xx-Informational-信息化" class="headerlink" title="1.1 1xx Informational 信息化"></a>1.1 1xx Informational 信息化</h2><ul>
+<li><p>100 Continue 继续</p>
+</li>
+<li><p>101 Switching Protocols 交换协议</p>
+</li>
+<li><p>102 Processing 处理</p>
+</li>
+</ul>
+<h2 id="1-2-2xx-Success-成功"><a href="#1-2-2xx-Success-成功" class="headerlink" title="1.2 2xx Success 成功"></a>1.2 2xx Success 成功</h2><ul>
+<li><p>200 OK</p>
+</li>
+<li><p>201 Created 创建</p>
+</li>
+<li><p>202 Accepted 已接受</p>
+</li>
+<li><p>203 Non-Authoritative Information 非授权信息</p>
+</li>
+<li><p>204 No Content 无内容</p>
+</li>
+<li><p>205 Reset Content 重置内容</p>
+</li>
+<li><p>206 Partial Content 部分内容</p>
+</li>
+<li><p>207 Multi-Status 多状态</p>
+</li>
+<li><p>208 Already Reported 已报告</p>
+</li>
+<li><p>226 IMIM Used 使用的</p>
+</li>
+</ul>
+<h2 id="1-3-3xx-Redirection-重定向"><a href="#1-3-3xx-Redirection-重定向" class="headerlink" title="1.3 3xx Redirection 重定向"></a>1.3 3xx Redirection 重定向</h2><ul>
+<li><p>300 Multiple Choices 多种选择</p>
+</li>
+<li><p>301 Moved Permanently 永久移动</p>
+</li>
+<li><p>302 Found 发现</p>
+</li>
+<li><p>303 See Other 查看其它</p>
+</li>
+<li><p>304 Not Modified 未修改</p>
+</li>
+<li><p>305 Use Proxy 使用代理</p>
+</li>
+<li><p>306 Switch Proxy 开关代理</p>
+</li>
+<li><p>307 Temporary Redirect 临时重定向</p>
+</li>
+<li><p>308 Permanent Redirect 永久重定向</p>
+</li>
+</ul>
+<h2 id="1-4-4xx-Client-Error-客户端错误"><a href="#1-4-4xx-Client-Error-客户端错误" class="headerlink" title="1.4 4xx Client Error 客户端错误"></a>1.4 4xx Client Error 客户端错误</h2><ul>
+<li><p>400 Bad Request 错误的请求</p>
+</li>
+<li><p>401 Unauthorized 未授权</p>
+</li>
+<li><p>402 Payment Required 需要付费</p>
+</li>
+<li><p>403Forbidden 拒绝访问</p>
+</li>
+<li><p>404 Not Found 未找到</p>
+</li>
+<li><p>405 Method Not Allowed 不允许的方法</p>
+</li>
+<li><p>406 Not Acceptable 不可接受</p>
+</li>
+<li><p>407 Proxy Authentication Required 代理服务器需要身份验证</p>
+</li>
+<li><p>408 Request Timeout 请求超时</p>
+</li>
+<li><p>409 Conflict 冲突</p>
+</li>
+<li><p>410 Gone 完成</p>
+</li>
+<li><p>411 Length Required 需要长度</p>
+</li>
+<li><p>412 Precondition Failed 前提条件失败</p>
+</li>
+<li><p>413 Payload Too Large 负载过大</p>
+</li>
+<li><p>414 URI Too Long 太长</p>
+</li>
+<li><p>415 Unsupported Media Type 不支持的媒体类型</p>
+</li>
+<li><p>416 Range Not Satisfiable 的范围不合适</p>
+</li>
+<li><p>417 Expectation Failed 预期失败</p>
+</li>
+<li><p>418 I’m a teapot 我是一个茶壶</p>
+</li>
+<li><p>421 Misdirected Request 误导请求</p>
+</li>
+<li><p>422 Unprocessable Entity 无法处理的实体</p>
+</li>
+<li><p>423 Locked 锁定</p>
+</li>
+<li><p>424 Failed Dependency 失败的依赖</p>
+</li>
+<li><p>426 Upgrade Required 升级所需</p>
+</li>
+<li><p>428 Precondition Required 所需的先决条件</p>
+</li>
+<li><p>429 Too Many Requests 太多的请求</p>
+</li>
+<li><p>431 Request Header Fields Too Large 请求头字段太大</p>
+</li>
+<li><p>451 Unavailable For Legal Reasons 不可出于法律原因</p>
+</li>
+</ul>
+<h2 id="1-5-5xx-Server-Error-服务器错误"><a href="#1-5-5xx-Server-Error-服务器错误" class="headerlink" title="1.5 5xx Server Error 服务器错误"></a>1.5 5xx Server Error 服务器错误</h2><ul>
+<li><p>500 Internal Server Error 内部服务器错误</p>
+</li>
+<li><p>501 Not Implemented 未执行</p>
+</li>
+<li><p>502 Bad Gateway 错误的网关</p>
+</li>
+<li><p>503 Service Unavailable 服务不可用</p>
+</li>
+<li><p>504 Gateway Timeout 网关超时</p>
+</li>
+<li><p>505 HTTP Version Not Supported 不支持HTTP版本</p>
+</li>
+<li><p>506 Variant Also Negotiates 变体也进行协商</p>
+</li>
+<li><p>507 Insufficient Storage 存储空间不足</p>
+</li>
+<li><p>508 Loop Detected 检测到循环</p>
+</li>
+<li><p>510 Not Extended 不延长</p>
+</li>
+<li><p>511 Network Authentication Required 网络需要身份验证</p>
+</li>
+</ul>
+<h1 id="2、非官方扩展码"><a href="#2、非官方扩展码" class="headerlink" title="2、非官方扩展码"></a>2、非官方扩展码</h1><ul>
+<li>103 Checkpoint 检查点</li>
+<li>420 Method Failure (Spring Framework) 故障的方法（Spring框架）</li>
+<li>420 Enhance Your Calm (Twitter) 增强您的平静（微博）</li>
+<li>450 Blocked by Windows Parental Controls (Microsoft) 被Windows阻止家长控制（微软）</li>
+<li>498 Invalid Token (Esri) 无效的令牌（ESRI的）</li>
+<li>499 Token Required (Esri) 令牌必需（ESRI的）</li>
+<li>499 Request has been forbidden by antivirus 请求已被禁止反病毒</li>
+<li>509 Bandwidth Limit Exceeded (Apache Web Server/cPanel) 超出带宽限制（Apache的Web服务器/的cPanel）</li>
+<li>530 Site is frozen 网站被冻结</li>
+</ul>
+<h1 id="3、互联网信息服务扩展状态码"><a href="#3、互联网信息服务扩展状态码" class="headerlink" title="3、互联网信息服务扩展状态码"></a>3、互联网信息服务扩展状态码</h1><ul>
+<li><p>440 Login Timeout 登录超时</p>
+</li>
+<li><p>449 Retry With 重新发送带</p>
+</li>
+<li><p>451 Redirect 重定向</p>
+</li>
+</ul>
+<h1 id="4、NGINX-扩展状态码"><a href="#4、NGINX-扩展状态码" class="headerlink" title="4、NGINX 扩展状态码"></a>4、NGINX 扩展状态码</h1><ul>
+<li><p>444 No Response 没有响应</p>
+</li>
+<li><p>495 SSL Certificate Error 证书错误</p>
+</li>
+<li><p>496 SSL Certificate Required证书要求</p>
+</li>
+<li><p>497 HTTP Request Sent to HTTPS Port 发送到HTTPS端口请求</p>
+</li>
+<li><p>499 Client Closed Request 客户端请求关闭</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20181112-win-install-tomcat\" rel="bookmark">Windows上Apache Tomcat的安装配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190407-aliyun-centos-apache-https\" rel="bookmark">阿里云轻量级应用服务器CentOS系统Apache配置Https</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190608-wireshark-stu\" rel="bookmark">Wireshark抓包分析校园网登录过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190829-http-to-nginx\" rel="bookmark">个人博客web服务器换用nginx</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx04-http-map-module\" rel="bookmark">Nginx篇04——map模块</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200714-ipv4-address-re-match/" rel="prev" title="匹配ipv4地址的正则表达式">
+      <i class="fa fa-chevron-left"></i> 匹配ipv4地址的正则表达式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200718-wsl-access-is-denied/" rel="next" title="wsl access is denied">
+      wsl access is denied <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E6%A0%87%E5%87%86%E6%89%A9%E5%B1%95%E7%A0%81"><span class="nav-text">1、标准扩展码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-1xx-Informational-%E4%BF%A1%E6%81%AF%E5%8C%96"><span class="nav-text">1.1 1xx Informational 信息化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-2xx-Success-%E6%88%90%E5%8A%9F"><span class="nav-text">1.2 2xx Success 成功</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-3xx-Redirection-%E9%87%8D%E5%AE%9A%E5%90%91"><span class="nav-text">1.3 3xx Redirection 重定向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-4xx-Client-Error-%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%94%99%E8%AF%AF"><span class="nav-text">1.4 4xx Client Error 客户端错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-5xx-Server-Error-%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%94%99%E8%AF%AF"><span class="nav-text">1.5 5xx Server Error 服务器错误</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E9%9D%9E%E5%AE%98%E6%96%B9%E6%89%A9%E5%B1%95%E7%A0%81"><span class="nav-text">2、非官方扩展码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E4%BA%92%E8%81%94%E7%BD%91%E4%BF%A1%E6%81%AF%E6%9C%8D%E5%8A%A1%E6%89%A9%E5%B1%95%E7%8A%B6%E6%80%81%E7%A0%81"><span class="nav-text">3、互联网信息服务扩展状态码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81NGINX-%E6%89%A9%E5%B1%95%E7%8A%B6%E6%80%81%E7%A0%81"><span class="nav-text">4、NGINX 扩展状态码</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

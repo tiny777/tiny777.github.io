@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="《编译原理》复习提纲，啥也别说了，大家考试好运(ง •_•)ง">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译原理复习提纲">
+<meta property="og:url" content="https://tinychen.com/20190117-compiling/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="《编译原理》复习提纲，啥也别说了，大家考试好运(ง •_•)ง">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling01.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling2.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling3.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling4.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling5.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling10.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling11.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling6.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling7.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling8.png">
+<meta property="og:image" content="https://resource.tinychen.com/Compiling9.png">
+<meta property="article:published_time" content="2019-01-17T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-01-17T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="stu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/Compiling01.png">
+
+<link rel="canonical" href="https://tinychen.com/20190117-compiling/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>编译原理复习提纲 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190117-compiling/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译原理复习提纲
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-01-17 15:00:00" itemprop="dateCreated datePublished" datetime="2019-01-17T15:00:00+08:00">2019-01-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/others/" itemprop="url" rel="index">
+                    <span itemprop="name">others</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>《编译原理》复习提纲，啥也别说了，大家考试好运(ง •_•)ง</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="编译过程"><a href="#编译过程" class="headerlink" title="编译过程"></a>编译过程</h1><p><strong>编译程序的基本任务是将源语言程序翻译成等价的目标语言程序。</strong></p>
+<p>一般的，将编译过程划分成<strong>词法分析、语法分析、语义分析、中间代码生成、代码优化和目标代码</strong>生成6个阶段。</p>
+<p><img src="https://resource.tinychen.com/Compiling01.png"></p>
+<h2 id="词法分析"><a href="#词法分析" class="headerlink" title="词法分析"></a>词法分析</h2><ul>
+<li><p>词法分析的任务是<strong>从左到右一个字符一个字符</strong>地读入源程序，对构成源程序的字符流进行扫描和分解，从而识<strong>别出一个个单词*</strong>（一些场合下也称单词符号或符号）*。</p>
+</li>
+<li><p>这里所谓的单词是指逻辑上紧密相连的一组字符，这些字符具有集体含义。</p>
+</li>
+</ul>
+<h2 id="语法分析"><a href="#语法分析" class="headerlink" title="语法分析"></a>语法分析</h2><ul>
+<li><p><strong>语法分析的任务是再词法分析的基础上将单词序列分解成各类语法短语。</strong></p>
+</li>
+<li><p>这种语法短语也称为语法单位，可表示成语法树，如图所示。<br><img src="https://resource.tinychen.com/Compiling2.png"></p>
+</li>
+</ul>
+<ul>
+<li>语法分析所依据的是语言的语法规则，即描述程序结构的规则。通过语法分析确定整个输入串是否构成一个语法上正确的程序。</li>
+</ul>
+<blockquote>
+<p>词法分析和语法分析本质上都是对源程序的结构进行分析。但词法分析的任务仅对源程序进行线性扫描即可完成，比如识别标识符，因为标识符的结构是字母打头的字母和数字串，这只要顺序扫描输入流，遇到既不是字母又不是数字的字符时，将前面所发现的所有字母和数字组合在一起构成标识符单词即可。但这种线性扫描不能用于识别递归定义的语法成分，比如不能用此办法去匹配表达式中的括号。</p>
+</blockquote>
+<h2 id="语义分析"><a href="#语义分析" class="headerlink" title="语义分析"></a>语义分析</h2><ul>
+<li><strong>语义分析是审查源程序有无语义错误，为代码生成阶段收集类型信息。</strong></li>
+</ul>
+<blockquote>
+<p>例如，语义分析的一个工作是进行类型审查，审查每个算符是否具有语言规范允许的运算对象，当不符合语言规范时，编译程序应报告错误。</p>
+</blockquote>
+<h2 id="中间代码生成"><a href="#中间代码生成" class="headerlink" title="中间代码生成"></a>中间代码生成</h2><ul>
+<li><p>在进行了上述的语法分析和语义分析阶段的工作之后，<strong>有的编译程序</strong>将源程序变成一种内部表示形式，这种表现形式叫做中间语言或中间代码。</p>
+</li>
+<li><p><strong>所谓“中间代码”是一种结构简单、含义明确的记号系统，这种记号系统可以设计为多种多样的形式，重要的设计原则为两点：一是容易生成；二是容易将它翻译成目标代码。</strong></p>
+</li>
+</ul>
+<blockquote>
+<p>很多编译程序采用了一种近似“三地址指令”的“四元式”中间代码，这种四元式的形式为</p>
+</blockquote>
+<blockquote>
+<p>（运算符，运算对象1，运算对象2，结果）</p>
+</blockquote>
+<pre><code>id1:= id2 + id3 * 10
+
+(1)    (*    id3    10    t1)
+(2)    (+    id2    t1    t2)
+(3)    (:=    t2    -    id1)
+</code></pre>
+<h2 id="代码优化"><a href="#代码优化" class="headerlink" title="代码优化"></a>代码优化</h2><p><strong>对前一阶段产生的中间代码进行变换或进行改造，目的是使生成的目标代码更为高效，即省时间和省空间。</strong></p>
+<pre><code>id1:= id2 + id3 * 10
+
+(1)    (*    id3    10    t1)
+(2)    (+    id2    t1    id1)
+</code></pre>
+<h2 id="目标代码生成"><a href="#目标代码生成" class="headerlink" title="目标代码生成"></a>目标代码生成</h2><p><strong>把中间代码变换成特定机器上的一个绝对指令代码或可重定位的指令代码或汇编指令代码。</strong></p>
+<pre><code>(1)    (*    id3    10    t1)
+(2)    (+    id2    t1    id1)
+ mov id3,R2
+ mul 10, R2
+ mov id2,R1
+ add  R2,R1
+ mov R1,id1
+</code></pre>
+<blockquote>
+<p>上述编译过程的阶段划分是一个典型处理模式，<strong>事实上并非所有的编译程序都分成这几个阶段，</strong>有些编译程序并不需要生成中间代码，有些编译程序不进行优化，即优化阶段可省去，有些最简单的编译程序在语法分析的同时产生目标指令代码，如PL/0语言编译程序。不过多数实用的编译程序都包含上述几个阶段的工作过程。</p>
+</blockquote>
+<h2 id="编译程序其他要点"><a href="#编译程序其他要点" class="headerlink" title="编译程序其他要点"></a>编译程序其他要点</h2><h3 id="符号表"><a href="#符号表" class="headerlink" title="符号表"></a>符号表</h3><ul>
+<li><p>记录源程序中使用的名字</p>
+</li>
+<li><p>收集每个名字的各种属性信息</p>
+</li>
+<li><p>类型、作用域、分配存储信息</p>
+</li>
+</ul>
+<h3 id="出错处理"><a href="#出错处理" class="headerlink" title="出错处理"></a>出错处理</h3><p>检查错误、报告出错信息、排错、恢复编译工作。</p>
+<h3 id="编译阶段的划分"><a href="#编译阶段的划分" class="headerlink" title="编译阶段的划分"></a>编译阶段的划分</h3><p><strong>前端和后端</strong></p>
+<ul>
+<li><p>编译的前端：与源语言有关但与目标机无关的那些部分组成</p>
+</li>
+<li><p>编译的后端：与目标机有关的那些部分组成</p>
+</li>
+</ul>
+<blockquote>
+<ul>
+<li>一个前端+多个后端：多平台编译器   例 Java</li>
+<li>多个前端+一个后端：多语言编译器  例 .NET</li>
+</ul>
+</blockquote>
+<ul>
+<li>遍（趟）：从头到尾扫描源程序一次称为一遍</li>
+</ul>
+<hr>
+<h1 id="解释过程（解释程序）"><a href="#解释过程（解释程序）" class="headerlink" title="解释过程（解释程序）"></a>解释过程（解释程序）</h1><ul>
+<li><p>这里介绍另一种语言处理程序，<strong>它不需要在运行前先把源程序翻译成目标代码，也可以实现在某台机器上运行程序并生成结果。</strong></p>
+</li>
+<li><p><strong>解释程序接受某个语言的程序并立即运行这个源程序。</strong>它的工作模式是一个个的获取、分析并执行源程序语句，一旦第一个语句分析结束，源程序便开始运行并生成结果，它特别适合程序员以交互工作方式工作的情况，即希望在获取下一个语句之前了解每个语句的执行结果，允许执行时修改程序。</p>
+</li>
+</ul>
+<blockquote>
+<p>著名的解释程序有Basic语言解释程序 ,Lisp语言解释程序,UNIX命令语言解释程序(shell),数据库查询语言SQL 解释程序以及bytecode解释程序。</p>
+</blockquote>
+<hr>
+<h1 id="编译程序和解释程序的对比"><a href="#编译程序和解释程序的对比" class="headerlink" title="编译程序和解释程序的对比"></a>编译程序和解释程序的对比</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p><img src="https://resource.tinychen.com/Compiling3.png"></p>
+<ul>
+<li><p><strong>编译：整个程序全部翻译结束之后，程序才能开始运行；编译和运行是两个独立分开的阶段。</strong></p>
+</li>
+<li><p><strong>解释：不需要将分析和执行阶段分开，一边分析一边执行；更加适用于交互环境中。</strong></p>
+</li>
+</ul>
+<h2 id="编译和解释的比较"><a href="#编译和解释的比较" class="headerlink" title="编译和解释的比较"></a>编译和解释的比较</h2><ul>
+<li><p>编译结果的执行效率比解释快很多</p>
+</li>
+<li><p>解释执行的空间开销大大超过编译结果的执行</p>
+</li>
+</ul>
+<hr>
+<h1 id="Java-C-和-传统语言-C-Pascal"><a href="#Java-C-和-传统语言-C-Pascal" class="headerlink" title="Java C#  和 传统语言 C Pascal"></a>Java C#  和 传统语言 C Pascal</h1><ul>
+<li><p>Java语言的处理环境既有编译程序，也有解释程序</p>
+</li>
+<li><p>java源程序经过JAVA编译程序编译后生成class可执行字节码文件（BYTECODE）</p>
+</li>
+<li><p>可执行字节码文件（BYTECODE）在java虚拟机（JVM）上经过解释程序一行行解释执行</p>
+</li>
+<li><p><strong>可以说JAVA编译程序兼具编译型语言和解释型语言的特点</strong></p>
+</li>
+<li><p><strong>传统语言都是一次编译，没有生成中间代码</strong></p>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/Compiling4.png"></p>
+<hr>
+<h1 id="文法的概念"><a href="#文法的概念" class="headerlink" title="文法的概念"></a>文法的概念</h1><p><strong>文法即是以有穷的集合刻画无穷的集合的一个工具。</strong></p>
+<h2 id="文法类型与形式（0—3）"><a href="#文法类型与形式（0—3）" class="headerlink" title="文法类型与形式（0—3）"></a>文法类型与形式（0—3）</h2><p><img src="https://resource.tinychen.com/Compiling5.png"></p>
+<ul>
+<li><p>0型文法→短语文法</p>
+</li>
+<li><p>1型文法→上下文有关</p>
+</li>
+<li><p>2型文法→上下文无关</p>
+</li>
+<li><p>3型文法→正规文法</p>
+</li>
+</ul>
+<h2 id="编程语言使用哪些文法"><a href="#编程语言使用哪些文法" class="headerlink" title="编程语言使用哪些文法"></a>编程语言使用哪些文法</h2><ul>
+<li><p>语法上使用的是<strong>上下文无关文法（2型）</strong></p>
+</li>
+<li><p>标识符、数字等使用的都是<strong>正规文法（3型）</strong></p>
+</li>
+</ul>
+<h2 id="句型、句子"><a href="#句型、句子" class="headerlink" title="句型、句子"></a>句型、句子</h2><p>我不知道(ノ｀Д)ノ</p>
+<h2 id="有害规则和多余规则"><a href="#有害规则和多余规则" class="headerlink" title="有害规则和多余规则"></a>有害规则和多余规则</h2><ul>
+<li><strong>文法中不含有有害规则和多余规则</strong></li>
+</ul>
+<h3 id="有害规则"><a href="#有害规则" class="headerlink" title="有害规则"></a>有害规则</h3><p><strong>形如U→U的产生式。会引起文法的二义性</strong></p>
+<h3 id="多余规则"><a href="#多余规则" class="headerlink" title="多余规则"></a>多余规则</h3><p><strong>指文法中任何句子的推导都不会用到的规则</strong></p>
+<ol>
+<li><p>文法中某些非终结符（除了开始符）不在任何规则的右部出现，该非终结符称为不可到达。</p>
+</li>
+<li><p>文法中某些非终结符，由它不能推出终结符号串，该非终结符称为不可终止。</p>
+</li>
+</ol>
+<h2 id="上下文无关文法及其语法树"><a href="#上下文无关文法及其语法树" class="headerlink" title="上下文无关文法及其语法树"></a>上下文无关文法及其语法树</h2><ul>
+<li><p><strong>最左（最右）推导：</strong>在推导的任何一步α=&gt;β，其中α、β是句型，都是对α中的最左（右）非终结符进行替换,则称这种推导为最左（右）推导。</p>
+</li>
+<li><p><strong>最右推导被称为规范推导，由规范推导所得的句型称为规范句型</strong></p>
+</li>
+<li><p><strong>短语：</strong>子树的所有叶子节点集合为一个短语，拥有多个子树就有多个短语（一个句型的语法树中任一子树叶结点所组成的符号串都是该句型的短语）</p>
+</li>
+<li><p><strong>直接短语：</strong>子树中不再包含其他的子树，即A只能推导出b，而b不能再推出其他的式子，则b为此句型的直接短语</p>
+</li>
+<li><p><strong>句柄：</strong>最左直接短语</p>
+</li>
+</ul>
+<h2 id="文法的二义性与语言的二义性关系"><a href="#文法的二义性与语言的二义性关系" class="headerlink" title="文法的二义性与语言的二义性关系"></a>文法的二义性与语言的二义性关系</h2><ul>
+<li><p>如果一个文法存在某个句子对应两颗不同的语法树，则说这个文法是二义的。</p>
+</li>
+<li><p>二义性文法可能产生同一个语言。</p>
+</li>
+<li><p>如果产生上下文无关语言的每一个文法都是二义的，则说此语言是先天二义的。</p>
+</li>
+</ul>
+<hr>
+<h1 id="优先关系概念"><a href="#优先关系概念" class="headerlink" title="优先关系概念"></a>优先关系概念</h1><p><img src="https://resource.tinychen.com/Compiling10.png"></p>
+<hr>
+<h1 id="算符文法概念"><a href="#算符文法概念" class="headerlink" title="算符文法概念"></a>算符文法概念</h1><p><img src="https://resource.tinychen.com/Compiling11.png"></p>
+<hr>
+<h1 id="子程序参数类型"><a href="#子程序参数类型" class="headerlink" title="子程序参数类型"></a>子程序参数类型</h1><p><img src="https://resource.tinychen.com/Compiling6.png"></p>
+<hr>
+<h1 id="机器指令"><a href="#机器指令" class="headerlink" title="机器指令"></a>机器指令</h1><p><img src="https://resource.tinychen.com/Compiling7.png"></p>
+<hr>
+<h1 id="动态堆式分配"><a href="#动态堆式分配" class="headerlink" title="动态堆式分配"></a>动态堆式分配</h1><p><img src="https://resource.tinychen.com/Compiling8.png"></p>
+<p><img src="https://resource.tinychen.com/Compiling9.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190608-wireshark-stu\" rel="bookmark">Wireshark抓包分析校园网登录过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20171227-computer-arch\" rel="bookmark">汕大计组复习提纲2017版</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180630-data-structure\" rel="bookmark">数据结构复习提纲</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180910-raspi-multi-media-centre\" rel="bookmark">树莓派3B+打造多媒体中心</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190601-isp-upgrade-sdn\" rel="bookmark">Optimizing Gradual SDN Upgrades in ISP Networks</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/stu/" rel="tag"># stu</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190109-operating-system/" rel="prev" title="操作系统部分重点内容">
+      <i class="fa fa-chevron-left"></i> 操作系统部分重点内容
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190227-special-ip/" rel="next" title="计算机中的一些特殊IP地址">
+      计算机中的一些特殊IP地址 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B"><span class="nav-text">编译过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-text">词法分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-text">语法分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%AD%E4%B9%89%E5%88%86%E6%9E%90"><span class="nav-text">语义分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-text">中间代码生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96"><span class="nav-text">代码优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E6%A0%87%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90"><span class="nav-text">目标代码生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F%E5%85%B6%E4%BB%96%E8%A6%81%E7%82%B9"><span class="nav-text">编译程序其他要点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%A6%E5%8F%B7%E8%A1%A8"><span class="nav-text">符号表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BA%E9%94%99%E5%A4%84%E7%90%86"><span class="nav-text">出错处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E9%98%B6%E6%AE%B5%E7%9A%84%E5%88%92%E5%88%86"><span class="nav-text">编译阶段的划分</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%A3%E9%87%8A%E8%BF%87%E7%A8%8B%EF%BC%88%E8%A7%A3%E9%87%8A%E7%A8%8B%E5%BA%8F%EF%BC%89"><span class="nav-text">解释过程（解释程序）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E7%A8%8B%E5%BA%8F%E5%92%8C%E8%A7%A3%E9%87%8A%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-text">编译程序和解释程序的对比</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%92%8C%E8%A7%A3%E9%87%8A%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-text">编译和解释的比较</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-C-%E5%92%8C-%E4%BC%A0%E7%BB%9F%E8%AF%AD%E8%A8%80-C-Pascal"><span class="nav-text">Java C#  和 传统语言 C Pascal</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%96%87%E6%B3%95%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-text">文法的概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%B3%95%E7%B1%BB%E5%9E%8B%E4%B8%8E%E5%BD%A2%E5%BC%8F%EF%BC%880%E2%80%943%EF%BC%89"><span class="nav-text">文法类型与形式（0—3）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80%E4%BD%BF%E7%94%A8%E5%93%AA%E4%BA%9B%E6%96%87%E6%B3%95"><span class="nav-text">编程语言使用哪些文法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%A5%E5%9E%8B%E3%80%81%E5%8F%A5%E5%AD%90"><span class="nav-text">句型、句子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E5%AE%B3%E8%A7%84%E5%88%99%E5%92%8C%E5%A4%9A%E4%BD%99%E8%A7%84%E5%88%99"><span class="nav-text">有害规则和多余规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E5%AE%B3%E8%A7%84%E5%88%99"><span class="nav-text">有害规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E4%BD%99%E8%A7%84%E5%88%99"><span class="nav-text">多余规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E6%97%A0%E5%85%B3%E6%96%87%E6%B3%95%E5%8F%8A%E5%85%B6%E8%AF%AD%E6%B3%95%E6%A0%91"><span class="nav-text">上下文无关文法及其语法树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%B3%95%E7%9A%84%E4%BA%8C%E4%B9%89%E6%80%A7%E4%B8%8E%E8%AF%AD%E8%A8%80%E7%9A%84%E4%BA%8C%E4%B9%89%E6%80%A7%E5%85%B3%E7%B3%BB"><span class="nav-text">文法的二义性与语言的二义性关系</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E5%85%B3%E7%B3%BB%E6%A6%82%E5%BF%B5"><span class="nav-text">优先关系概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%97%E7%AC%A6%E6%96%87%E6%B3%95%E6%A6%82%E5%BF%B5"><span class="nav-text">算符文法概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%90%E7%A8%8B%E5%BA%8F%E5%8F%82%E6%95%B0%E7%B1%BB%E5%9E%8B"><span class="nav-text">子程序参数类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%BA%E5%99%A8%E6%8C%87%E4%BB%A4"><span class="nav-text">机器指令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A0%86%E5%BC%8F%E5%88%86%E9%85%8D"><span class="nav-text">动态堆式分配</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

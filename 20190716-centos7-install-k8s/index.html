@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在CentOS7上部署单Master节点k8s集群(v1.15)">
+<meta property="og:url" content="https://tinychen.com/20190716-centos7-install-k8s/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190712/Je1FaoVF0MN5.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190712/R2uWM3SndVT0.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190712/hJQG4vsWGvdv.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190712/XK1VTkSOoj8S.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/RjGz0wYLLfz8.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/UFeKeu1f2ExI.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/SUFO45fFoCFu.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/I8fH62Yw0lGO.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/aKGUvuJIU440.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/txGwdrFwgVbw.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/sC3ASl1YgTcS.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/ANXz4UKJdrPP.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/IC3JIliuKcWP.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190715/ysakuW2dsKJF.png">
+<meta property="article:published_time" content="2019-07-16T09:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-16T09:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="graduation">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png">
+
+<link rel="canonical" href="https://tinychen.com/20190716-centos7-install-k8s/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>在CentOS7上部署单Master节点k8s集群(v1.15) | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190716-centos7-install-k8s/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在CentOS7上部署单Master节点k8s集群(v1.15)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-16 17:00:00" itemprop="dateCreated datePublished" datetime="2019-07-16T17:00:00+08:00">2019-07-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/devops/" itemprop="url" rel="index">
+                    <span itemprop="name">devops</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>9.1k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>8 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。</p>
+<a id="more"></a>
+
+
+
+<h1 id="1、安装docker-ce"><a href="#1、安装docker-ce" class="headerlink" title="1、安装docker-ce"></a>1、安装docker-ce</h1><h2 id="1-1-docker简介"><a href="#1-1-docker简介" class="headerlink" title="1.1 docker简介"></a>1.1 docker简介</h2><p>最早的时候docker其实不是开源的，后来docker混得不太好，无奈之下创始人决定将docker开源（然后docker就火了），然后就有了docker这个开源项目，现在主要是由docker公司维护。</p>
+<p>2017年年初，docker公司将原先的docker项目改名为moby，并创建了docker-ce和docker-ee。</p>
+<p>这三者的关系是：</p>
+<ul>
+<li><p>moby是继承了原先的docker的项目，是社区维护的的开源项目，谁都可以在moby的基础打造自己的容器产品</p>
+</li>
+<li><p>docker-ce（ Community Edition）是docker公司维护的开源项目，是一个基于moby项目的<strong>免费</strong>的容器产品</p>
+</li>
+<li><p>docker-ee（ Enterprise Edition）是docker公司维护的闭源产品，是docker公司的<strong>商业</strong>产品。</p>
+</li>
+</ul>
+<p>我们这里还是使用docker-ce的稳定版本，关于ce版本其实也有三个分支：</p>
+<p>我们来看一下官网的解释：</p>
+<ul>
+<li><strong>Stable</strong> gives you latest releases for general availability.</li>
+<li><strong>Test</strong> gives pre-releases that are ready for testing before general availability.</li>
+<li><strong>Nightly</strong> gives you latest builds of work in progress for the next major release.</li>
+</ul>
+<p>简单的打个比方来说就是：<strong>Stable</strong>就是稳定版，<strong>Test</strong>就是开发版，<strong>Nightly</strong>就是内测版</p>
+<h2 id="1-2-安装docker-ce"><a href="#1-2-安装docker-ce" class="headerlink" title="1.2 安装docker-ce"></a>1.2 安装docker-ce</h2><p>centos版本的decker-ce官方安装指导：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a></p>
+<p>这里我们主要是通过yum的方式来安装，如果出现无法连接docker官网的情况，建议检查一下网络，或者使用rpm的方式进行安装。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 导入官网提供的repo</span></span><br><span class="line">sudo yum install -y yum-utils device-mapper-persistent-data lvm2</span><br><span class="line">sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装docker及其相关组件</span></span><br><span class="line">sudo yum install docker-ce docker-ce-cli containerd.io</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>注意这里我们需要校对一下密钥，确保和官网提供的无误。</p>
+<p><img src="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/Je1FaoVF0MN5.png"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动docker</span></span><br><span class="line">sudo systemctl start docker</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 跑个helloworld看看</span></span><br><span class="line">sudo docker run hello-world</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 最后我们还要设置一下开机启动</span></span><br><span class="line">sudo systemctl enable docker</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190712/R2uWM3SndVT0.png"></p>
+<h1 id="2、准备工作"><a href="#2、准备工作" class="headerlink" title="2、准备工作"></a>2、准备工作</h1><h2 id="2-1-修改host文件-所有机器"><a href="#2-1-修改host文件-所有机器" class="headerlink" title="2.1 修改host文件(所有机器)"></a>2.1 修改host文件(所有机器)</h2><p>为了保证通信方便，<strong>每台主机</strong>上的<code>/etc/hosts</code>文件都需要进行修改，添加节点的<code>IP地址</code>和<code>hostname</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/hJQG4vsWGvdv.png"></p>
+<p><strong>同时最好把每台主机的hostname也修改成和上面的host文件一样。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 可以直接编辑文件</span></span><br><span class="line">vim /etc/hostname</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 或者使用命令</span></span><br><span class="line">hostnamectl set-hostname</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="2-2-关闭防火墙-所有机器"><a href="#2-2-关闭防火墙-所有机器" class="headerlink" title="2.2 关闭防火墙(所有机器)"></a>2.2 关闭防火墙(所有机器)</h2><p>因为k8s涉及的端口非常多，我们先把防火墙关了，如果安装了iptable也先关掉。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 关闭centos7自带的firewall防火墙</span></span><br><span class="line">systemctl disable firewalld.service </span><br><span class="line">systemctl stop firewalld.service </span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190712/XK1VTkSOoj8S.png"></p>
+<p>我们来看一下官网对这些端口的描述。</p>
+<p><strong>Master 节点</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">规则</th>
+<th align="left">方向</th>
+<th align="left">端口范围</th>
+<th align="left">作用</th>
+<th align="left">使用者</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">6443*</td>
+<td align="left">Kubernetes API server</td>
+<td align="left">All</td>
+</tr>
+<tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">2379-2380</td>
+<td align="left">etcd server client API</td>
+<td align="left">kube-apiserver, etcd</td>
+</tr>
+<tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">10250</td>
+<td align="left">Kubelet API</td>
+<td align="left">Self, Control plane</td>
+</tr>
+<tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">10251</td>
+<td align="left">kube-scheduler</td>
+<td align="left">Self</td>
+</tr>
+<tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">10252</td>
+<td align="left">kube-controller-manager</td>
+<td align="left">Self</td>
+</tr>
+</tbody></table>
+<p> <strong>Worker 节点</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">规则</th>
+<th align="left">方向</th>
+<th align="left">端口范围</th>
+<th align="left">作用</th>
+<th align="left">使用者</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">10250</td>
+<td align="left">Kubelet API</td>
+<td align="left">Self, Control plane</td>
+</tr>
+<tr>
+<td align="left">TCP</td>
+<td align="left">Inbound</td>
+<td align="left">30000-32767</td>
+<td align="left">NodePort Services**</td>
+<td align="left">All</td>
+</tr>
+</tbody></table>
+<p>** <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/service/">NodePort 服务</a> 的默认端口范围。</p>
+<p>任何使用 * 标记的端口号都有可能被覆盖，所以您需要保证您的自定义端口的状态是开放的。</p>
+<p>虽然主节点已经包含了 etcd 的端口，您也可以使用自定义的外部 etcd 集群，或是指定自定义端口。 您使用的 pod 网络插件 (见下) 也可能需要某些特定端口开启。由于各个 pod 网络插件都有所不同，请参阅他们各自文档中对端口的要求。</p>
+<blockquote>
+<p>如果对安全性有要求，不放心关闭防火墙的话，最好还是修改一下防火墙的配置，放行这些端口。</p>
+</blockquote>
+<h2 id="2-3-同步时间-所有机器"><a href="#2-3-同步时间-所有机器" class="headerlink" title="2.3 同步时间(所有机器)"></a>2.3 同步时间(所有机器)</h2><p>这里我们使用ntpdate来进行时间同步</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用yum安装ntpdate工具</span></span><br><span class="line">yum install ntpdate -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用阿里云的源同步时间</span></span><br><span class="line">ntpdate ntp1.aliyun.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最后查看一下时间</span></span><br><span class="line">hwclock</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>我们也可以在<code>/etc/cron.hourly/</code>下面直接新建一个文件，将<code>ntpdate ntp1.aliyun.com</code>这条命令写进去，这样cron就会每小时执行一次这个同步时间操作。<a href="https://tinychen.com/20190710-rhel7-cron/">关于cron可以点击这里了解。</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;EOF</span><br><span class="line">ntpdate ntp1.aliyun.com</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+<h2 id="2-4-设置selinux-所有机器"><a href="#2-4-设置selinux-所有机器" class="headerlink" title="2.4 设置selinux(所有机器)"></a>2.4 设置selinux(所有机器)</h2><p><strong>来自官网的说明，必须把selinux改为permissive（直接生效无需重启）或者disabled（需要重启生效）</strong></p>
+<blockquote>
+<p>通过命令 <code>setenforce 0</code> 和 <code>sed ...</code> 可以将 SELinux 设置为 permissive 模式(将其禁用)。 只有执行这一操作之后，容器才能访问宿主的文件系统，进而能够正常使用 Pod 网络。您必须这么做，直到 kubelet 做出升级支持 SELinux 为止。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">setenforce 0</span><br><span class="line">sed -i <span class="string">'s/^SELINUX=enforcing$/SELINUX=permissive/'</span> /etc/selinux/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以直接修改/etc/selinux/config文件</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>关于SELinux的简单介绍，可以<a href="https://tinychen.com/20190707-rhel7-selinux/">点击这里</a>查看之前的博客。</p>
+</blockquote>
+<h1 id="3、安装kubeadm-kubelet-和-kubectl"><a href="#3、安装kubeadm-kubelet-和-kubectl" class="headerlink" title="3、安装kubeadm, kubelet 和 kubectl"></a>3、安装kubeadm, kubelet 和 kubectl</h1><h2 id="3-1-简介"><a href="#3-1-简介" class="headerlink" title="3.1 简介"></a>3.1 简介</h2><p>我们需要在<strong>每台机器</strong>上都安装以下的软件包：</p>
+<ul>
+<li><code>kubeadm</code>: 用来初始化集群的指令。</li>
+<li><code>kubelet</code>: 在集群中的每个节点上用来启动 pod 和 container 等。</li>
+<li><code>kubectl</code>: 用来与集群通信的命令行工具。</li>
+</ul>
+<p>kubeadm <strong>不能</strong> 帮我们安装或管理 <code>kubelet</code> 或 <code>kubectl</code> ，所以我们需要保证他们满足通过 kubeadm 安装的 Kubernetes 控制层对版本的要求。然而控制层与 kubelet 间的 <em>小版本号</em> 不一致无伤大雅，不过请记住 kubelet 的版本不可以超过 API server 的版本。<strong>例如 1.8.0 的 API server 可以适配 1.7.0 的 kubelet，反之就不行了。</strong></p>
+<h2 id="3-2-添加yum仓库-所有机器"><a href="#3-2-添加yum仓库-所有机器" class="headerlink" title="3.2 添加yum仓库(所有机器)"></a>3.2 添加yum仓库(所有机器)</h2><p>由于众所周知的原因，k8s官网提供的yum源并不能在国内正常使用，好在我们还可以使用阿里的镜像源。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新建一个yum源</span></span><br><span class="line">vim /etc/yum.repos.d/kubernetes.repo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加下列内容到repo中</span></span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=1</span><br><span class="line">repo_gpgcheck=1</span><br><span class="line">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="line">exclude=kube*</span><br></pre></td></tr></table></figure>
+
+<p>使用yum安装kubeadm, kubelet 和 kubectl</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">yum clean all</span><br><span class="line">yum repolist</span><br><span class="line"></span><br><span class="line">yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes</span><br><span class="line"><span class="comment"># 启动kubelet并设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-3-修改cgroup相关配置-所有机器"><a href="#3-3-修改cgroup相关配置-所有机器" class="headerlink" title="3.3 修改cgroup相关配置(所有机器)"></a>3.3 修改cgroup相关配置(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## Create /etc/docker directory.</span></span><br><span class="line">mkdir /etc/docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># Setup daemon.</span></span><br><span class="line">cat &gt; /etc/docker/daemon.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"exec-opts"</span>: [<span class="string">"native.cgroupdriver=systemd"</span>],</span><br><span class="line">  <span class="string">"log-driver"</span>: <span class="string">"json-file"</span>,</span><br><span class="line">  <span class="string">"log-opts"</span>: &#123;</span><br><span class="line">    <span class="string">"max-size"</span>: <span class="string">"100m"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"storage-driver"</span>: <span class="string">"overlay2"</span>,</span><br><span class="line">  <span class="string">"storage-opts"</span>: [</span><br><span class="line">    <span class="string">"overlay2.override_kernel_check=true"</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line"></span><br><span class="line"><span class="comment"># Restart Docker</span></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-4-编辑环境变量-所有机器"><a href="#3-4-编辑环境变量-所有机器" class="headerlink" title="3.4 编辑环境变量(所有机器)"></a>3.4 编辑环境变量(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/sysctl.conf</span><br><span class="line"><span class="comment"># 添加两行</span></span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line"></span><br><span class="line">sysctl -p</span><br><span class="line">systemctl daemon-reload</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/RjGz0wYLLfz8.png"></p>
+<h2 id="3-5-关闭swap分区-所有机器"><a href="#3-5-关闭swap分区-所有机器" class="headerlink" title="3.5 关闭swap分区(所有机器)"></a>3.5 关闭swap分区(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">swapoff -a</span><br><span class="line"></span><br><span class="line">vim /etc/fstab</span><br><span class="line"><span class="comment"># 注释掉swap分区启动挂载的那一行</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-6-拉取镜像"><a href="#3-6-拉取镜像" class="headerlink" title="3.6 拉取镜像"></a>3.6 拉取镜像</h2><p>我们可以使用<code>kubeadm config images pull</code>看看需要拉取哪些镜像版本，然后根据错误提示来对下面的版本进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-proxy:v1.15.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/etcd:3.3.10</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/pause:3.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/coredns/coredns/tags</span></span><br><span class="line">docker pull coredns/coredns:1.3.1</span><br></pre></td></tr></table></figure>
+
+<p>由于国内不能访问k8s官网，所以我们需要先使用docker拉取镜像，然后使用tag对其更改名称。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拉取docker上的镜像到本地</span></span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-proxy:v1.15.0</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/etcd:3.3.10</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/pause:3.1</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span></span><br><span class="line">docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1</span><br><span class="line"><span class="comment"># https://hub.docker.com/r/coredns/coredns/tags</span></span><br><span class="line">docker pull coredns/coredns:1.3.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用tag对其改名，方便kubeadm直接拉取使用</span></span><br><span class="line">docker tag mirrorgooglecontainers/kube-apiserver:v1.15.0 k8s.gcr.io/kube-apiserver:v1.15.0</span><br><span class="line">docker tag mirrorgooglecontainers/kube-proxy:v1.15.0 k8s.gcr.io/kube-proxy:v1.15.0</span><br><span class="line">docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.0 k8s.gcr.io/kube-controller-manager:v1.15.0</span><br><span class="line">docker tag mirrorgooglecontainers/kube-scheduler:v1.15.0 k8s.gcr.io/kube-scheduler:v1.15.0</span><br><span class="line">docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10</span><br><span class="line">docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1</span><br><span class="line">docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1</span><br><span class="line">docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除掉多余的images</span></span><br><span class="line">docker rmi mirrorgooglecontainers/kube-apiserver:v1.15.0</span><br><span class="line">docker rmi mirrorgooglecontainers/kube-proxy:v1.15.0</span><br><span class="line">docker rmi mirrorgooglecontainers/kube-controller-manager:v1.15.0</span><br><span class="line">docker rmi mirrorgooglecontainers/kube-scheduler:v1.15.0</span><br><span class="line">docker rmi mirrorgooglecontainers/etcd:3.3.10</span><br><span class="line">docker rmi mirrorgooglecontainers/pause:3.1</span><br><span class="line">docker rmi mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1</span><br><span class="line">docker rmi coredns/coredns:1.3.1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>最后效果如下</p>
+<p><img src="https://resource.tinychen.com/blog/20190715/UFeKeu1f2ExI.png"></p>
+<h2 id="3-7-初始化master节点"><a href="#3-7-初始化master节点" class="headerlink" title="3.7 初始化master节点"></a>3.7 初始化master节点</h2><ul>
+<li><p><code>--kubernetes-version</code>就是我们这里使用的k8s版本</p>
+</li>
+<li><p><code>--apiserver-advertise-address</code> 指明用Master的哪个interface与Cluster的其他节点通信。如果Master有多个interface，建议明确指定，如果不指定，kubeadm会自动选择有默认网关的interface</p>
+</li>
+<li><p><code>--pod-network-cidr</code> 指定Pod网络的范围。Kubernetes支持多种网络方案，而且不同网络方案对–pod-network-cidr有自己的要求，这里设置为10.244.0.0/16是因为我们将使用flannel网络方案，必须设置成这个CIDR</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init --kubernetes-version=v1.15.0 --apiserver-advertise-address 192.168.100.50 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/SUFO45fFoCFu.png"></p>
+<p><strong>注意红框中的那一串密钥要保存好，后面我们添加节点的时候需要用到。</strong></p>
+<h2 id="3-8在master上配置kubectl"><a href="#3-8在master上配置kubectl" class="headerlink" title="3.8在master上配置kubectl"></a>3.8在master上配置kubectl</h2><p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
+<p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
+<p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo chown $(id -u):$(id -g)</span><br><span class="line"> <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"><span class="comment"># 多加一个kubectl的自动补全动能方便我们使用</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"source &lt;(kubectl completion bash)"</span> &gt;&gt; ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/I8fH62Yw0lGO.png"></p>
+<p>到这里我们检查一下是否安装顺利</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取集群状态</span></span><br><span class="line">kubectl get cs</span><br><span class="line"><span class="comment"># 获取集群节点信息</span></span><br><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/aKGUvuJIU440.png"></p>
+<h1 id="4、安装flannel网络-Master"><a href="#4、安装flannel网络-Master" class="headerlink" title="4、安装flannel网络(Master)"></a>4、安装flannel网络(Master)</h1><p>安装flannel</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;coreos&#x2F;flannel&#x2F;master&#x2F;Documentation&#x2F;kube-flannel.yml -O kube-flannel.yml</span><br><span class="line">kubectl apply -f kube-flannel.yml</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/txGwdrFwgVbw.png"></p>
+<p>到这里master节点上面的操作就算是完成了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看pod运行情况</span></span><br><span class="line">kubectl get pods -n kube-system</span><br><span class="line"><span class="comment"># 查看并验证节点信息是否成功</span></span><br><span class="line">kubectl get nodes</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/sC3ASl1YgTcS.png"></p>
+<h1 id="5、添加node"><a href="#5、添加node" class="headerlink" title="5、添加node"></a>5、添加node</h1><p>在node节点上使用root用户运行下列命令将node节点加入到集群中，下面的密钥就是刚刚前面生成的密钥，而这个<code>192.168.100.50:6443</code>就是master节点的IP地址和对应端口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join --token 3pyvba.siol4xy1rvf2om8k --discovery-token-ca-cert-hash sha256:c61cdd8b8ad5d34faece61867e76d539dbc243c1f206eacbab163895777c099e 192.168.100.50:6443</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190715/ANXz4UKJdrPP.png"></p>
+<p>最后顺利启动之后应该是如下图所示</p>
+<p><img src="https://resource.tinychen.com/blog/20190715/IC3JIliuKcWP.png"></p>
+<blockquote>
+<p>提示：</p>
+<p><strong>如果node节点上没有顺利出现running的话，很有可能是因为镜像被墙了无法顺利拉取镜像，这时我们需要按照步骤3.6中的操作来手动拉取镜像。</strong></p>
+</blockquote>
+<p>查看pod运行情况的命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod &lt;PodName&gt; --namespace&#x3D;&lt;namespace&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>输出内容太长了，这里只截取一部分。</p>
+</blockquote>
+<p><img src="https://resource.tinychen.com/blog/20190715/ysakuW2dsKJF.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190723-k8s-service\" rel="bookmark">在k8s中的Service简介</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190722-k8s-controller\" rel="bookmark">在k8s中的controller简介</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190718-centos7-install-k8s-ha\" rel="bookmark">在CentOS7上部署高可用的k8s集群(v1.15)</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190801-k8s-del-n-add-node\" rel="bookmark">在k8s中删除和添加节点的方法</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190912-centos-install-docker\" rel="bookmark">在CentOS中安装特定版本的docker</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/centos/" rel="tag"># centos</a>
+              <a href="/tags/graduation/" rel="tag"># graduation</a>
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190715-k8s-concepts-intro/" rel="prev" title="k8s重要概念及各组件简介">
+      <i class="fa fa-chevron-left"></i> k8s重要概念及各组件简介
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190718-centos7-install-k8s-ha/" rel="next" title="在CentOS7上部署高可用的k8s集群(v1.15)">
+      在CentOS7上部署高可用的k8s集群(v1.15) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E5%AE%89%E8%A3%85docker-ce"><span class="nav-text">1、安装docker-ce</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-docker%E7%AE%80%E4%BB%8B"><span class="nav-text">1.1 docker简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E5%AE%89%E8%A3%85docker-ce"><span class="nav-text">1.2 安装docker-ce</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">2、准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E4%BF%AE%E6%94%B9host%E6%96%87%E4%BB%B6-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">2.1 修改host文件(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E5%85%B3%E9%97%AD%E9%98%B2%E7%81%AB%E5%A2%99-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">2.2 关闭防火墙(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E5%90%8C%E6%AD%A5%E6%97%B6%E9%97%B4-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">2.3 同步时间(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E8%AE%BE%E7%BD%AEselinux-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">2.4 设置selinux(所有机器)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E5%AE%89%E8%A3%85kubeadm-kubelet-%E5%92%8C-kubectl"><span class="nav-text">3、安装kubeadm, kubelet 和 kubectl</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E7%AE%80%E4%BB%8B"><span class="nav-text">3.1 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E6%B7%BB%E5%8A%A0yum%E4%BB%93%E5%BA%93-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">3.2 添加yum仓库(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E4%BF%AE%E6%94%B9cgroup%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">3.3 修改cgroup相关配置(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-%E7%BC%96%E8%BE%91%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">3.4 编辑环境变量(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-%E5%85%B3%E9%97%ADswap%E5%88%86%E5%8C%BA-%E6%89%80%E6%9C%89%E6%9C%BA%E5%99%A8"><span class="nav-text">3.5 关闭swap分区(所有机器)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-%E6%8B%89%E5%8F%96%E9%95%9C%E5%83%8F"><span class="nav-text">3.6 拉取镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-%E5%88%9D%E5%A7%8B%E5%8C%96master%E8%8A%82%E7%82%B9"><span class="nav-text">3.7 初始化master节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-8%E5%9C%A8master%E4%B8%8A%E9%85%8D%E7%BD%AEkubectl"><span class="nav-text">3.8在master上配置kubectl</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%AE%89%E8%A3%85flannel%E7%BD%91%E7%BB%9C-Master"><span class="nav-text">4、安装flannel网络(Master)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E6%B7%BB%E5%8A%A0node"><span class="nav-text">5、添加node</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="一般来说，修电脑的各位老铁们，在制作PE启动盘的时候，就会需要格式化U盘，然后将PE所需要的文件刻录进U盘里面。 对于像小七这样喜欢使用U盘刻录安装原生纯净的操作系统的人，就需要准备两个U盘，一个用来制作PE工具盘，一个用来安装操作系统，现在小七给大家介绍一个方法，让一个U盘实现双启动或者三启动。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="双启动U盘">
+<meta property="og:url" content="https://tinychen.com/20180318-dou-boot-udisk/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="一般来说，修电脑的各位老铁们，在制作PE启动盘的时候，就会需要格式化U盘，然后将PE所需要的文件刻录进U盘里面。 对于像小七这样喜欢使用U盘刻录安装原生纯净的操作系统的人，就需要准备两个U盘，一个用来制作PE工具盘，一个用来安装操作系统，现在小七给大家介绍一个方法，让一个U盘实现双启动或者三启动。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%981.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%983.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%984.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%985.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%986.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%987.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%988.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%989.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9810.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9811.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9812.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9813.png">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9814.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9815.png">
+<meta property="article:published_time" content="2018-03-18T07:00:00.000Z">
+<meta property="article:modified_time" content="2018-03-18T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="windows">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%981.png">
+
+<link rel="canonical" href="https://tinychen.com/20180318-dou-boot-udisk/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>双启动U盘 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20180318-dou-boot-udisk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          双启动U盘
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-03-18 15:00:00" itemprop="dateCreated datePublished" datetime="2018-03-18T15:00:00+08:00">2018-03-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/others/" itemprop="url" rel="index">
+                    <span itemprop="name">others</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>1 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>一般来说，修电脑的各位老铁们，在制作PE启动盘的时候，就会需要格式化U盘，然后将PE所需要的文件刻录进U盘里面。</p>
+<p>对于像小七这样喜欢使用U盘刻录安装原生纯净的操作系统的人，就需要准备两个U盘，一个用来制作PE工具盘，一个用来安装操作系统，现在小七给大家介绍一个方法，让一个U盘实现双启动或者三启动。</p>
+<a id="more"></a>
+
+<p><strong>此处先上一张成品图</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%981.png"></p>
+<p><strong>图中三个盘其实都是一个U盘的，第一个里面的是PE工具箱，第三个是原装win10刻录文件，第二个则可以当作普通U盘使用。</strong></p>
+<p>这样的好处是一个U盘双启动，平时放的文件和工具箱/win10镜像的文件不容易混淆。</p>
+<blockquote>
+<p>有些同学说在刻录win10镜像的盘符里面用文件夹存放文件也可以，这个方法虽然简单，但是作为启动盘一般都是FAT32格式，是无法存放单个文件大小超过4G的文件的。</p>
+</blockquote>
+<p><strong>（PE工具箱也可以安装操作系统，习惯用PE安装系统的朋友可以忽略这篇推文）</strong></p>
+<h1 id="1、准备工作"><a href="#1、准备工作" class="headerlink" title="1、准备工作"></a>1、准备工作</h1><ul>
+<li><p>原装系统镜像（此处使用最新版的64位win10，可在msdn itellyou中下载）</p>
+</li>
+<li><p>PE工具箱的ISO文件（此处使用微PE2.0版本，后台回复PE有惊喜）</p>
+</li>
+<li><p>Ultra ISO软件（试用版即可）</p>
+</li>
+<li><p>一个8G以上的U盘（此处使用一个32G的USB3.0的U盘）</p>
+</li>
+<li><p>一台能用的正常的电脑</p>
+</li>
+</ul>
+<h1 id="2、刻录原版win10镜像"><a href="#2、刻录原版win10镜像" class="headerlink" title="2、刻录原版win10镜像"></a>2、刻录原版win10镜像</h1><p>首先，安装并打开UltraISO，点击上方的菜单栏中的 <strong>文件 —&gt; 打开，然后选择win10镜像文件</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%983.png"></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%984.png"></p>
+<p>然后再点击上方的菜单栏中的** 启动 —&gt; 写入硬盘映像**</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%985.png"></p>
+<p><strong>在弹出的界面中，检查下图红框的两项：</strong></p>
+<ul>
+<li><p><strong>硬盘驱动器要确定是自己用来制作的U盘</strong></p>
+</li>
+<li><p><strong>隐藏启动分区里面要选择高端隐藏</strong></p>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%986.png"></p>
+<p><strong>接下来会格式化U盘，请务必要备份U盘中的重要文件</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%987.png"></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%988.png"></p>
+<p>刻录完成之后，打开我的电脑，会发现U盘已经被分成两个分区</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%989.png"></p>
+<p><strong>如果不需要PE工具箱，到这里就可以停了，因为到这里已经制作了一个正常的win10安装盘，需要重装系统的话，用这个U盘就已经OK了。</strong></p>
+<h1 id="3、利用磁盘管理进行二次分区"><a href="#3、利用磁盘管理进行二次分区" class="headerlink" title="3、利用磁盘管理进行二次分区"></a>3、利用磁盘管理进行二次分区</h1><p>右键我的电脑，点击管理，在左边找到磁盘管理，然后在下方找到自己的U盘，删除掉上图中的20多G的磁盘</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9810.png"></p>
+<p>然后新建两个磁盘，<strong>一个大小为800M，文件系统类型记得选择FAT32，否则PE工具箱会无法正常启动</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9811.png"></p>
+<p>剩下的全部分到另一个盘，文件系统类型随意选择<strong>（建议exFAT）</strong>。</p>
+<p>最后应该和下图类似。</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9812.png"></p>
+<h1 id="4、解压ISO文件制作PE工具箱"><a href="#4、解压ISO文件制作PE工具箱" class="headerlink" title="4、解压ISO文件制作PE工具箱"></a>4、解压ISO文件制作PE工具箱</h1><p>解压PE工具箱的ISO文件，PE工具箱的文件一般都是两三百MB，将解压后的文件全部复制到容量比较小的磁盘中</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9813.png"></p>
+<h1 id="5、测试"><a href="#5、测试" class="headerlink" title="5、测试"></a>5、测试</h1><p>将U盘插入电脑，按下开机键的时候按ESC或者F1/F2/F9/F12等按键即可进入启动项选择菜单（不同电脑情况不同），如果像下图这样出现了两个一样的启动项，那么就制作成功。</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9814.jpg"></p>
+<p><strong>最后，如何区分哪个才是PE，哪个才是WIN10呢？</strong></p>
+<p>你可能会说，直接点进去试一下不就行了。</p>
+<p>对的，没错这确实可以，但是这样的话就太没有技术含量了。</p>
+<p>我们还是打开我的电脑中的磁盘管理，会发现左边的是PE，右边的是WIN10，所以上图的第一个就是PE，第二个才是win10。</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9815.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170418-fat32-to-ntfs\" rel="bookmark">FAT32无损转换为NTFS</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170503-chkdsk\" rel="bookmark">CHKDSK使用方法</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170414-win10-show-seconds\" rel="bookmark">win10时间栏显示秒</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170502-disable-disk-onboot-check\" rel="bookmark">关闭硬盘开机自检</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170509-backup-drivers\" rel="bookmark">驱动备份(免第三方)</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"># windows</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20180225-disable-keyboard/" rel="prev" title="禁用笔记本内置键盘">
+      <i class="fa fa-chevron-left"></i> 禁用笔记本内置键盘
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20180630-data-structure/" rel="next" title="数据结构复习提纲">
+      数据结构复习提纲 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">1、准备工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%88%BB%E5%BD%95%E5%8E%9F%E7%89%88win10%E9%95%9C%E5%83%8F"><span class="nav-text">2、刻录原版win10镜像</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E5%88%A9%E7%94%A8%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86%E8%BF%9B%E8%A1%8C%E4%BA%8C%E6%AC%A1%E5%88%86%E5%8C%BA"><span class="nav-text">3、利用磁盘管理进行二次分区</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E8%A7%A3%E5%8E%8BISO%E6%96%87%E4%BB%B6%E5%88%B6%E4%BD%9CPE%E5%B7%A5%E5%85%B7%E7%AE%B1"><span class="nav-text">4、解压ISO文件制作PE工具箱</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E6%B5%8B%E8%AF%95"><span class="nav-text">5、测试</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文介绍使用JAVA8+Apache Tomcat 9.0.19的安装配置。 文中部分内容更新于2019年5月10日。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows上Apache Tomcat的安装配置">
+<meta property="og:url" content="https://tinychen.com/20181112-win-install-tomcat/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文介绍使用JAVA8+Apache Tomcat 9.0.19的安装配置。 文中部分内容更新于2019年5月10日。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/181109Tomcat%20%281%29.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/poPbblp4gVrs.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/8n5yCERheDQB.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/gQmMGVQXCs4g.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/Bg6prx7abE8T.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/uAOhLOFK1G8o.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/yn6LLdYG5PIN.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/GqtfFMdyXryv.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/0jAzJHYEyrXU.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/TRykrzcLNA2u.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/4l0i1wWW31uP.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/2Uo7p84WTzH5.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/ioziMyafhlEI.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/iWnGyVoOGi14.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190510/AbIKFnW3u3hn.png">
+<meta property="article:published_time" content="2018-11-12T07:00:00.000Z">
+<meta property="article:modified_time" content="2018-11-12T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="code">
+<meta property="article:tag" content="tomcat">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/181109Tomcat%20%281%29.png">
+
+<link rel="canonical" href="https://tinychen.com/20181112-win-install-tomcat/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Windows上Apache Tomcat的安装配置 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20181112-win-install-tomcat/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows上Apache Tomcat的安装配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-12 15:00:00" itemprop="dateCreated datePublished" datetime="2018-11-12T15:00:00+08:00">2018-11-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p> 本文介绍使用JAVA8+Apache Tomcat 9.0.19的安装配置。</p>
+<p>文中部分内容更新于2019年5月10日。</p>
+<a id="more"></a>
+
+<h1 id="1、Tomcat是什么？"><a href="#1、Tomcat是什么？" class="headerlink" title="1、Tomcat是什么？"></a>1、Tomcat是什么？</h1><blockquote>
+<p>Tomcat 服务器是一个免费的开放源代码的Web 应用服务器，属于轻量级应用服务器，在中小型系统和并发访问用户不是很多的场合下被普遍使用，是开发和调试JSP 程序的首选。对于一个初学者来说，可以这样认为，当在一台机器上配置好Apache 服务器，可利用它响应HTML（标准通用标记语言下的一个应用）页面的访问请求。实际上Tomcat是Apache 服务器的扩展，但运行时它是独立运行的，所以当你运行tomcat 时，它实际上作为一个与Apache 独立的进程单独运行的。</p>
+<p>摘自百度百科</p>
+</blockquote>
+<h1 id="2、配置JAVA8"><a href="#2、配置JAVA8" class="headerlink" title="2、配置JAVA8"></a>2、配置JAVA8</h1><p>JAVA8下载地址，下载前记得要先勾选accept，否则无法下载，i586/x86即为32位，x64为64位，大家根据自己的机器配置下载对应的版本。<br><a target="_blank" rel="noopener" href="https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html</a></p>
+<p><img src="https://resource.tinychen.com/181109Tomcat%20%281%29.png"></p>
+<blockquote>
+<p><strong>注意，现在在甲骨文官网下载JDK需要先进行注册登录，否则无法正常下载。</strong></p>
+</blockquote>
+<p>JAVA8安装比较简单，这里不再贴过多的图片，需要安装更新的版本的同学可以看看这篇文章：<a target="_blank" rel="noopener" href="http://tiny777.com/180803JAVAInstall/">JDK安装与环境变量配置</a></p>
+<ol>
+<li><p>安装下载好的JDK文件，此处为jdk-8u211-windows-x64.exe，安装完成后，配置环境变量，右击【我的电脑】—【属性】—–【高级】—【环境变量】;</p>
+</li>
+<li><p>选择【新建系统变量】–弹出“新建系统变量”对话框，在“变量名”文本框输入<code>JAVA_HOME</code>,在“变量值”文本框输入<strong>JDK的安装路径</strong>，单击“确定”按钮;</p>
+</li>
+<li><p>在“系统变量”选项区域中查看PATH变量，如果不存在，则新建变量 <code>PATH</code>，否则选中该变量，单击“编辑”按钮，在“变量值”文本框的起始位置添加<code>%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;</code>，或者是直接<code>%JAVA_HOME%\bin</code>，单击确定按钮；</p>
+</li>
+<li><p>在“系统变量”选项区域中查看<code>CLASSPATH</code> 变量，如果不存在，则新建变量<code>CLASSPATH</code>，否则选中该变量，单击“编辑”按钮，在“变量值”文本框的起始位置添加<code>.;%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;</code></p>
+</li>
+</ol>
+<ol start="5">
+<li><p>测试环境变量的配置成功与否。在DOS命令行窗口或powershell输入<code>JAVAC</code>，输出帮助信息即为配置正确。</p>
+<p><img src="https://resource.tinychen.com/blog/20190510/poPbblp4gVrs.png"></p>
+</li>
+</ol>
+<h1 id="3、安装Apache的Tomcat"><a href="#3、安装Apache的Tomcat" class="headerlink" title="3、安装Apache的Tomcat"></a>3、安装Apache的Tomcat</h1><ol>
+<li>用浏览器打开tomcat官网：<pre><code> https://tomcat.apache.org/
+ 点击左侧的导航栏Download下方选择最新的Tomcat 9，出现以下页面，点击页面下方的“64-bit Windows zip (pgp, sha1,sha512)“进行下载。
+</code></pre>
+<img src="https://resource.tinychen.com/blog/20190510/8n5yCERheDQB.png"></li>
+</ol>
+<ol start="2">
+<li><p>完成下载后，直接解压，路径自选。（这里以D:\apache-tomcat-9.0.19为例）</p>
+</li>
+<li><p>右键 “此电脑”，点击”属性”，点击”高级系统设置”—&gt;”高级”—&gt;”环境变量”</p>
+</li>
+<li><p>在”系统变量”里新建变量名：<code>CATALINA_BASE</code>，变量值：<code>D:\apache-tomcat-9.0.19</code>（此处为你的解压包路径）</p>
+<p><img src="https://resource.tinychen.com/blog/20190510/gQmMGVQXCs4g.png"></p>
+</li>
+</ol>
+<ol start="5">
+<li><p>在”系统变量”里新建变量名：<code>CATALINA_HOME</code>，变量值：<code>D:\apache-tomcat-9.0.19</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190510/Bg6prx7abE8T.png"></p>
+</li>
+</ol>
+<ol start="6">
+<li><p>在”系统变量”里打开<code>Path</code>变量，添加变量值：<code>%CATALINA_HOME%\lib</code>和<code>%CATALINA_HOME%\bin</code>（这一步可有可无，有些电脑无需配置此步骤便可完成，因此可以先跳过）</p>
+<p><img src="https://resource.tinychen.com/blog/20190510/uAOhLOFK1G8o.png"></p>
+</li>
+</ol>
+<ol start="7">
+<li>使用DOS或者powershell进入tomcat下的bin目录（本人电脑的路径为D:\apache-tomcat-9.0.19\bin），执行“service.bat install”  。（附：service卸载命令：service.bat remove）</li>
+</ol>
+<p><img src="https://resource.tinychen.com/blog/20190510/yn6LLdYG5PIN.png"></p>
+<ol start="8">
+<li>启动tomcat，在tomcat解压路径下的bin文件夹内双击打开”tomcat9w.exe”，在打开的软件界面点击“Start”即可</li>
+</ol>
+<p><img src="https://resource.tinychen.com/blog/20190510/GqtfFMdyXryv.png"></p>
+<p>这里的startup type为启动类型，即开机自动启动（Automatic），手动启动（Manual）和禁用（Disabled）</p>
+<p><img src="https://resource.tinychen.com/blog/20190510/0jAzJHYEyrXU.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190510/TRykrzcLNA2u.png"></p>
+<blockquote>
+<p>注：在cmd中或者powershell直接运行bin目录下的shutdowm.bat文件或startup.bat文件也可以直接关闭或打开tomcat服务</p>
+</blockquote>
+<ol start="9">
+<li>完成方法操作后，在浏览器地址栏输入<br><a target="_blank" rel="noopener" href="http://localhost:8080/">http://localhost:8080/</a><br>出现下图所示信息即为成功配置</li>
+</ol>
+<p><img src="https://resource.tinychen.com/blog/20190510/4l0i1wWW31uP.png"></p>
+<h1 id="4、Eclipse-配置Tomcat"><a href="#4、Eclipse-配置Tomcat" class="headerlink" title="4、Eclipse 配置Tomcat"></a>4、Eclipse 配置Tomcat</h1><h2 id="4-1-下载Eclipse"><a href="#4-1-下载Eclipse" class="headerlink" title="4.1 下载Eclipse"></a>4.1 下载Eclipse</h2><p><strong>注意在安装Eclipse的时候要选择</strong><code>Eclipse IDE for Enterprise Java Developers</code></p>
+<p>Eclipse官网下载地址：</p>
+<p><a target="_blank" rel="noopener" href="https://www.eclipse.org/downloads/download.php?file=/oomph/epp/2019-03/R/eclipse-inst-win64.exe">https://www.eclipse.org/downloads/download.php?file=/oomph/epp/2019-03/R/eclipse-inst-win64.exe</a></p>
+<p><img src="https://resource.tinychen.com/blog/20190510/2Uo7p84WTzH5.png"></p>
+<h2 id="4-2-Eclipse中关联Tomcat"><a href="#4-2-Eclipse中关联Tomcat" class="headerlink" title="4.2 Eclipse中关联Tomcat"></a>4.2 Eclipse中关联Tomcat</h2><p>打开Eclipse，点击菜单栏的<code>Window</code>，然后选择<code>Preferences</code>，选择<code>Server</code>，点击<code>Runtime Environments</code> ，点击右侧的<code>Add</code>, 选择<code>Apache Tomcat v9.0</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190510/ioziMyafhlEI.png"></p>
+<p>选择电脑上安装好tomcat的目录，然后选择JRE。</p>
+<p><img src="https://resource.tinychen.com/blog/20190510/iWnGyVoOGi14.png"></p>
+<p>确认之后，点击<code>Apply and Close</code>。</p>
+<p><img src="https://resource.tinychen.com/blog/20190510/AbIKFnW3u3hn.png"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200409-tomcat03-jmeter-nio-nio2-apr\" rel="bookmark">Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200504-tomcat04-deploy-manager-serverxml\" rel="bookmark">Tomcat篇04-部署和管理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200608-http2-introduction\" rel="bookmark">HTTP2的特性解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200402-tomcat02-structure-io-model\" rel="bookmark">Tomcat篇02-整体架构和I/O模型</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200327-tomcat01-brief-introduction-installation\" rel="bookmark">Tomcat篇01-概念简介和守护进程配置</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/code/" rel="tag"># code</a>
+              <a href="/tags/tomcat/" rel="tag"># tomcat</a>
+              <a href="/tags/web/" rel="tag"># web</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20181109-ubuntu-change-time/" rel="prev" title="Ubuntu18.04与Win10时间不一致">
+      <i class="fa fa-chevron-left"></i> Ubuntu18.04与Win10时间不一致
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190109-operating-system/" rel="next" title="操作系统部分重点内容">
+      操作系统部分重点内容 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81Tomcat%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">1、Tomcat是什么？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E9%85%8D%E7%BD%AEJAVA8"><span class="nav-text">2、配置JAVA8</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E5%AE%89%E8%A3%85Apache%E7%9A%84Tomcat"><span class="nav-text">3、安装Apache的Tomcat</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81Eclipse-%E9%85%8D%E7%BD%AETomcat"><span class="nav-text">4、Eclipse 配置Tomcat</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E4%B8%8B%E8%BD%BDEclipse"><span class="nav-text">4.1 下载Eclipse</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Eclipse%E4%B8%AD%E5%85%B3%E8%81%94Tomcat"><span class="nav-text">4.2 Eclipse中关联Tomcat</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

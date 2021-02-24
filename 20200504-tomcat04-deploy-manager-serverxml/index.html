@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要包括tomcat服务器的web应用部署和管理，以及server.xml的主要配置。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat篇04-部署和管理">
+<meta property="og:url" content="https://tinychen.com/20200504-tomcat04-deploy-manager-serverxml/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要包括tomcat服务器的web应用部署和管理，以及server.xml的主要配置。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106171454.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/20200410100657.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200410100810.png">
+<meta property="og:image" content="https://resource.tinychen.com/20200403155129.png">
+<meta property="article:published_time" content="2020-05-04T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-04T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="tomcat">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106171454.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200504-tomcat04-deploy-manager-serverxml/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Tomcat篇04-部署和管理 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200504-tomcat04-deploy-manager-serverxml/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tomcat篇04-部署和管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-04 10:00:00" itemprop="dateCreated datePublished" datetime="2020-05-04T10:00:00+08:00">2020-05-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>8.9k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>8 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106171454.jpg"></p>
+<p>本文主要包括tomcat服务器的web应用部署和管理，以及<code>server.xml</code>的主要配置。</p>
+<a id="more"></a>
+
+<h1 id="1、manager应用"><a href="#1、manager应用" class="headerlink" title="1、manager应用"></a>1、manager应用</h1><p>tomcat本身内置了两个web应用，专门用来管理tomcat，它们分别是host-manager（管理virtual host）和manager（管理web应用）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;localhost:8080&#x2F;host-manager&#x2F;html</span><br><span class="line">http:&#x2F;&#x2F;localhost:8080&#x2F;manager&#x2F;html</span><br></pre></td></tr></table></figure>
+
+<p>在启动tomcat之后，我们访问上面的这两个网址可以发现被403了。因为我们还没有在配置文件中增加相关的用户，为了保证安全，这里的用户默认都是禁用的，我们需要自己创建。</p>
+<p>我们编辑tomcat目录下的conf子目录中的<code>tomcat-users.xml</code>，添加对应的配置即可：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--admin对应的是host-manager的用户--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--allows access to the HTML GUI--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">role</span> <span class="attr">rolename</span>=<span class="string">"admin-gui"</span>/&gt;</span></span><br><span class="line"><span class="comment">&lt;!--allows access to the text interface--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">role</span> <span class="attr">rolename</span>=<span class="string">"admin‐script"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--manager对应的是manager的用户--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--allows access to the HTML GUI and the status pages--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">role</span> <span class="attr">rolename</span>=<span class="string">"manager-gui"</span>/&gt;</span></span><br><span class="line"><span class="comment">&lt;!--allows access to the text interface and the status pages--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">role</span> <span class="attr">rolename</span>=<span class="string">"manager‐script"</span>/&gt;</span></span><br><span class="line"><span class="comment">&lt;!--allows access to the JMX proxy and the status pages--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">role</span> <span class="attr">rolename</span>=<span class="string">"manager-jmx"</span>/&gt;</span></span><br><span class="line"><span class="comment">&lt;!--allows access to the status pages only--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">role</span> <span class="attr">rolename</span>=<span class="string">"manager-status"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--我们这里添加一个用户，然后定义角色即可--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">user</span> <span class="attr">username</span>=<span class="string">"tinychen"</span> <span class="attr">password</span>=<span class="string">"tinychen#321"</span> <span class="attr">roles</span>=<span class="string">"admin‐gui,manager-gui"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Users with the <code>admin-gui</code> role should not be granted the <code>admin-script</code> role.</p>
+<p>注意被授予<code>admin-gui</code>权限的用户不应该授予<code>admin-script</code>权限</p>
+<p>Users with the <code>manager-gui</code> role should not be granted either the <code>manager-script</code> or <code>manager-jmx</code> roles.</p>
+<p>注意被授予<code>manager-gui</code>权限的用户不应该授予<code>manager-script</code>或<code>manager-jmx</code>权限</p>
+</blockquote>
+<p>tomcat9中默认是只允许部署tomcat的机器访问manger和host-manager的页面的，因此我们需要修改tomcat目录下对应的web应用的配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vim /home/tomcat9/webapps/host-manager/META-INF/context.xml </span><br><span class="line">vim /home/tomcat9/webapps/manager/META-INF/context.xml</span><br></pre></td></tr></table></figure>
+
+<p>然后修改里面限制的IP地址为全部或者自己的IP地址即可。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Context</span> <span class="attr">antiResourceLocking</span>=<span class="string">"false"</span> <span class="attr">privileged</span>=<span class="string">"true"</span> &gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Valve</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.valves.RemoteAddrValve"</span></span></span><br><span class="line"><span class="tag">         <span class="attr">allow</span>=<span class="string">"127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1"</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Manager</span> <span class="attr">sessionAttributeValueClassNameFilter</span>=<span class="string">"java\.lang\.(?:Boolean|Integer|Long|Number|String)</span></span></span><br><span class="line"><span class="tag"><span class="string">|org\.apache\.catalina\.filters\.CsrfPreventionFilter\$LruCache(?:\$1)?|java\.util\.(?:Linked)?HashMap"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Context</span>&gt;</span></span><br><span class="line"></span><br><span class="line"># 将allow参数改为</span><br><span class="line">  <span class="tag">&lt;<span class="name">Valve</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.valves.RemoteAddrValve"</span></span></span><br><span class="line"><span class="tag">         <span class="attr">allow</span>=<span class="string">"^.*$"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们就可以访问web界面来查看tomcat服务器的运行状态了。</p>
+<ul>
+<li>manager的web界面</li>
+</ul>
+<p><img src="https://resource.tinychen.com/20200410100657.png"></p>
+<ul>
+<li>host-manager的web界面</li>
+</ul>
+<p><img src="https://resource.tinychen.com/20200410100810.png"></p>
+<h1 id="2、Tomcat的容器架构"><a href="#2、Tomcat的容器架构" class="headerlink" title="2、Tomcat的容器架构"></a>2、Tomcat的容器架构</h1><p>Tomcat设计了4种容器，分别是Engine、Host、Context和Wrapper。这4种容器是父子关系， Tomcat通过一种分层的架构，使得Servlet容器具有很好的灵活性。</p>
+<p><img src="https://resource.tinychen.com/20200403155129.png"></p>
+<p>如上图所示，我们可以看到：</p>
+<ul>
+<li>一台机器上可以通过设置不同的CATALINA_BASE来运行多个tomcat实例，即可以运行<strong>多个</strong>server</li>
+<li>一个server中只有<strong>一个</strong>Engine，而Engine就是实现了servlet规范的引擎，这里就是Catalina</li>
+<li>一个engine中可以包含<strong>多个</strong>host，即和apache、nginx等服务器相同，可以配置多个virtual host站点</li>
+<li>一个host中可以包含<strong>多个</strong>context，即可以包含多个web应用</li>
+<li>一个warpper表示<strong>一个</strong>Servlet，wrapper 作为容器中的最底层，不能包含子容器</li>
+</ul>
+<p>Tomcat使用组合模式来管理这些容器，所有容器组件都实现了Container接口，因此组合模式可以使得用户对单容器对象（最底层的Wrapper）和组合容器对象（Context、Host或者Engine）的使用具有一致性。</p>
+<p>Tomcat 服务器的配置主要集中于 <code>tomcat/conf</code> 下的 <code>catalina.policy</code>、 <code>catalina.properties</code>、<code>context.xml</code>、<code>server.xml</code>、<code>tomcat-users.xml</code>、<code>web.xml</code> 文件。</p>
+<p>Tomcat的这一设计思想在其配置文件<code>server.xml</code>中得到了很好的诠释，<code>server.xml</code> 是tomcat 服务器的核心配置文件，包含了Tomcat的 Servlet 容器 （Catalina）的所有配置。下面我们先来了解一下<code>server.xml</code>文件中的一些主要配置。</p>
+<h1 id="3、server-xml"><a href="#3、server-xml" class="headerlink" title="3、server.xml"></a>3、server.xml</h1><h2 id="3-1-server-xml整体架构"><a href="#3-1-server-xml整体架构" class="headerlink" title="3.1 server.xml整体架构"></a>3.1 server.xml整体架构</h2><p>首先我们需要知道<code>server.xml</code>中的xml代码块分类，tomcat官网将其主要分为四类：</p>
+<ul>
+<li><strong>Top Level Elements</strong>：<code>server</code>块是整个配置文件的根元素，而<code>service</code>块代表与引擎关联的一组连接器（connector）。</li>
+<li><strong>Connectors</strong> ：表示外部客户端向特定服务发送请求和接收响应的接口（比如我们之前提到的coyote连接器以及对应的NIO等IO模式都是整个范畴内的概念）。 </li>
+<li><strong>Containers</strong>：容器（<code>Container</code>）负责处理传入的请求并创建相应的响应。<code>Engine</code>处理对Service的所有请求，<code>Host</code>处理对特定<code>virtual host</code>的所有请求，而<code>Context</code>处理对特定Web应用程序的所有请求。</li>
+<li><strong>Nested Components</strong>：表示可以嵌套在<code>Container</code>元素内的元素。 注意一些元素可以嵌套在任何Container中，而另一些元素只能嵌套在<code>Context</code>中。</li>
+</ul>
+<h2 id="3-2-Top-Level-Elements"><a href="#3-2-Top-Level-Elements" class="headerlink" title="3.2 Top Level Elements"></a>3.2 Top Level Elements</h2><h3 id="3-2-1-Server块"><a href="#3-2-1-Server块" class="headerlink" title="3.2.1 Server块"></a>3.2.1 Server块</h3><p>Server块代表的是整个catalina servlet容器。因此，它必须是<code>conf/server.xml</code>配置文件中最外面的单个元素。它的属性代表了整个servlet容器的特征。Tomcat9中默认的配置文件中<code>Server</code>块内嵌的子元素为 <code>Listener</code>、<code>GlobalNamingResources</code>、<code>Service</code>（可以嵌套多个）。具体的每个属性参数我们可以查询<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/server.html">官网</a>，下面解释默认的参数配置。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Server</span> <span class="attr">port</span>=<span class="string">"8005"</span> <span class="attr">shutdown</span>=<span class="string">"SHUTDOWN"</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">		port ： Tomcat监听的关闭服务器的端口 </span></span><br><span class="line"><span class="comment">		shutdown ： 关闭服务器的指令字符串</span></span><br><span class="line"><span class="comment"> 	--&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">&lt;!-- 以日志形式输出服务器、操作系统、JVM的版本信息 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Listener</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.startup.VersionLoggerListener"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- 启动和停止APR。如果找不到APR库会输出日志但并不影响tomcat正常启动 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Listener</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.core.AprLifecycleListener"</span> <span class="attr">SSLEngine</span>=<span class="string">"off"</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- </span></span><br><span class="line"><span class="comment">        注意这里的SSLEngine默认是打开的（on）</span></span><br><span class="line"><span class="comment">        如果启用了apr作为连接器的协议</span></span><br><span class="line"><span class="comment">        但是只配置了http而没有配置https</span></span><br><span class="line"><span class="comment">        则会报错    </span></span><br><span class="line"><span class="comment">    --&gt;</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">&lt;!-- 用于避免JRE内存泄漏问题 --&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">Listener</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.core.JreMemoryLeakPreventionListener"</span> /&gt;</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">&lt;!-- 用户加载（服务器启动）和销毁（服务器停止）全局命名服务 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Listener</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.mbeans.GlobalResourcesLifecycleListener"</span> /&gt;</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">&lt;!-- 用于在Context停止时重建Executor池中的线程， 以避免ThreadLocal相关的内</span></span><br><span class="line"><span class="comment">存泄漏 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Listener</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.core.ThreadLocalLeakPreventionListener"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- GlobalNamingResources中定义了全局命名服务： --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">GlobalNamingResources</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Resource</span> <span class="attr">name</span>=<span class="string">"UserDatabase"</span> <span class="attr">auth</span>=<span class="string">"Container"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">type</span>=<span class="string">"org.apache.catalina.UserDatabase"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">description</span>=<span class="string">"User database that can be updated and saved"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">factory</span>=<span class="string">"org.apache.catalina.users.MemoryUserDatabaseFactory"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">pathname</span>=<span class="string">"conf/tomcat-users.xml"</span> /&gt;</span></span><br><span class="line">              <span class="comment">&lt;!--这里定义的文件就是我们前面配置manager和host manager的用户的文件--&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">GlobalNamingResources</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="tag">&lt;<span class="name">Service</span>&gt;</span></span><br><span class="line">    ...</span><br><span class="line">  <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"> <span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-2-Service块"><a href="#3-2-2-Service块" class="headerlink" title="3.2.2 Service块"></a>3.2.2 Service块</h3><p> Service元素用于创建 Service 实例，默认使用 <code>org.apache.catalina.core.StandardService</code>。 默认情况下，Tomcat9中默认仅指定了Service的名称为<code>Catalina</code>。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Service</span> <span class="attr">name</span>=<span class="string">"Catalina"</span>&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Service</code> 可以内嵌的元素为 ： <code>Listener</code>、<code>Executor</code>、<code>Connector</code>、<code>Engine</code> ，详细的参数可以点击这里查看<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/service.html">官网</a></p>
+<ul>
+<li><code>Listener</code> 用于为<code>Service</code> 添加生命周期监听器</li>
+<li><code>Executor</code> 用于配置<code>Service</code> 共享线程池</li>
+<li><code>Connector</code> 用于配置 <code>Service</code> 包含的链接器</li>
+<li><code>Engine</code> 用于配置<code>Service</code>中连接器（<code>connector</code>）对应的Servlet 容器引擎</li>
+</ul>
+<h2 id="3-3-Executor"><a href="#3-3-Executor" class="headerlink" title="3.3 Executor"></a>3.3 Executor</h2><p><code>executor</code>表示可组件之间Tomcat中共享的线程池。默认情况下，<code>Service</code>并未添加共享线程池配置。<code>executor</code>实现了tomcat中的<code>org.apache.catalina.Executor</code>接口。 如果不配置共享线程池，那么Catalina 各组件在用到线程池时会独立创建。由于<code>executor</code>是<code>Service</code>元素的嵌套元素。为了使它能够被<code>Connector</code>使用，<code>Executor</code>元素必须出现在<code>server.xml</code>中的<code>Connector</code>元素之前。下面展示的是一个简单的executor的配置，具体的配置参数可以点这里查看<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/executor.html">官网</a>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Executor</span> <span class="attr">name</span>=<span class="string">"tomcatThreadPool"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">namePrefix</span>=<span class="string">"catalina‐exec‐"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">maxThreads</span>=<span class="string">"200"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">minSpareThreads</span>=<span class="string">"100"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">maxIdleTime</span>=<span class="string">"60000"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">maxQueueSize</span>=<span class="string">"Integer.MAX_VALUE"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">prestartminSpareThreads</span>=<span class="string">"false"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">threadPriority</span>=<span class="string">"5"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">className</span>=<span class="string">"org.apache.catalina.core.StandardThreadExecutor"</span>/&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name</td>
+<td>线程池名称，用于<code>Connector</code>中指定。</td>
+</tr>
+<tr>
+<td>namePrefix</td>
+<td>所创建的每个线程的名称前缀，一个单独的线程名称为 <code>namePrefix</code>+<code>threadNumber</code>。</td>
+</tr>
+<tr>
+<td>daemon</td>
+<td>是否作为守护线程（类似于守护进程），默认为true</td>
+</tr>
+<tr>
+<td>maxThreads</td>
+<td>线程池中最大线程数。</td>
+</tr>
+<tr>
+<td>minSpareThreads</td>
+<td>活跃线程数，也就是核心池线程数，这些线程不会被销毁，会一直存在。</td>
+</tr>
+<tr>
+<td>maxIdleTime</td>
+<td>线程空闲时间，超过该时间后，空闲线程会被销毁，默 认值为6000（1分钟），单位毫秒。</td>
+</tr>
+<tr>
+<td>maxQueueSize</td>
+<td>在被执行前最大线程排队数目，默认为<code>int</code>的最大值，也就是广义的无限。除非特殊情况，这个值不需要更改， 否则会有请求不会被处理的情况发生。</td>
+</tr>
+<tr>
+<td>prestartminSpareThreads</td>
+<td>启动线程池时是否启动 <code>minSpareThreads</code>部分线程。 默认值为<code>false</code>，即不启动。</td>
+</tr>
+<tr>
+<td>threadPriority</td>
+<td>线程池中线程优先级，默认值为5，值从1到10。</td>
+</tr>
+<tr>
+<td>className</td>
+<td>线程池实现类，未指定情况下，默认实现类为 <code>org.apache.catalina.core.StandardThreadExecutor</code>。 如果想使用自定义线程池首先需要实现 <code>org.apache.catalina.Executor</code>接口。</td>
+</tr>
+</tbody></table>
+<h2 id="3-4-Connector"><a href="#3-4-Connector" class="headerlink" title="3.4 Connector"></a>3.4 Connector</h2><p>Connector 用于创建链接器实例。默认情况下，server.xml 配置了两个链接器，一个支 持HTTP协议，一个支持AJP协议。因此大多数情况下，我们并不需要新增链接器配置， 只是根据需要对已有链接器进行优化。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">"8080"</span> <span class="attr">protocol</span>=<span class="string">"HTTP/1.1"</span> <span class="attr">connectionTimeout</span>=<span class="string">"20000"</span></span></span><br><span class="line"><span class="tag"><span class="attr">redirectPort</span>=<span class="string">"8443"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">"8009"</span> <span class="attr">protocol</span>=<span class="string">"AJP/1.3"</span> <span class="attr">redirectPort</span>=<span class="string">"8443"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>port</code>为监听的端口，如果设置为0，Tomcat将会随机选择一个可用的端口号给当前Connector 使用</li>
+<li><code>protocol</code>为Connector的协议，这里默认的是HTTP和AJP两种协议，后面可以指定对应协议的不同版本，默认情况下会检测本机是否配置了APR库，如果有并且 <code>useAprConnector</code>设置为true则会默认使用APR模式的IO协议，如果无则会使用NIO模式</li>
+<li><code>connectionTimeOut</code> ：Connector 接收链接后的等待超时时间，单位为毫秒。 -1表示永不超时</li>
+<li><code>redirectPort</code>：当前Connector 不支持SSL请求， 接收到了一个请求， 并且也符合 security-constraint 约束， 需要SSL传输，Catalina自动将请求重定向到指定的端口</li>
+<li><code>executor</code> ： 指定前面提到的共享线程池的名称，也可以通过maxThreads、minSpareThreads 等属性对该connector进行单独配置对应的内部线程池</li>
+<li><code>URIEncoding</code> : 用于指定编码URI的字符编码， Tomcat8.x和Tomcat9.x版本默认的编码为 UTF-8 , Tomcat7.x版本默认为ISO-8859-1</li>
+</ul>
+<h2 id="3-5-engine"><a href="#3-5-engine" class="headerlink" title="3.5 engine"></a>3.5 engine</h2><p>Engine 作为Servlet 引擎的顶级元素，内部可以嵌入： Cluster、Listener、Realm、 Valve和Host。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Engine</span> <span class="attr">name</span>=<span class="string">"Catalina"</span> <span class="attr">defaultHost</span>=<span class="string">"localhost"</span>&gt;</span></span><br><span class="line">    ……</span><br><span class="line"><span class="tag">&lt;/<span class="name">Engine</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>name</code>：用于指定Engine 的名称， 默认为Catalina </li>
+<li><code>defaultHost</code>：默认使用的虚拟主机名称，当客户端请求访问的host无效时，会跳转到默认的host来处理请求</li>
+</ul>
+<h2 id="3-6-Host"><a href="#3-6-Host" class="headerlink" title="3.6 Host"></a>3.6 Host</h2><p>Host 元素用于配置一个虚拟主机，它支持以下嵌入元素：Alias、Cluster、Listener、 Valve、Realm、Context</p>
+<p>如果在Engine下配置Realm，那么此配置将在当前Engine下的所有Host中共享。 同样，如果在Host中配置Realm ，则在当前Host下的所有Context 中共享</p>
+<p><strong>Context中的Realm优先级 &gt; Host的Realm优先级 &gt; Engine中的Realm优先级</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Host</span> <span class="attr">name</span>=<span class="string">"localhost"</span>  <span class="attr">appBase</span>=<span class="string">"webapps"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">unpackWARs</span>=<span class="string">"true"</span> <span class="attr">autoDeploy</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Valve</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.valves.AccessLogValve"</span> <span class="attr">directory</span>=<span class="string">"logs"</span></span></span><br><span class="line"><span class="tag">           <span class="attr">prefix</span>=<span class="string">"localhost_access_log"</span> <span class="attr">suffix</span>=<span class="string">".txt"</span></span></span><br><span class="line"><span class="tag">           <span class="attr">pattern</span>=<span class="string">"%h %l %u %t <span class="symbol">&amp;quot;</span>%r<span class="symbol">&amp;quot;</span> %s %b"</span> /&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">Alias</span>&gt;</span>www.example.com<span class="tag">&lt;/<span class="name">Alias</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Alias</span>&gt;</span>www.example2.com<span class="tag">&lt;/<span class="name">Alias</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面这一段Host的配置文件中还额外添加了Valve配置来实现自定义的日志记录。其中一些参数的详细信息和配置方式可以查看<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/valve.html#Access_Logging">官网的说明</a><br>。</p>
+<p>The shorthand pattern <code>pattern=&quot;common&quot;</code> corresponds to the Common Log Format defined by <strong>‘%h %l %u %t “%r” %s %b’</strong>.</p>
+</blockquote>
+<ul>
+<li>name: 当前Host通用的网络名称，也就是常用的域名，如果有多个域名对应同一个Host的应用，我们可以设置一个或多个Alias来实现访问</li>
+<li>appBase：当前Host应用对应的目录，当前Host上部署的Web应用均在该目录下（相对路径和绝对路径均可），默认为webapps</li>
+<li>unpackWARs：设置为true，Host在启动时会将appBase目录下war包解压为目 录。设置为false，Host将直接从war文件启动</li>
+<li>autoDeploy： 控制tomcat是否在运行时定期检测并自动部署新增或变更的web应用</li>
+</ul>
+<h2 id="3-7-Context"><a href="#3-7-Context" class="headerlink" title="3.7 Context"></a>3.7 Context</h2><p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/context.html">Context的完整配置官网文档</a>，Context 用于配置一个Web应用，默认的配置如下。它支持的内嵌元素为：CookieProcessor，Loader，Manager，Realm，Resources，WatchedResource，JarScanner，Valve。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Host</span> <span class="attr">name</span>=<span class="string">"localhost"</span>  <span class="attr">appBase</span>=<span class="string">"webapps"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">unpackWARs</span>=<span class="string">"true"</span> <span class="attr">autoDeploy</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">Context</span> <span class="attr">docBase</span>=<span class="string">"myAppDeploy"</span> <span class="attr">path</span>=<span class="string">"/myApp"</span>&gt;</span></span><br><span class="line">    ....</span><br><span class="line">    <span class="tag">&lt;/<span class="name">Context</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>docBase：Web应用目录或者War包的部署路径。可以是绝对路径，也可以是相对于该Context所属的Host中的<code>appBase</code>的相对路径。</li>
+<li>path：Web应用的Context的访问路径。</li>
+</ul>
+<p>假设tomcat的安装目录为<code>/home/tomcat9</code>，Host为默认的localhost， 则该web应用访问的根路径为： <code>http://localhost:8080/myApp</code>，对应的部署文件所存放的路径为：<code>/home/tomcat9/webapps/myAppDeploy</code>。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20181112-win-install-tomcat\" rel="bookmark">Windows上Apache Tomcat的安装配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200409-tomcat03-jmeter-nio-nio2-apr\" rel="bookmark">Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200608-http2-introduction\" rel="bookmark">HTTP2的特性解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200402-tomcat02-structure-io-model\" rel="bookmark">Tomcat篇02-整体架构和I/O模型</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200327-tomcat01-brief-introduction-installation\" rel="bookmark">Tomcat篇01-概念简介和守护进程配置</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/tomcat/" rel="tag"># tomcat</a>
+              <a href="/tags/web/" rel="tag"># web</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200427-lvs-principle-introduction/" rel="prev" title="LVS三种模式的工作原理">
+      <i class="fa fa-chevron-left"></i> LVS三种模式的工作原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200505-lvs-deploy-dr-mode-in-ipv6/" rel="next" title="IPv6网络配置LVS的DR模式">
+      IPv6网络配置LVS的DR模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81manager%E5%BA%94%E7%94%A8"><span class="nav-text">1、manager应用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81Tomcat%E7%9A%84%E5%AE%B9%E5%99%A8%E6%9E%B6%E6%9E%84"><span class="nav-text">2、Tomcat的容器架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81server-xml"><span class="nav-text">3、server.xml</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-server-xml%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">3.1 server.xml整体架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-Top-Level-Elements"><span class="nav-text">3.2 Top Level Elements</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-Server%E5%9D%97"><span class="nav-text">3.2.1 Server块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-Service%E5%9D%97"><span class="nav-text">3.2.2 Service块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-Executor"><span class="nav-text">3.3 Executor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-Connector"><span class="nav-text">3.4 Connector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-engine"><span class="nav-text">3.5 engine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-Host"><span class="nav-text">3.6 Host</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-Context"><span class="nav-text">3.7 Context</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

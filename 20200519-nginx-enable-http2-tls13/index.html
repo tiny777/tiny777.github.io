@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要介绍如何使用编译的方式升级openssl库和nginx用于支持HTTP2和TLSv1.3并且介绍了一些简单的提高nginx安全性的配置。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx启用HTTP2和TLSv1.3">
+<meta property="og:url" content="https://tinychen.com/20200519-nginx-enable-http2-tls13/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要介绍如何使用编译的方式升级openssl库和nginx用于支持HTTP2和TLSv1.3并且介绍了一些简单的提高nginx安全性的配置。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106171342.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526134022033.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200520093003858.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200520093151328.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200520102345707.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526114531995.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200520095720093.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526135856527.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526153241345.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526153141135.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526160107947.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526160349729.png">
+<meta property="og:image" content="https://resource.tinychen.com/image-20200526160303067.png">
+<meta property="article:published_time" content="2020-05-19T02:00:00.000Z">
+<meta property="article:modified_time" content="2020-05-19T02:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="nginx">
+<meta property="article:tag" content="tls">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106171342.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20200519-nginx-enable-http2-tls13/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>nginx启用HTTP2和TLSv1.3 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20200519-nginx-enable-http2-tls13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nginx启用HTTP2和TLSv1.3
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-05-19 10:00:00" itemprop="dateCreated datePublished" datetime="2020-05-19T10:00:00+08:00">2020-05-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210106171342.jpg"></p>
+<p>本文主要介绍如何使用编译的方式升级openssl库和nginx用于支持HTTP2和TLSv1.3并且介绍了一些简单的提高nginx安全性的配置。</p>
+<a id="more"></a>
+
+<h1 id="1、编译安装openssl"><a href="#1、编译安装openssl" class="headerlink" title="1、编译安装openssl"></a>1、编译安装openssl</h1><p>考虑到Linux系统中有许多组件都需要使用openssl库，而现在默认使用的openssl库绝大多数都没到达能够支持TLS1.3的openssl1.1.1版本以上，因此个人建议不要直接修改系统已有的默认openssl库而是另外使用一个新目录来编译安装新版本的openssl。</p>
+<p>具体的支持信息可以查看<a target="_blank" rel="noopener" href="https://wiki.openssl.org/index.php/TLS1.3">openssl官网的TLSv1.3部分</a>。</p>
+<p>解压下载的稳定版openssl1.1.1g进行编译安装，注意使用<code>--prefix=</code>指定安装目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 下载</span></span><br><span class="line">wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz</span><br><span class="line"><span class="meta">#</span><span class="bash"> 解压</span></span><br><span class="line">tar -zxvf openssl-1.1.1g.tar.gz</span><br><span class="line"><span class="meta">#</span><span class="bash"> 配置、编译</span></span><br><span class="line">./config  --prefix=/home/openssl</span><br><span class="line">make</span><br><span class="line"><span class="meta">#</span><span class="bash"> 检查是否出错</span></span><br><span class="line">make test</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装</span></span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>安装完成后检查链接库是否正常，将缺少的文件直接软链接到系统的<code>/usr/lib64</code>目录下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ln -s /home/openssl/lib/libssl.so.1.1 /usr/lib64/libssl.so.1.1</span><br><span class="line">ln -s /home/openssl/lib/libcrypto.so.1.1 /usr/lib64/libcrypto.so.1.1</span><br></pre></td></tr></table></figure>
+
+<p>最后检查系统使用的openssl的版本是否为新版以及系统的库指向是否正确</p>
+<p><img src="https://resource.tinychen.com/image-20200526134022033.png"></p>
+<h1 id="2、编译安装nginx"><a href="#2、编译安装nginx" class="headerlink" title="2、编译安装nginx"></a>2、编译安装nginx</h1><h2 id="2-1-nginx的TLS1-3和HTTP2"><a href="#2-1-nginx的TLS1-3和HTTP2" class="headerlink" title="2.1 nginx的TLS1.3和HTTP2"></a>2.1 nginx的TLS1.3和HTTP2</h2><p>想要在nginx中开启TLS1.3的支持，<strong>只需要使用支持TLS1.3的openssl库来进行编译</strong>即可。</p>
+<p>查看nginx的版本更新说明我们可以知道<strong>nginx从1.9.5版本开始支持HTTP2：</strong></p>
+<p><img src="https://resource.tinychen.com/image-20200520093003858.png"></p>
+<p>从1.13版本开始支持TLS1.3</p>
+<p><img src="https://resource.tinychen.com/image-20200520093151328.png"></p>
+<h2 id="2-2-指定openssl目录进行nginx编译安装"><a href="#2-2-指定openssl目录进行nginx编译安装" class="headerlink" title="2.2 指定openssl目录进行nginx编译安装"></a>2.2 指定openssl目录进行nginx编译安装</h2><p>nginx的编译安装此前已经介绍过了，有需要的同学可以点击<a href="https://tinychen.com/20200317-nginx01-base-conf-static-web/">这里</a>回顾。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://nginx.org/download/nginx-1.18.0.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>这次我们使用的是截止<code>2020年5月19号</code>最新的稳定版本<code>nginx1.18.0</code>，一些注意的事项如下：</p>
+<ul>
+<li><code>--with-http_v2_module</code>和<code>--with-http_ssl_module</code>用于支持HTTP2和ssl加密，</li>
+<li><code>--with-openssl=</code>用于指定openssl库的安装目录</li>
+<li><code>--with-openssl-opt=enable-tls1_3</code>用于开启openssl库的tls1.3支持，但是现在的新版本已经默认开启，无需额外添加这个参数</li>
+</ul>
+<p>剩下的就和常规的编译安装无异，下面是此次编译的参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/home/nginx \</span><br><span class="line">--sbin-path=/home/nginx/sbin/nginx \</span><br><span class="line">--with-openssl-opt=enable-tls1_3 \</span><br><span class="line">--with-openssl=/home/openssl \</span><br><span class="line">--conf-path=/home/nginx/nginx.conf \</span><br><span class="line">--error-log-path=/home/nginx/logs/error.log \</span><br><span class="line">--http-log-path=/home/nginx/logs/access.log \</span><br><span class="line">--pid-path=/home/nginx/nginx.pid \</span><br><span class="line">--lock-path=/home/nginx/nginx.lock \</span><br><span class="line">--http-client-body-temp-path=/home/nginx/cache/client_temp \</span><br><span class="line">--http-proxy-temp-path=/home/nginx/cache/proxy_temp \</span><br><span class="line">--http-fastcgi-temp-path=/home/nginx/cache/fastcgi_temp \</span><br><span class="line">--http-uwsgi-temp-path=/home/nginx/cache/uwsgi_temp \</span><br><span class="line">--http-scgi-temp-path=/home/nginx/cache/scgi_temp \</span><br><span class="line">--user=nginx \</span><br><span class="line">--group=nginx \</span><br><span class="line">--with-compat \</span><br><span class="line">--with-file-aio \</span><br><span class="line">--with-threads \</span><br><span class="line">--with-http_addition_module \</span><br><span class="line">--with-http_auth_request_module \</span><br><span class="line">--with-http_dav_module \</span><br><span class="line">--with-http_flv_module \</span><br><span class="line">--with-http_gunzip_module \</span><br><span class="line">--with-http_gzip_static_module \</span><br><span class="line">--with-http_mp4_module \</span><br><span class="line">--with-http_random_index_module \</span><br><span class="line">--with-http_realip_module \</span><br><span class="line">--with-http_secure_link_module \</span><br><span class="line">--with-http_slice_module \</span><br><span class="line">--with-http_ssl_module \</span><br><span class="line">--with-http_stub_status_module \</span><br><span class="line">--with-http_sub_module \</span><br><span class="line">--with-http_v2_module \</span><br><span class="line">--with-stream</span><br></pre></td></tr></table></figure>
+
+<p>编译的时候出现报错：</p>
+<p><img src="https://resource.tinychen.com/image-20200520102345707.png"></p>
+<p>修改nginx源码目录中<code>auto/lib/openssl/conf</code>中的openssl路径参数，在40行左右的位置对应四个参数中的<code>.openssl</code>去掉，修改后的内容如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">39             CORE_INCS="$CORE_INCS $OPENSSL/include"</span><br><span class="line">40             CORE_DEPS="$CORE_DEPS $OPENSSL/include/openssl/ssl.h"</span><br><span class="line">41             CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libssl.a"</span><br><span class="line">42             CORE_LIBS="$CORE_LIBS $OPENSSL/lib/libcrypto.a"</span><br></pre></td></tr></table></figure>
+
+<p>然后重新编译安装。</p>
+<p><img src="https://resource.tinychen.com/image-20200526114531995.png"></p>
+<h2 id="2-3-nginx配置修改"><a href="#2-3-nginx配置修改" class="headerlink" title="2.3 nginx配置修改"></a>2.3 nginx配置修改</h2><p>安装完成之后将原来的配置文件和html文件全部迁移到新的nginx目录下并进行相应的修改就可以正常的启用nginx了。如果此前的nginx是直接使用yum安装并且使用systemd进行守护进程的控制，我们可以将对应的systemd unit文件中的目录进行修改，一般来说只需要修改相关路径的参数即可：</p>
+<p><img src="https://resource.tinychen.com/image-20200520095720093.png"></p>
+<p>首先我们停止服务，然后修改文件，接着重启服务即可：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 停止nginx</span></span><br><span class="line">systemctl stop nginx</span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改配置文件</span></span><br><span class="line">vim /usr/lib/systemd/system/nginx.service</span><br><span class="line"></span><br><span class="line">[Unit]</span><br><span class="line">Description=nginx - high performance web server</span><br><span class="line">Documentation=http://nginx.org/en/docs/</span><br><span class="line">After=network-online.target remote-fs.target nss-lookup.target</span><br><span class="line">Wants=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=forking</span><br><span class="line">PIDFile=/home/nginx/nginx.pid</span><br><span class="line">ExecStart=/home/nginx/sbin/nginx -c /home/nginx/nginx.conf</span><br><span class="line">ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">ExecStop=/bin/kill -s TERM $MAINPID</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重启daemon进程</span></span><br><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure>
+
+<p>如果还想使用全局命令nginx的话，可以先把原来的yum安装的移除再将编译安装的新版本指向系统目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">使用<span class="built_in">which</span> nginx查看nginx的指向</span></span><br><span class="line">[root@aliyun bin]# which nginx</span><br><span class="line">/usr/sbin/nginx</span><br><span class="line">[root@aliyun bin]# mv /usr/sbin/nginx /usr/sbin/nginx.bak</span><br><span class="line">[root@aliyun bin]# ln -s /home/nginx/sbin/nginx /usr/sbin/nginx</span><br></pre></td></tr></table></figure>
+
+<p>最后我们查看nginx版本信息：</p>
+<p><img src="https://resource.tinychen.com/image-20200526135856527.png"></p>
+<h1 id="3、配置http2和tls1-3"><a href="#3、配置http2和tls1-3" class="headerlink" title="3、配置http2和tls1.3"></a>3、配置http2和tls1.3</h1><h2 id="3-1-nginx配置"><a href="#3-1-nginx配置" class="headerlink" title="3.1 nginx配置"></a>3.1 nginx配置</h2><p>nginx中开启http2和tls1.3十分简单，这里配置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">server&#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name tinychen.com www.tinychen.com;</span><br><span class="line"></span><br><span class="line">    if ($server_port &#x3D; 80)&#123;</span><br><span class="line">        return 301 https:&#x2F;&#x2F;$host$request_uri;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server&#123;</span><br><span class="line">    listen 443 ssl http2 default_server;</span><br><span class="line">    server_name tinychen.com www.tinychen.com;</span><br><span class="line"></span><br><span class="line">    add_header Strict-Transport-Security &quot;max-age&#x3D;63072000; includeSubDomains; preload&quot;;</span><br><span class="line"></span><br><span class="line">    ssl_ciphers TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-256-GCM-SHA384:TLS13-AES-128-GCM-SHA256:EECDH+CHACHA20:EECDH+AESGCM:EECDH+AES;</span><br><span class="line">    #ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256;</span><br><span class="line">    ssl_protocols TLSv1.2 TLSv1.3;</span><br><span class="line">    ssl_stapling on;</span><br><span class="line">    ssl_stapling_verify on;</span><br><span class="line">    ssl_trusted_certificate certs&#x2F;tinychen.com.pem;</span><br><span class="line">    ssl_prefer_server_ciphers on;</span><br><span class="line">    ssl_certificate certs&#x2F;tinychen.com.pem;</span><br><span class="line">    ssl_certificate_key certs&#x2F;tinychen.com.key;</span><br><span class="line">    ssl_session_cache shared:SSL:1m;</span><br><span class="line">    ssl_verify_depth 10;</span><br><span class="line">    ssl_session_timeout 30m;</span><br><span class="line"></span><br><span class="line">    location &#x2F; &#123;</span><br><span class="line">        root html&#x2F;;</span><br><span class="line">        index index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>由于http2默认需要使用加密，因此直接在nginx对应的ssl监听端口上加上<code>http2</code>字段即可</li>
+<li>TLS1.3则只需要在<code>ssl_protocols</code>指令中加上<code>TLSv1.3</code></li>
+<li><code>ssl_ciphers</code>这里的配置采用了比较激进的配置，由于前面协议只启用了TLSv1.2和TLSv1.3，因此这里对应的<code>ssl_ciphers</code>也直接弃用了大量旧的和弱的加密套件</li>
+<li><code>add_header Strict-Transport-Security &quot;max-age=63072000; includeSubDomains; preload&quot;;</code>这个字段头用于开启HSTS避免在进行301跳转的时候被中间人攻击，添加了<code>preload</code>字段还需要在<a target="_blank" rel="noopener" href="https://hstspreload.org/">HSTS的官网</a>添加自己的网址，注意HSTS不应该添加在HTTP请求的网站上，所以上面将80端口和443端口分为两个server块</li>
+<li><code>ssl_stapling on</code>用于开启OCSP（Online Certificate Status Protocol），可以减缓网络和客户端资源负担</li>
+<li><code>ssl_stapling_verify on</code>用于开启OCSP Stapling（OCSP装订），这是TLS证书状态查询扩展，服务器在TLS握手时发送事先缓存的OCSP响应，用户只要验证该响应的时效性而不用再向数字证书认证机构(CA)发送请求，可以加快握手速度</li>
+</ul>
+<h2 id="3-2-检测"><a href="#3-2-检测" class="headerlink" title="3.2 检测"></a>3.2 检测</h2><p>使用<a target="_blank" rel="noopener" href="https://myssl.com/">myssl</a>进行检测，可以看到很顺利地显示已经支持了HTTP2和TLS1.3协议。</p>
+<p><img src="https://resource.tinychen.com/image-20200526153241345.png"></p>
+<p>同时可以看到由于关闭了TLS1.2以下的加密协议支持并且强制启用了https之后很多旧浏览器已经不再支持了：</p>
+<p><img src="https://resource.tinychen.com/image-20200526153141135.png"></p>
+<p>在不考虑旧版浏览器的兼容之后可以很轻松获得A+评分并且上榜：</p>
+<p><img src="https://resource.tinychen.com/image-20200526160107947.png"></p>
+<p>同样的我们可以使用<a target="_blank" rel="noopener" href="https://www.ssllabs.com/ssltest/">ssllab</a>来进行测试，测试结果也是大同小异：</p>
+<p><img src="https://resource.tinychen.com/image-20200526160349729.png"></p>
+<p><img src="https://resource.tinychen.com/image-20200526160303067.png"></p>
+<h2 id="3-3-主流网站测试"><a href="#3-3-主流网站测试" class="headerlink" title="3.3 主流网站测试"></a>3.3 主流网站测试</h2><p>下表是截止2020年6月6日使用Chrome（83.0.4103.97（正式版本））对一些主要的网站首页进行的简单测试</p>
+<table>
+<thead>
+<tr>
+<th align="center">简称</th>
+<th align="center">网站</th>
+<th align="center">HTTP</th>
+<th align="center">TLS</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">谷歌</td>
+<td align="center">google.com/</td>
+<td align="center">H2+quic/46</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">苹果</td>
+<td align="center">apple.com.cn/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">GitHub</td>
+<td align="center">github.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">维基百科</td>
+<td align="center">en.wikipedia.org/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">k8s</td>
+<td align="center">kubernetes.io/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">nginx商业版</td>
+<td align="center">nginx.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">阿里CDN</td>
+<td align="center">*.alicdn.com</td>
+<td align="center">H2</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">163首页</td>
+<td align="center">163.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">ssllab</td>
+<td align="center">ssllabs.com/index.html</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.3</td>
+</tr>
+<tr>
+<td align="center">微软</td>
+<td align="center">microsoft.com/zh-cn/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">docker</td>
+<td align="center">docker.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">微信</td>
+<td align="center">weixin.qq.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">严选</td>
+<td align="center">you.163.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">淘宝</td>
+<td align="center">taobao.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">天猫</td>
+<td align="center">tmall.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">阿里巴巴</td>
+<td align="center">alibaba.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">csdn</td>
+<td align="center">csdn.net/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">腾讯云</td>
+<td align="center">cloud.tencent.com/</td>
+<td align="center">H2</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">亚马逊</td>
+<td align="center">amazon.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">QQ</td>
+<td align="center">qq.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">B站</td>
+<td align="center">bilibili.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">百度</td>
+<td align="center">baidu.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">今日头条</td>
+<td align="center">toutiao.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">小米</td>
+<td align="center">mi.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">拼多多</td>
+<td align="center">pinduoduo.com/</td>
+<td align="center">H2+HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">美团</td>
+<td align="center">meituan.com/</td>
+<td align="center">HTTP1.1+H2(极少)</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">网易企业邮</td>
+<td align="center">qiye.163.com/</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">126邮箱</td>
+<td align="center">126.com/</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">myssl</td>
+<td align="center">myssl.com/</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">openssl</td>
+<td align="center">openssl.org/</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">nginx开源版</td>
+<td align="center">nginx.org/</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+<tr>
+<td align="center">华为</td>
+<td align="center">huawei.com/cn/</td>
+<td align="center">HTTP1.1</td>
+<td align="center">TLS1.2</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190829-http-to-nginx\" rel="bookmark">个人博客web服务器换用nginx</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx04-http-map-module\" rel="bookmark">Nginx篇04——map模块</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200323-nginx06-sendfile\" rel="bookmark">Nginx篇06——Sendfile指令及其原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx05-upstream-keepalive\" rel="bookmark">Nginx篇05——http长连接和keeplive</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200608-http2-introduction\" rel="bookmark">HTTP2的特性解析</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+              <a href="/tags/tls/" rel="tag"># tls</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20200513-wireshark-analysis-imap/" rel="prev" title="Wireshark对IMAP抓包分析">
+      <i class="fa fa-chevron-left"></i> Wireshark对IMAP抓包分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20200602-encryption-intro/" rel="next" title="SSL/TLS、对称加密和非对称加密和TLSv1.3">
+      SSL/TLS、对称加密和非对称加密和TLSv1.3 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85openssl"><span class="nav-text">1、编译安装openssl</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85nginx"><span class="nav-text">2、编译安装nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-nginx%E7%9A%84TLS1-3%E5%92%8CHTTP2"><span class="nav-text">2.1 nginx的TLS1.3和HTTP2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E6%8C%87%E5%AE%9Aopenssl%E7%9B%AE%E5%BD%95%E8%BF%9B%E8%A1%8Cnginx%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85"><span class="nav-text">2.2 指定openssl目录进行nginx编译安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-nginx%E9%85%8D%E7%BD%AE%E4%BF%AE%E6%94%B9"><span class="nav-text">2.3 nginx配置修改</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E9%85%8D%E7%BD%AEhttp2%E5%92%8Ctls1-3"><span class="nav-text">3、配置http2和tls1.3</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-nginx%E9%85%8D%E7%BD%AE"><span class="nav-text">3.1 nginx配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E6%A3%80%E6%B5%8B"><span class="nav-text">3.2 检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E4%B8%BB%E6%B5%81%E7%BD%91%E7%AB%99%E6%B5%8B%E8%AF%95"><span class="nav-text">3.3 主流网站测试</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

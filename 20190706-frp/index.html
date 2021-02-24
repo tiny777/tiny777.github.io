@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="使用github上面的开源项目Frp和一台有公网IP的主机来实现反向代理（内网穿透），从而达到使用微软自带的远程桌面mstsc来远程没有公网IP的windows电脑和使用ssh远程Linux系统（Centos和Ubuntu）的效果。 本文不涉及反向代理的具体理论知识，使用的公网IP主机为阿里云主机（十块钱一个月的学生版），由于使用的阿里云主机带宽有限，因此使用远程桌面的效果可能比较一般，但是对于S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Frp内网穿透实现MS远程桌面和SSH">
+<meta property="og:url" content="https://tinychen.com/20190706-frp/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="使用github上面的开源项目Frp和一台有公网IP的主机来实现反向代理（内网穿透），从而达到使用微软自带的远程桌面mstsc来远程没有公网IP的windows电脑和使用ssh远程Linux系统（Centos和Ubuntu）的效果。 本文不涉及反向代理的具体理论知识，使用的公网IP主机为阿里云主机（十块钱一个月的学生版），由于使用的阿里云主机带宽有限，因此使用远程桌面的效果可能比较一般，但是对于S">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/QEPAirRf1m3C.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/PjcMH3c9D5VT.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/iDX1mDiMgUGM.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/iCbfgRJ2uTV4.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/qvHyuBzi26Ps.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/GXeLCvfem8lH.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/ewPkXMG4Qpfl.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/C6KW7eQUIUH1.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/bFvHSr8JJwFv.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/nM4W0oeUAgW4.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/uxA0NJ7mokcb.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/BYdBdqgN4Pqq.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/wkuIU9En3z6S.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/6c5PFY8xkjJh.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190706/rx9t4hlsBLMY.png">
+<meta property="article:published_time" content="2019-07-06T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-06T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="network">
+<meta property="article:tag" content="centos">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190706/QEPAirRf1m3C.png">
+
+<link rel="canonical" href="https://tinychen.com/20190706-frp/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Frp内网穿透实现MS远程桌面和SSH | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190706-frp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Frp内网穿透实现MS远程桌面和SSH
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-07-06 15:00:00" itemprop="dateCreated datePublished" datetime="2019-07-06T15:00:00+08:00">2019-07-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>4 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>使用github上面的开源项目Frp和一台有公网IP的主机来实现反向代理（内网穿透），从而达到使用微软自带的远程桌面mstsc来远程没有公网IP的windows电脑和使用ssh远程Linux系统（Centos和Ubuntu）的效果。</p>
+<p>本文不涉及反向代理的具体理论知识，使用的公网IP主机为阿里云主机（十块钱一个月的学生版），由于使用的阿里云主机带宽有限，因此使用远程桌面的效果可能比较一般，但是对于SSH远程来说肯定是足够了的。</p>
+<p>需要注意的是，如果你的电脑本身所处的网络是有动态公网IP的，建议直接在路由器中设置DDNS，效果要比这个好很多，这个仅适用于那些没有公网IP的电脑。</p>
+<a id="more"></a>
+
+<h1 id="1、服务端配置"><a href="#1、服务端配置" class="headerlink" title="1、服务端配置"></a>1、服务端配置</h1><p>首先我们对服务端的阿里云主机进行配置，当然有其他的公网IP主机都是可以的。这里使用的操作系统是CentOS7.3。</p>
+<h2 id="1-1-下载Frp"><a href="#1-1-下载Frp" class="headerlink" title="1.1 下载Frp"></a>1.1 下载Frp</h2><p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/releases">github上各个配置版本下载地址</a></p>
+<p><img src="https://resource.tinychen.com/blog/20190706/QEPAirRf1m3C.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用wget指令下载linux版本</span></span><br><span class="line">wget https://github.com/fatedier/frp/releases/download/v0.27.0/frp_0.27.0_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用tar命令解压</span></span><br><span class="line">tar -zxvf frp_0.27.0_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用cp命令复制到/etc目录中并重命名为frps</span></span><br><span class="line">cp -r frp_0.27.0_linux_amd64 /etc/frps</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用rm命令删除掉多余的frpc客户端文件，只留下服务端frps相关的文件</span></span><br><span class="line">rm -f frpc frpc_full.ini frpc.ini</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190706/PjcMH3c9D5VT.png"></p>
+<p>这些就是剩下的我们需要的文件，这里我们可以看到有两个ini配置文件，其中<code>frps_full,ini</code>是完整的带有注释说明和所有功能的配置文件，我们把需要的简单配置摘到<code>frps.ini</code>这个文件，方便我们管理配置。</p>
+<h2 id="1-2-编辑配置文件"><a href="#1-2-编辑配置文件" class="headerlink" title="1.2 编辑配置文件"></a>1.2 编辑配置文件</h2><p>接下来我们编辑配置文件启用frp的监听端口7000和监控面板dashboard的监听端口7500。</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将下列内容加入到frps.ini中</span></span><br><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">bind_addr</span> = <span class="number">0.0</span>.<span class="number">0.0</span></span><br><span class="line"><span class="attr">bind_port</span> = <span class="number">7000</span></span><br><span class="line"><span class="attr">auto_token</span> = 你的连接认证密码</span><br><span class="line"></span><br><span class="line"><span class="attr">dashboard_port</span> = <span class="number">7500</span></span><br><span class="line"><span class="attr">dashboard_user</span> = admin</span><br><span class="line"><span class="attr">dashboard_pwd</span> = 你的管理登录密码</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，这上面说的7000和7500端口都需要在阿里云的防火墙里面配置放行，否则会无法访问。</p>
+<h2 id="1-3-设置开启自动和后台运行"><a href="#1-3-设置开启自动和后台运行" class="headerlink" title="1.3 设置开启自动和后台运行"></a>1.3 设置开启自动和后台运行</h2><p>我们新建一个文件，将Frps注册成Linux中的服务进程。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新建一个文件设置frps服务能够实现后台启动和开机启动</span></span><br><span class="line">vim /etc/systemd/system/frpsd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将下列内容加入到frpsd.service中</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=frps daemon</span><br><span class="line">After=syslog.target  network.target</span><br><span class="line">Wants=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/etc/frps/frps -c /etc/frps/frps.ini</span><br><span class="line">Restart= always</span><br><span class="line">RestartSec=1min</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动frps服务</span></span><br><span class="line">systemctl start frpsd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置frps服务开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> frpsd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看frps状态</span></span><br><span class="line">systemctl status frpsd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启frps服务</span></span><br><span class="line">systemctl restart frpsd.service</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190706/iDX1mDiMgUGM.png"></p>
+<h1 id="2、Windows客户端配置"><a href="#2、Windows客户端配置" class="headerlink" title="2、Windows客户端配置"></a>2、Windows客户端配置</h1><h2 id="2-1-下载Frp"><a href="#2-1-下载Frp" class="headerlink" title="2.1 下载Frp"></a>2.1 下载Frp</h2><p>我们按照之前的下载好对应的Windows版本之后，删除掉多余的frps服务端文件，只留下对应的frpc客户端文件。</p>
+<p><img src="https://resource.tinychen.com/blog/20190706/iCbfgRJ2uTV4.png"></p>
+<h2 id="2-2-编辑配置文件"><a href="#2-2-编辑配置文件" class="headerlink" title="2.2 编辑配置文件"></a>2.2 编辑配置文件</h2><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="attr">server_addr</span> = 你的公网主机的公网IP</span><br><span class="line"><span class="attr">server_port</span> = <span class="number">7000</span></span><br><span class="line"></span><br><span class="line"><span class="section">[MSRDP]</span></span><br><span class="line"><span class="attr">type</span> = tcp</span><br><span class="line"><span class="attr">local_ip</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">local_port</span> = <span class="number">3389</span></span><br><span class="line"><span class="attr">remote_port</span> = <span class="number">7777</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的<code>server_port</code>就是我们前面的服务端配置的端口7000，<code>local_port</code>则是微软自带的远程桌面mstsc的默认端口3389，<code>remote_port</code>就是到时候使用mstsc远程的时候需要在这个公网IP后面加上的端口号，注意这个端口号也是需要在阿里云主机的防火墙中放行。</p>
+<p>然后我们就可以启用frpc客户端来建立连接</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在命令行中输入</span></span><br><span class="line">frpc.exe -c frpc.ini</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190706/qvHyuBzi26Ps.png"></p>
+<h2 id="2-3-注册Frpc为Windows服务"><a href="#2-3-注册Frpc为Windows服务" class="headerlink" title="2.3 注册Frpc为Windows服务"></a>2.3 注册Frpc为Windows服务</h2><p>为了使frpc能够开启后台运行，我们需要将它注册为系统服务。</p>
+<p>这里我们需要使用到GitHub上面的另一个项目<a target="_blank" rel="noopener" href="https://github.com/kohsuke/winsw/releases">winsw</a></p>
+<p><img src="https://resource.tinychen.com/blog/20190706/GXeLCvfem8lH.png"></p>
+<p>这里我使用的是<code>WinSW.NET4.exe</code>这个版本，这个需要电脑安装了<code>.net4</code>才可以使用，一般win10应该都是安装了的，此外我们还要下载一个xml文件作为启动配置文件。</p>
+<p>然后我们在对应的xml配置文件中加入下列内容</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">&lt;!-- ID of the service. It should be unique accross the Windows system--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">id</span>&gt;</span>frpc<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Display name of the service --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>Frpc Service (powered by WinSW)<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Service description --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">description</span>&gt;</span>This frpc service can realize reverse Proxy<span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- Path to the executable, which should be started --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">executable</span>&gt;</span>frpc<span class="tag">&lt;/<span class="name">executable</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">arguments</span>&gt;</span>-c frpc.ini<span class="tag">&lt;/<span class="name">arguments</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">logmode</span>&gt;</span>reset<span class="tag">&lt;/<span class="name">logmode</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>接着我们把这两个文件都命名为WinSW，然后放在刚刚frpc的目录下。</p>
+<p><img src="https://resource.tinychen.com/blog/20190706/ewPkXMG4Qpfl.png"></p>
+<p>然后我们以管理员身份启动<code>powershell</code>或者<code>cmd</code>，输入下列命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WinSW.exe install</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190706/C6KW7eQUIUH1.png"></p>
+<p><code>win+r</code>后通过<code>services.msc</code>进入到服务列表页面找到<code>frpc</code>服务。</p>
+<p><img src="https://resource.tinychen.com/blog/20190706/bFvHSr8JJwFv.png"></p>
+<p><strong>我们打开设置，将它设置为开机启动，服务失败后一分钟自动重启服务。</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20190706/nM4W0oeUAgW4.png"></p>
+<p><img src="https://resource.tinychen.com/blog/20190706/uxA0NJ7mokcb.png"></p>
+<p>到这里windows客户端的配置就已经完成了。我们在远程的时候只需要输入刚刚使用的公网IP地址加上端口号即可进行远程连接，如果有多台电脑需要进行远程，只需要给每个电脑设置一个不同的端口号即可。</p>
+<p><img src="https://resource.tinychen.com/blog/20190706/BYdBdqgN4Pqq.png"></p>
+<h1 id="3、Linux客户端配置"><a href="#3、Linux客户端配置" class="headerlink" title="3、Linux客户端配置"></a>3、Linux客户端配置</h1><p>Linux客户端的配置和上面的服务端大同小异，只需要将<code>frps</code>换为<code>frpc</code>并且修改对应的配置文件即可。注意下面的操作小七在CentOS7.6和Ubuntu18.04上面都能成功实现。</p>
+<h2 id="3-1-下载Frp"><a href="#3-1-下载Frp" class="headerlink" title="3.1 下载Frp"></a>3.1 下载Frp</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用wget指令下载linux版本</span></span><br><span class="line">wget https://github.com/fatedier/frp/releases/download/v0.27.0/frp_0.27.0_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用tar命令解压</span></span><br><span class="line">tar -zxvf frp_0.27.0_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用cp命令复制到/etc目录中并重命名为frpc</span></span><br><span class="line">cp -r frp_0.27.0_linux_amd64 /etc/frpc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用rm命令删除掉多余的frps服务端文件，只留下客户端</span></span><br><span class="line">rm -f frps frps_full.ini frps.ini</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用vim编辑客户端配置文件</span></span><br><span class="line">vim /etc/frpc/frpc.ini</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-2-编辑配置文件"><a href="#3-2-编辑配置文件" class="headerlink" title="3.2 编辑配置文件"></a>3.2 编辑配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置本地的frpc.ini文件</span></span><br><span class="line"></span><br><span class="line">[common]</span><br><span class="line">server_addr = 你的公网主机的公网IP</span><br><span class="line">server_port = 7000</span><br><span class="line"></span><br><span class="line">[ssh]</span><br><span class="line"><span class="built_in">type</span> = tcp</span><br><span class="line">local_ip = 127.0.0.1</span><br><span class="line">local_port = 22</span><br><span class="line">remote_port = 8000</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-3-设置开机启动和后台运行"><a href="#3-3-设置开机启动和后台运行" class="headerlink" title="3.3 设置开机启动和后台运行"></a>3.3 设置开机启动和后台运行</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新建一个文件设置frps服务能够实现后台启动和开机启动</span></span><br><span class="line">vim /etc/systemd/system/frpcd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将下列内容加入到frpcd.service中</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=frpc daemon</span><br><span class="line">After=syslog.target  network.target</span><br><span class="line">Wants=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/etc/frpc/frpc -c /etc/frpc/frpc.ini</span><br><span class="line">Restart= always</span><br><span class="line">RestartSec=1min</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动frpc服务</span></span><br><span class="line">systemctl start frpcd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置frpc服务开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> frpcd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看frpc服务状态</span></span><br><span class="line">systemctl status frpcd.service</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190706/wkuIU9En3z6S.png"></p>
+<h2 id="3-4-错误记录"><a href="#3-4-错误记录" class="headerlink" title="3.4 错误记录"></a>3.4 错误记录</h2><p>在Ubuntu上面出现了一点小意外，发现服务并没有成功启用</p>
+<p><img src="https://resource.tinychen.com/blog/20190706/6c5PFY8xkjJh.png"></p>
+<p><code>[control.go:142] [ssh] start error: proxy name [ssh] is already in use</code></p>
+<p>提示是说ssh这个名字已经被别的服务占用了，这里我们只需要修改之前的配置文件里面的ssh为别的名字，然后重启服务即可。</p>
+<p><img src="https://resource.tinychen.com/blog/20190706/rx9t4hlsBLMY.png"></p>
+<p><strong>最后注意这时候我们如果需要使用ssh远程需要加上-p命令来指定端口。</strong></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190409-iperf3\" rel="bookmark">iperf3安装配置使用踩坑记录</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200331-mstsc-deploy-tls-cert\" rel="bookmark">windows系统RDP远程桌面配置可信证书</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190709-multi-ssh\" rel="bookmark">多主机间实现SSH免密登录</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200912-ssh-config-introduction\" rel="bookmark">ssh常用配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20201024-centos8-modify-eth-name\" rel="bookmark">centos7/8修改网卡名称</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows/" rel="tag"># windows</a>
+              <a href="/tags/network/" rel="tag"># network</a>
+              <a href="/tags/centos/" rel="tag"># centos</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190618-database-review/" rel="prev" title="数据库原理部分重点内容">
+      <i class="fa fa-chevron-left"></i> 数据库原理部分重点内容
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190707-rhel7-break-passwd/" rel="next" title="RHEL7破解ROOT密码">
+      RHEL7破解ROOT密码 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="nav-text">1、服务端配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E4%B8%8B%E8%BD%BDFrp"><span class="nav-text">1.1 下载Frp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E7%BC%96%E8%BE%91%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">1.2 编辑配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E8%AE%BE%E7%BD%AE%E5%BC%80%E5%90%AF%E8%87%AA%E5%8A%A8%E5%92%8C%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C"><span class="nav-text">1.3 设置开启自动和后台运行</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81Windows%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="nav-text">2、Windows客户端配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E4%B8%8B%E8%BD%BDFrp"><span class="nav-text">2.1 下载Frp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E7%BC%96%E8%BE%91%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">2.2 编辑配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E6%B3%A8%E5%86%8CFrpc%E4%B8%BAWindows%E6%9C%8D%E5%8A%A1"><span class="nav-text">2.3 注册Frpc为Windows服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81Linux%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="nav-text">3、Linux客户端配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E4%B8%8B%E8%BD%BDFrp"><span class="nav-text">3.1 下载Frp</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E7%BC%96%E8%BE%91%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">3.2 编辑配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E8%AE%BE%E7%BD%AE%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8%E5%92%8C%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C"><span class="nav-text">3.3 设置开机启动和后台运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-%E9%94%99%E8%AF%AF%E8%AE%B0%E5%BD%95"><span class="nav-text">3.4 错误记录</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

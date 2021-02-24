@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="项目github地址：https:&#x2F;&#x2F;github.com&#x2F;tiny777&#x2F;ServersManagementTools">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用python导出华为网络设备中的配置为excel文件">
+<meta property="og:url" content="https://tinychen.com/20190816-hw-auto-get-profile/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="项目github地址：https:&#x2F;&#x2F;github.com&#x2F;tiny777&#x2F;ServersManagementTools">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190816/cpwtbe7uUvBF.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190816/TxJqKjGMH9CU.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190816/g43DkiCQiUkV.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190816/ySXeeAXjIs3a.png">
+<meta property="article:published_time" content="2019-08-16T09:00:00.000Z">
+<meta property="article:modified_time" content="2019-08-16T09:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="code">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190816/cpwtbe7uUvBF.png">
+
+<link rel="canonical" href="https://tinychen.com/20190816-hw-auto-get-profile/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>使用python导出华为网络设备中的配置为excel文件 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190816-hw-auto-get-profile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用python导出华为网络设备中的配置为excel文件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-08-16 17:00:00" itemprop="dateCreated datePublished" datetime="2019-08-16T17:00:00+08:00">2019-08-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>2k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>2 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>项目github地址：<a target="_blank" rel="noopener" href="https://github.com/tiny777/ServersManagementTools">https://github.com/tiny777/ServersManagementTools</a></p>
+<a id="more"></a>
+
+<h1 id="0、概述"><a href="#0、概述" class="headerlink" title="0、概述"></a>0、概述</h1><p>这个脚本需要实现的功能很简单，就是自动ssh登录到网络设备上，查询相应的白名单，然后将结果导出成excel表格，具体的操作命令如下，对应的设备是华为的AC6605。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">操作步骤</span><br><span class="line"></span><br><span class="line"># 执行命令system-view，进入系统视图。</span><br><span class="line">system-view</span><br><span class="line"></span><br><span class="line"># 执行命令wlan，进入WLAN视图。</span><br><span class="line">wlan</span><br><span class="line"></span><br><span class="line"># 查看特定白名单内的信息</span><br><span class="line">display sta-whitelist-profile name profilename</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>由于这里使用的是<code>netmiko</code>库，所以除了华为的网络设备，思科的设备也能支持，只需要在代码文件中稍作修改即可。</li>
+<li>相应的命令也可以进行修改成其他的系列命令</li>
+</ul>
+<h1 id="1、软件版本"><a href="#1、软件版本" class="headerlink" title="1、软件版本"></a>1、软件版本</h1><p>eNSP的BUG非常多，这里搭建拓扑来进行测试使用的软件版本是</p>
+<ul>
+<li><code>eNSP 1.2.00.500 V100R002C00</code></li>
+<li><code>VirtualBox Graphical User Interface Version 5.1.26r117224(Qt5.6.2)</code></li>
+<li><code>WinPcap_4_1_3</code></li>
+<li>Wireshark没有用到，版本应该无所谓</li>
+<li>操作系统是<code>win10 pro</code>，<code>Microsoft Windows Version 1903(OS Build 18362.239)</code></li>
+</ul>
+<h1 id="2、配置eNSP桥接真机"><a href="#2、配置eNSP桥接真机" class="headerlink" title="2、配置eNSP桥接真机"></a>2、配置eNSP桥接真机</h1><p>这里使用的是AC6605，对真机进行桥接，使用的桥接网卡是VMware WorkStation 15.1 的VMnet8网卡，即NAT模式的网卡，不是eNSP上面的192.168.56.1的那个网卡（这个老是有问题，各种ping不同）。</p>
+<p><img src="https://resource.tinychen.com/blog/20190816/cpwtbe7uUvBF.png"></p>
+<p>接下来的eNSP内的桥接配置就十分简单了，添加一个UDP端口，然后添加一个网卡，再添加端口映射，就可以了。可以参考下面的这张图。</p>
+<p><img src="https://resource.tinychen.com/blog/20190816/TxJqKjGMH9CU.png"></p>
+<p>接着我们拖入一个设备，我这里使用的是华为的AC6605。</p>
+<p>给它配置一个IP地址然后测试一下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[AC6605]vlan batch 10</span><br><span class="line">Info: This operation may take a few seconds. Please wait for a moment...done.</span><br><span class="line">[AC6605]int Vlanif 10</span><br><span class="line">[AC6605-Vlanif10]ip address 192.168.59.2 24</span><br><span class="line">[AC6605-Vlanif10]q</span><br><span class="line">[AC6605]int GigabitEthernet 0&#x2F;0&#x2F;1</span><br><span class="line">[AC6605-GigabitEthernet0&#x2F;0&#x2F;1]port link-type access </span><br><span class="line">[AC6605-GigabitEthernet0&#x2F;0&#x2F;1]port default vlan 10</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190816/g43DkiCQiUkV.png"></p>
+<p>然后我们ping一下真机的网卡，能通就说明桥接成功了。</p>
+<p><img src="https://resource.tinychen.com/blog/20190816/ySXeeAXjIs3a.png"></p>
+<h1 id="3、配置SSH服务"><a href="#3、配置SSH服务" class="headerlink" title="3、配置SSH服务"></a>3、配置SSH服务</h1><p>首先进行系统视图，然后创建<code>rsa key</code>，全部选择默认，接着启动<code>stelnet</code>服务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">system-view </span><br><span class="line">rsa local-key-pair create</span><br><span class="line">stelnet server enable</span><br></pre></td></tr></table></figure>
+
+<p>接着配置用来远程的终端</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">system-view</span><br><span class="line">user-interface vty 0 4</span><br><span class="line">authentication-mode aaa</span><br><span class="line">protocol inbound ssh</span><br></pre></td></tr></table></figure>
+
+<p>然后创建用户并设置密码。然后启动ssh服务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">system-view </span><br><span class="line">aaa</span><br><span class="line">local-user tinychen password irreversible-cipher easy1234</span><br><span class="line">local-user tinychen privilege level 3</span><br><span class="line">local-user tinychen service-type ssh</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
+
+<p>最后回到系统视图下，设置ssh用户的登录方式为密码登录。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh user tinychen authentication-type password</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="4、保存配置"><a href="#4、保存配置" class="headerlink" title="4、保存配置"></a>4、保存配置</h1><p><strong>上面的所有配置如果不保存，当前的终端退出就会失效，所以要记得保存配置，方法是退到最开始的登录视图输入save就能保存了。</strong></p>
+<h1 id="5、def-sshLogin"><a href="#5、def-sshLogin" class="headerlink" title="5、def sshLogin"></a>5、<code>def sshLogin</code></h1><p>这里使用<code>netmiko</code>来对网络设备进行<code>ssh</code>登录，考虑到获取到的结果是包含了命令执行过程中的所有套接字，因此得到结果之后，先将其全部写入一个<code>debug.log</code>文件中保存记录，再将该次的操作结果写入<code>cache</code>文件用于下一步处理。</p>
+<h1 id="6、def-sort-to-csv"><a href="#6、def-sort-to-csv" class="headerlink" title="6、def sort_to_csv"></a>6、<code>def sort_to_csv</code></h1><p>对于输出的结果进行筛选处理，我们需要用到<code>re</code>库的正则表达式，以及<code>split()</code>，因为大多数的输出结果是以空格来分列的，因此使用<code>split()</code>来处理这些字符是最好不过的了。</p>
+<p>最后导出成<code>csv</code>文件而不是直接导出excel的<code>xlsx</code>文件则是因为<code>csv</code>相比<code>xlsx</code>更容易读取处理，转成其他格式也更加方便。</p>
+<h1 id="7、def-csv-to-xlsx-pd"><a href="#7、def-csv-to-xlsx-pd" class="headerlink" title="7、def csv_to_xlsx_pd"></a>7、<code>def csv_to_xlsx_pd</code></h1><p>这里就是使用<code>pandas</code>库来将上一步生成的<code>csv</code>转为<code>xlsx</code>文件了，非常的简单，需要的注意的就是添加的行名和列名参数。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190413-centos-install-python\" rel="bookmark">CentOS配置Python3开发环境</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180717-tiny-program-01\" rel="bookmark">小程序之HelloWorld</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180803-jdk-install\" rel="bookmark">JDK安装与环境变量配置</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180718-tiny-program-02\" rel="bookmark">小程序之app.json</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180824-androidstudio-install\" rel="bookmark">Android Studio配置</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/code/" rel="tag"># code</a>
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190801-k8s-del-n-add-node/" rel="prev" title="在k8s中删除和添加节点的方法">
+      <i class="fa fa-chevron-left"></i> 在k8s中删除和添加节点的方法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190821-thread-n-process/" rel="next" title="线程和进程的区别">
+      线程和进程的区别 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#0%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">0、概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E8%BD%AF%E4%BB%B6%E7%89%88%E6%9C%AC"><span class="nav-text">1、软件版本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E9%85%8D%E7%BD%AEeNSP%E6%A1%A5%E6%8E%A5%E7%9C%9F%E6%9C%BA"><span class="nav-text">2、配置eNSP桥接真机</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E9%85%8D%E7%BD%AESSH%E6%9C%8D%E5%8A%A1"><span class="nav-text">3、配置SSH服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E4%BF%9D%E5%AD%98%E9%85%8D%E7%BD%AE"><span class="nav-text">4、保存配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81def-sshLogin"><span class="nav-text">5、def sshLogin</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6%E3%80%81def-sort-to-csv"><span class="nav-text">6、def sort_to_csv</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7%E3%80%81def-csv-to-xlsx-pd"><span class="nav-text">7、def csv_to_xlsx_pd</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

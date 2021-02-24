@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="小七比较喜欢在宿舍和室友一起看电影或听音乐，且对画质和音质要求较高，一般都是观看1080P的蓝光REMUX电影（约30G一部）和听无损音质的音乐（30M一首），且观看设备较多（电视盒子、电脑、手机），再加上平时需要下载电影且自己有写博客的习惯，博客和一些其他的重要资料也需要备份，因此决定使用树莓派3B+、一块移动硬盘和一个路由器搭建一个宿舍多媒体中心来满足这些需求。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="树莓派3B+打造多媒体中心">
+<meta property="og:url" content="https://tinychen.com/20180910-raspi-multi-media-centre/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="小七比较喜欢在宿舍和室友一起看电影或听音乐，且对画质和音质要求较高，一般都是观看1080P的蓝光REMUX电影（约30G一部）和听无损音质的音乐（30M一首），且观看设备较多（电视盒子、电脑、手机），再加上平时需要下载电影且自己有写博客的习惯，博客和一些其他的重要资料也需要备份，因此决定使用树莓派3B+、一块移动硬盘和一个路由器搭建一个宿舍多媒体中心来满足这些需求。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/image001.png">
+<meta property="og:image" content="https://resource.tinychen.com/image002.png">
+<meta property="og:image" content="https://resource.tinychen.com/image003.png">
+<meta property="og:image" content="https://resource.tinychen.com/image004.png">
+<meta property="og:image" content="https://resource.tinychen.com/image005.png">
+<meta property="og:image" content="https://resource.tinychen.com/image006.png">
+<meta property="og:image" content="https://resource.tinychen.com/image007.png">
+<meta property="og:image" content="https://resource.tinychen.com/image008.png">
+<meta property="og:image" content="https://resource.tinychen.com/image009.png">
+<meta property="og:image" content="https://resource.tinychen.com/image010.png">
+<meta property="og:image" content="https://resource.tinychen.com/image011.png">
+<meta property="og:image" content="https://resource.tinychen.com/image012.png">
+<meta property="og:image" content="https://resource.tinychen.com/image013.png">
+<meta property="og:image" content="https://resource.tinychen.com/image014.png">
+<meta property="og:image" content="https://resource.tinychen.com/image015.png">
+<meta property="og:image" content="https://resource.tinychen.com/image016.png">
+<meta property="og:image" content="https://resource.tinychen.com/image017.png">
+<meta property="og:image" content="https://resource.tinychen.com/image018.png">
+<meta property="og:image" content="https://resource.tinychen.com/image019.png">
+<meta property="og:image" content="https://resource.tinychen.com/image020.png">
+<meta property="og:image" content="https://resource.tinychen.com/image021.png">
+<meta property="og:image" content="https://resource.tinychen.com/image022.png">
+<meta property="og:image" content="https://resource.tinychen.com/image023.png">
+<meta property="og:image" content="https://resource.tinychen.com/image024.png">
+<meta property="og:image" content="https://resource.tinychen.com/image025.png">
+<meta property="og:image" content="https://resource.tinychen.com/image026.png">
+<meta property="og:image" content="https://resource.tinychen.com/image027.png">
+<meta property="og:image" content="https://resource.tinychen.com/image028.png">
+<meta property="og:image" content="https://resource.tinychen.com/image029.png">
+<meta property="og:image" content="https://resource.tinychen.com/image030.png">
+<meta property="og:image" content="https://resource.tinychen.com/image031.png">
+<meta property="og:image" content="https://resource.tinychen.com/image032.png">
+<meta property="og:image" content="https://resource.tinychen.com/image033.png">
+<meta property="og:image" content="https://resource.tinychen.com/image034.png">
+<meta property="og:image" content="https://resource.tinychen.com/raspi%E6%9C%AA%E5%91%BD%E5%90%8D1546430991.png">
+<meta property="article:published_time" content="2018-09-10T07:00:00.000Z">
+<meta property="article:modified_time" content="2018-09-10T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="hardware">
+<meta property="article:tag" content="stu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/image001.png">
+
+<link rel="canonical" href="https://tinychen.com/20180910-raspi-multi-media-centre/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>树莓派3B+打造多媒体中心 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20180910-raspi-multi-media-centre/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          树莓派3B+打造多媒体中心
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-09-10 15:00:00" itemprop="dateCreated datePublished" datetime="2018-09-10T15:00:00+08:00">2018-09-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>17k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>15 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>小七比较喜欢在宿舍和室友一起看电影或听音乐，且对画质和音质要求较高，一般都是观看1080P的蓝光REMUX电影（约30G一部）和听无损音质的音乐（30M一首），且观看设备较多（电视盒子、电脑、手机），再加上平时需要下载电影且自己有写博客的习惯，博客和一些其他的重要资料也需要备份，因此决定使用树莓派3B+、一块移动硬盘和一个路由器搭建一个宿舍多媒体中心来满足这些需求。</p>
+<a id="more"></a>
+
+<hr>
+<h1 id="1、功能简介"><a href="#1、功能简介" class="headerlink" title="1、功能简介"></a>1、功能简介</h1><h2 id="1-1-Samba"><a href="#1-1-Samba" class="headerlink" title="1.1 Samba"></a>1.1 Samba</h2><p><strong>Samba是在Linux和UNIX系统上实现SMB协议的一个免费软件，由服务器及客户端程序构成。SMB（Server Messages Block，信息服务块）是一种在局域网上共享文件和打印机的一种通信协议，它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。</strong></p>
+<p>换言之，使用Samba可以在局域网内实现文件的共享操作，有些放在移动硬盘里面的文件需要用的时候就不用再插移动硬盘，在网上邻居处拷贝即可。</p>
+<h2 id="1-2-miniDLNA"><a href="#1-2-miniDLNA" class="headerlink" title="1.2 miniDLNA"></a>1.2 miniDLNA</h2><p><strong>DLNA的全称是DIGITAL LIVING NETWORK ALLIANCE(数字生活网络联盟)，DLNA并不是创造技术，而是形成一种解决的方案，一种大家可以遵守的规范。</strong></p>
+<p>所以，其选择的各种技术和协议都是当前所应用很广泛的技术和协议。miniDLNA可以实现音乐视频图片的局域网跨设备共享，且目前大多数智能手机、平板和电视均支持DLNA协议，在树莓派上安装miniDLNA服务后即可让处在同一局域网下的设备能轻松访问到树莓派上的影音资源。</p>
+<h2 id="1-3-下载机"><a href="#1-3-下载机" class="headerlink" title="1.3 下载机"></a>1.3 下载机</h2><p><strong>Transmission全称TransmissionBittorrent，由C开发而成（Mac OS上用的是Objective-C），硬件资源消耗极少，界面极度精简。</strong>支持包括Linux、BSD、Solaris、Mac OS X等多种操作系统，以及Networked Media Tank、WD MyBook、ReadyNAS、D-Link DNS-323 &amp; CH3SNAS、Synology等多种设备。支持GTK+、命令行、Web等多种界面。</p>
+<p><strong>Aria2支持Http、FTP、磁力链接和BT下载，可以和Transimission互补。</strong></p>
+<h2 id="1-4-自动备份"><a href="#1-4-自动备份" class="headerlink" title="1.4 自动备份"></a>1.4 自动备份</h2><p>数据备份是一个好习惯，但是总是会有遗忘或者是疏漏的情况出现，因此我们可以利用树莓派来实现自动备份。<strong>首先可以创建powershell命令实现备份功能，再另存为bat脚本文件，最后利用windows自带的定时任务功能和linux的定时执行命令操作来实现文件自动备份到树莓派上的操作。</strong></p>
+<h2 id="1-5-状态监控"><a href="#1-5-状态监控" class="headerlink" title="1.5 状态监控"></a>1.5 状态监控</h2><p>作为长时间运行的多媒体中心，树莓派的运行状态不能忽视，因此我们可以<strong>使用LCD1602显示屏</strong>连接树莓派，显示一些必要的信息来监控它的运行状态。<strong>（CPU，GPU, RAM, IP, TIME）</strong></p>
+<h1 id="2、安装操作"><a href="#2、安装操作" class="headerlink" title="2、安装操作"></a>2、安装操作</h1><h2 id="2-1-Samba"><a href="#2-1-Samba" class="headerlink" title="2.1 Samba"></a>2.1 Samba</h2><h3 id="2-1-1-安装ntfs-3g"><a href="#2-1-1-安装ntfs-3g" class="headerlink" title="2.1.1 安装ntfs-3g"></a>2.1.1 安装ntfs-3g</h3><p>树莓派接上移动硬盘后，会自动挂载到/media目录下，但是由于我的硬盘是ntfs格式，在树莓系统下只能读不能写，因此我需要安装ntfs-3g服务实现对移动硬盘的写操作，然后再设置开机自动挂载移动硬盘。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ntfs-3g</span><br><span class="line"><span class="comment">#安装ntfs -3g服务</span></span><br><span class="line"></span><br><span class="line">sudo mkdir /home/pi/share</span><br><span class="line"><span class="comment">#创建用于挂载移动硬盘的目录</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image001.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sudo umount /dev/sda1</span><br><span class="line"><span class="comment">#有些系统会自动挂载，因此先使用umont命令取消挂载移动硬盘</span></span><br><span class="line"><span class="comment">#后面的/dev/sda1是硬盘在此系统中对应的编号，可以使用 df -h命令查看，或者直接使用硬盘名代替</span></span><br><span class="line"></span><br><span class="line">sudo mount -t ntfs-3g /dev/sda1 /home/pi/share</span><br><span class="line"><span class="comment">#使用ntfs -3g挂载硬盘到指定目录</span></span><br><span class="line"></span><br><span class="line">sudo chmod 777 /home/pi/share</span><br><span class="line"><span class="comment">#使用chmod命令赋予目录读写权限</span></span><br><span class="line"></span><br><span class="line">sudo chmod 777 /home/pi</span><br><span class="line"><span class="comment">#目录的上级目录也需要赋予读写权限</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image002.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/fstab</span><br><span class="line"><span class="comment">#编辑/etc/fstab文件实现开机自动挂载硬盘</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在文件的最后一行加入下列代码</span></span><br><span class="line">/dev/sda1   /home/pi/share  ntfsdefaults0   0</span><br><span class="line"><span class="comment">#第一列是挂载的硬盘设备名或者uuid</span></span><br><span class="line"><span class="comment">#第二列是挂载的目录</span></span><br><span class="line"><span class="comment">#第三列是硬盘的文件系统类型</span></span><br><span class="line"><span class="comment">#第四列是文件系统的参数，defaults表示同时具有rw, suid, dev, exec, auto, nouser, async等默认参数的设置</span></span><br><span class="line"><span class="comment">#第五列是能否被dump备份命令作用：dump是一个用来作为备份的命令。通常这个参数的值为0或者1，0表示不备份</span></span><br><span class="line"><span class="comment">#第六列是是否检验扇区：开机的过程中，系统默认会以fsck检验我们系统是否为完整（clean）。0表示不要检验</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://resource.tinychen.com/image003.png"></p>
+<h3 id="2-1-2安装Samba"><a href="#2-1-2安装Samba" class="headerlink" title="2.1.2安装Samba"></a>2.1.2安装Samba</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line"><span class="comment">#首先更新一下系统源</span></span><br><span class="line"></span><br><span class="line">sudo apt-get install samba samba-common-bin</span><br><span class="line"><span class="comment">#安装samba-common版本</span></span><br><span class="line"><span class="comment">#samba-common：这个套件则主要提供了 SAMBA 的主要设定档(smb.conf) 、 smb.conf 语法检验的测试程序 ( testparm )等等；</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image004.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line"><span class="comment">#编辑配置文件，在文件中加入下列内容</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image005.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">security = share</span><br><span class="line"><span class="comment">#开放security权限等级为share</span></span><br><span class="line"><span class="comment">#share---不需要提供用户名和密码。</span></span><br><span class="line"><span class="comment">#user----需要提供用户名和密码，而且身份验证由 samba server 负责。</span></span><br><span class="line"><span class="comment">#server--需要提供用户名和密码，可指定其他机器(winNT/2000/XP)或另一台 samba server作身份验证。</span></span><br><span class="line"><span class="comment">#domain--需要提供用户名和密码，指定winNT/2000/XP域服务器作身份验证。</span></span><br><span class="line"></span><br><span class="line">[share] </span><br><span class="line"><span class="comment">#share为开启共享后的文件夹名</span></span><br><span class="line">comment = samba share   </span><br><span class="line"><span class="comment">#comment为备注，帮助理解这个共享文件夹</span></span><br><span class="line">path = /home/pi/share   </span><br><span class="line"><span class="comment">#path为共享的文件目录路径</span></span><br><span class="line">valid user = pi root   </span><br><span class="line"><span class="comment">#vaild users-----设定只有此名单内的用户才能访问共享资源(拒绝优先)(用户名/@组名)，这里设置为pi和root两个</span></span><br><span class="line">public = yes</span><br><span class="line"><span class="comment">#public----------是yes/否no公开共享，若为否则进行身份验证(只有当security = share 时此项才起作用)</span></span><br><span class="line">browseable = yes</span><br><span class="line"><span class="comment">#browseable------是yes/否no在浏览资源中显示共享目录，若为否则必须指定共享路径才能存取</span></span><br><span class="line">writable = yes  </span><br><span class="line"><span class="comment">#writable--------是yes/否no不以只读方式共享当与read only发生冲突时，无视read only</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image006.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a pi</span><br><span class="line"><span class="comment">#新建一个名为pi的用户，然后会提示输入两次密码</span></span><br><span class="line"><span class="comment">#smbpasswd命令的一些用法如下</span></span><br><span class="line"><span class="comment">#-a：向smbpasswd文件中添加用户；</span></span><br><span class="line"><span class="comment">#-c：指定samba的配置文件；</span></span><br><span class="line"><span class="comment">#-x：从smbpasswd文件中删除用户；</span></span><br><span class="line"><span class="comment">#-d：在smbpasswd文件中禁用指定的用户；</span></span><br><span class="line"><span class="comment">#-e：在smbpasswd文件中激活指定的用户；</span></span><br><span class="line"><span class="comment">#-n：将指定的用户的密码置空。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置完用户名和密码后输入下列命令激活用户</span></span><br><span class="line">sudo smbpasswd -e pi</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image007.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#然后重启samba服务即可生效</span></span><br><span class="line">sudo /etc/init.d/samba restart</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image008.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#最后还是要设置开机启动</span></span><br><span class="line">sudo vim /etc/rc.local</span><br><span class="line"></span><br><span class="line"><span class="comment">#在下面添加如下代码</span></span><br><span class="line">sudo /etc/init.d/samba restart</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image009.png"></p>
+<h3 id="2-1-3添加网络映射"><a href="#2-1-3添加网络映射" class="headerlink" title="2.1.3添加网络映射"></a>2.1.3添加网络映射</h3><p>添加网络映射主要是方便访问，可以将共享的samba文件夹添加到我的电脑中。首先右键我的电脑，点击添加网络映射/Add a network location<br><img src="https://resource.tinychen.com/image010.png"></p>
+<p>输入共享的文件夹路径，然后命名，最后即可完成。<br><img src="https://resource.tinychen.com/image011.png"></p>
+<p><img src="https://resource.tinychen.com/image012.png"></p>
+<p><img src="https://resource.tinychen.com/image013.png"></p>
+<h2 id="2-2-miniDLNA"><a href="#2-2-miniDLNA" class="headerlink" title="2.2 miniDLNA"></a>2.2 miniDLNA</h2><h3 id="2-2-1-安装miniDLNA"><a href="#2-2-1-安装miniDLNA" class="headerlink" title="2.2.1 安装miniDLNA"></a>2.2.1 安装miniDLNA</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line"><span class="comment">#先更新一下安装源</span></span><br><span class="line"></span><br><span class="line">sudo apt-get install minidlna</span><br><span class="line"><span class="comment">#安装minidlna</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image014.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装完后编辑配置文件</span></span><br><span class="line">sudo vim /etc/minidlna.conf</span><br><span class="line"></span><br><span class="line">media_dir=A,/home/pi/share/Music</span><br><span class="line"><span class="comment">#A表示这个目录是存放音乐的，当minidlna读到配置文件时，它会自动加载这个目录下的音乐文件 </span></span><br><span class="line">media_dir=P,/home/pi/share/Picture  </span><br><span class="line"><span class="comment">#P表示图片文件  </span></span><br><span class="line">media_dir=V,/home/pi/share/Video</span><br><span class="line"><span class="comment">#V表示视频文件</span></span><br><span class="line">db_dir=/home/pi/share/dlnadb</span><br><span class="line"><span class="comment">#配置minidlna的数库数据的存放目录 </span></span><br><span class="line">log_dir=/home/pi/share/dlnalog  </span><br><span class="line"><span class="comment">#配置日志目录 </span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image015.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#然后建立对应的文件夹并给予对应的权限</span></span><br><span class="line">sudo mkdir /home/pi/share/Music</span><br><span class="line">sudo mkdir /home/pi/share/Picture</span><br><span class="line">sudo mkdir /home/pi/share/Video</span><br><span class="line">sudo mkdir /home/pi/share/dlnadb</span><br><span class="line">sudo mkdir /home/pi/share/dlnalog</span><br><span class="line"></span><br><span class="line">sudo chmod 777 /home/pi/share/Music</span><br><span class="line">sudo chmod 777 /home/pi/share/Picture</span><br><span class="line">sudo chmod 777 /home/pi/share/Video</span><br><span class="line">sudo chmod 777 /home/pi/share/dlnadb</span><br><span class="line">sudo chmod 777 /home/pi/share/dlnalog</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用下列命令重启dlna服务</span></span><br><span class="line">sudo /etc/init.d/minidlna restart</span><br><span class="line"></span><br><span class="line"><span class="comment">#再使用下列命令查看dlna状态</span></span><br><span class="line">sudo /etc/init.d/minidlna status</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image016.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#最后修改开机启动文件</span></span><br><span class="line">sudo vim /etc/rc.local</span><br><span class="line"><span class="comment">#在后面加入以下代码</span></span><br><span class="line">sudo /etc/init.d/minidlna restart</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image017.png"></p>
+<h3 id="2-2-2-添加DLNA设备"><a href="#2-2-2-添加DLNA设备" class="headerlink" title="2.2.2 添加DLNA设备"></a>2.2.2 添加DLNA设备</h3><p>点击我的电脑左上方的流媒体</p>
+<p><img src="https://resource.tinychen.com/image018.png"></p>
+<p>系统会自动搜索到局域网中的支持DLNA的设备，点击添加，等待添加完成。</p>
+<p><img src="https://resource.tinychen.com/image019.png"></p>
+<p>打开支持DLNA或者是流媒体播放的软件，就能看到树莓派中的流媒体文件。</p>
+<p><img src="https://resource.tinychen.com/image020.png"></p>
+<h2 id="2-3-下载机"><a href="#2-3-下载机" class="headerlink" title="2.3 下载机"></a>2.3 下载机</h2><h3 id="2-3-1-安装transmission"><a href="#2-3-1-安装transmission" class="headerlink" title="2.3.1 安装transmission"></a>2.3.1 安装transmission</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line"><span class="comment">#先更新一下安装源</span></span><br><span class="line">sudo apt-get install transmission-daemon</span><br><span class="line"><span class="comment">#然后安装transmission</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://resource.tinychen.com/image021.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建目录用于存放下载文件</span></span><br><span class="line">sudo mkdir /home/pi/share/Downloads/Incomplete  </span><br><span class="line"><span class="comment">#存放未下载完成的文件</span></span><br><span class="line">sudo mkdir /home/pi/share/Downloads/complete</span><br><span class="line"><span class="comment">#存放下载完成的文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#更改文件所属组别</span></span><br><span class="line">sudo chgrp debian-transmission /home/pi/share/Downloads/Incomplete</span><br><span class="line">sudo chgrp debian-transmission /home/pi/share/Downloads/complete</span><br><span class="line"></span><br><span class="line"><span class="comment">#赋予文件夹权限</span></span><br><span class="line">sudo chmod 777 /home/pi/share/Downloads/Incomplete </span><br><span class="line">sudo chmod 777 /home/pi/share/Downloads/complete </span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image022.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#修改配置文件</span></span><br><span class="line">sudo vim /etc/transmission-daemon/settings.json</span><br><span class="line"></span><br><span class="line"><span class="comment">#找到以下项进行修改</span></span><br><span class="line"><span class="comment">#已完成的下载目录</span></span><br><span class="line"><span class="string">"download-dir"</span>: <span class="string">"/home/pi/share/Downloads/complete"</span>,</span><br><span class="line"><span class="comment">#未完成的下载目录</span></span><br><span class="line"><span class="string">"incomplete-dir"</span>: <span class="string">"/home/pi/share/Downloads/Incomplete"</span>,</span><br><span class="line"><span class="comment">#允许Web访问的白名单地址,这里要根据自己的路由器实际IP地址进行修改</span></span><br><span class="line"><span class="string">"rpc-whitelist"</span>: <span class="string">"192.168.8.*"</span>,</span><br><span class="line"><span class="comment">#登录的用户名</span></span><br><span class="line">“rpc-username”: “yourname”,</span><br><span class="line"><span class="comment">#登录的密码</span></span><br><span class="line">“rpc-password”: “yoursecretcode”,</span><br><span class="line"></span><br><span class="line"><span class="comment">#最后依次执行下面的两条命令完成重启服务</span></span><br><span class="line">sudo service transmission-daemon reload</span><br><span class="line">sudo service transmission-daemon restart</span><br></pre></td></tr></table></figure>
+
+<p>最后我们访问树莓派的IP再加上9091端口就能登录到下载界面。<br><img src="https://resource.tinychen.com/image023.png"></p>
+<p><img src="https://resource.tinychen.com/image024.png"></p>
+<p><img src="https://resource.tinychen.com/image025.png"></p>
+<h3 id="2-3-2-安装Aria2"><a href="#2-3-2-安装Aria2" class="headerlink" title="2.3.2 安装Aria2"></a>2.3.2 安装Aria2</h3><h4 id="2-3-2-1-安装Aria2"><a href="#2-3-2-1-安装Aria2" class="headerlink" title="2.3.2.1 安装Aria2"></a>2.3.2.1 安装Aria2</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line"><span class="comment">#更新一下安装源</span></span><br><span class="line">sudo apt-get install aria2</span><br><span class="line"><span class="comment">#安装aria2</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image026.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在/etc目录下创建aria2目录用来存放配置文件：</span></span><br><span class="line">sudo mkdir /etc/aria2</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建空白的aria2.session文件：</span></span><br><span class="line">sudo touch /etc/aria2/aria2.session</span><br><span class="line"></span><br><span class="line"><span class="comment">#创建配置文件</span></span><br><span class="line">sudo vim /etc/aria2/aria2.conf</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image027.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在该文件中输入以下内容：</span></span><br><span class="line"></span><br><span class="line">dir=/home/pi/share/Downloads</span><br><span class="line"><span class="comment">#设置文件下载的存放目录 </span></span><br><span class="line"><span class="built_in">disable</span>-ipv6=<span class="literal">true</span> </span><br><span class="line"><span class="comment">#打开rpc的目的是为了给web管理端用 </span></span><br><span class="line"><span class="built_in">enable</span>-rpc=<span class="literal">true</span> </span><br><span class="line">rpc-allow-origin-all=<span class="literal">true</span> </span><br><span class="line">rpc-listen-all=<span class="literal">true</span> </span><br><span class="line"><span class="comment">#rpc-listen-port=6800 </span></span><br><span class="line"><span class="built_in">continue</span>=<span class="literal">true</span> </span><br><span class="line">input-file=/etc/aria2/aria2.session </span><br><span class="line">save-session=/etc/aria2/aria2.session </span><br><span class="line">max-concurrent-downloads=3</span><br><span class="line"><span class="comment">#设置最大同时下载的任务数</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image028.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#启动aria2</span></span><br><span class="line">sudo aria2c --conf-path=/etc/aria2/aria2.conf</span><br><span class="line"></span><br><span class="line"><span class="comment">#如果没有提示任何错误信息，那就按ctrl+c停止上面的语句，转为后台运行：</span></span><br><span class="line"></span><br><span class="line">sudo aria2c --conf-path=/etc/aria2/aria2.conf －D</span><br><span class="line"></span><br><span class="line"><span class="comment">#同时其此句写到开机启动中，编辑/etc/rc.local</span></span><br><span class="line">sudo vim /etc/rc.local</span><br><span class="line"></span><br><span class="line"><span class="comment">#在文件的最后面添加这一行</span></span><br><span class="line">sudo aria2c --conf-path=/etc/aria2/aria2.conf －D</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image029.png"></p>
+<h4 id="2-3-2-2-安装appache"><a href="#2-3-2-2-安装appache" class="headerlink" title="2.3.2.2 安装appache"></a>2.3.2.2 安装appache</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装appach</span></span><br><span class="line">sudo apt-get install apache2</span><br><span class="line"></span><br><span class="line"><span class="comment">#修改/var/www/html的权限</span></span><br><span class="line">chmod 777 /var/www/html</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image030.png"></p>
+<p><img src="https://resource.tinychen.com/image031.png"></p>
+<h4 id="2-3-2-3-安装yaaw"><a href="#2-3-2-3-安装yaaw" class="headerlink" title="2.3.2.3 安装yaaw"></a>2.3.2.3 安装yaaw</h4><p>从<a target="_blank" rel="noopener" href="https://github.com/binux/yaaw%E4%B8%8B%E8%BD%BDyaaw%EF%BC%8C%E7%82%B9%E5%87%BB%E5%8F%B3%E4%B8%8B%E8%A7%92%E7%9A%84Download">https://github.com/binux/yaaw下载yaaw，点击右下角的Download</a> Zip, 下载后将解压后的文件夹内容拷贝到/var/www/html文件夹下。这时在浏览器内输入树莓派的IP，如果出现以下页面，则表示已经正常工作了。</p>
+<p><strong>点击左上方的add就可以进行下载。</strong></p>
+<p><img src="https://resource.tinychen.com/image032.png"></p>
+<h2 id="2-4-自动备份"><a href="#2-4-自动备份" class="headerlink" title="2.4 自动备份"></a>2.4 自动备份</h2><h3 id="2-4-1-创建自动执行文件"><a href="#2-4-1-创建自动执行文件" class="headerlink" title="2.4.1 创建自动执行文件"></a>2.4.1 创建自动执行文件</h3><p>使用记事本新建一个文件，里面输入下列代码，然后保存并更改文件名后缀为bat执行文件。</p>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off</span><br><span class="line"><span class="built_in">echo</span> Backuping D:\MyBlog\source\_posts---------&gt;<span class="number">192</span>.<span class="number">168</span>.<span class="number">8</span>.<span class="number">106</span>\share\Backup</span><br><span class="line"><span class="built_in">xcopy</span> "D:\MyBlog\source\_posts" "\\RASPBERRYPI\share\Backup" /e/I/d/h/r/y</span><br><span class="line"><span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<p>其中xcopy指令后两个路径分别为需要备份的文件夹路径和用于存放备份的文件夹路径，其余参数说明如下：</p>
+<p><strong>/e：拷贝所有子目录，包括空子目录；</strong></p>
+<p><strong>/I： 如果目标文件或目录不存在且拷贝的文件数多于一，则假设目标为目录；</strong></p>
+<p><strong>/d：只拷贝文件日期与在目标文件后的文件（即修改过的源文件）</strong></p>
+<p><strong>/h：同时拷贝隐藏文件和系统文件</strong></p>
+<p><strong>/r：拷贝并覆盖只读文件</strong></p>
+<p><strong>/y： 复制文件审核设置（不显示已有文件覆盖确认）</strong></p>
+<p>以上参数可以根据需要添加，推荐都加上最好。</p>
+<h3 id="2-4-2-设置定时任务"><a href="#2-4-2-设置定时任务" class="headerlink" title="2.4.2 设置定时任务"></a>2.4.2 设置定时任务</h3><p><strong>然后我们打开”控制面板”—“计划任务”添加计划任务，计划任务里的执行目标为该批处理文件，设定在什么时候执行则由个人决定。</strong></p>
+<p>执行效果示例如下：</p>
+<p><img src="https://resource.tinychen.com/image033.png"></p>
+<h2 id="2-5-状态监控"><a href="#2-5-状态监控" class="headerlink" title="2.5 状态监控"></a>2.5 状态监控</h2><p>按照针脚跳线连接好LCD1602和树莓派并调节好LCD1602的对比度，使用python编写代码，控制1602输出相关信息，具体代码如下：</p>
+<p><strong>将下面这个文件保存为lcd1602.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># based on code from lrvick and LiquidCrystal</span></span><br><span class="line"><span class="comment"># lrvic - https://github.com/lrvick/raspi-hd44780/blob/master/hd44780.py</span></span><br><span class="line"><span class="comment"># LiquidCrystal - https://github.com/arduino/Arduino/blob/master/libraries/LiquidCrystal/LiquidCrystal.cpp</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">lcd1602</span>:</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># commands</span></span><br><span class="line">LCD_CLEARDISPLAY= <span class="number">0x01</span></span><br><span class="line">LCD_RETURNHOME  = <span class="number">0x02</span></span><br><span class="line">LCD_ENTRYMODESET= <span class="number">0x04</span></span><br><span class="line">LCD_DISPLAYCONTROL  = <span class="number">0x08</span></span><br><span class="line">LCD_CURSORSHIFT = <span class="number">0x10</span></span><br><span class="line">LCD_FUNCTIONSET = <span class="number">0x20</span></span><br><span class="line">LCD_SETCGRAMADDR= <span class="number">0x40</span></span><br><span class="line">LCD_SETDDRAMADDR= <span class="number">0x80</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># flags for display entry mode</span></span><br><span class="line">LCD_ENTRYRIGHT  = <span class="number">0x00</span></span><br><span class="line">LCD_ENTRYLEFT   = <span class="number">0x02</span></span><br><span class="line">LCD_ENTRYSHIFTINCREMENT = <span class="number">0x01</span></span><br><span class="line">LCD_ENTRYSHIFTDECREMENT = <span class="number">0x00</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># flags for display on/off control</span></span><br><span class="line">LCD_DISPLAYON   = <span class="number">0x04</span></span><br><span class="line">LCD_DISPLAYOFF  = <span class="number">0x00</span></span><br><span class="line">LCD_CURSORON= <span class="number">0x02</span></span><br><span class="line">LCD_CURSOROFF   = <span class="number">0x00</span></span><br><span class="line">LCD_BLINKON = <span class="number">0x01</span></span><br><span class="line">LCD_BLINKOFF= <span class="number">0x00</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># flags for display/cursor shift</span></span><br><span class="line">LCD_DISPLAYMOVE = <span class="number">0x08</span></span><br><span class="line">LCD_CURSORMOVE  = <span class="number">0x00</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># flags for display/cursor shift</span></span><br><span class="line">LCD_DISPLAYMOVE = <span class="number">0x08</span></span><br><span class="line">LCD_CURSORMOVE  = <span class="number">0x00</span></span><br><span class="line">LCD_MOVERIGHT   = <span class="number">0x04</span></span><br><span class="line">LCD_MOVELEFT= <span class="number">0x00</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># flags for function set</span></span><br><span class="line">LCD_8BITMODE= <span class="number">0x10</span></span><br><span class="line">LCD_4BITMODE= <span class="number">0x00</span></span><br><span class="line">LCD_2LINE   = <span class="number">0x08</span></span><br><span class="line">LCD_1LINE   = <span class="number">0x00</span></span><br><span class="line">LCD_5x10DOTS= <span class="number">0x04</span></span><br><span class="line">LCD_5x8DOTS = <span class="number">0x00</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​<br>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, pin_rs=<span class="number">14</span>, pin_e=<span class="number">15</span>, pins_db=[<span class="number">17</span>, <span class="number">18</span>, <span class="number">27</span>, <span class="number">22</span>], GPIO = None</span>):</span></span><br><span class="line"><span class="comment"># Emulate the old behavior of using RPi.GPIO if we haven't been given</span></span><br><span class="line"><span class="comment"># an explicit GPIO interface to use</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> GPIO:</span><br><span class="line"><span class="keyword">import</span> RPi.GPIO <span class="keyword">as</span> GPIO</span><br><span class="line">self.GPIO = GPIO</span><br><span class="line">self.pin_rs = pin_rs</span><br><span class="line">self.pin_e = pin_e</span><br><span class="line">self.pins_db = pins_db</span><br><span class="line"> </span><br><span class="line">self.GPIO.setmode(GPIO.BCM)</span><br><span class="line">self.GPIO.setwarnings(<span class="literal">False</span>)</span><br><span class="line">self.GPIO.setup(self.pin_e, GPIO.OUT)</span><br><span class="line">self.GPIO.setup(self.pin_rs, GPIO.OUT)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> pin <span class="keyword">in</span> self.pins_db:</span><br><span class="line">self.GPIO.setup(pin, GPIO.OUT)</span><br><span class="line"> </span><br><span class="line">self.write4bits(<span class="number">0x33</span>) <span class="comment"># initialization</span></span><br><span class="line">self.write4bits(<span class="number">0x32</span>) <span class="comment"># initialization</span></span><br><span class="line">self.write4bits(<span class="number">0x28</span>) <span class="comment"># 2 line 5x7 matrix</span></span><br><span class="line">self.write4bits(<span class="number">0x0C</span>) <span class="comment"># turn cursor off 0x0E to enable cursor</span></span><br><span class="line">self.write4bits(<span class="number">0x06</span>) <span class="comment"># shift cursor right</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol = self.LCD_DISPLAYON | self.LCD_CURSOROFF | self.LCD_BLINKOFF</span><br><span class="line"> </span><br><span class="line">self.displayfunction = self.LCD_4BITMODE | self.LCD_1LINE | self.LCD_5x8DOTS</span><br><span class="line">self.displayfunction |= self.LCD_2LINE</span><br><span class="line"> </span><br><span class="line"><span class="string">""" Initialize to default text direction (for romance languages) """</span></span><br><span class="line">self.displaymode =  self.LCD_ENTRYLEFT | self.LCD_ENTRYSHIFTDECREMENT</span><br><span class="line">self.write4bits(self.LCD_ENTRYMODESET | self.displaymode) <span class="comment">#  set the entry mode</span></span><br><span class="line"> </span><br><span class="line">self.clear()</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">begin</span>(<span class="params">self, cols, lines</span>):</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> (lines &gt; <span class="number">1</span>):</span><br><span class="line">self.numlines = lines</span><br><span class="line">self.displayfunction |= self.LCD_2LINE</span><br><span class="line">self.currline = <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">home</span>(<span class="params">self</span>):</span></span><br><span class="line"> </span><br><span class="line">self.write4bits(self.LCD_RETURNHOME) <span class="comment"># set cursor position to zero</span></span><br><span class="line">self.delayMicroseconds(<span class="number">3000</span>) <span class="comment"># this command takes a long time!</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">clear</span>(<span class="params">self</span>):</span></span><br><span class="line"> </span><br><span class="line">self.write4bits(self.LCD_CLEARDISPLAY) <span class="comment"># command to clear display</span></span><br><span class="line">self.delayMicroseconds(<span class="number">3000</span>)<span class="comment"># 3000 microsecond sleep, clearing the display takes a long time</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">setCursor</span>(<span class="params">self, col, row</span>):</span></span><br><span class="line"> </span><br><span class="line">self.row_offsets = [ <span class="number">0x00</span>, <span class="number">0x40</span>, <span class="number">0x14</span>, <span class="number">0x54</span> ]</span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> ( row &gt; self.numlines ): </span><br><span class="line">row = self.numlines - <span class="number">1</span> <span class="comment"># we count rows starting w/0</span></span><br><span class="line"> </span><br><span class="line">self.write4bits(self.LCD_SETDDRAMADDR | (col + self.row_offsets[row]))</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">noDisplay</span>(<span class="params">self</span>):</span> </span><br><span class="line"><span class="string">""" Turn the display off (quickly) """</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol &amp;= ~self.LCD_DISPLAYON</span><br><span class="line">self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">display</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" Turn the display on (quickly) """</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol |= self.LCD_DISPLAYON</span><br><span class="line">self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">noCursor</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" Turns the underline cursor on/off """</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol &amp;= ~self.LCD_CURSORON</span><br><span class="line">self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cursor</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" Cursor On """</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol |= self.LCD_CURSORON</span><br><span class="line">self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">noBlink</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" Turn on and off the blinking cursor """</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol &amp;= ~self.LCD_BLINKON</span><br><span class="line">self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">noBlink</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" Turn on and off the blinking cursor """</span></span><br><span class="line"> </span><br><span class="line">self.displaycontrol &amp;= ~self.LCD_BLINKON</span><br><span class="line">self.write4bits(self.LCD_DISPLAYCONTROL | self.displaycontrol)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">DisplayLeft</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" These commands scroll the display without changing the RAM """</span></span><br><span class="line"> </span><br><span class="line">self.write4bits(self.LCD_CURSORSHIFT | self.LCD_DISPLAYMOVE | self.LCD_MOVELEFT)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">scrollDisplayRight</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" These commands scroll the display without changing the RAM """</span></span><br><span class="line"> </span><br><span class="line">self.write4bits(self.LCD_CURSORSHIFT | self.LCD_DISPLAYMOVE | self.LCD_MOVERIGHT);</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leftToRight</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" This is for text that flows Left to Right """</span></span><br><span class="line"> </span><br><span class="line">self.displaymode |= self.LCD_ENTRYLEFT</span><br><span class="line">self.write4bits(self.LCD_ENTRYMODESET | self.displaymode);</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rightToLeft</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" This is for text that flows Right to Left """</span></span><br><span class="line">self.displaymode &amp;= ~self.LCD_ENTRYLEFT</span><br><span class="line">self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">autoscroll</span>(<span class="params">self</span>):</span></span><br><span class="line"><span class="string">""" This will 'right justify' text from the cursor """</span></span><br><span class="line"> </span><br><span class="line">self.displaymode |= self.LCD_ENTRYSHIFTINCREMENT</span><br><span class="line">self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">noAutoscroll</span>(<span class="params">self</span>):</span> </span><br><span class="line"><span class="string">""" This will 'left justify' text from the cursor """</span></span><br><span class="line"> </span><br><span class="line">self.displaymode &amp;= ~self.LCD_ENTRYSHIFTINCREMENT</span><br><span class="line">self.write4bits(self.LCD_ENTRYMODESET | self.displaymode)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write4bits</span>(<span class="params">self, bits, char_mode=False</span>):</span></span><br><span class="line"><span class="string">""" Send command to LCD """</span></span><br><span class="line"> </span><br><span class="line">self.delayMicroseconds(<span class="number">1000</span>) <span class="comment"># 1000 microsecond sleep</span></span><br><span class="line"> </span><br><span class="line">bits=bin(bits)[<span class="number">2</span>:].zfill(<span class="number">8</span>)</span><br><span class="line"> </span><br><span class="line">self.GPIO.output(self.pin_rs, char_mode)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> pin <span class="keyword">in</span> self.pins_db:</span><br><span class="line">self.GPIO.output(pin, <span class="literal">False</span>)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">4</span>):</span><br><span class="line"><span class="keyword">if</span> bits[i] == <span class="string">"1"</span>:</span><br><span class="line">self.GPIO.output(self.pins_db[::<span class="number">-1</span>][i], <span class="literal">True</span>)</span><br><span class="line"> </span><br><span class="line">self.pulseEnable()</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> pin <span class="keyword">in</span> self.pins_db:</span><br><span class="line">self.GPIO.output(pin, <span class="literal">False</span>)</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">4</span>,<span class="number">8</span>):</span><br><span class="line"><span class="keyword">if</span> bits[i] == <span class="string">"1"</span>:</span><br><span class="line">self.GPIO.output(self.pins_db[::<span class="number">-1</span>][i<span class="number">-4</span>], <span class="literal">True</span>)</span><br><span class="line"> </span><br><span class="line">self.pulseEnable()</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delayMicroseconds</span>(<span class="params">self, microseconds</span>):</span></span><br><span class="line">seconds = microseconds / float(<span class="number">1000000</span>) <span class="comment"># divide microseconds by 1 million for seconds</span></span><br><span class="line">sleep(seconds)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pulseEnable</span>(<span class="params">self</span>):</span></span><br><span class="line">self.GPIO.output(self.pin_e, <span class="literal">False</span>)</span><br><span class="line">self.delayMicroseconds(<span class="number">1</span>)   <span class="comment"># 1 microsecond pause - enable pulse must be &gt; 450ns </span></span><br><span class="line">self.GPIO.output(self.pin_e, <span class="literal">True</span>)</span><br><span class="line">self.delayMicroseconds(<span class="number">1</span>)   <span class="comment"># 1 microsecond pause - enable pulse must be &gt; 450ns </span></span><br><span class="line">self.GPIO.output(self.pin_e, <span class="literal">False</span>)</span><br><span class="line">self.delayMicroseconds(<span class="number">1</span>)   <span class="comment"># commands need &gt; 37us to settle</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">message</span>(<span class="params">self, text</span>):</span></span><br><span class="line"><span class="string">""" Send string to LCD、Newline wraps to second line"""</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> char <span class="keyword">in</span> text:</span><br><span class="line"><span class="keyword">if</span> char == <span class="string">'\n'</span>:</span><br><span class="line">self.write4bits(<span class="number">0xC0</span>) <span class="comment"># next line</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">self.write4bits(ord(char),<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+
+<p>​     </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line"> </span><br><span class="line">lcd = lcd1602()</span><br><span class="line">lcd.clear()</span><br><span class="line">lcd.message(<span class="string">"hello world!"</span>)</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>再将这个文件保存为1602.py</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">from</span> lcd1602 <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> commands</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_cpu_temp</span>():</span></span><br><span class="line">tmp = open(<span class="string">'/sys/class/thermal/thermal_zone0/temp'</span>)</span><br><span class="line">cpu = tmp.read()</span><br><span class="line">tmp.close()</span><br><span class="line"><span class="keyword">return</span> <span class="string">'&#123;:.2f&#125;'</span>.format( float(cpu)/<span class="number">1000</span> ) + <span class="string">' C'</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_gpu_temp</span>():</span></span><br><span class="line">tmp = commands.getoutput(<span class="string">'vcgencmd measure_temp|awk -F= \'&#123;print $2&#125;\''</span>).replace(<span class="string">'\'C'</span>,<span class="string">''</span>)</span><br><span class="line">gpu = float(tmp)</span><br><span class="line"><span class="keyword">return</span> <span class="string">'&#123;:.2f&#125;'</span>.format( gpu ) + <span class="string">' C'</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_time_now</span>():</span></span><br><span class="line"><span class="keyword">return</span> datetime.now().strftime(<span class="string">'%H:%M:%S\n   %Y-%m-%d'</span>)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_ip_info</span>():</span></span><br><span class="line">ip= commands.getoutput(<span class="string">'ifconfig eth0 | grep inet | awk \'&#123; print $2 &#125;\' | awk \'NR==1\''</span>)</span><br><span class="line"><span class="keyword">return</span> <span class="string">'Ethernet IP:\n'</span> + ip </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_mem_info</span>():</span></span><br><span class="line">total= commands.getoutput(<span class="string">'free -m|grep Mem:|awk \'&#123;print $2&#125;\''</span>)  </span><br><span class="line">free= commands.getoutput(<span class="string">'free -m|grep Mem:|awk \'&#123;print $4&#125;\''</span>)</span><br><span class="line"><span class="keyword">return</span> <span class="string">'MEM:\n'</span> + free +<span class="string">'/'</span>+ total +<span class="string">'M'</span></span><br><span class="line"> </span><br><span class="line">lcd = lcd1602()</span><br><span class="line">lcd.clear()</span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line"> </span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">lcd.clear()</span><br><span class="line">lcd.message( get_ip_info() )</span><br><span class="line">sleep(<span class="number">5</span>)</span><br><span class="line"> </span><br><span class="line">lcd.clear()</span><br><span class="line">lcd.message( get_time_now() )</span><br><span class="line">sleep(<span class="number">5</span>)</span><br><span class="line"> </span><br><span class="line">lcd.clear()</span><br><span class="line">lcd.message( get_mem_info() )</span><br><span class="line">sleep(<span class="number">5</span>)</span><br><span class="line"> </span><br><span class="line">lcd.clear()</span><br><span class="line">lcd.message( <span class="string">'CPU: '</span> + get_cpu_temp()+<span class="string">'\n'</span> )</span><br><span class="line">lcd.message( <span class="string">'GPU: '</span> + get_gpu_temp() )</span><br><span class="line">sleep(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>最后将两个文件保存到同一个目录下面，然后编辑文件设置开机启动即可让LCD1602循环显示信息。</strong></p>
+<p><strong>我将这两个文件保存到/home/pi/1602目录下</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#编辑配置文件</span></span><br><span class="line">sudo vim /etc/rc.local</span><br><span class="line"><span class="comment">#将此命令添加到文件最后</span></span><br><span class="line">sudo python /home/pi/1602/1602.py</span><br></pre></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/image034.png"></p>
+<h1 id="3、爬虫服务器"><a href="#3、爬虫服务器" class="headerlink" title="3、爬虫服务器"></a>3、爬虫服务器</h1><h2 id="3-1-Python源码示例"><a href="#3-1-Python源码示例" class="headerlink" title="3.1 Python源码示例"></a>3.1 Python源码示例</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#encoding='UTF-8'</span></span><br><span class="line"><span class="keyword">from</span> urllib <span class="keyword">import</span> request</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> timedelta</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> lxml <span class="keyword">import</span> etree</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> csv</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取数据，根据url获取</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_data</span>(<span class="params">url</span>):</span></span><br><span class="line">headers = &#123;</span><br><span class="line"><span class="string">'User-Agent'</span>: <span class="string">'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36'</span></span><br><span class="line">&#125;</span><br><span class="line">req = request.Request(url, headers=headers)</span><br><span class="line">response = request.urlopen(req)</span><br><span class="line"><span class="keyword">if</span> response.getcode() == <span class="number">200</span>:</span><br><span class="line"><span class="keyword">return</span> response.read()</span><br><span class="line"><span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 处理数据</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">parse_data</span>(<span class="params">html</span>):</span></span><br><span class="line">data = json.loads(html)[<span class="string">'cmts'</span>]  <span class="comment"># 将str转换为json</span></span><br><span class="line">comments = []</span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> data:</span><br><span class="line">comment = &#123;</span><br><span class="line"><span class="string">'id'</span>: item[<span class="string">'id'</span>],</span><br><span class="line"><span class="comment">#'nickName': item['nickName'],</span></span><br><span class="line"><span class="string">'cityName'</span>: item[<span class="string">'cityName'</span>] <span class="keyword">if</span> <span class="string">'cityName'</span> <span class="keyword">in</span> item <span class="keyword">else</span> <span class="string">''</span>,  <span class="comment"># 处理cityName不存在的情况</span></span><br><span class="line"><span class="comment"># 处理评论内容换行的情况,并且将逗号替换为空格</span></span><br><span class="line"><span class="string">'content'</span>: item[<span class="string">'content'</span>].replace(<span class="string">'”'</span>,<span class="string">' '</span>).replace(<span class="string">'“'</span>,<span class="string">' '</span>).replace(<span class="string">','</span>,<span class="string">' '</span>).replace(<span class="string">'，'</span>,<span class="string">' '</span>).replace(<span class="string">'\n'</span>, <span class="string">' '</span>),  </span><br><span class="line"><span class="string">'score'</span>: item[<span class="string">'score'</span>],</span><br><span class="line"><span class="string">'startTime'</span>: item[<span class="string">'startTime'</span>]</span><br><span class="line">&#125;</span><br><span class="line">comments.append(comment)</span><br><span class="line"><span class="keyword">return</span> comments</span><br><span class="line"></span><br><span class="line"><span class="comment"># 存储数据，存储到文本文件</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">savetoCSV</span>():</span></span><br><span class="line"><span class="comment">#设置指定时间向前爬取评论数据或者从特定的时间段爬取评论</span></span><br><span class="line"><span class="comment">#start_time = '2015-05-12 02:40:34'</span></span><br><span class="line">start_time = datetime.now().strftime(<span class="string">'%Y-%m-%d %H:%M:%S'</span>)  <span class="comment"># 获取当前时间，从当前时间向前获取</span></span><br><span class="line"><span class="comment">#设置爬取评论数据的截至时间</span></span><br><span class="line">end_time = <span class="string">'2015-05-01 00:00:00'</span></span><br><span class="line"><span class="keyword">while</span> start_time &gt; end_time:</span><br><span class="line">url = <span class="string">'http://m.maoyan.com/mmdb/comments/movie/248170.json?_v_=yes&amp;offset=0&amp;startTime='</span> + start_time.replace(<span class="string">' '</span>, <span class="string">'%20'</span>)</span><br><span class="line">html = <span class="literal">None</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="string">问题：当请求过于频繁时，服务器会拒绝连接，实际上是服务器的反爬虫策略</span></span><br><span class="line"><span class="string">解决：1.在每个请求间增加延时0.1秒，尽量减少请求被拒绝</span></span><br><span class="line"><span class="string"> 2.如果被拒绝，则0.5秒后重试</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">html = get_data(url)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">time.sleep(<span class="number">0.5</span>)</span><br><span class="line">html = get_data(url)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">time.sleep(<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line">comments = parse_data(html)</span><br><span class="line">print(comments)</span><br><span class="line">start_time = comments[<span class="number">14</span>][<span class="string">'startTime'</span>]  <span class="comment"># 获得末尾评论的时间</span></span><br><span class="line">start_time = datetime.strptime(start_time, <span class="string">'%Y-%m-%d %H:%M:%S'</span>) + timedelta(seconds=<span class="number">-1</span>)  <span class="comment"># 转换为datetime类型，减1秒，避免获取到重复数据</span></span><br><span class="line">start_time = datetime.strftime(start_time, <span class="string">'%Y-%m-%d %H:%M:%S'</span>)  <span class="comment"># 转换为str</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​    </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> comments:</span><br><span class="line"><span class="keyword">with</span> open(<span class="string">'test3.csv'</span>, <span class="string">'a'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> f:</span><br><span class="line">f.write(str(item[<span class="string">'id'</span>]) + <span class="string">','</span> + item[<span class="string">'startTime'</span>].strip(<span class="string">'[\''</span>).split(<span class="string">' '</span>)[<span class="number">0</span>] + <span class="string">','</span> + str(item[<span class="string">'score'</span>]) + <span class="string">','</span> + item[<span class="string">'cityName'</span>] + <span class="string">','</span> + str(item[<span class="string">'content'</span>]) + <span class="string">'\n'</span>)</span><br><span class="line"><span class="comment">#f.write(str(item['id'])+','+item['nickName'] + ',' + item['cityName'] + ',' + item['content'] + ',' + str(item['score'])+ ',' + item['startTime'] + '\n')</span></span><br></pre></td></tr></table></figure>
+
+
+<p>​<br>​    </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">html = get_data(<span class="string">'http://m.maoyan.com/mmdb/comments/movie/248170.json?_v_=yes&amp;offset=0&amp;startTime=2018-12-31%2022%3A25%3A03'</span>)</span><br><span class="line">comments = parse_data(html)</span><br><span class="line">print(comments)</span><br><span class="line">savetoCSV()</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-效果展示"><a href="#3-2-效果展示" class="headerlink" title="3.2 效果展示"></a>3.2 效果展示</h2><p><img src="https://resource.tinychen.com/raspi%E6%9C%AA%E5%91%BD%E5%90%8D1546430991.png"></p>
+<h1 id="4、写在最后"><a href="#4、写在最后" class="headerlink" title="4、写在最后"></a>4、写在最后</h1><p><strong>重启之后就可以尽情地享用树莓派打造的多媒体中心了，虽然树莓派3B+只有USB2.0接口，但是只要搭配上百兆lan口的路由器，局域网内流畅观看40G左右大小的一部电影还是毫无问题的。</strong></p>
+<p>如果有更高的需求，还是建议上更好的路由器和NAS吧。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170418-fat32-to-ntfs\" rel="bookmark">FAT32无损转换为NTFS</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170503-chkdsk\" rel="bookmark">CHKDSK使用方法</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170504-pagefiles\" rel="bookmark">虚拟内存</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170502-disable-disk-onboot-check\" rel="bookmark">关闭硬盘开机自检</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20170512-disk-a-b-introduction\" rel="bookmark">电脑的AB盘去哪了？</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/hardware/" rel="tag"># hardware</a>
+              <a href="/tags/stu/" rel="tag"># stu</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20180824-androidstudio-install/" rel="prev" title="Android Studio配置">
+      <i class="fa fa-chevron-left"></i> Android Studio配置
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20181109-ubuntu-change-time/" rel="next" title="Ubuntu18.04与Win10时间不一致">
+      Ubuntu18.04与Win10时间不一致 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81%E5%8A%9F%E8%83%BD%E7%AE%80%E4%BB%8B"><span class="nav-text">1、功能简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Samba"><span class="nav-text">1.1 Samba</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-miniDLNA"><span class="nav-text">1.2 miniDLNA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E4%B8%8B%E8%BD%BD%E6%9C%BA"><span class="nav-text">1.3 下载机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD"><span class="nav-text">1.4 自动备份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-%E7%8A%B6%E6%80%81%E7%9B%91%E6%8E%A7"><span class="nav-text">1.5 状态监控</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81%E5%AE%89%E8%A3%85%E6%93%8D%E4%BD%9C"><span class="nav-text">2、安装操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Samba"><span class="nav-text">2.1 Samba</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-%E5%AE%89%E8%A3%85ntfs-3g"><span class="nav-text">2.1.1 安装ntfs-3g</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2%E5%AE%89%E8%A3%85Samba"><span class="nav-text">2.1.2安装Samba</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-3%E6%B7%BB%E5%8A%A0%E7%BD%91%E7%BB%9C%E6%98%A0%E5%B0%84"><span class="nav-text">2.1.3添加网络映射</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-miniDLNA"><span class="nav-text">2.2 miniDLNA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-%E5%AE%89%E8%A3%85miniDLNA"><span class="nav-text">2.2.1 安装miniDLNA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-%E6%B7%BB%E5%8A%A0DLNA%E8%AE%BE%E5%A4%87"><span class="nav-text">2.2.2 添加DLNA设备</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E4%B8%8B%E8%BD%BD%E6%9C%BA"><span class="nav-text">2.3 下载机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-%E5%AE%89%E8%A3%85transmission"><span class="nav-text">2.3.1 安装transmission</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-%E5%AE%89%E8%A3%85Aria2"><span class="nav-text">2.3.2 安装Aria2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-1-%E5%AE%89%E8%A3%85Aria2"><span class="nav-text">2.3.2.1 安装Aria2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-2-%E5%AE%89%E8%A3%85appache"><span class="nav-text">2.3.2.2 安装appache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-3-%E5%AE%89%E8%A3%85yaaw"><span class="nav-text">2.3.2.3 安装yaaw</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD"><span class="nav-text">2.4 自动备份</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-1-%E5%88%9B%E5%BB%BA%E8%87%AA%E5%8A%A8%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6"><span class="nav-text">2.4.1 创建自动执行文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-2-%E8%AE%BE%E7%BD%AE%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-text">2.4.2 设置定时任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-%E7%8A%B6%E6%80%81%E7%9B%91%E6%8E%A7"><span class="nav-text">2.5 状态监控</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E7%88%AC%E8%99%AB%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">3、爬虫服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-Python%E6%BA%90%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-text">3.1 Python源码示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E6%95%88%E6%9E%9C%E5%B1%95%E7%A4%BA"><span class="nav-text">3.2 效果展示</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-text">4、写在最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

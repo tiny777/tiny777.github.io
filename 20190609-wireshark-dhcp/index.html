@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="使用Wireshark抓包分析DHCP过程，并分析在同一广播域中存在多个DHCP服务器的产生的路由干扰过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wireshark抓包分析DHCP以及路由干扰过程">
+<meta property="og:url" content="https://tinychen.com/20190609-wireshark-dhcp/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="使用Wireshark抓包分析DHCP过程，并分析在同一广播域中存在多个DHCP服务器的产生的路由干扰过程。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/dogAUe1Ba8D2.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/4wSvnifDgxaP.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/CDdjQgrGbqac.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/hytGlrtwYwlT.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/GrScXGYroTPm.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/hNKn0hoQPFaU.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/XvL5NVjcpFtO.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/wYNVDCL6RDrJ.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190609/bOfKYRIT14yC.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/gW8jaa3BavbB.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/gJ4zNuXFF8Tn.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/0h17nDkVa0yE.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/srlcaXxu8jT1.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/R3t0oJPxuuvv.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/S3Scm4vea5l1.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/sf6I5auVsS32.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/wT71TP3iEOGS.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/wTONY9Wj3T9b.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/B4cjmSsyBsVz.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/4ALNec1bheRj.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/uPIQx7MjUTrt.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/URDqGmgJtBk0.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/FEQGPHjUltML.png">
+<meta property="og:image" content="https://resource.tinychen.com/blog/20190610/BfscX3u634RB.png">
+<meta property="article:published_time" content="2019-06-09T07:00:00.000Z">
+<meta property="article:modified_time" content="2019-06-09T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="stu">
+<meta property="article:tag" content="network">
+<meta property="article:tag" content="wireshark">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/blog/20190609/dogAUe1Ba8D2.png">
+
+<link rel="canonical" href="https://tinychen.com/20190609-wireshark-dhcp/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Wireshark抓包分析DHCP以及路由干扰过程 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20190609-wireshark-dhcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Wireshark抓包分析DHCP以及路由干扰过程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-06-09 15:00:00" itemprop="dateCreated datePublished" datetime="2019-06-09T15:00:00+08:00">2019-06-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>8.5k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>8 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>使用Wireshark抓包分析DHCP过程，并分析在同一广播域中存在多个DHCP服务器的产生的路由干扰过程。</p>
+<a id="more"></a>
+
+<h1 id="1、DHCP简介"><a href="#1、DHCP简介" class="headerlink" title="1、DHCP简介"></a>1、DHCP简介</h1><p><strong>动态主机设置协议（英语：Dynamic Host Configuration Protocol，DHCP）</strong>是一个局域网的网络协议，使用<strong>UDP协议</strong>工作，主要有两个用途：用于内部网或网络服务供应商自动分配IP地址；给用户用于内部网管理员作为对所有计算机作中央管理的手段。</p>
+<p>DHCP有三种机制分配IP地址：</p>
+<ol>
+<li>自动分配方式（Automatic Allocation），DHCP服务器为主机指定一个永久性的IP地址，一旦DHCP客户端第一次成功从DHCP服务器端租用到IP地址后，就可以永久性的使用该地址。</li>
+<li>动态分配方式（Dynamic Allocation），DHCP服务器给主机指定一个具有时间限制的IP地址，时间到期或主机明确表示放弃该地址时，该地址可以被其他主机使用。</li>
+<li>手工分配方式（Manual Allocation），客户端的IP地址是由网络管理员指定的，DHCP服务器只是将指定的IP地址告诉客户端主机。</li>
+</ol>
+<p><strong>三种地址分配方式中，只有动态分配可以重复使用客户端不再需要的地址。</strong></p>
+<h1 id="2、DHCP状态机"><a href="#2、DHCP状态机" class="headerlink" title="2、DHCP状态机"></a>2、DHCP状态机</h1><h2 id="2-0-DHCP状态机"><a href="#2-0-DHCP状态机" class="headerlink" title="2.0 DHCP状态机"></a>2.0 DHCP状态机</h2><p>如下图所示是比较常见的DHCP状态机，下面我们结合Wireshark抓到的数据包来进行分析。</p>
+<p><img src="https://resource.tinychen.com/blog/20190609/dogAUe1Ba8D2.png"></p>
+<h3 id="2-0-1-如何抓取数据包"><a href="#2-0-1-如何抓取数据包" class="headerlink" title="2.0.1 如何抓取数据包"></a>2.0.1 如何抓取数据包</h3><p>在windows下，使网卡重新发出DHCP请求获取IP地址比较简单的方法就是使用<code>ipconfig</code>命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 释放IP地址</span></span><br><span class="line">ipconfig -realease</span><br><span class="line"><span class="comment"># 重新获取IP地址</span></span><br><span class="line">ipconfig -renew</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是要确定网卡配置中是使用了DHCP而不是手动指定IP地址。</p>
+<p><img src="https://resource.tinychen.com/blog/20190609/4wSvnifDgxaP.png"></p>
+<h3 id="2-0-2-一次DHCP过程的四个数据包"><a href="#2-0-2-一次DHCP过程的四个数据包" class="headerlink" title="2.0.2 一次DHCP过程的四个数据包"></a>2.0.2 一次DHCP过程的四个数据包</h3><p>正常来说，一次DHCP过程只需要上面状态机的前四步，后面的续约是在DHCP的租期到达1/2和7/8的时候进行的。</p>
+<p><img src="https://resource.tinychen.com/blog/20190609/CDdjQgrGbqac.png"></p>
+<p>打开任意一个数据包，我们可以看到wireshark已经把里面的数据分层显示。</p>
+<p><img src="https://resource.tinychen.com/blog/20190609/hytGlrtwYwlT.png"></p>
+<p>从上到下依次为物理层、数据链路层、网络层、传输层和应用层。</p>
+<p>接下来我们对这四个数据包进行分析。</p>
+<h2 id="2-1-发现阶段——DHCP-Discover（广播）"><a href="#2-1-发现阶段——DHCP-Discover（广播）" class="headerlink" title="2.1 发现阶段——DHCP Discover（广播）"></a>2.1 发现阶段——DHCP Discover（广播）</h2><h3 id="2-1-1-DHCP-Discover-理论分析"><a href="#2-1-1-DHCP-Discover-理论分析" class="headerlink" title="2.1.1 DHCP Discover 理论分析"></a>2.1.1 DHCP Discover 理论分析</h3><p>DHCP Discover（广播）是第一个阶段即DHCP客户端寻找DHCP服务端的阶段。</p>
+<p>由于DHCP服务端的IP地址等信息对于DHCP客户端来说是未知，此时就需要使用广播的方式进行发送消息，基于UDP的源端口号68，目的端口号67来发送DHCP Discover发现信息来寻找DHCP服务器。</p>
+<p>由于是广播包，在同一个广播域中的每一台安装了TCP/IP协议的主机都会接收到这种广播信息，但只有DHCP服务器才会做出响应。</p>
+<blockquote>
+<p>在二层中，广播地址是12个f即<code>ff:ff:ff:ff:ff:ff</code>。</p>
+<p>在三层中，广播地址是4个255（IPv4）即<code>255.255.255.255</code>。</p>
+<p>换算成二进制，即全为1。</p>
+</blockquote>
+<h3 id="2-1-2-DHCP-Discover-物理层"><a href="#2-1-2-DHCP-Discover-物理层" class="headerlink" title="2.1.2 DHCP Discover 物理层"></a>2.1.2 DHCP Discover 物理层</h3><p><img src="https://resource.tinychen.com/blog/20190609/GrScXGYroTPm.png"></p>
+<p>物理层给出的有用信息并不多，但是我们能够看到网卡相关信息和这个是DHCP的数据包且使用了UDP协议。</p>
+<h3 id="2-1-3-DHCP-Discover-数据链路层"><a href="#2-1-3-DHCP-Discover-数据链路层" class="headerlink" title="2.1.3 DHCP Discover 数据链路层"></a>2.1.3 DHCP Discover 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190609/hNKn0hoQPFaU.png"></p>
+<p>数据链路层中我们可以看到本机的MAC地址和目标MAC地址（广播）。</p>
+<h3 id="2-1-4-DHCP-Discover-网络层"><a href="#2-1-4-DHCP-Discover-网络层" class="headerlink" title="2.1.4 DHCP Discover 网络层"></a>2.1.4 DHCP Discover 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190609/XvL5NVjcpFtO.png"></p>
+<p>网络层的参数较多，我们对其进行一一解析：</p>
+<ul>
+<li><p>版本（Version）：4，表明这里使用IPv4</p>
+</li>
+<li><p>头部长度（Header Length）：20 bytes，即20个字节</p>
+</li>
+<li><p>区分服务字段（Differentiated Services Field）：0x00，十六进制，换算成二进制正好是下面的8个0，表明当前的IP数据报中没有使用服务类型字段，采用默认的“尽力传输”优先级别</p>
+</li>
+<li><p>总长度（Total Lenth）：328，表明该数据报的总长度是328个字节</p>
+</li>
+<li><p>标识（Identification）：0xe752，十六进制，换算成十进制正好是括号中的59218，表明该数据报的标识为0xe752</p>
+</li>
+<li><p>分段标识（Flags）：<br>  保留位（Reserved bit）为0，Don’t fragment为0表示该数据报可以被分段，More fragments为0表明后面没有分段</p>
+</li>
+<li><p>分段偏移（Fragment offset）：0，表明没有被分段</p>
+</li>
+<li><p>生存时间（Time to live）：128，表明该数据报最多可以经过128个路由</p>
+</li>
+<li><p>上层协议（Protocol）： UDP，值为17</p>
+</li>
+<li><p>头部校验（Header checksum）： validation disabled，表示没有进行校验</p>
+</li>
+<li><p>校验状态（Header checksum status）：Unverified，同上，没有进行校验</p>
+</li>
+<li><p>源IP地址（Source）：0.0.0.0，表明当前尚未获得DHCP服务端分配的IP地址，只能使用0.0.0.0</p>
+</li>
+<li><p>目标IP地址（Destination）：255.255.255.255，广播IP地址，对同一广播域内的所有TCP/IP协议客户端进行广播</p>
+</li>
+</ul>
+<h3 id="2-1-5-DHCP-Discover-传输层"><a href="#2-1-5-DHCP-Discover-传输层" class="headerlink" title="2.1.5 DHCP Discover 传输层"></a>2.1.5 DHCP Discover 传输层</h3><p><img src="https://resource.tinychen.com/blog/20190609/wYNVDCL6RDrJ.png"></p>
+<p>传输层这里可以看到源端口为68，目的端口为67，且校验状态为未校验。</p>
+<h3 id="2-1-6-DHCP-Discover-应用层"><a href="#2-1-6-DHCP-Discover-应用层" class="headerlink" title="2.1.6 DHCP Discover 应用层"></a>2.1.6 DHCP Discover 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190609/bOfKYRIT14yC.png"></p>
+<p>应用层的报文也有很多重要数据，我们截取重要的进行分析。</p>
+<ul>
+<li>Bootp flags：0表示单播，1表示广播，这里为0，即DHCP服务端回复的DHCP Offer报文应为单播形式</li>
+</ul>
+<blockquote>
+<p>部分书上讲述的DHCP四个包都是使用广播的方式进行，实际上DHCP Offer和DHCP Ack这两个数据包是广播还是单播是由DHCP的客户端发送的数据包来决定的。</p>
+</blockquote>
+<ul>
+<li><p>Ciaddr即客户端IP地址（Client IP address）、</p>
+<p>  Yiaddr即被分配的DHCP客户端IP地址（ Your(client) IP address）、 </p>
+<p>  Siaddr即下一个为DHCP客户端分配IP地址的DHCP服务器地址（Next server IP address ）、</p>
+<p>  Giaddr即DHCP中继IP地址（Relay agent IP address）、</p>
+<p>  <strong>这四个IP地址均为0.0.0.0，因为此时还处于DHCP的发现阶段，DHCP客户端对这些信息还是一无所知。</strong></p>
+</li>
+<li><p>我们还可以看到请求信息里面需要请求获取包括子网掩码（Subnet Mask）、路由网关（Router）、 DNS服务器（Domain Name Server） 、以及域名（Domain Name）等信息</p>
+</li>
+</ul>
+<h2 id="2-2-提供阶段——DHCP-Offer（单播-广播）"><a href="#2-2-提供阶段——DHCP-Offer（单播-广播）" class="headerlink" title="2.2 提供阶段——DHCP Offer（单播/广播）"></a>2.2 提供阶段——DHCP Offer（单播/广播）</h2><h3 id="2-2-1-DHCP-Offer-理论分析"><a href="#2-2-1-DHCP-Offer-理论分析" class="headerlink" title="2.2.1 DHCP Offer 理论分析"></a>2.2.1 DHCP Offer 理论分析</h3><p>提供阶段，即DHCP服务器向DHCP客户端提供预分配IP地址的阶段。网络中的所有DHCP服务器接收到客户端的DHCP Discover报文后都会根据自己的DHCP地址池中IP地址分配的优先次序选出一个IP地址，然后与其他参数一起通过传输层的UDP67号端口在DHCP Offer报文中以单播/广播方式发送给客户端的UDP68号端口。</p>
+<blockquote>
+<p>DHCP服务器在分配这个地址之间会ping一下这个分配的ip地址，如果没有Response就才会预分配这个地址</p>
+</blockquote>
+<p>客户端通过封装在帧中的目的MAC地址（也就是DHCP Discover报文中的CHADDR字段值）的比对来确定是否接收该帧。但这样以来，理论上DHCP客户端可能会收到多个DHCP Offer报文（当网络中存在多个DHCP服务器时），但DHCP客户端只接收第一个到来的DHCP Offer报文。</p>
+<h3 id="2-2-2-DHCP-Offer-数据链路层"><a href="#2-2-2-DHCP-Offer-数据链路层" class="headerlink" title="2.2.2 DHCP Offer 数据链路层"></a>2.2.2 DHCP Offer 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/gW8jaa3BavbB.png"></p>
+<p>这时可以看到根据之前的DHCP报文，这里使用了单播的形式。而源MAC地址就是DHCP服务器的MAC地址且目的MAC地址是之前发送DHCP Discover报文的客户端MAC地址。</p>
+<h3 id="2-2-3-DHCP-Offer-网络层"><a href="#2-2-3-DHCP-Offer-网络层" class="headerlink" title="2.2.3 DHCP Offer 网络层"></a>2.2.3 DHCP Offer 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/gJ4zNuXFF8Tn.png"></p>
+<p>网络层报文中我们可以看到这时候目的IP地址和源IP地址都已经有了数据，10.22.25.118就是即将要分配的IP地址，而10.22.25.254就是DHCP服务器的地址又或者是DHCP中继代理服务器的IP地址，具体要看应用层的报文。</p>
+<blockquote>
+<p>通过DHCP中继代理服务，与DHCP服务器不在同一子网的DHCP客户端可以通过DHCP中继代理（通常是路由器或三层交换机设备开启DHCP中继功能）与位于其他网段的DHCP服务器通信，最终是DHCP客户端获取到从DHCP服务器上分配而来的IP地址。</p>
+<p>此时的DHCP中继代理就位于DHCP客户端和DHCP服务器之间，负责广播DHCP报文的转发。</p>
+</blockquote>
+<h3 id="2-2-4-DHCP-Offer-应用层"><a href="#2-2-4-DHCP-Offer-应用层" class="headerlink" title="2.2.4 DHCP Offer 应用层"></a>2.2.4 DHCP Offer 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190610/0h17nDkVa0yE.png"></p>
+<p>这个时候我们再看应用层的报文：</p>
+<ul>
+<li>Ciaddr即客户端IP地址（Client IP address）：此时还没有分配，所以还是0.0.0.0</li>
+<li>Yiaddr即被分配的DHCP客户端IP地址（ Your(client) IP address）：10.22.25.118，这个IP即将分配给该客户端</li>
+<li>Siaddr即下一个为DHCP客户端分配IP地址的DHCP服务器地址（Next server IP address ）：192.168.112.240，这个是分配IP地址的DHCP服务器</li>
+<li>Giaddr即DHCP中继IP地址（Relay agent IP address）：10.22.25.254，这个是DHCP的中继代理服务器的IP地址，在这里应该是一个开启了DHCP中继的三层交换机</li>
+<li>子网掩码（Subnet Mask）、路由网关（Router）、 DNS服务器（Domain Name Server） 、以及域名（Domain Name）等信息均已经包含在里面</li>
+<li>租约时间是需要注意的一个问题，这里我们可以看到DHCP租约时间（IP Address Lease Time）实际上是8天，单位是s，wieshark换算成了天方便我们查看</li>
+<li>而Renewal Time Value就是初次续约的时间，这个时间是租约时间的1/2，这里就是4天，这个时候一般客户端会以单播的方式向DHCP服务器发送报文请求续约</li>
+<li>而Rebinding Time Value就是第二次续约时间，这个时间是租约时间的7/8，这里也就是7天，只有在初次续约失败之后，才会在这个时间以广播的方式向网络中的DHCP服务器再次申请IP地址</li>
+</ul>
+<h2 id="2-3-选择阶段——DHCP-Request（广播）"><a href="#2-3-选择阶段——DHCP-Request（广播）" class="headerlink" title="2.3 选择阶段——DHCP Request（广播）"></a>2.3 选择阶段——DHCP Request（广播）</h2><h3 id="2-3-1-DHCP-Request-理论分析"><a href="#2-3-1-DHCP-Request-理论分析" class="headerlink" title="2.3.1 DHCP Request 理论分析"></a>2.3.1 DHCP Request 理论分析</h3><p>选择阶段，即DHCP客户端选择IP地址的阶段。</p>
+<p>如果有多台DHCP服务器向该客户端发来DHCPOFFER报文，客户端只接收第一个收到的DHCP Offer报文，然后以广播方式发送DHCP Request报文。在该报文的Requested Address选项中包含DHCP服务器在DHCP Offer报文中预分配的IP地址、对应的DHCP服务器IP地址等。</p>
+<p><strong>这样也就相当于同时告诉其他DHCP服务器，它们可以释放已提供的地址并将这些地址返回到可用的地址池中。</strong></p>
+<p>在DHCP REQUEST报文封装的IP协议头部中，客户端的Source Address仍然是0.0.0.0，数据包的Destination仍然是255.255.255.255。但在DHCP Request报文中Ciaddr、Yiaddr、Siaddr、Giaddr 字段的地址均为0.0.0.0</p>
+<h3 id="2-3-2-DHCP-Request-数据链路层"><a href="#2-3-2-DHCP-Request-数据链路层" class="headerlink" title="2.3.2 DHCP Request 数据链路层"></a>2.3.2 DHCP Request 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/srlcaXxu8jT1.png"></p>
+<p>这时候又变回了广播。</p>
+<h3 id="2-3-3-DHCP-Request-网络层"><a href="#2-3-3-DHCP-Request-网络层" class="headerlink" title="2.3.3 DHCP Request 网络层"></a>2.3.3 DHCP Request 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/R3t0oJPxuuvv.png"></p>
+<p>由于是广播，所以目标IP地址是255.255.255.255，而源IP地址还是0.0.0.0是因为还没有完成整个DHCP过程，本机尚未获取到IP地址。</p>
+<h3 id="2-3-4-DHCP-Request-应用层"><a href="#2-3-4-DHCP-Request-应用层" class="headerlink" title="2.3.4 DHCP Request 应用层"></a>2.3.4 DHCP Request 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190610/S3Scm4vea5l1.png"></p>
+<ul>
+<li>Bootp flags：0表示单播，1表示广播，这里为0，即DHCP服务端回复的报文应为单播形式</li>
+<li>Ciaddr、Yiaddr、Siaddr、Giaddr 字段的地址均为0.0.0.0</li>
+</ul>
+<h2 id="2-4-确认阶段——DHCP-Ack（单播-广播）"><a href="#2-4-确认阶段——DHCP-Ack（单播-广播）" class="headerlink" title="2.4 确认阶段——DHCP Ack（单播/广播）"></a>2.4 确认阶段——DHCP Ack（单播/广播）</h2><h3 id="2-4-1-DHCP-Ack-理论分析"><a href="#2-4-1-DHCP-Ack-理论分析" class="headerlink" title="2.4.1 DHCP Ack 理论分析"></a>2.4.1 DHCP Ack 理论分析</h3><p>确认阶段，即DHCP服务器确认分配级DHCP客户端IP地址的阶段。</p>
+<p>某个DHCP服务器在收到DHCP客户端发来的DHCP REOUEST报文后，只有DHCP客户端选择的服务器会进行如下操作：如果确认将地址分配给该客户端，则以单播/广播方式返回DHCP ACK报文；否则返回DHCP NAK报文，表明地址不能分配给该客户端。</p>
+<h3 id="2-4-2-DHCP-Ack-数据链路层"><a href="#2-4-2-DHCP-Ack-数据链路层" class="headerlink" title="2.4.2 DHCP Ack 数据链路层"></a>2.4.2 DHCP Ack 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/sf6I5auVsS32.png"></p>
+<p>可以看到这里是单播，源MAC地址是DHCP服务器（此处为中继代理）的MAC地址，目标MAC地址是DHCP客户端的MAC地址。</p>
+<h3 id="2-4-3-DHCP-Ack-网络层"><a href="#2-4-3-DHCP-Ack-网络层" class="headerlink" title="2.4.3 DHCP Ack 网络层"></a>2.4.3 DHCP Ack 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/wT71TP3iEOGS.png"></p>
+<p>10.22.25.118就是即将要分配的IP地址，而10.22.25.254就是DHCP服务器的地址（此处为DHCP中继代理服务器）</p>
+<h3 id="2-4-4-DHCP-Ack-应用层"><a href="#2-4-4-DHCP-Ack-应用层" class="headerlink" title="2.4.4 DHCP Ack 应用层"></a>2.4.4 DHCP Ack 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190610/wTONY9Wj3T9b.png"></p>
+<p>在DHCPACK报文中Yiaddr字段包含要分配给客户端的IP地址，而Chaddr和DHCP:Client Identifier字段是发出请求的客户端中网卡的MAC地址。</p>
+<p>同时，在选项部分也会把在DHCPOFFER报文中所分配的IP地址的子网掩码、默认网关、DNS服务器、租约期、续约时间等信息加上。</p>
+<h1 id="3、DHCP的IP地址租约更新"><a href="#3、DHCP的IP地址租约更新" class="headerlink" title="3、DHCP的IP地址租约更新"></a>3、DHCP的IP地址租约更新</h1><h2 id="3-1-DHCP服务IP地址租约更新原理"><a href="#3-1-DHCP服务IP地址租约更新原理" class="headerlink" title="3.1 DHCP服务IP地址租约更新原理"></a>3.1 DHCP服务IP地址租约更新原理</h2><p>如果采用动态IP地址分配策略，则DHCP服务器分配给客户端的IP地址都是有一定租约期限的，当租约期满后DHCP服务器又会收回原来分配的这个IP地址。</p>
+<p>如果DHCP客户端希望继续使用该地址，则需要向DHCP服务器提出更新IP地址租约的申请，也就是前面所说到的“续约”。</p>
+<p>IP地址租约更新或者IP地址续约也就是更新服务器端对IP地址的租约信息，使其恢复为初始状态。</p>
+<h2 id="3-2-申请续约的方法"><a href="#3-2-申请续约的方法" class="headerlink" title="3.2 申请续约的方法"></a>3.2 申请续约的方法</h2><ol>
+<li>在DHCP客户端的IP地址<strong>租约期限达到1/2时</strong>，由DHCP客户端向为它分配IP地址的DHCP服务器以单播方式发送DHCP REOUEST请求报文，以期进行IP租约的更新。</li>
+<li>如果DHCP服务器同意续约，则DHCP服务器向客户端以单播方式返回DHCP ACK报文，通知DHCP客户端已经获得新IP租约，可以继续使用此IP地址；相反，如果DHCP服务器不同意续约，则DHCP服务器以单播方式返回DHCP NAK报文，通知DHCP客户端不能获得新的租约，此IP地址不可以再分配给该客户端。</li>
+<li>如果上面的续约申请失败，则DHCP客户端还会在<strong>租约期限达到7/8时</strong>再次以广播方式发送DHCP REQUEST请求报文进行续约。DHCP服务器的处理方式同上，不再赘述。</li>
+<li>如果第二次续约请求还是失败，则原来租约的IP地址将被释放。</li>
+</ol>
+<h1 id="4、DHCP中继代理服务"><a href="#4、DHCP中继代理服务" class="headerlink" title="4、DHCP中继代理服务"></a>4、DHCP中继代理服务</h1><p>在前面我们已经说过，在DHCP客户端初次从DHCP服务器获取IP地址的过程中，所有从DHCP客户端发出的请求报文均是以广播方式（目的地址为255.255.255.255）进行发送的，<strong>所以DHCP服务只适用于DHCP客户端和DHCP服务器处于同一个子网</strong>（也就是DHCP服务器至少有一个端口与DHCP客户端所在的子网是直接连接的）的情况，因为广播包是不能穿越子网的。</p>
+<p>基于DHCP服务的以上限制，这样一来，如果DHCP客户端与DHCP服务器之间隔了路由器设备，不在同一子网，就不能直接通过这台DHCP服务器获取IP地址，即使DHCP服务器上已配置了对应的地址池。<strong>这也就意味着，如果想要让多个子网中的主机进行动态IP地址分配，就需要在网络中的所有子网中都设置一个DHCP服务器。这显然是很不经济的，也是没有必要的。</strong></p>
+<p>DHCP中继功能可以很好地解决DHCP服务的以上难题。<strong>通过DHCP中继代理服务，与DHCP服务器不在同一子网的DHCP客户端可以通过DHCP中继代理（通常也是由路由器或三层交换机设备担当，但需要开启DHCP中继功能）与位于其他网段的DHCP服务器通信，最终使DHCP客户端获取到从DHCP服务器上分配而来的IP地址。</strong>此时的DHCP中继代理就位于DHCP客户端和DHCP服务器之间，负责广播DHCP报文的转发。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/B4cjmSsyBsVz.png"></p>
+<p>从前面的报文分析我们可以轻松的看出10.22.25.118和192.168.112.240是明显不属于同一个子网的，他们之间通信肯定需要使用路由器进行路由，而10.22.25.254就是担任着DHCP中继代理的角色。</p>
+<p>至于和DHCP服务器之间经过了多少个路由，我们可以tracert一下。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/4ALNec1bheRj.png"></p>
+<p>从图中我们可以看到，从10.22.25.254这个DHCP中继代理到DHCP服务器之间需要经过5个路由节点。</p>
+<p>而实际上，在很多的大型园区网络中，都会使用一个DHCP服务器集群+多个DHCP中继代理这样的方式进行DHCP分配。</p>
+<h1 id="5、路由干扰"><a href="#5、路由干扰" class="headerlink" title="5、路由干扰"></a>5、路由干扰</h1><h2 id="5-1-路由干扰原理"><a href="#5-1-路由干扰原理" class="headerlink" title="5.1 路由干扰原理"></a>5.1 路由干扰原理</h2><p>路由干扰是园区网络中经常出现的问题，主要体现在用户无法获取到正确的IP地址/网关地址/DNS服务器地址等信息而无法上网。</p>
+<p>主要原因则是因为其他用户私接路由器且配置不当，导致私接的路由器成为所在的局域网中的第二个DHCP服务器，这时其他用户使用DHCP获取IP地址的时候就会有不只一个DHCP服务器提供IP地址。不幸的是，私接的路由器虽然能正确提供DHCP服务和IP地址等信息，却往往无法提供上网功能，这就会造成所谓的路由干扰。</p>
+<p><strong>从上面的解释我们可以知道，路由干扰只可能发生在使用DHCP协议的客户端，如果是使用静态IP地址，是可以避免路由干扰的。</strong></p>
+<p>因为这时候当客户端接入网络之后，会直接发送ARP请求来查询设置的网关IP地址的MAC地址信息，而根本不会去发送DHCP Discover报文。</p>
+<p><strong>但是，大型网络中使用静态网络地址往往容易产生管理混乱，IP地址冲突等问题。</strong></p>
+<h2 id="5-2-路由干扰模拟"><a href="#5-2-路由干扰模拟" class="headerlink" title="5.2 路由干扰模拟"></a>5.2 路由干扰模拟</h2><p>下面我们在一个局域网内接入两个DHCP服务器，进行路由干扰的模拟。</p>
+<p>从本文前面我们可以知道，由于DHCP Discover是以广播的方式进行发送，因此局域网内的所有DHCP服务器都会进行回应，而客户端只会选择最快回应的那一个DHCP服务器，其他的DHCP服务器则会被拒绝，如果此时我们的局域网中出现了一个能提供DHCP服务而不能提供上网服务的设备，就会对其产生路由干扰。</p>
+<h3 id="5-2-1-模拟1"><a href="#5-2-1-模拟1" class="headerlink" title="5.2.1 模拟1"></a>5.2.1 模拟1</h3><p><img src="https://resource.tinychen.com/blog/20190610/uPIQx7MjUTrt.png"></p>
+<p>第一次模拟中我们可以看到，在客户端发送了DHCP Discover报文之后，10.22.25.254和192.168.100.1两个DHCP服务器都进行了回应，不同的是这时10.22.25.254的回应显然要快得多，因此客户端选择了10.22.25.254这个DHCP服务器而192.168.100.1这个DHCP服务器则是发送了DHCP NAK报文来表示DHCP失败。</p>
+<h3 id="5-2-2-模拟2"><a href="#5-2-2-模拟2" class="headerlink" title="5.2.2 模拟2"></a>5.2.2 模拟2</h3><p>这次我们调整192.168.100.1这个路由器对于DHCP报文的查询频率（加快），再次进行模拟。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/URDqGmgJtBk0.png"></p>
+<p>这次我们可以看到是192.168.100.1这个DHCP服务器先建立了连接。</p>
+<h3 id="5-2-3-实例分析"><a href="#5-2-3-实例分析" class="headerlink" title="5.2.3 实例分析"></a>5.2.3 实例分析</h3><p><img src="https://resource.tinychen.com/blog/20190610/FEQGPHjUltML.png"></p>
+<p>从上图的IPv4地址和对应的子网掩码，我们可以计算出对应的默认网关应该是10.27.26.254，而这里则是显示10.27.26.59，显然是错误的，很可能就是受到了路由干扰。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/BfscX3u634RB.png"></p>
+<p>这种IP地址在接了路由器的情况下是很常见的，但是如果是接入的分配10开头的IP地址的网络中出现这种IP地址信息，也是很有可能受到了路由干扰。</p>
+<h3 id="5-2-4-定位干扰源"><a href="#5-2-4-定位干扰源" class="headerlink" title="5.2.4 定位干扰源"></a>5.2.4 定位干扰源</h3><p>定位干扰源最简单的方法就是查询arp缓存表。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在cmd中输入下列命令查询arp缓存</span></span><br><span class="line">arp -a</span><br></pre></td></tr></table></figure>
+
+<p>再根据IP信息中的默认网关（或者是DHCP服务器等其他异常信息）对应的IP地址找到干扰源的MAC地址，在交换机后台查询该MAC地址对应的交换机端口（往往需要网络管理员协助），即可定位干扰源。</p>
+<h2 id="5-3-路由干扰解决方案"><a href="#5-3-路由干扰解决方案" class="headerlink" title="5.3 路由干扰解决方案"></a>5.3 路由干扰解决方案</h2><h3 id="5-3-1-用户合理配置路由器"><a href="#5-3-1-用户合理配置路由器" class="headerlink" title="5.3.1 用户合理配置路由器"></a>5.3.1 用户合理配置路由器</h3><ol>
+<li>将墙上端口接出来的网线插到用户自己的路由器的wan口上，这时候相当于在该网络中下接了一层网络，即又建立了一个小型的局域网；</li>
+<li>关闭路由器的DHCP功能，将网线插到路由器的lan口上，此时路由器相当于一个傻瓜交换机，只能起到增加网络接口和提供无线接入（如果路由器有无线功能的话）的作用；</li>
+</ol>
+<p>这种方法的弊端是很多用户并不知道如何合理的配置路由器，因此可行性不大。</p>
+<h3 id="5-3-2-DHCP-Snooping"><a href="#5-3-2-DHCP-Snooping" class="headerlink" title="5.3.2 DHCP Snooping"></a>5.3.2 DHCP Snooping</h3><p>DHCP Snooping技术是DHCP安全特性，通过建立和维护DHCP Snooping绑定表过滤不可信任的DHCP信息，这些信息是指来自不信任区域的DHCP信息。DHCP Snooping绑定表包含不信任区域的用户MAC地址、IP地址、租用期、VLAN-ID 接口等信息。</p>
+<p>当交换机开启了 DHCP-Snooping后，会对DHCP报文进行侦听，并可以从接收到的DHCP Request或DHCP Ack报文中提取并记录IP地址和MAC地址信息。另外，DHCP-Snooping允许将某个物理端口设置为信任端口或不信任端口。信任端口可以正常接收并转发DHCP Offer报文，而不信任端口会将接收到的DHCP Offer报文丢弃。这样，可以完成交换机对假冒DHCP Server的屏蔽作用，确保客户端从合法的DHCP Server获取IP地址。</p>
+<p>DHCP Snooping可以非常有效地防止园区网中的路由干扰现象发生，但是需要网络管理员对每台路由网关进行配置，考虑到大型网络中可能会使用多种品牌和型号的交换机，这样子的工作量会比较大。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190608-wireshark-stu\" rel="bookmark">Wireshark抓包分析校园网登录过程</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190601-isp-upgrade-sdn\" rel="bookmark">Optimizing Gradual SDN Upgrades in ISP Networks</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190117-compiling\" rel="bookmark">编译原理复习提纲</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20171227-computer-arch\" rel="bookmark">汕大计组复习提纲2017版</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20180630-data-structure\" rel="bookmark">数据结构复习提纲</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/stu/" rel="tag"># stu</a>
+              <a href="/tags/network/" rel="tag"># network</a>
+              <a href="/tags/wireshark/" rel="tag"># wireshark</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20190608-wireshark-stu/" rel="prev" title="Wireshark抓包分析校园网登录过程">
+      <i class="fa fa-chevron-left"></i> Wireshark抓包分析校园网登录过程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20190612-centos-update-kernel/" rel="next" title="CentOS升级Linux内核">
+      CentOS升级Linux内核 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81DHCP%E7%AE%80%E4%BB%8B"><span class="nav-text">1、DHCP简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81DHCP%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-text">2、DHCP状态机</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-0-DHCP%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-text">2.0 DHCP状态机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-0-1-%E5%A6%82%E4%BD%95%E6%8A%93%E5%8F%96%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="nav-text">2.0.1 如何抓取数据包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-0-2-%E4%B8%80%E6%AC%A1DHCP%E8%BF%87%E7%A8%8B%E7%9A%84%E5%9B%9B%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="nav-text">2.0.2 一次DHCP过程的四个数据包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E5%8F%91%E7%8E%B0%E9%98%B6%E6%AE%B5%E2%80%94%E2%80%94DHCP-Discover%EF%BC%88%E5%B9%BF%E6%92%AD%EF%BC%89"><span class="nav-text">2.1 发现阶段——DHCP Discover（广播）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-DHCP-Discover-%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90"><span class="nav-text">2.1.1 DHCP Discover 理论分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-DHCP-Discover-%E7%89%A9%E7%90%86%E5%B1%82"><span class="nav-text">2.1.2 DHCP Discover 物理层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-3-DHCP-Discover-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82"><span class="nav-text">2.1.3 DHCP Discover 数据链路层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-4-DHCP-Discover-%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-text">2.1.4 DHCP Discover 网络层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-5-DHCP-Discover-%E4%BC%A0%E8%BE%93%E5%B1%82"><span class="nav-text">2.1.5 DHCP Discover 传输层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-6-DHCP-Discover-%E5%BA%94%E7%94%A8%E5%B1%82"><span class="nav-text">2.1.6 DHCP Discover 应用层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E6%8F%90%E4%BE%9B%E9%98%B6%E6%AE%B5%E2%80%94%E2%80%94DHCP-Offer%EF%BC%88%E5%8D%95%E6%92%AD-%E5%B9%BF%E6%92%AD%EF%BC%89"><span class="nav-text">2.2 提供阶段——DHCP Offer（单播&#x2F;广播）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-DHCP-Offer-%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90"><span class="nav-text">2.2.1 DHCP Offer 理论分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-DHCP-Offer-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82"><span class="nav-text">2.2.2 DHCP Offer 数据链路层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-DHCP-Offer-%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-text">2.2.3 DHCP Offer 网络层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-4-DHCP-Offer-%E5%BA%94%E7%94%A8%E5%B1%82"><span class="nav-text">2.2.4 DHCP Offer 应用层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E9%80%89%E6%8B%A9%E9%98%B6%E6%AE%B5%E2%80%94%E2%80%94DHCP-Request%EF%BC%88%E5%B9%BF%E6%92%AD%EF%BC%89"><span class="nav-text">2.3 选择阶段——DHCP Request（广播）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-DHCP-Request-%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90"><span class="nav-text">2.3.1 DHCP Request 理论分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-DHCP-Request-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82"><span class="nav-text">2.3.2 DHCP Request 数据链路层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-3-DHCP-Request-%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-text">2.3.3 DHCP Request 网络层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-4-DHCP-Request-%E5%BA%94%E7%94%A8%E5%B1%82"><span class="nav-text">2.3.4 DHCP Request 应用层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E7%A1%AE%E8%AE%A4%E9%98%B6%E6%AE%B5%E2%80%94%E2%80%94DHCP-Ack%EF%BC%88%E5%8D%95%E6%92%AD-%E5%B9%BF%E6%92%AD%EF%BC%89"><span class="nav-text">2.4 确认阶段——DHCP Ack（单播&#x2F;广播）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-1-DHCP-Ack-%E7%90%86%E8%AE%BA%E5%88%86%E6%9E%90"><span class="nav-text">2.4.1 DHCP Ack 理论分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-2-DHCP-Ack-%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82"><span class="nav-text">2.4.2 DHCP Ack 数据链路层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-3-DHCP-Ack-%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-text">2.4.3 DHCP Ack 网络层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-4-DHCP-Ack-%E5%BA%94%E7%94%A8%E5%B1%82"><span class="nav-text">2.4.4 DHCP Ack 应用层</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81DHCP%E7%9A%84IP%E5%9C%B0%E5%9D%80%E7%A7%9F%E7%BA%A6%E6%9B%B4%E6%96%B0"><span class="nav-text">3、DHCP的IP地址租约更新</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-DHCP%E6%9C%8D%E5%8A%A1IP%E5%9C%B0%E5%9D%80%E7%A7%9F%E7%BA%A6%E6%9B%B4%E6%96%B0%E5%8E%9F%E7%90%86"><span class="nav-text">3.1 DHCP服务IP地址租约更新原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E7%94%B3%E8%AF%B7%E7%BB%AD%E7%BA%A6%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-text">3.2 申请续约的方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81DHCP%E4%B8%AD%E7%BB%A7%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1"><span class="nav-text">4、DHCP中继代理服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5%E3%80%81%E8%B7%AF%E7%94%B1%E5%B9%B2%E6%89%B0"><span class="nav-text">5、路由干扰</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-%E8%B7%AF%E7%94%B1%E5%B9%B2%E6%89%B0%E5%8E%9F%E7%90%86"><span class="nav-text">5.1 路由干扰原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E8%B7%AF%E7%94%B1%E5%B9%B2%E6%89%B0%E6%A8%A1%E6%8B%9F"><span class="nav-text">5.2 路由干扰模拟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-1-%E6%A8%A1%E6%8B%9F1"><span class="nav-text">5.2.1 模拟1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-2-%E6%A8%A1%E6%8B%9F2"><span class="nav-text">5.2.2 模拟2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-3-%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-text">5.2.3 实例分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-4-%E5%AE%9A%E4%BD%8D%E5%B9%B2%E6%89%B0%E6%BA%90"><span class="nav-text">5.2.4 定位干扰源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-%E8%B7%AF%E7%94%B1%E5%B9%B2%E6%89%B0%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-text">5.3 路由干扰解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-1-%E7%94%A8%E6%88%B7%E5%90%88%E7%90%86%E9%85%8D%E7%BD%AE%E8%B7%AF%E7%94%B1%E5%99%A8"><span class="nav-text">5.3.1 用户合理配置路由器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-2-DHCP-Snooping"><span class="nav-text">5.3.2 DHCP Snooping</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">152</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">640k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">9:42</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
