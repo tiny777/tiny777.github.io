@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://resource.tinychen.com/logos.png">
+  <link rel="mask-icon" href="https://resource.tinychen.com/logos.png" color="#222">
+  <link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-material.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://tinychen.com').hostname,
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"right","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":true,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: true,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="本文主要对openresty做入门简介以及初始化的安装配置介绍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenResty篇01-入门简介和安装配置">
+<meta property="og:url" content="https://tinychen.com/20210317-openresty01-introduction-and-installation/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要对openresty做入门简介以及初始化的安装配置介绍。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112809.jpg">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112817.png">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112824.png">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112828.png">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112832.png">
+<meta property="og:image" content="c:/Users/tinychen/OneDrive/Blogs/pic_cache/20210309-openresty01/image-20210312144310441.png">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112842.png">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112847.png">
+<meta property="og:image" content="https://resource.tinychen.com/20210317112852.png">
+<meta property="article:published_time" content="2021-03-17T07:00:00.000Z">
+<meta property="article:modified_time" content="2021-03-17T07:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="nginx">
+<meta property="article:tag" content="openresty">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210317112809.jpg">
+
+<link rel="canonical" href="https://tinychen.com/20210317-openresty01-introduction-and-installation/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>OpenResty篇01-入门简介和安装配置 | TinyChen's Studio</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166769908-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-166769908-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TinyChen's Studio</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">DO or DIE</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="https://tinychen.com/20210317-openresty01-introduction-and-installation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://resource.tinychen.com/logo.jpg">
+      <meta itemprop="name" content="TinyChen">
+      <meta itemprop="description" content=" ">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TinyChen's Studio">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenResty篇01-入门简介和安装配置
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-03-17 15:00:00" itemprop="dateCreated datePublished" datetime="2021-03-17T15:00:00+08:00">2021-03-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/frontend/" itemprop="url" rel="index">
+                    <span itemprop="name">frontend</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>9.3k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>8 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://resource.tinychen.com/20210317112809.jpg"></p>
+<p>本文主要对openresty做入门简介以及初始化的安装配置介绍。</p>
+<a id="more"></a>
+
+<h1 id="1、OpenResty简介"><a href="#1、OpenResty简介" class="headerlink" title="1、OpenResty简介"></a>1、OpenResty简介</h1><p>了解过web服务器的同学肯定对nginx不陌生，nginx作为目前占有率第一的web服务器，本身作为静态web服务器、反向代理服务和四层、七层负载均衡器都有着非常优秀的表现。但是对于web服务器而言，nginx的很多功能都偏向于静态web应用，也就是说它的动态处理能力是有一定的缺失的。举个最简单的例子，nginx无法在配置中直接进行一个条件以上的逻辑判断，这对于一些架构设计来说有着较大的不便。OpenResty的诞生就是为了解决这个问题。</p>
+<p>官方对于OpenResty的介绍是：</p>
+<blockquote>
+<p>OpenResty® 是一个基于 <a target="_blank" rel="noopener" href="https://openresty.org/cn/nginx.html">Nginx</a> 与 Lua 的高性能 Web 平台，其内部集成了大量精良的 Lua 库、第三方模块以及大多数的依赖项。用于方便地搭建能够处理超高并发、扩展性极高的动态 Web 应用、Web 服务和动态网关。</p>
+<p>OpenResty® 通过汇聚各种设计精良的 <a target="_blank" rel="noopener" href="https://openresty.org/cn/nginx.html">Nginx</a> 模块（主要由 OpenResty 团队自主开发），从而将 <a target="_blank" rel="noopener" href="https://openresty.org/cn/nginx.html">Nginx</a> 有效地变成一个强大的通用 Web 应用平台。这样，Web 开发人员和系统工程师可以使用 Lua 脚本语言调动 <a target="_blank" rel="noopener" href="https://openresty.org/cn/nginx.html">Nginx</a> 支持的各种 C 以及 Lua 模块，快速构造出足以胜任 10K 乃至 1000K 以上单机并发连接的高性能 Web 应用系统。</p>
+<p>OpenResty® 的目标是让你的Web服务直接跑在 <a target="_blank" rel="noopener" href="https://openresty.org/cn/nginx.html">Nginx</a> 服务内部，充分利用 <a target="_blank" rel="noopener" href="https://openresty.org/cn/nginx.html">Nginx</a> 的非阻塞 I/O 模型，不仅仅对 HTTP 客户端请求,甚至于对远程后端诸如 MySQL、PostgreSQL、Memcached 以及 Redis 等都进行一致的高性能响应。</p>
+</blockquote>
+<p>个人简单的理解就是OpenResty=nginx+lua+第三方库，事实上nginx本身也可以通过编译的方式添加lua的支持，同时nginx也可以通过编译的方式添加第三方库的支持，OpenResty则是直接将其全部打包在一起。且不讨论OpenResty作为全能型web服务器是否能够满足所有的业务需求，就其突出的动态处理能力就能给我们的系统架构带来很大的灵活性和额外的多样化处理能力。</p>
+<h1 id="2、yum安装"><a href="#2、yum安装" class="headerlink" title="2、yum安装"></a>2、yum安装</h1><h2 id="2-1-配置yum源"><a href="#2-1-配置yum源" class="headerlink" title="2.1 配置yum源"></a>2.1 配置yum源</h2><p>openresty官网有提供各种主流Linux发行版的<a target="_blank" rel="noopener" href="https://openresty.org/en/linux-packages.html">预编译包</a>，如果没有特殊需求，一般可以直接使用官方提供的安装包进行安装。</p>
+<p>下面我们以<code>centos</code>为例进行示范：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># add the yum repo:</span><br><span class="line">wget https:&#x2F;&#x2F;openresty.org&#x2F;package&#x2F;centos&#x2F;openresty.repo</span><br><span class="line">sudo mv openresty.repo &#x2F;etc&#x2F;yum.repos.d&#x2F;</span><br><span class="line"></span><br><span class="line"># update the yum index:</span><br><span class="line">sudo yum check-update</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-rpm包介绍"><a href="#2-2-rpm包介绍" class="headerlink" title="2.2 rpm包介绍"></a>2.2 rpm包介绍</h2><p>openresty的yum源中除了openresty本身之外，还有一些其他的工具包和依赖包，我们可以这样查看所有可用的rpm包，对于这些rpm包的详细内容解说可以查看官网的<a target="_blank" rel="noopener" href="https://openresty.org/en/rpm-packages.html">文档</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum --disablerepo&#x3D;&quot;*&quot; --enablerepo&#x3D;&quot;openresty&quot; list available</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://resource.tinychen.com/20210317112817.png"></p>
+<p>下面简单介绍几个重点的rpm包。</p>
+<h3 id="2-2-1-openresty"><a href="#2-2-1-openresty" class="headerlink" title="2.2.1 openresty"></a>2.2.1 openresty</h3><p>这是用于核心 OpenResty 服务的生产版本。也就是整个openresty中提供主要服务的核心功能文件。在使用rpm包安装的情况下，系统中的openresty指令会链接到<code>/usr/bin/openresty</code>，而<code>/usr/bin/openresty</code>实际上是<code>/usr/local/openresty/nginx/sbin/nginx</code>的软链接</p>
+<p><img src="https://resource.tinychen.com/20210317112824.png"></p>
+<p>实际上<code>/usr/local/openresty/nginx/sbin/nginx</code>才是整个openresty的nginx可执行文件的本体，我们加上-V参数即可查看它包括编译模块在内的详细情况。之所以要将其软链接到<code>/usr/bin/openresty</code>，官方解释是为了避免和机器上已有的nginx发生冲突。</p>
+<p><img src="https://resource.tinychen.com/20210317112828.png"></p>
+<blockquote>
+<p>从上面的编译参数中我们可以看到openresty使用了它们自己维护的openssl库、zlib库、pcre库和LuaJIT库，这样一来能够较好地控制各个库之间的版本以及功能更新和同步协调。</p>
+</blockquote>
+<h3 id="2-2-2-openresty-resty"><a href="#2-2-2-openresty-resty" class="headerlink" title="2.2.2 openresty-resty"></a>2.2.2 openresty-resty</h3><p>这个包里面有 <code>resty</code> 命令行程序，这个工具包主要依赖于 <a target="_blank" rel="noopener" href="https://github.com/openresty/resty-cli">resty-cli</a> 这个项目，这个包依赖标准 的<code>perl</code> 包以及上面提到的 <code>openresty</code> 包才能正常工作。默认情况下它是指向<code>/usr/bin/resty</code>目录的一个环境变量，并且源文件在<code>/usr/local/openresty/bin/resty</code></p>
+<p><img src="https://resource.tinychen.com/20210317112832.png"></p>
+<p>个人认为这个工具包的主要作用就是方便我们进行一些简单的命令调试</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> resty -e <span class="string">'ngx.say("hello")'</span></span></span><br><span class="line">hello</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-3-openresty-doc"><a href="#2-2-3-openresty-doc" class="headerlink" title="2.2.3 openresty-doc"></a>2.2.3 openresty-doc</h3><p>顾名思义这个rpm包最重要的功能就是提供文档查询，一般来说需要注意使用UTF-8编码的Terminal即可。和man命令有些类似，如果我们想要查询openresty中某个模块的相关文档，只需要使用<code>restydoc</code>命令即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 我们可以直接输入对应的模块命查看对应的文档</span><br><span class="line">restydoc ngx_lua</span><br><span class="line">restydoc ngx_lua_upstream</span><br><span class="line">restydoc ngx_http_v2_module</span><br><span class="line">restydoc luajit</span><br><span class="line"># 也可以加入-s参数查看某条指令或某个部分的文档</span><br><span class="line">restydoc -s content_by_lua</span><br><span class="line">restydoc -s proxy_pass</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-4-openresty-openssl"><a href="#2-2-4-openresty-openssl" class="headerlink" title="2.2.4 openresty-openssl"></a>2.2.4 openresty-openssl</h3><p>这是openresty官方维护的 OpenSSL 库。为了节省开销，这个版本禁用了在构建中对于多线程的支持。此外，这个版本最重要的是OpenResty官方加入了他们自己的一些补丁包来支持一些openssl的最新特性，同时也做了一些优化使得比较旧的系统也能够支持最新版本的openssl。<strong>同理，不仅是openssl，openresty自己维护的pcre和zlib库也是有这种的目的。</strong></p>
+<blockquote>
+<p>和nginx默认的rpm版本使用的还是较旧/稳定的openssl版本相比，openresty对于openssl版本的支持无疑是比较激进的。</p>
+</blockquote>
+<h3 id="2-2-5-其他"><a href="#2-2-5-其他" class="headerlink" title="2.2.5 其他"></a>2.2.5 其他</h3><p>更多详细的包介绍可以查看官方的英文文档，介绍的比较全面，一般来说就是主要的几个工具软件如openresty、openssl、pcre、zlib等等的主要生产版本、debug版本、asan版本、valgrind版本等，这里不做赘述。</p>
+<h2 id="2-3-rpm包安装openresty"><a href="#2-3-rpm包安装openresty" class="headerlink" title="2.3 rpm包安装openresty"></a>2.3 rpm包安装openresty</h2><p>虽然上面介绍了很多个openresty相关的包，但是实际上安装的时候只需要安装openresty，其他的依赖关系会由yum自动处理。注意openresty-doc、openresty-resty等是可选安装的包。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># add the yum repo:</span><br><span class="line">wget https:&#x2F;&#x2F;openresty.org&#x2F;package&#x2F;centos&#x2F;openresty.repo</span><br><span class="line">sudo mv openresty.repo &#x2F;etc&#x2F;yum.repos.d&#x2F;</span><br><span class="line"></span><br><span class="line"># update the yum index:</span><br><span class="line">sudo yum check-update</span><br><span class="line"></span><br><span class="line"># use yum to install</span><br><span class="line">yum install openresty</span><br></pre></td></tr></table></figure>
+
+<p>安装完成之后会在默认的目录路径<code>/usr/local/openresty/nginx</code>下面生成对应的配置文件目录，我们将其和yum安装的nginx和编译安装的nginx对比可以发现几乎是一致的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用yum安装的nginx</span></span><br><span class="line">[root@tiny-test nginx]<span class="comment"># pwd</span></span><br><span class="line">/etc/nginx</span><br><span class="line">[root@tiny-test nginx]<span class="comment"># ls</span></span><br><span class="line">conf.d  fastcgi_params  koi-utf  koi-win  mime.types  modules  nginx.conf  scgi_params  uwsgi_params  win-utf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 源码编译安装的nginx</span></span><br><span class="line">[root@tiny-test nginx]<span class="comment"># pwd</span></span><br><span class="line">/home/nginx</span><br><span class="line">[root@tiny-test nginx]<span class="comment"># ls</span></span><br><span class="line">client_body_temp  conf  fastcgi_temp  html  logs  sbin  scgi_temp  uwsgi_temp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用yum安装的openresty目录下的nginx</span></span><br><span class="line">[root@tiny-test nginx]<span class="comment"># pwd</span></span><br><span class="line">/usr/<span class="built_in">local</span>/openresty/nginx</span><br><span class="line">[root@tiny-test nginx]<span class="comment"># ls</span></span><br><span class="line">client_body_temp  conf  fastcgi_temp  html  logs  proxy_temp  sbin  scgi_temp  uwsgi_temp</span><br></pre></td></tr></table></figure>
+
+<p>我们简单写一个nginx.conf配置文件用来测试即可，文件使用默认路径的<code>/usr/local/openresty/nginx/conf/nginx.conf</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">[root@tiny-test conf]<span class="comment"># openresty -T</span></span><br><span class="line">nginx: the configuration file /usr/<span class="built_in">local</span>/openresty/nginx/conf/nginx.conf syntax is ok</span><br><span class="line">nginx: configuration file /usr/<span class="built_in">local</span>/openresty/nginx/conf/nginx.conf <span class="built_in">test</span> is successful</span><br><span class="line"><span class="comment"># configuration file /usr/local/openresty/nginx/conf/nginx.conf:</span></span><br><span class="line">user root;</span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">error_log logs/error.log;</span><br><span class="line"></span><br><span class="line">pid logs/nginx.pid;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections 1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line"></span><br><span class="line">    log_format main</span><br><span class="line">    <span class="string">'$remote_addr | [$time_local] | $status | $scheme | '</span></span><br><span class="line">    <span class="string">'$server_name | request= $request | request_uri= $request_uri | http_referer= $http_referer | '</span></span><br><span class="line">    <span class="string">'UA= $http_user_agent | $request_time | $ssl_protocol | $ssl_cipher | '</span></span><br><span class="line">    <span class="string">'remote_port= $remote_port | $request_id'</span>;</span><br><span class="line"></span><br><span class="line">    access_log logs/access.log main;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen 8080;</span><br><span class="line">        location / &#123;</span><br><span class="line">            default_type text/html;</span><br><span class="line">            content_by_lua_block &#123;</span><br><span class="line">                ngx.say(<span class="string">"&lt;p&gt;hello, world&lt;/p&gt;"</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>分别使用curl和浏览器测试均正常</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@tiny-test conf]# curl 10.224.192.144:8080</span><br><span class="line">&lt;p&gt;hello, world&lt;&#x2F;p&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:\Users\tinychen\OneDrive\Blogs\pic_cache\20210309-openresty01\image-20210312144310441.png" alt="image-20210312144310441"></p>
+<p>日志中也能看到对应的操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@tiny-test conf]# tail -f ..&#x2F;logs&#x2F;access.log</span><br><span class="line">10.224.192.144 | [12&#x2F;Mar&#x2F;2021:14:42:25 +0800] | 200 | http |  | request&#x3D; GET &#x2F; HTTP&#x2F;1.1 | request_uri&#x3D; &#x2F; | http_referer&#x3D; - | UA&#x3D; curl&#x2F;7.29.0 | 0.000 | - | - | remote_port&#x3D; 34626 | 602882ad9b5cf910bea2f6d13ce4bf5e</span><br><span class="line">10.228.18.249 | [12&#x2F;Mar&#x2F;2021:14:42:51 +0800] | 200 | http |  | request&#x3D; GET &#x2F; HTTP&#x2F;1.1 | request_uri&#x3D; &#x2F; | http_referer&#x3D; - | UA&#x3D; Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;88.0.4324.190 Safari&#x2F;537.36 | 0.000 | - | - | remote_port&#x3D; 7148 | 5a91256294bf307ed62f48a06905dbc0</span><br><span class="line">10.228.18.249 | [12&#x2F;Mar&#x2F;2021:14:42:51 +0800] | 200 | http |  | request&#x3D; GET &#x2F;favicon.ico HTTP&#x2F;1.1 | request_uri&#x3D; &#x2F;favicon.ico | http_referer&#x3D; http:&#x2F;&#x2F;10.224.192.144:8080&#x2F; | UA&#x3D; Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;88.0.4324.190 Safari&#x2F;537.36 | 0.000 | - | - | remote_port&#x3D; 7148 | 372e7402db9f396950dae48b66a7e1ce</span><br></pre></td></tr></table></figure>
+
+<p>再查看端口监听和服务进程都正常</p>
+<p><img src="https://resource.tinychen.com/20210317112842.png"></p>
+<p>那么就可以基本判定这次的安装是顺利安装成功了。</p>
+<h1 id="3、源码编译安装"><a href="#3、源码编译安装" class="headerlink" title="3、源码编译安装"></a>3、源码编译安装</h1><p>如果需要进行定制化，那么从源码开始进行编译安装就是我们的不二之选。首先我们去<a target="_blank" rel="noopener" href="https://openresty.org/en/download.html">官网</a>下载最新版本的openresty源码包并解压。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;home</span><br><span class="line">wget https:&#x2F;&#x2F;openresty.org&#x2F;download&#x2F;openresty-1.19.3.1.tar.gz</span><br><span class="line">tar -zxvf openresty-1.19.3.1.tar.gz</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-1-编译环境"><a href="#3-1-编译环境" class="headerlink" title="3.1 编译环境"></a>3.1 编译环境</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@tiny-test home]# lsb_release -a</span><br><span class="line">LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch</span><br><span class="line">Distributor ID: CentOS</span><br><span class="line">Description:    CentOS Linux release 7.9.2009 (Core)</span><br><span class="line">Release:        7.9.2009</span><br><span class="line">Codename:       Core</span><br></pre></td></tr></table></figure>
+
+<p>同时我们还需要准备编译使用的工具如编译器等，对于CentOS7，我们可以简单的安装整个开发工具包<code>Development Tools</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum grouplist</span><br><span class="line">yum groupinstall <span class="string">"Development Tools"</span> -y</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-2-准备openssl、pcre和zlib"><a href="#3-2-准备openssl、pcre和zlib" class="headerlink" title="3.2 准备openssl、pcre和zlib"></a>3.2 准备openssl、pcre和zlib</h2><p>和nginx一样，我们手动下载准备最新版本的openssl、pcre和zlib，注意这三个库<strong>只需要下载解压，并不需要提前进行安装</strong>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载</span></span><br><span class="line">wget https://www.openssl.org/<span class="built_in">source</span>/openssl-1.1.1j.tar.gz</span><br><span class="line">wget https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz</span><br><span class="line">wget https://zlib.net/zlib-1.2.11.tar.gz</span><br><span class="line"><span class="comment"># 解压</span></span><br><span class="line">tar -zxvf openssl-1.1.1j.tar.gz</span><br><span class="line">tar -zxvf pcre-8.44.tar.gz</span><br><span class="line">tar -zxvf zlib-1.2.11.tar.gz</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="3-3-编译安装"><a href="#3-3-编译安装" class="headerlink" title="3.3 编译安装"></a>3.3 编译安装</h2><p>和nginx的编译安装一样，我们可以自定义编译安装的模块，这里可以查看openresty模块的<a target="_blank" rel="noopener" href="https://openresty.org/en/components.html">官方说明</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd &#x2F;home&#x2F;openresty-1.19.3.1&#x2F;</span><br><span class="line">.&#x2F;configure --prefix&#x3D;&#x2F;home&#x2F;openresty --with-openssl&#x3D;&#x2F;home&#x2F;openssl-1.1.1j --with-pcre&#x3D;&#x2F;home&#x2F;pcre-8.44 --with-zlib&#x3D;&#x2F;home&#x2F;zlib-1.2.11 --with-http_realip_module --with-http_stub_status_module --with-debug --with-http_ssl_module --with-http_v2_module </span><br></pre></td></tr></table></figure>
+
+<p><img src="https://resource.tinychen.com/20210317112847.png"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gmake -j8</span><br><span class="line">gmake install</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://resource.tinychen.com/20210317112852.png"></p>
+<p>最后在安装完成的时候我们可以看到会把编译的openresty目录下的<code>/home/openresty/nginx/sbin/nginx</code>软链接到<code>/home/openresty/bin/openresty</code>，逻辑和yum安装的openresty一样</p>
+<p>如果想要方便全局操作，可以创建一个软链接。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s &#x2F;home&#x2F;openresty&#x2F;bin&#x2F;openresty &#x2F;usr&#x2F;local&#x2F;bin&#x2F;openresty</span><br></pre></td></tr></table></figure>
+
+<h1 id="4、OpenResty操作"><a href="#4、OpenResty操作" class="headerlink" title="4、OpenResty操作"></a>4、OpenResty操作</h1><p><strong>openresty的操作指令和nginx是完全一致的</strong>。具体如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[root@tiny-test home]# nginx -h</span><br><span class="line">nginx version: nginx&#x2F;1.19.8</span><br><span class="line">Usage: nginx [-?hvVtTq] [-s signal] [-p prefix]</span><br><span class="line">             [-e filename] [-c filename] [-g directives]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -?,-h         : this help</span><br><span class="line">  -v            : show version and exit</span><br><span class="line">  -V            : show version and configure options then exit</span><br><span class="line">  -t            : test configuration and exit</span><br><span class="line">  -T            : test configuration, dump it and exit</span><br><span class="line">  -q            : suppress non-error messages during configuration testing</span><br><span class="line">  -s signal     : send signal to a master process: stop, quit, reopen, reload</span><br><span class="line">  -p prefix     : set prefix path (default: &#x2F;etc&#x2F;nginx&#x2F;)</span><br><span class="line">  -e filename   : set error log file (default: &#x2F;var&#x2F;log&#x2F;nginx&#x2F;error.log)</span><br><span class="line">  -c filename   : set configuration file (default: &#x2F;etc&#x2F;nginx&#x2F;nginx.conf)</span><br><span class="line">  -g directives : set global directives out of configuration file</span><br><span class="line"></span><br><span class="line">[root@tiny-test home]# openresty -h</span><br><span class="line">nginx version: openresty&#x2F;1.19.3.1</span><br><span class="line">Usage: nginx [-?hvVtTq] [-s signal] [-c filename] [-p prefix] [-g directives]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -?,-h         : this help</span><br><span class="line">  -v            : show version and exit</span><br><span class="line">  -V            : show version and configure options then exit</span><br><span class="line">  -t            : test configuration and exit</span><br><span class="line">  -T            : test configuration, dump it and exit</span><br><span class="line">  -q            : suppress non-error messages during configuration testing</span><br><span class="line">  -s signal     : send signal to a master process: stop, quit, reopen, reload</span><br><span class="line">  -p prefix     : set prefix path (default: &#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;)</span><br><span class="line">  -c filename   : set configuration file (default: conf&#x2F;nginx.conf)</span><br><span class="line">  -g directives : set global directives out of configuration file</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-h</code> 打印帮助菜单</li>
+<li><code>-v</code> 小写的v是打印版本并退出</li>
+<li><code>-V</code> 大写的V是打印编译参数和版本信息并退出</li>
+<li><code>-t</code> 小写的t是测试配置文件是否有错误并退出</li>
+<li><code>-T</code> 大写的T是测试配置文件是否有误并且打印出生效的配置文件并退出，如果nginx.conf里面使用了include命令添加了其他的配置文件，也会一并拼接打印出来</li>
+<li><code>-q</code> 在测试期间不打印非错误信息，适合debug使用</li>
+<li><code>-s</code> 发送信号控制master进程，分别为<code>stop</code>（暴力停止）, <code>quit</code>（优雅停止）, <code>reopen</code>（重新打开日志文件）, <code>reload</code>（优雅重启）</li>
+<li><code>-p</code>通过-p参数来指定实际的工作目录，例如我们有两个不同的测试项目，则可以通过<code>openresty -p /path/to/app</code>在启动的时候指定不同的工作目录，从而实现允许多个不同的 OpenResty 应用共享同一个 OpenResty 服务程序的效果</li>
+<li><code>-c</code> 通过-c参数来指定不同的配置文件而非只是默认路径下的配置文件</li>
+<li><code>-g</code> 在启动的时候设定配置文件之外的全局指令，例如<code>openresty -g &quot;pid /var/run/nginx.pid; worker_processes 8;&quot;</code></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">Related Posts</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20190829-http-to-nginx\" rel="bookmark">个人博客web服务器换用nginx</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200323-nginx06-sendfile\" rel="bookmark">Nginx篇06——Sendfile指令及其原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx04-http-map-module\" rel="bookmark">Nginx篇04——map模块</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200320-nginx05-upstream-keepalive\" rel="bookmark">Nginx篇05——http长连接和keeplive</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\20200519-nginx-enable-http2-tls13\" rel="bookmark">nginx启用HTTP2和TLSv1.3</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+              <a href="/tags/openresty/" rel="tag"># openresty</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20210304-nginx-ssl-client-certificate/" rel="prev" title="给nginx添加双向证书认证">
+      <i class="fa fa-chevron-left"></i> 给nginx添加双向证书认证
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1%E3%80%81OpenResty%E7%AE%80%E4%BB%8B"><span class="nav-text">1、OpenResty简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2%E3%80%81yum%E5%AE%89%E8%A3%85"><span class="nav-text">2、yum安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E9%85%8D%E7%BD%AEyum%E6%BA%90"><span class="nav-text">2.1 配置yum源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-rpm%E5%8C%85%E4%BB%8B%E7%BB%8D"><span class="nav-text">2.2 rpm包介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-openresty"><span class="nav-text">2.2.1 openresty</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-openresty-resty"><span class="nav-text">2.2.2 openresty-resty</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-openresty-doc"><span class="nav-text">2.2.3 openresty-doc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-4-openresty-openssl"><span class="nav-text">2.2.4 openresty-openssl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-5-%E5%85%B6%E4%BB%96"><span class="nav-text">2.2.5 其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-rpm%E5%8C%85%E5%AE%89%E8%A3%85openresty"><span class="nav-text">2.3 rpm包安装openresty</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3%E3%80%81%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85"><span class="nav-text">3、源码编译安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83"><span class="nav-text">3.1 编译环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-%E5%87%86%E5%A4%87openssl%E3%80%81pcre%E5%92%8Czlib"><span class="nav-text">3.2 准备openssl、pcre和zlib</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85"><span class="nav-text">3.3 编译安装</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4%E3%80%81OpenResty%E6%93%8D%E4%BD%9C"><span class="nav-text">4、OpenResty操作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="TinyChen"
+      src="https://resource.tinychen.com/logo.jpg">
+  <p class="site-author-name" itemprop="name">TinyChen</p>
+  <div class="site-description" itemprop="description"> </div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">155</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">41</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/tiny777" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;tiny777" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:tinyseventh@gmail.com" title="Gmail → mailto:tinyseventh@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Gmail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.zhihu.com/people/tinyseventh/posts" title="知乎 → https:&#x2F;&#x2F;www.zhihu.com&#x2F;people&#x2F;tinyseventh&#x2F;posts" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>知乎</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/c3de3c0ad794" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;c3de3c0ad794" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>简书</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_36885515" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_36885515" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>CSDN</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">粤ICP备18140640号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2017 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TinyChen</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+      <span class="post-meta-item-text">Symbols count total: </span>
+    <span title="Symbols count total">692k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">Reading time total &asymp;</span>
+    <span title="Reading time total">10:29</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
