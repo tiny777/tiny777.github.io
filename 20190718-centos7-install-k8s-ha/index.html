@@ -1,0 +1,743 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="在VMware虚拟机中的CentOS7集群部署高可用的k8s集群环境(v1.15)。
+这里有两篇基础知识的补充和单master节点集群的搭建过程，有需要的同学可以看一下。
+k8s重要概念及各组件简介
+在CentOS7上部署k8s集群(v1.15)">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>在CentOS7上部署高可用的k8s集群(v1.15) - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="在CentOS7上部署高可用的k8s集群(v1.15)">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-07-18 11:00" pubdate>
+        July 18, 2019 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.2k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      31
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">在CentOS7上部署高可用的k8s集群(v1.15)</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：July 18, 2019 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>在VMware虚拟机中的CentOS7集群部署高可用的k8s集群环境(v1.15)。</p>
+<p>这里有两篇基础知识的补充和单master节点集群的搭建过程，有需要的同学可以看一下。</p>
+<p><a href="https://tinychen.com/20190715-k8s-concepts-intro/">k8s重要概念及各组件简介</a></p>
+<p><a href="https://tinychen.com/20190716-centos7-install-k8s/">在CentOS7上部署k8s集群(v1.15)</a></p>
+<span id="more"></span>
+
+<h1 id="1、前期工作"><a href="#1、前期工作" class="headerlink" title="1、前期工作"></a>1、前期工作</h1><h2 id="1-1-什么是高可用集群？"><a href="#1-1-什么是高可用集群？" class="headerlink" title="1.1 什么是高可用集群？"></a>1.1 什么是高可用集群？</h2><p>简单来说就是master节点不止一个的集群，我们知道k8s的node节点中，非master节点都需要听从master节点来进行任务的调度分配和负载均衡等操作，这样的好处就是我们只需要操作master节点就可以调度所有的node节点，坏处就是如果master节点崩了，那么整个集群也就崩掉了。所以这里的解决方案就是配置多个master节点，如果一个崩掉了还有别的备用备用节点顶上，不至于出现崩溃的情况。</p>
+<h2 id="1-2-集群机器"><a href="#1-2-集群机器" class="headerlink" title="1.2 集群机器"></a>1.2 集群机器</h2><p>这里必须要说一下，k8s对每个节点的机器配置的最低要求是2C2G，即两核心的CPU，2G的内存，低于这个配置也不是不能用，只是在初始化的时候会警告而已。这里小七采用的是虚拟机的方法（穷学生没有真机集群），具体的配置如下表。</p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">配置</th>
+<th align="center">IP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">VIP</td>
+<td align="center">不需要虚拟机，留一个IP即可</td>
+<td align="center">192.168.100.10</td>
+</tr>
+<tr>
+<td align="center">master20</td>
+<td align="center">8C4G，CentOS7.6</td>
+<td align="center">192.168.100.20</td>
+</tr>
+<tr>
+<td align="center">master21</td>
+<td align="center">8C4G，CentOS7.6</td>
+<td align="center">192.168.100.21</td>
+</tr>
+<tr>
+<td align="center">master22</td>
+<td align="center">8C4G，CentOS7.6</td>
+<td align="center">192.168.100.22</td>
+</tr>
+<tr>
+<td align="center">node30</td>
+<td align="center">8C8G，CentOS7.6</td>
+<td align="center">192.168.100.30</td>
+</tr>
+<tr>
+<td align="center">node31</td>
+<td align="center">8C8G，CentOS7.6</td>
+<td align="center">192.168.100.31</td>
+</tr>
+<tr>
+<td align="center">node32</td>
+<td align="center">8C8G，CentOS7.6</td>
+<td align="center">192.168.100.32</td>
+</tr>
+</tbody></table>
+<p>真机用的是一块渣渣i7-8700和64G的内存，勉强能撑一下。</p>
+<h2 id="1-3-集群间免密登录"><a href="#1-3-集群间免密登录" class="headerlink" title="1.3 集群间免密登录"></a>1.3 集群间免密登录</h2><p>之前专门写过一篇文章，这里不再赘述。<a href="https://tinychen.com/20190709-multi-ssh/">多主机间实现SSH免密登录</a></p>
+<p>需要注意的是，在hosts文件中，我们还需要为<code>192.168.100.10</code>添加一下解析。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;192.168.100.10  kubernetes.haproxy.com&quot;</span> &gt;&gt; /etc/hosts<br></code></pre></div></td></tr></table></figure>
+
+<p>这里的<code>kubernetes.haproxy.com</code>可以改成别的名字，但是注意后面要用到，建议改成有意义的名字。</p>
+<h2 id="1-4-时间同步-所有机器"><a href="#1-4-时间同步-所有机器" class="headerlink" title="1.4 时间同步(所有机器)"></a>1.4 时间同步(所有机器)</h2><p>这里我们使用ntpdate来进行时间同步</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-comment"># 使用阿里云的源同步时间</span><br>ntpdate ntp1.aliyun.com<br><br><span class="hljs-comment"># 最后查看一下时间</span><br>hwclock<br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>我们也可以在<code>/etc/cron.hourly/</code>下面直接新建一个文件，将<code>ntpdate ntp1.aliyun.com</code>这条命令写进去，这样cron就会每小时执行一次这个同步时间操作。<a href="https://tinychen.com/20190710-rhel7-cron/">关于cron可以点击这里了解。</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">ntpdate ntp1.aliyun.com</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+</blockquote>
+<h2 id="1-5-升级内核-所有机器"><a href="#1-5-升级内核-所有机器" class="headerlink" title="1.5 升级内核(所有机器)"></a>1.5 升级内核(所有机器)</h2><p>建议直接升级centos官方的内核，这样兼容性最好。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前内核版本</span><br>uname -r<br><br><span class="hljs-comment"># 更新yum源</span><br>yum update -y<br><br><span class="hljs-comment"># 升级yum源中的最新版内核</span><br>yum install -y kernel<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190718/3WGsaJ3zAOPe.png" srcset="/img/loading.gif" lazyload></p>
+<p>此外我们还需要设置一下内核的namespace</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">grubby --args=<span class="hljs-string">&quot;user_namespace.enable=1&quot;</span> --update-kernel=<span class="hljs-string">&quot;<span class="hljs-subst">$(grubby --default-kernel)</span>&quot;</span><br><br><span class="hljs-comment"># 重新加载内核</span><br>reboot<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="1-6-关闭防火墙-所有机器"><a href="#1-6-关闭防火墙-所有机器" class="headerlink" title="1.6 关闭防火墙(所有机器)"></a>1.6 关闭防火墙(所有机器)</h2><p>因为k8s涉及的端口非常多，我们先把防火墙关了，<strong>如果安装了iptable也先关掉。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 关闭centos7自带的firewall防火墙</span><br>systemctl disable firewalld.service <br>systemctl stop firewalld.service <br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-7-设置selinux-所有机器"><a href="#1-7-设置selinux-所有机器" class="headerlink" title="1.7 设置selinux(所有机器)"></a>1.7 设置selinux(所有机器)</h2><p><strong>来自官网的说明，必须把selinux改为permissive（直接生效无需重启）或者disabled（需要重启生效）</strong></p>
+<blockquote>
+<p>通过命令 <code>setenforce 0</code> 和 <code>sed ...</code> 可以将 SELinux 设置为 permissive 模式(将其禁用)。 只有执行这一操作之后，容器才能访问宿主的文件系统，进而能够正常使用 Pod 网络。您必须这么做，直到 kubelet 做出升级支持 SELinux 为止。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setenforce 0<br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>关于SELinux的简单介绍，<a href="https://tinychen.com/20190707-rhel7-selinux/">可以点击这里查看之前的博客。</a></p>
+</blockquote>
+<h2 id="1-8-关闭swap（所有机器）"><a href="#1-8-关闭swap（所有机器）" class="headerlink" title="1.8 关闭swap（所有机器）"></a>1.8 关闭swap（所有机器）</h2><p>k8s官方不推荐我们使用swap分区，所以这里我们也关闭掉。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">swapoff -a<br><br>vim /etc/fstab<br><span class="hljs-comment"># 注释掉swap分区启动挂载的那一行</span><br><br><span class="hljs-comment"># 重启机器</span><br>reboot<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="2、配置ipvs-所有机器"><a href="#2、配置ipvs-所有机器" class="headerlink" title="2、配置ipvs(所有机器)"></a>2、配置ipvs(所有机器)</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum源安装ipvs</span><br>yum install ipvsadm ipset -y<br></code></pre></div></td></tr></table></figure>
+
+
+
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使配置生效</span><br>sysctl --system<br></code></pre></div></td></tr></table></figure>
+
+
+
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 加载模块</span><br>modprobe -- ip_vs<br>modprobe -- ip_vs_rr<br>modprobe -- ip_vs_wrr<br>modprobe -- ip_vs_sh<br>modprobe -- nf_conntrack_ipv4<br><br><span class="hljs-comment"># 查看是否加载</span><br>lsmod | grep ip_vs<br><br><span class="hljs-comment"># 配置开机自加载</span><br>cat &lt;&lt;<span class="hljs-string">EOF &gt;&gt; /etc/rc.local</span><br><span class="hljs-string">modprobe -- ip_vs</span><br><span class="hljs-string">modprobe -- ip_vs_rr</span><br><span class="hljs-string">modprobe -- ip_vs_wrr</span><br><span class="hljs-string">modprobe -- ip_vs_sh</span><br><span class="hljs-string">modprobe -- nf_conntrack_ipv4</span><br><span class="hljs-string">EOF</span><br><br>chmod +x /etc/rc.d/rc.local<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="3、配置k8s相关网络参数-所有机器"><a href="#3、配置k8s相关网络参数-所有机器" class="headerlink" title="3、配置k8s相关网络参数(所有机器)"></a>3、配置k8s相关网络参数(所有机器)</h1><p>接着我们需要编辑一个k8s的配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 需要设定/etc/sysctl.d/k8s.conf的系统参数。</span><br>cat &lt;&lt;<span class="hljs-string">EOF &gt; /etc/sysctl.d/k8s.conf</span><br><span class="hljs-string">net.ipv4.tcp_keepalive_time = 600</span><br><span class="hljs-string">net.ipv4.tcp_keepalive_intvl = 30</span><br><span class="hljs-string">net.ipv4.tcp_keepalive_probes = 10</span><br><span class="hljs-string">net.ipv4.neigh.default.gc_stale_time = 120</span><br><span class="hljs-string">net.ipv4.conf.all.rp_filter = 0</span><br><span class="hljs-string">net.ipv4.conf.default.rp_filter = 0</span><br><span class="hljs-string">net.ipv4.conf.default.arp_announce = 2</span><br><span class="hljs-string">net.ipv4.conf.lo.arp_announce = 2</span><br><span class="hljs-string">net.ipv4.conf.all.arp_announce = 2</span><br><span class="hljs-string">net.ipv4.ip_forward = 1</span><br><span class="hljs-string">net.ipv4.tcp_max_tw_buckets = 5000</span><br><span class="hljs-string">net.ipv4.tcp_syncookies = 1</span><br><span class="hljs-string">net.ipv4.tcp_max_syn_backlog = 1024</span><br><span class="hljs-string">net.ipv4.tcp_synack_retries = 2</span><br><span class="hljs-string">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="hljs-string">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="hljs-string">net.netfilter.nf_conntrack_max = 2310720</span><br><span class="hljs-string">fs.inotify.max_user_watches=89100</span><br><span class="hljs-string">fs.may_detach_mounts = 1</span><br><span class="hljs-string">fs.file-max = 52706963</span><br><span class="hljs-string">fs.nr_open = 52706963</span><br><span class="hljs-string">net.bridge.bridge-nf-call-arptables = 1</span><br><span class="hljs-string">vm.swappiness = 0</span><br><span class="hljs-string">vm.overcommit_memory=1</span><br><span class="hljs-string">vm.panic_on_oom=0</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+<h1 id="4、配置iptables-所有机器"><a href="#4、配置iptables-所有机器" class="headerlink" title="4、配置iptables(所有机器)"></a>4、配置iptables(所有机器)</h1><p>保险起见，我们还需要配置iptables</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt; /etc/sysctl.conf &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="hljs-string">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="hljs-string">EOF</span><br><br>yum install -y bridge-utils.x86_64<br>modprobe bridge<br>modprobe br_netfilter<br><br>sysctl -p<br><br>reboot<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="5、检查配置-所有机器"><a href="#5、检查配置-所有机器" class="headerlink" title="5、检查配置(所有机器)"></a>5、检查配置(所有机器)</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 检查系统内核和模块是否适合运行 docker (仅适用于 linux 系统)</span><br>curl https://raw.githubusercontent.com/docker/docker/master/contrib/check-config.sh &gt; check-config.sh<br><br>bash ./check-config.sh<br></code></pre></div></td></tr></table></figure>
+
+<p>这里只需要保证必要项通过就可以了。</p>
+<h1 id="6、安装docker-所有机器"><a href="#6、安装docker-所有机器" class="headerlink" title="6、安装docker(所有机器)"></a>6、安装docker(所有机器)</h1><h2 id="6-1-安装docker"><a href="#6-1-安装docker" class="headerlink" title="6.1 安装docker"></a>6.1 安装docker</h2><p>centos版本的decker-ce官方安装指导：</p>
+<p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a></p>
+<p>这里我们主要是通过yum的方式来安装，如果出现无法连接docker官网的情况，建议检查一下网络，或者使用rpm的方式进行安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 导入官网提供的repo</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo<br><br><span class="hljs-comment"># 安装docker及其相关组件</span><br>sudo yum install -y docker-ce docker-ce-cli containerd.io<br><br><span class="hljs-comment"># 启动docker</span><br>sudo systemctl start docker<br><br><span class="hljs-comment"># 跑个helloworld看看</span><br>sudo docker run hello-world<br><br><span class="hljs-comment"># 最后我们还要设置一下开机启动</span><br>sudo systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="6-2-配置cgroup"><a href="#6-2-配置cgroup" class="headerlink" title="6.2 配置cgroup"></a>6.2 配置cgroup</h2><p>k8s推荐docker的cgroup驱动使用systemd，说是会更稳定，所以这里我们还需要修改一下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br>mkdir /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br>cat &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>mkdir -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="6-3-配置普通用户"><a href="#6-3-配置普通用户" class="headerlink" title="6.3 配置普通用户"></a>6.3 配置普通用户</h2><p>默认情况下，普通用户需要使用sudo才能操作docker，我们这里需要进行一些修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 切换到普通用户</span><br>su 普通用户名<br><br><span class="hljs-comment"># 创建docker组</span><br>sudo groupadd docker<br><br><span class="hljs-comment"># 将当前用户加入docker用户组</span><br>sudo gpasswd -a <span class="hljs-variable">$&#123;USER&#125;</span> docker<br><br><span class="hljs-comment"># 重启docker服务</span><br>sudo systemctl daemon-reload<br>sudo systemctl restart docker<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="7、安装配置keepalived、haproxy-所有master节点"><a href="#7、安装配置keepalived、haproxy-所有master节点" class="headerlink" title="7、安装配置keepalived、haproxy(所有master节点)"></a>7、安装配置keepalived、haproxy(所有master节点)</h1><h2 id="7-1-安装"><a href="#7-1-安装" class="headerlink" title="7.1 安装"></a>7.1 安装</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum源直接安装</span><br>yum install socat keepalived haproxy -y<br><br><span class="hljs-comment"># 设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> haproxy<br>systemctl <span class="hljs-built_in">enable</span> keepalived<br><br><span class="hljs-comment"># 备份一下原来的配置文件以防万一</span><br>mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak<br>mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="7-2-编辑haproxy配置文件"><a href="#7-2-编辑haproxy配置文件" class="headerlink" title="7.2 编辑haproxy配置文件"></a>7.2 编辑haproxy配置文件</h2><p>首先我们开启系统的日志功能</p>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">vim <span class="hljs-regexp">/etc/</span>rsyslog.conf     <span class="hljs-comment">#为其添加日志功能</span><br><span class="hljs-comment"># Provides UDP syslog reception</span><br><span class="hljs-variable">$ModLoad</span> imudp<br><span class="hljs-variable">$UDPServerRun</span> <span class="hljs-number">514</span>                   ------&gt;启动udp，启动端口后将作为服务器工作<br> <br><span class="hljs-comment"># Provides TCP syslog reception</span><br><span class="hljs-variable">$ModLoad</span> imtcp<br><span class="hljs-variable">$InputTCPServerRun</span> <span class="hljs-number">514</span>            ------&gt;启动tcp监听端口<br>local2.*                                                <span class="hljs-regexp">/var/</span>log/haproxy.log<br></code></pre></div></td></tr></table></figure>
+
+<p>注意配置文件里面的IP要根据自己的master节点实际情况进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt; /etc/haproxy/haproxy.cfg &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">global</span><br><span class="hljs-string">    log	127.0.0.1	local2</span><br><span class="hljs-string">    chroot      /var/lib/haproxy</span><br><span class="hljs-string">    pidfile     /var/run/haproxy.pid</span><br><span class="hljs-string">    maxconn     1024</span><br><span class="hljs-string">    user        haproxy</span><br><span class="hljs-string">    group       haproxy</span><br><span class="hljs-string">    daemon</span><br><span class="hljs-string">    nbproc      1</span><br><span class="hljs-string">    stats socket /var/lib/haproxy/stats</span><br><span class="hljs-string"></span><br><span class="hljs-string">defaults</span><br><span class="hljs-string">    mode                    tcp</span><br><span class="hljs-string">    log                     global</span><br><span class="hljs-string">    option                  tcplog</span><br><span class="hljs-string">    option                  dontlognull</span><br><span class="hljs-string">    option                  redispatch</span><br><span class="hljs-string">    retries                 3</span><br><span class="hljs-string">    timeout queue           1m</span><br><span class="hljs-string">    timeout connect         10s</span><br><span class="hljs-string">    timeout client          1m</span><br><span class="hljs-string">    timeout server          1m</span><br><span class="hljs-string">    timeout check           10s</span><br><span class="hljs-string"></span><br><span class="hljs-string">listen stats</span><br><span class="hljs-string">    mode   	http</span><br><span class="hljs-string">    bind	0.0.0.0:12345</span><br><span class="hljs-string">    stats   enable</span><br><span class="hljs-string">	log		127.0.0.1	local2</span><br><span class="hljs-string">	stats	realm  Haproxy\ Statistics</span><br><span class="hljs-string">    stats   uri     /stats</span><br><span class="hljs-string">    stats   auth    admin:admin</span><br><span class="hljs-string">    stats   admin   if TRUE</span><br><span class="hljs-string"></span><br><span class="hljs-string">frontend  k8s</span><br><span class="hljs-string">	bind	0.0.0.0:8443</span><br><span class="hljs-string">    mode      tcp</span><br><span class="hljs-string">    maxconn      200</span><br><span class="hljs-string">    default_backend     k8s-https</span><br><span class="hljs-string"></span><br><span class="hljs-string">backend k8s-https</span><br><span class="hljs-string">    balance      roundrobin</span><br><span class="hljs-string">	mode	tcp</span><br><span class="hljs-string">    server master220 192.168.100.20:6443  check inter 10000 fall 2 rise 2 weight 1</span><br><span class="hljs-string">    server master221 192.168.100.21:6443  check inter 10000 fall 2 rise 2 weight 1</span><br><span class="hljs-string">    server master222 192.168.100.22:6443  check inter 10000 fall 2 rise 2 weight 1</span><br><span class="hljs-string"></span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="7-3-编辑keepalived配置文件"><a href="#7-3-编辑keepalived配置文件" class="headerlink" title="7.3 编辑keepalived配置文件"></a>7.3 编辑keepalived配置文件</h2><p><strong>注意，三个节点keepalived配置文件存在区别：</strong></p>
+<ul>
+<li>router_id分别为master20、master21、master22</li>
+<li>state分别为MASTER、BACKUP、BACKUP</li>
+<li>priority分别为100、90、80</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt; /etc/keepalived/keepalived.conf &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">global_defs &#123;</span><br><span class="hljs-string">   router_id master20</span><br><span class="hljs-string">   script_user root</span><br><span class="hljs-string">   enable_script_security</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string"></span><br><span class="hljs-string">vrrp_script check_haproxy &#123;</span><br><span class="hljs-string">    script /etc/keepalived/check_haproxy.sh</span><br><span class="hljs-string">    interval 3</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string"></span><br><span class="hljs-string">vrrp_instance VI_1 &#123;</span><br><span class="hljs-string">    state MASTER</span><br><span class="hljs-string">    interface ens32</span><br><span class="hljs-string">    virtual_router_id 80</span><br><span class="hljs-string">    priority 100</span><br><span class="hljs-string">    advert_int 1</span><br><span class="hljs-string">    authentication &#123;</span><br><span class="hljs-string">        auth_type PASS</span><br><span class="hljs-string">        auth_pass 1111</span><br><span class="hljs-string">    &#125;</span><br><span class="hljs-string">    virtual_ipaddress &#123;</span><br><span class="hljs-string">        192.168.100.10/24</span><br><span class="hljs-string">    &#125;</span><br><span class="hljs-string">    track_script &#123;   </span><br><span class="hljs-string">        check_haproxy</span><br><span class="hljs-string">    &#125;</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+<p>此外我们还需要编辑一个检查的脚本来确保正常</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt; /etc/keepalived/check_haproxy.sh &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">#!/bin/bash</span><br><span class="hljs-string">NUM=`ps -C haproxy --no-header |wc -l`</span><br><span class="hljs-string">if [ $NUM -eq 0 ];then</span><br><span class="hljs-string">    systemctl stop keepalived</span><br><span class="hljs-string">fi</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="8、安装k8s-所有机器"><a href="#8、安装k8s-所有机器" class="headerlink" title="8、安装k8s(所有机器)"></a>8、安装k8s(所有机器)</h1><p>k8s官网提供的yum源并不太好用，我们这里使用阿里云的yum镜像源。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个yum源</span><br>cat &gt;&gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">exclude=kube*</span><br><span class="hljs-string">EOF</span><br><br>yum clean all<br><br>yum repolist<br><br>yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><span class="hljs-comment"># 启动kubelet并设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet<br></code></pre></div></td></tr></table></figure>
+
+<p>关于SELinux的简单介绍，可以点击这里查看之前的博客。</p>
+<h2 id="9-1-获取默认配置文件"><a href="#9-1-获取默认配置文件" class="headerlink" title="9.1 获取默认配置文件"></a>9.1 获取默认配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 获得默认配置文件。</span><br>kubeadm config <span class="hljs-built_in">print</span> init-defaults &gt; kubeadm.conf<br><br><span class="hljs-comment"># 查看需要的镜像</span><br>kubeadm config images list --config kubeadm.conf<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/sqMD0W66d4AF.png" srcset="/img/loading.gif" lazyload><br>不知道为啥这里显示的居然是1.14版本的，小七安装的明明是1.15版本，我们把<code>kubeadm.conf</code>里面的版本号改成1.15再查看</p>
+<p><img src="https://resource.tinychen.com/blog/20190717/przVGhQPmirw.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="9-2-编辑自定义配置文件"><a href="#9-2-编辑自定义配置文件" class="headerlink" title="9.2 编辑自定义配置文件"></a>9.2 编辑自定义配置文件</h2><p>注意下面的ip地址和版本号需要根据实际情况来进行改动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 配置文件kubuadm_master20.conf</span><br><br>apiVersion: kubeadm.k8s.io/v1beta2<br>kind: InitConfiguration<br>localAPIEndpoint:<br>  advertiseAddress: 192.168.100.20<br>  bindPort: 6443<br>---<br>apiVersion: kubeadm.k8s.io/v1beta2<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.15.0<br>controlPlaneEndpoint: <span class="hljs-string">&quot;kubernetes.haproxy.com:8443&quot;</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>apiServer:<br>  certSANs:<br>  - <span class="hljs-string">&quot;master20&quot;</span><br>  - <span class="hljs-string">&quot;master21&quot;</span><br>  - <span class="hljs-string">&quot;master22&quot;</span><br>  - 192.168.100.10<br>  - 192.168.100.20<br>  - 192.168.100.21<br>  - 192.168.100.22<br><br>networking:<br>  podSubnet: <span class="hljs-string">&quot;10.244.0.0/16&quot;</span><br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br><br>etcd:<br>  <span class="hljs-built_in">local</span>:<br>    extraArgs:<br>      listen-client-urls: <span class="hljs-string">&quot;https://127.0.0.1:2379,https://192.168.100.20:2379&quot;</span><br>      advertise-client-urls: <span class="hljs-string">&quot;https://192.168.100.20:2379&quot;</span><br>      listen-peer-urls: <span class="hljs-string">&quot;https://192.168.100.20:2380&quot;</span><br>      initial-advertise-peer-urls: <span class="hljs-string">&quot;https://192.168.100.20:2380&quot;</span><br>      initial-cluster: <span class="hljs-string">&quot;master20=https://192.168.100.20:2380&quot;</span><br>      initial-cluster-state: new<br>    serverCertSANs:<br>      - master20<br>      - 192.168.100.20<br>    peerCertSANs:<br>      - master20<br>      - 192.168.100.20<br>---<br>apiVersion: kubeproxy.config.k8s.io/v1alpha1<br>kind: KubeProxyConfiguration<br>mode: ipvs<br><br></code></pre></div></td></tr></table></figure>
+
+<h2 id="9-3-初始化"><a href="#9-3-初始化" class="headerlink" title="9.3 初始化"></a>9.3 初始化</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 拉取需要的镜像</span><br>kubeadm config images pull --config kubuadm_master20.conf<br><br><span class="hljs-comment"># 初始化</span><br>kubeadm init --config kubuadm_master20.conf<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/BM1ThaHUbcgV.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里的token需要记下来。然后我们需要切换到非root用户来进行配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 添加kubectl的自动补全功能</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="10、安装flannel网络（master20）"><a href="#10、安装flannel网络（master20）" class="headerlink" title="10、安装flannel网络（master20）"></a>10、安装flannel网络（master20）</h1><figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/coreos/</span>flannel<span class="hljs-regexp">/master/</span>Documentation/kube-flannel.yml<br></code></pre></div></td></tr></table></figure>
+
+<p>我们先下载一下配置文件，为了保险起见，我们手动指定网卡</p>
+<p><img src="https://resource.tinychen.com/blog/20190717/bFdDgyBt897N.png" srcset="/img/loading.gif" lazyload></p>
+<p>然后我们执行初始化安装操作。</p>
+<figure class="highlight coq"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs coq">kubectl <span class="hljs-built_in">apply</span> -f kube-flannel.yml<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/XQdoAPF9dvBU.png" srcset="/img/loading.gif" lazyload></p>
+<p>这时候我们再查看节点就会发现，coredns已经正常工作了。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">kubectl <span class="hljs-builtin-name">get</span> pods -A<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/ok3yVOxN6vYc.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="11、分发证书（master20）"><a href="#11、分发证书（master20）" class="headerlink" title="11、分发证书（master20）"></a>11、分发证书（master20）</h1><p>我们在master20节点上编写一个脚本进行证书的分发，只需要分发到其他的master节点即可。<strong>注意里面的ip地址和用户名需要根据实际情况进行修改。</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt; districert &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">#!/bin/bash</span><br><span class="hljs-string">for index in 21 22; do</span><br><span class="hljs-string">  ip=192.168.100.$&#123;index&#125;</span><br><span class="hljs-string">  ssh $ip &quot;mkdir -p /etc/kubernetes/pki/etcd/; mkdir -p /home/tinychen/.kube/&quot;</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/ca.crt $ip:/etc/kubernetes/pki/ca.crt</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/ca.key $ip:/etc/kubernetes/pki/ca.key</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/sa.key $ip:/etc/kubernetes/pki/sa.key</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/sa.pub $ip:/etc/kubernetes/pki/sa.pub</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/front-proxy-ca.crt $ip:/etc/kubernetes/pki/front-proxy-ca.crt</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/front-proxy-ca.key $ip:/etc/kubernetes/pki/front-proxy-ca.key</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/etcd/ca.crt $ip:/etc/kubernetes/pki/etcd/ca.crt</span><br><span class="hljs-string">  scp /etc/kubernetes/pki/etcd/ca.key $ip:/etc/kubernetes/pki/etcd/ca.key</span><br><span class="hljs-string">  scp /etc/kubernetes/admin.conf $ip:/etc/kubernetes/admin.conf</span><br><span class="hljs-string">  scp /etc/kubernetes/admin.conf $ip:/home/tinychen/.kube/config</span><br><span class="hljs-string">done</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+<h1 id="12、配置master21"><a href="#12、配置master21" class="headerlink" title="12、配置master21"></a>12、配置master21</h1><h2 id="12-1-编辑自定义配置文件"><a href="#12-1-编辑自定义配置文件" class="headerlink" title="12.1 编辑自定义配置文件"></a>12.1 编辑自定义配置文件</h2><p>注意下面的ip地址和版本号需要根据实际情况来进行改动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 配置文件kubeadm_master21.conf</span><br><br>apiVersion: kubeadm.k8s.io/v1beta2<br>kind: InitConfiguration<br>localAPIEndpoint:<br>  advertiseAddress: 192.168.100.21<br>  bindPort: 6443<br>---<br>apiVersion: kubeadm.k8s.io/v1beta2<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.15.0<br>controlPlaneEndpoint: <span class="hljs-string">&quot;kubernetes.haproxy.com:8443&quot;</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>apiServer:<br>  certSANs:<br>  - <span class="hljs-string">&quot;master20&quot;</span><br>  - <span class="hljs-string">&quot;master21&quot;</span><br>  - <span class="hljs-string">&quot;master22&quot;</span><br>  - 192.168.100.10<br>  - 192.168.100.20<br>  - 192.168.100.21<br>  - 192.168.100.22<br>networking:<br>  podSubnet: <span class="hljs-string">&quot;10.244.0.0/16&quot;</span><br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br><br>etcd:<br>  <span class="hljs-built_in">local</span>:<br>    extraArgs:<br>      listen-client-urls: <span class="hljs-string">&quot;https://127.0.0.1:2379,https://192.168.100.21:2379&quot;</span><br>      advertise-client-urls: <span class="hljs-string">&quot;https://192.168.100.21:2379&quot;</span><br>      listen-peer-urls: <span class="hljs-string">&quot;https://192.168.100.21:2380&quot;</span><br>      initial-advertise-peer-urls: <span class="hljs-string">&quot;https://192.168.100.21:2380&quot;</span><br>      initial-cluster: <span class="hljs-string">&quot;master20=https://192.168.100.20:2380,master21=https://192.168.100.21:2380&quot;</span><br>      initial-cluster-state: existing<br>    serverCertSANs:<br>      - master21<br>      - 192.168.100.21<br>    peerCertSANs:<br>      - master21<br>      - 192.168.100.21<br>---<br>apiVersion: kubeproxy.config.k8s.io/v1alpha1<br>kind: KubeProxyConfiguration<br>mode: ipvs<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="12-2-配置非root用户"><a href="#12-2-配置非root用户" class="headerlink" title="12.2 配置非root用户"></a>12.2 配置非root用户</h2><p>前面我们在脚本那里已经创建好了文件夹，我们这里只需要修改权限和添加自动补全就好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo chown $(id -u):$(id -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 添加kubectl的自动补全功能</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="12-3-初始化"><a href="#12-3-初始化" class="headerlink" title="12.3 初始化"></a>12.3 初始化</h2><p>注意这里的文件名和IP地址要根据实际情况进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 配置证书</span><br>kubeadm init phase certs all --config kubeadm_master21.conf<br><span class="hljs-comment"># 配置etcd</span><br>kubeadm init phase etcd <span class="hljs-built_in">local</span> --config kubeadm_master21.conf<br><span class="hljs-comment"># 生成kubelet配置文件</span><br>kubeadm init phase kubeconfig kubelet --config kubeadm_master21.conf<br><span class="hljs-comment"># 启动kubelet</span><br>kubeadm init phase kubelet-start --config kubeadm_master21.conf<br></code></pre></div></td></tr></table></figure>
+
+<p><strong>然后这一步要切换到非root用户</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将master21的etcd加入集群</span><br>kubectl <span class="hljs-built_in">exec</span> -n kube-system etcd-master20 -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --endpoints=https://192.168.100.20:2379 member add master21 https://192.168.100.21:2380<br><br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/KMrEwDxiDf17.png" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 启动 kube-apiserver、kube-controller-manager、kube-scheduler</span><br>kubeadm init phase kubeconfig all --config kubeadm_master21.conf<br>kubeadm init phase control-plane all --config kubeadm_master21.conf<br><br><span class="hljs-comment"># 将节点标记为master</span><br>kubeadm init phase mark-control-plane --config kubeadm_master21.conf<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/E50I4UqxbbuR.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="13、配置master22"><a href="#13、配置master22" class="headerlink" title="13、配置master22"></a>13、配置master22</h1><h2 id="13-1-编辑自定义配置文件"><a href="#13-1-编辑自定义配置文件" class="headerlink" title="13.1 编辑自定义配置文件"></a>13.1 编辑自定义配置文件</h2><p>注意下面的ip地址和版本号需要根据实际情况来进行改动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 配置文件kubeadm_master22.conf</span><br><br>apiVersion: kubeadm.k8s.io/v1beta2<br>kind: InitConfiguration<br>localAPIEndpoint:<br>  advertiseAddress: 192.168.100.22<br>  bindPort: 6443<br>---<br>apiVersion: kubeadm.k8s.io/v1beta2<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.15.0<br>controlPlaneEndpoint: <span class="hljs-string">&quot;kubernetes.haproxy.com:8443&quot;</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>apiServer:<br>  certSANs:<br>  - <span class="hljs-string">&quot;master20&quot;</span><br>  - <span class="hljs-string">&quot;master21&quot;</span><br>  - <span class="hljs-string">&quot;master22&quot;</span><br>  - 192.168.100.10<br>  - 192.168.100.20<br>  - 192.168.100.21<br>  - 192.168.100.22<br>networking:<br>  podSubnet: <span class="hljs-string">&quot;10.244.0.0/16&quot;</span><br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br><br>etcd:<br>  <span class="hljs-built_in">local</span>:<br>    extraArgs:<br>      listen-client-urls: <span class="hljs-string">&quot;https://127.0.0.1:2379,https://192.168.100.22:2379&quot;</span><br>      advertise-client-urls: <span class="hljs-string">&quot;https://192.168.100.22:2379&quot;</span><br>      listen-peer-urls: <span class="hljs-string">&quot;https://192.168.100.22:2380&quot;</span><br>      initial-advertise-peer-urls: <span class="hljs-string">&quot;https://192.168.100.22:2380&quot;</span><br>      initial-cluster: <span class="hljs-string">&quot;master20=https://192.168.100.20:2380,master21=https://192.168.100.21:2380,master22=https://192.168.100.22:2380&quot;</span><br>      initial-cluster-state: existing<br>    serverCertSANs:<br>      - master22<br>      - 192.168.100.22<br>    peerCertSANs:<br>      - master22<br>      - 192.168.100.22<br>---<br>apiVersion: kubeproxy.config.k8s.io/v1alpha1<br>kind: KubeProxyConfiguration<br>mode: ipvs<br><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="13-2-配置非root用户"><a href="#13-2-配置非root用户" class="headerlink" title="13.2 配置非root用户"></a>13.2 配置非root用户</h2><p>前面我们在脚本那里已经创建好了文件夹，我们这里只需要修改权限和添加自动补全就好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo chown $(id -u):$(id -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 添加kubectl的自动补全功能</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="13-3-初始化"><a href="#13-3-初始化" class="headerlink" title="13.3 初始化"></a>13.3 初始化</h2><p>注意这里的文件名和IP地址要根据实际情况进行修改。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 配置证书</span><br>kubeadm init phase certs all --config kubeadm_master22.conf<br><span class="hljs-comment"># 配置etcd</span><br>kubeadm init phase etcd <span class="hljs-built_in">local</span> --config kubeadm_master22.conf<br><span class="hljs-comment"># 生成kubelet配置文件</span><br>kubeadm init phase kubeconfig kubelet --config kubeadm_master22.conf<br><span class="hljs-comment"># 启动kubelet</span><br>kubeadm init phase kubelet-start --config kubeadm_master22.conf<br></code></pre></div></td></tr></table></figure>
+
+<p><strong>然后这一步要切换到非root用户</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将master22的etcd加入集群</span><br><br>kubectl <span class="hljs-built_in">exec</span> -n kube-system etcd-master20 -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt --cert-file /etc/kubernetes/pki/etcd/peer.crt --key-file /etc/kubernetes/pki/etcd/peer.key --endpoints=https://192.168.100.20:2379 member add master22 https://192.168.100.22:2380<br></code></pre></div></td></tr></table></figure>
+
+
+
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 启动 kube-apiserver、kube-controller-manager、kube-scheduler</span><br>kubeadm init phase kubeconfig all --config kubeadm_master22.conf<br>kubeadm init phase control-plane all --config kubeadm_master22.conf<br><br><span class="hljs-comment"># 将节点标记为master</span><br>kubeadm init phase mark-control-plane --config kubeadm_master22.conf<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/LHqaqwhqRgIj.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="14、添加node节点"><a href="#14、添加node节点" class="headerlink" title="14、添加node节点"></a>14、添加node节点</h1><p>node节点的添加我们只需要切换到root用户执行之前master20初始化成功提示的指令即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubeadm join kubernetes.haproxy.com:8443 --token m42q2v.y8sffomwkgjlhx8h \<br>    --discovery-token-ca-cert-hash sha256:1829cbaf37e968b43f91e6f0b65e2f2b7985a2d3d17ec66f3af70e0d15db01de <br></code></pre></div></td></tr></table></figure>
+
+<h1 id="15、查看最终效果"><a href="#15、查看最终效果" class="headerlink" title="15、查看最终效果"></a>15、查看最终效果</h1><h2 id="查看节点"><a href="#查看节点" class="headerlink" title="查看节点"></a>查看节点</h2><p><img src="https://resource.tinychen.com/blog/20190717/c2MnYCxxCJiQ.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="查看pods"><a href="#查看pods" class="headerlink" title="查看pods"></a>查看pods</h2><p><img src="https://resource.tinychen.com/blog/20190717/QnXPwJikRui0.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="查看集群"><a href="#查看集群" class="headerlink" title="查看集群"></a>查看集群</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubectl <span class="hljs-built_in">exec</span> -n kube-system etcd-master20 \<br> -- etcdctl --ca-file /etc/kubernetes/pki/etcd/ca.crt \<br> --cert-file /etc/kubernetes/pki/etcd/peer.crt \<br> --key-file /etc/kubernetes/pki/etcd/peer.key \<br> --endpoints=https://192.168.100.20:2379 member list<br></code></pre></div></td></tr></table></figure>
+
+
+
+
+<p><img src="https://resource.tinychen.com/blog/20190717/Eo0C4JnfTGsg.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="查看ipvs情况"><a href="#查看ipvs情况" class="headerlink" title="查看ipvs情况"></a>查看ipvs情况</h2><p><img src="https://resource.tinychen.com/blog/20190717/Tt8eD0VvRoVw.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/devops/">devops</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/graduation/">graduation</a>
+                    
+                      <a class="hover-with-bg" href="/tags/k8s/">k8s</a>
+                    
+                      <a class="hover-with-bg" href="/tags/docker/">docker</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20190722-k8s-controller/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">在k8s中的controller简介</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20190716-centos7-install-k8s/">
+                        <span class="hidden-mobile">在CentOS7上部署单Master节点k8s集群(v1.15)</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

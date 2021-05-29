@@ -1,0 +1,644 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="NoSQL基本概念简介，常见的NoSQL数据库类型介绍以及MongoDB、Memcached和Redis的简单概念以及特性介绍。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>NoSQL数据库简介 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106171514.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="NoSQL数据库简介">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-04-24 10:00" pubdate>
+        April 24, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.8k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      26
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">NoSQL数据库简介</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：April 24, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>NoSQL基本概念简介，常见的NoSQL数据库类型介绍以及MongoDB、Memcached和Redis的简单概念以及特性介绍。</p>
+<span id="more"></span>
+
+<h1 id="1、什么是NoSQL"><a href="#1、什么是NoSQL" class="headerlink" title="1、什么是NoSQL"></a>1、什么是NoSQL</h1><p>NoSQL(Not only SQL)是对不同于传统的关系数据库的数据库管理系统的统称，即广义地来说可以把所有不是关系型数据库的数据库统称为NoSQL。</p>
+<p>NoSQL 数据库专门构建用于特定的数据模型，并且具有灵活的架构来构建现代应用程序。NoSQL 数据库使用各种数据模型来访问和管理数据。这些类型的数据库专门针对需要大数据量、低延迟和灵活数据模型的应用程序进行了优化，这是通过放宽其他数据库的某些数据一致性限制来实现的。</p>
+<p>数十年来，用于应用程序开发的主要数据模型是由关系数据库（如 Oracle、DB2、SQL Server、MySQL 和 PostgreSQL）使用的关系数据模型。直到 21 世纪中后期，才开始大规模采用和使用其他数据模型。为了对这些新类别的数据库和数据模型进行区分和分类，创造了术语“NoSQL”。通常术语“NoSQL”与“非关系”可互换使用。</p>
+<h2 id="1-1-NoSQL的常见类型"><a href="#1-1-NoSQL的常见类型" class="headerlink" title="1.1 NoSQL的常见类型"></a>1.1 NoSQL的常见类型</h2><h3 id="键值数据库"><a href="#键值数据库" class="headerlink" title="键值数据库"></a>键值数据库</h3><p>键值：键值数据库是高度可分区的，并且允许以其他类型的数据库无法实现的规模进行水平扩展。诸如游戏、广告技术和 IoT 等使用案例本身特别适合键值数据模型。Amazon DynamoDB 旨在为任意规模的工作负载提供一致且低于 10 毫秒的延迟。这种一致的性能是为何使用 Snapchat Stories 功能的主要原因，该功能包含移至 DynamoDB 的 Snapchat 的最大存储写入工作负载。</p>
+<p>键值数据库是一种非关系数据库，它使用简单的键值方法来存储数据。键值数据库将数据存储为键值对集合，其中键作为唯一标识符。键和值都可以是从简单对象到复杂复合对象的任何内容。键值数据库是高度可分区的，并且允许以其他类型的数据库无法实现的规模进行水平扩展。 </p>
+<h3 id="内存数据库"><a href="#内存数据库" class="headerlink" title="内存数据库"></a>内存数据库</h3><p>内存：游戏和广告技术应用程序具有排行榜、会话存储和实时分析等使用案例，它们需要微秒响应时间并且可能随时出现大规模的流量高峰。</p>
+<h3 id="文档数据库"><a href="#文档数据库" class="headerlink" title="文档数据库"></a>文档数据库</h3><p>文档：在应用程序代码中，数据通常表示为对象或 JSON 文档，因为对开发人员而言它是高效和直观的数据模型。文档数据库让开发人员可以使用他们在其应用程序代码中使用的相同文档模型格式，更轻松地在数据库中存储和查询数据。文档和文档数据库的灵活、半结构化和层级性质允许它们随应用程序的需求而变化。文档模型可以很好地与目录、用户配置文件和内容管理系统配合使用，其中每个文档都是唯一的，并会随时间而变化。</p>
+<p>文档数据库是一种非关系数据库，旨在将数据作为类 JSON 文档存储和查询。文档数据库让开发人员可以使用他们在其应用程序代码中使用的相同文档模型格式，更轻松地在数据库中存储和查询数据。文档和文档数据库的灵活、半结构化和层级性质允许它们随应用程序的需求而变化。文档模型可以很好地与目录、用户配置文件和内容管理系统等使用案例配合使用，其中每个文档都是唯一的，并会随时间而变化。文档数据库支持灵活的索引、强大的临时查询和文档集合分析。</p>
+<h3 id="图形数据库"><a href="#图形数据库" class="headerlink" title="图形数据库"></a>图形数据库</h3><p>图形：图形数据库旨在轻松构建和运行与高度连接的数据集一起使用的应用程序。图形数据库的典型使用案例包括社交网络、推荐引擎、欺诈检测和知识图形。热门图形数据库包括 Neo4j 和 Giraph。图形数据库专门用于存储和导航关系。关系是图形数据库中的一等公民，图形数据库的大部分价值都源自于这些关系。图形数据库使用节点来存储数据实体，并使用边缘来存储实体之间的关系。边缘始终有一个开始节点、结束节点、类型和方向，并且边缘可以描述父子关系、操作、所有权等。一个节点可以拥有的关系的数量和类型没有限制。</p>
+<p>图形数据库中的图形可依据具体的边缘类型进行遍历，或者也可对整个图形进行遍历。在图形数据库中，遍历联结或关系非常快，因为节点之间的关系不是在查询时计算的，而是留存在数据库中。在社交网络、推荐引擎和欺诈检测等使用案例中，您需要在数据之间创建关系并快速查询这些关系，此时，图形数据库更具优势。</p>
+<h3 id="搜索数据库"><a href="#搜索数据库" class="headerlink" title="搜索数据库"></a>搜索数据库</h3><p>搜索：许多应用程序输出日志以帮助开发人员解决问题。搜索引擎数据库是一种非关系数据库，专用于数据内容的搜索。搜索引擎数据库使用索引对数据之间的相似特征进行分类，并增强搜索功能。搜索引擎数据库经过优化，可处理可能是长数据，半结构数据或非结构数据的数据，并且它们通常提供专门的方法，例如全文搜索，复杂的搜索表达式和搜索结果排名。</p>
+<h2 id="1-2-关系型数据库和NoSQL"><a href="#1-2-关系型数据库和NoSQL" class="headerlink" title="1.2 关系型数据库和NoSQL"></a>1.2 关系型数据库和NoSQL</h2><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>关系数据库</strong></th>
+<th><strong>NoSQL 数据库</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>最佳工作负载</strong></td>
+<td>关系数据库专为事务性和高度一致的联机事务处理 (OLTP) 应用程序而设计，并且适用于联机分析处理 (OLAP)。</td>
+<td>NoSQL 数据库适用于包括低延迟应用程序在内的多种数据访问模式。NoSQL 搜索数据库设计用于对半结构化数据进行分析。</td>
+</tr>
+<tr>
+<td><strong>数据模型</strong></td>
+<td>关系模型可将数据标准化为由行和列组成的表。采用一种架构来严格定义表、行、列、索引、各个表之间的关系及其他数据库元素。数据库在表之间的关系中强制实施引用完整性。</td>
+<td>NoSQL 数据库提供了各种数据模型，如键值、文档和图形，这些模型针对性能和规模进行了优化。</td>
+</tr>
+<tr>
+<td><strong>ACID 属性</strong></td>
+<td>关系数据库提供原子性、一致性、隔离性和持久性 (ACID) 属性： 原子性要求事务完全执行或根本不执行。一致性要求事务提交之后，数据必须符合数据库架构。隔离性要求并发事务彼此分开执行。持久性要求能够从意外系统故障或断电情况中恢复到上一个已知状态。</td>
+<td>NoSQL 数据库通常通过放宽关系数据库的一些 ACID 属性来进行权衡，以获得可以水平扩展的更灵活的数据模型。这将使 NoSQL 数据库成为高吞吐量、低延迟使用案例的绝佳选择，这些使用案例需要水平扩展超出单个实例的限制。</td>
+</tr>
+<tr>
+<td><strong>性能</strong></td>
+<td>性能通常取决于磁盘子系统。要获得最佳性能，通常需要优化查询、索引和表结构。</td>
+<td>性能通常由底层硬件集群大小、网络延迟以及调用应用程序来决定。</td>
+</tr>
+<tr>
+<td><strong>扩展</strong></td>
+<td>关系数据库通常通过增加硬件的计算能力进行纵向扩展或通过为只读工作负载添加副本进行横向扩展。</td>
+<td>NoSQL 数据库通常是可分区的，因为访问模式可以通过使用分布式体系结构进行横向扩展来提高吞吐量，从而以接近无限的规模提供一致的性能。</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td>存储和检索数据的请求通过使用符合结构化查询语言 (SQL) 的查询来传达。这些查询由关系数据库解析和执行。</td>
+<td>借助基于对象的 API，应用开发人员可以轻松存储和检索数据结构。通过分区键，应用程序可以查找键值对、列集或包含序列化应用程序对象和属性的半结构化文档。</td>
+</tr>
+</tbody></table>
+<h2 id="1-3-分布式系统的CAP原理"><a href="#1-3-分布式系统的CAP原理" class="headerlink" title="1.3 分布式系统的CAP原理"></a>1.3 分布式系统的CAP原理</h2><p>在理论计算机科学中，CAP定理（CAP theorem），又被称作布鲁尔定理（Brewer’s theorem），它指出对于一个分布式计算系统来说，不可能同时满足以下三点：</p>
+<ul>
+<li>一致性（Consistency） （等同于所有节点访问同一份最新的数据副本）</li>
+<li>可用性（Availability）（每次请求都能获取到非错的响应——但是不保证获取的数据为最新数据）</li>
+<li>分区容错性（Partition tolerance）（以实际效果而言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。）</li>
+</ul>
+<p>根据定理，分布式系统只能满足三项中的两项而不可能满足全部三项。理解CAP理论的最简单方式是想象两个节点分处分区两侧。允许至少一个节点更新状态会导致数据不一致，即丧失了C性质。如果为了保证数据一致性，将分区一侧的节点设置为不可用，那么又丧失了A性质。除非两个节点可以互相通信，才能既保证C又保证A，这又会导致丧失P性质。</p>
+<h2 id="1-3-NoSQL的BASE原则"><a href="#1-3-NoSQL的BASE原则" class="headerlink" title="1.3 NoSQL的BASE原则"></a>1.3 NoSQL的BASE原则</h2><p>BASE：Basically Available, Soft-state, Eventually Consistent。 由 Eric Brewer 定义。BASE是NoSQL数据库通常对可用性及一致性的弱要求原则:</p>
+<ul>
+<li>Basically Availble –基本可用</li>
+<li>Soft-state –软状态/柔性事务。 “Soft state” 可以理解为”无连接”的, 而 “Hard state” 是”面向连接”的</li>
+<li>Eventual Consistency – 最终一致性， 也是是 ACID 的最终目的。</li>
+</ul>
+<p>BASE模型是传统ACID模型的反面，不同于ACID，BASE强调牺牲高一致性，从而获得可用性，数据允许在一段时间内的不一致，只要保证最终一致就可以了。</p>
+<h1 id="2、MongoDB"><a href="#2、MongoDB" class="headerlink" title="2、MongoDB"></a>2、MongoDB</h1><p>MongoDB 是由C++语言编写的基于分布式文件存储的开源数据库系统（document database）。MongoDB数据库中的记录称为文档（document），是一种由字段和值（field and value）成对组成的key-value键值型数据结构，格式上和常用的json格式类似，字段的值可以包括其他文档，数组和文档数组。</p>
+<figure class="highlight json"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs json">&#123;<br>  name: <span class="hljs-string">&quot;sue&quot;</span>,<br>  age: <span class="hljs-number">26</span>,<br>  status: <span class="hljs-string">&quot;A&quot;</span>,<br>  groups: [<span class="hljs-string">&quot;news&quot;</span>,<span class="hljs-string">&quot;sports&quot;</span>]<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>使用文档的主要优势在于可以支持许多编程语言的原生数据类型，避免不必要的join操作以及动态的schema模式可以流畅地支持多态类型。</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/36946572/meaning-of-dynamic-schema-supports-fluent-polymorphism-in-mongodb-doc">Dynamic schema supports fluent polymorphism</a>。</p>
+</blockquote>
+<p>MongoDB将文档存储到集合（collections）中，集合与关系型数据库中的数据表类似。除了集合之外，MongoDB还支持只读视图（3.4）和按需实例化视图（4.2）。</p>
+<p>除了最主要的文档特性外，MongoDB还具有以下特性：</p>
+<h2 id="2-1-High-Performance"><a href="#2-1-High-Performance" class="headerlink" title="2.1 High Performance"></a>2.1 High Performance</h2><p>MongoDB提供了高性能的数据持久化存储功能，主要是</p>
+<ul>
+<li>通过支持嵌入式的数据模型来减少数据库系统的I/O操作</li>
+<li>索引支持更快的查询，并且可以包括来自嵌入式文档和数组的键</li>
+</ul>
+<h2 id="2-2-Rich-Query-Language"><a href="#2-2-Rich-Query-Language" class="headerlink" title="2.2 Rich Query Language"></a>2.2 Rich Query Language</h2><p>MongoDB提供了丰富的查询语句用于支持CRUD等操作，除了常规的查询语句还支持如</p>
+<p>Data Aggregation（数据聚合）、Text Search 、 Geospatial Queries和mapping等操作</p>
+<ul>
+<li>聚合操作（Data Aggregation）处理数据记录并返回计算结果。聚合操作将来自多个文档的值组合在一起，并且可以对分组的数据执行各种操作以返回单个结果。MongoDB提供了三种执行聚合的方式：聚合管道，map-reduce函数和单一目的聚合方法。</li>
+<li>MongoDB支持使用文本索引和<code>$text</code>运算符执行字符串内容的文本搜索的查询操作。</li>
+<li>MongoDB还支持地理空间位置的查询操作</li>
+</ul>
+<h2 id="2-3-High-Availability"><a href="#2-3-High-Availability" class="headerlink" title="2.3 High Availability"></a>2.3 High Availability</h2><p>MongoDB的复制工具（称为副本集 ）提供自动故障转移和数据冗余功能。副本集是一组维护相同数据集的MongoDB服务器，可提供冗余并提高数据可用性.</p>
+<h2 id="2-4-Horizontal-Scalability"><a href="#2-4-Horizontal-Scalability" class="headerlink" title="2.4 Horizontal Scalability"></a>2.4 Horizontal Scalability</h2><p>MongoDB的核心功能之一就是提供水平扩展能力。</p>
+<ul>
+<li>分片将数据分布在一组计算机上。 </li>
+<li>从3.4开始，MongoDB支持基于分片键创建数据区域。在均衡的集群中，MongoDB仅将区域覆盖的读写定向到区域内的那些分片。</li>
+</ul>
+<h2 id="2-5-Support-for-Multiple-Storage-Engines"><a href="#2-5-Support-for-Multiple-Storage-Engines" class="headerlink" title="2.5 Support for Multiple Storage Engines"></a>2.5 Support for Multiple Storage Engines</h2><p>MongoDB支持多种存储引擎，如<code>WiredTiger</code>和<code>In-Memory</code> 。此外，MongoDB还提供了存储引擎的API插件供第三方开发者开发存储引擎。</p>
+<h1 id="3、Memcached"><a href="#3、Memcached" class="headerlink" title="3、Memcached"></a>3、Memcached</h1><p>自由和开放源代码，高性能，分布式内存对象缓存系统，本质上是通用的，但旨在通过减轻数据库负载来加速动态Web应用程序。Memcached是一个内存中的键值存储，用于存储来自数据库调用，API调用或页面渲染结果的任意数据（字符串，对象）。Memcached简单但功能强大。其简单的设计可促进快速部署，易于开发，并解决了大型数据缓存面临的许多问题。它的API适用于大多数流行语言。Memcached对其特点介绍主要有以下几点：</p>
+<h2 id="3-1-Simple-Key-Value-Store"><a href="#3-1-Simple-Key-Value-Store" class="headerlink" title="3.1 Simple Key/Value Store"></a>3.1 Simple Key/Value Store</h2><p>Memcached的服务端并不在乎用户的数据具体是怎么样的，每一个项目/Item（相当于MySQL中的行）是由key、过期时间、标记/flags（可选）和原始数据组成。Memcached并不知道数据的数据结构，因此用户端必须要上传预序列化的数据。</p>
+<h2 id="3-2-Logic-Half-in-Client-Half-in-Server"><a href="#3-2-Logic-Half-in-Client-Half-in-Server" class="headerlink" title="3.2 Logic Half in Client, Half in Server"></a>3.2 Logic Half in Client, Half in Server</h2><p>一个完整的memcached过程实现是需要客户端和服务端共同完成的，也就是说有部分操作在客户端完成而另一部分在服务端完成。客户端负责选择哪一个服务器来进行读写和无法与服务器建立通信连接的时候该如何操作；服务器负责存储和拉取item，同时还负责内存的释放和复用等工作。</p>
+<h2 id="3-3-Servers-are-Disconnected-From-Each-Other"><a href="#3-3-Servers-are-Disconnected-From-Each-Other" class="headerlink" title="3.3 Servers are Disconnected From Each Other"></a>3.3 Servers are Disconnected From Each Other</h2><p>Memcached集群之间的服务器互相并不知道对方的存在，他们不交流、不同步、不广播、不复制，往集群中添加服务器就可以直接增加整个集群的可用内存。当客户端删除或者覆盖了记录该客户端的缓存数据的服务器的时候，缓存就会失效。</p>
+<h2 id="3-4-O-1"><a href="#3-4-O-1" class="headerlink" title="3.4 O(1)"></a>3.4 O(1)</h2><p>所有的命令实现起来都很快并且对加锁十分友好，这为所有用例提供了近乎确定的查询速度。官方表示对于比较慢的机器每次查询都在1ms以下，而高端服务器可以实现每秒百万的吞吐。</p>
+<blockquote>
+<p>Queries on slow machines should run in well under 1ms. High end servers can serve millions of keys per second in throughput.</p>
+</blockquote>
+<h2 id="3-5-Forgetting-is-a-Feature"><a href="#3-5-Forgetting-is-a-Feature" class="headerlink" title="3.5 Forgetting is a Feature"></a>3.5 Forgetting is a Feature</h2><p>Memcached默认使用LRU算法和懒惰回收机制。items会在指定的时间后失效，但不是失效后就马上把item从内存中删除，而是当内存不足需要新的内存来建立item时再去查找已经过期的item将其删除并释放内存。当没有过期的item且当内存不足时，Memcached会清除内存中尚未过期但是很久没有被使用的数据来释放内存从而保留那些被频繁访问的数据</p>
+<h2 id="3-6-Cache-Invalidation"><a href="#3-6-Cache-Invalidation" class="headerlink" title="3.6 Cache Invalidation"></a>3.6 Cache Invalidation</h2><p>Memcached使用哈希算法，因此客户端不是直接向所有可用主机广播更改，而是根据哈希表的记录直接访问保存有待失效数据的服务器。</p>
+<h1 id="4、Redis"><a href="#4、Redis" class="headerlink" title="4、Redis"></a>4、Redis</h1><p>Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams. Redis has built-in replication, Lua scripting, LRU eviction, transactions and different levels of on-disk persistence, and provides high availability via Redis Sentinel and automatic partitioning with Redis Cluster.</p>
+<p>Redis是一个基于BSD开源协议的，内存中的数据结构存储系统，可以用于数据库、缓存和消息中间件。它支持多种类型的数据结构，如 字符串（strings）， 散列（hashes）， 列表（lists）， 集合（sets）， 有序集合（sorted sets） 与范围查询， bitmaps， hyperloglogs 和 地理空间（geospatial） 索引半径查询。 Redis 内置了复制（replication），LUA脚本（Lua scripting）， LRU驱动事件（LRU eviction），事务（transactions） 和不同级别的数据持久化（persistence）， 并通过 Redis哨兵（Sentinel）和redis集群的自动分区提供高可用性。</p>
+<h2 id="4-1-Redis-vs-Memcached"><a href="#4-1-Redis-vs-Memcached" class="headerlink" title="4.1 Redis vs Memcached"></a>4.1 Redis vs Memcached</h2><p>缓存中间件 Memcache 和 Redis 的区别</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Memcached</th>
+<th>Redis</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据类型</td>
+<td>支持简单数据类型</td>
+<td>数据类型丰富</td>
+</tr>
+<tr>
+<td>数据持久化存储</td>
+<td>N</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>主从</td>
+<td>N</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>分片</td>
+<td>N</td>
+<td>Y</td>
+</tr>
+</tbody></table>
+<h2 id="4-2-Redis的特点"><a href="#4-2-Redis的特点" class="headerlink" title="4.2 Redis的特点"></a>4.2 Redis的特点</h2><ul>
+<li><p>redis 完全基于内存，绝大部分请求是纯粹的内存操作，执行效率高。</p>
+</li>
+<li><p>redis 使用单进程单线程模型的（K，V）数据库，将数据存储在内存中，存取均不会受到硬盘 IO 的限制，因此其执行速度极快。</p>
+<p>另外单线程也能处理高并发请求，还可以避免频繁上下文切换和锁的竞争，如果想要多核运行也可以启动多个实例。</p>
+<p>当然了，单线程也会有它的缺点，也是Redis的噩梦：<strong>阻塞。</strong>如果执行一个命令过长，那么会造成其他命令的阻塞，对于Redis是十分致命的，所以Redis是面向快速执行场景的数据库。</p>
+</li>
+<li><p>数据结构简单，对数据操作也简单，Redis 不使用表，不会强制用户对各个关系进行关联，不会有复杂的关系限制，其存储结构就是键值对，类似于 HashMap，HashMap 最大的优点就是存取的时间复杂度为 O(1)。</p>
+</li>
+<li><p>redis 使用I/O 多路复用模型，属于非阻塞 IO。Redis使用epoll作为I/O多路复用技术的实现，再加上Redis自身的事件处理模型将epoll的read、write、close等都转换成事件，不在网络I/O上浪费过多的时间。实现对多个FD读写的监控，提高性能。</p>
+</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/database/">database</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200427-lvs-principle-introduction/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">LVS三种模式的工作原理</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200417-dns-01-dns-theory-01-dns-introduction/">
+                        <span class="hidden-mobile">DNS系列之原理篇01-DNS原理介绍</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

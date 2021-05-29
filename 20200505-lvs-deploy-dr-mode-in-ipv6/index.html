@@ -1,0 +1,614 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要包括LVS DR模式在IPv4网络和IPv6网络下配置的一些差异对比。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>IPv6网络配置LVS的DR模式 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106171444.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="IPv6网络配置LVS的DR模式">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-05-05 10:00" pubdate>
+        May 5, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      17
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">IPv6网络配置LVS的DR模式</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：May 5, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要包括LVS DR模式在IPv4网络和IPv6网络下配置的一些差异对比。</p>
+<span id="more"></span>
+
+<h1 id="1、LVS-DR-via-IPv4"><a href="#1、LVS-DR-via-IPv4" class="headerlink" title="1、LVS DR via IPv4"></a>1、LVS DR via IPv4</h1><p>首先这里我们使用三台主机配置lvs集群，对应的系统和内核版本如下</p>
+<figure class="highlight subunit"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs subunit">[root@lvs81 ~]# lsb_release -a<br>LSB Version:    :base<span class="hljs-string">-4</span>.0-amd64:base<span class="hljs-string">-4</span>.0-noarch:core<span class="hljs-string">-4</span>.0-amd64:core<span class="hljs-string">-4</span>.0-noarch:graphics<span class="hljs-string">-4</span>.0-amd64:graphics<span class="hljs-string">-4</span>.0-noarch:printing<span class="hljs-string">-4</span>.0-amd64:printing<span class="hljs-string">-4</span>.0-noarch<br>Distributor ID: CentOS<br>Description:    CentOS release 6.10 (Final)<br>Release:        6.10<br>Codename:       Final<br>[root@lvs81 ~]# uname -r<br>2.6.32<span class="hljs-string">-754</span>.28.1.el6.x86_64<br></code></pre></div></td></tr></table></figure>
+
+<p>对应的IP地址如下</p>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">80</span>  lvsipv<span class="hljs-number">4</span><br><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">81</span>  lvs<span class="hljs-number">81</span><br><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">82</span>  lvs<span class="hljs-number">82</span><br><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">83</span>  lvs<span class="hljs-number">83</span><br><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">80</span> lvsipv<span class="hljs-number">6</span><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">81</span> lvs<span class="hljs-number">81</span><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">82</span> lvs<span class="hljs-number">82</span><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">83</span> lvs<span class="hljs-number">83</span><br></code></pre></div></td></tr></table></figure>
+
+<p><strong>其中lvs81对应为LB，lvs82和lvs83为RS，RS上部署nginx分别监听本机对应ipv4和ipv6地址的80端口用于测试。</strong></p>
+<h2 id="1-1-LB配置"><a href="#1-1-LB配置" class="headerlink" title="1.1 LB配置"></a>1.1 LB配置</h2><p>此处略去ipvs模块的加载和ipvsadm的安装。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">ifconfig eth1:1 192.168.100.80 broadcast 192.168.100.81 netmask 255.255.255.255 up<br>ipvsadm -A -t 192.168.100.80:80 -s rr <br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.82 -g<br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.83 -g   <br></code></pre></div></td></tr></table></figure>
+
+<p>修改ip_vs模块对应的哈希表的大小</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">echo &#x27;options ip_vs conn_tab_bits=20&#x27; &gt;/etc/modprobe.d/ipvs.conf<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-2-RS配置"><a href="#1-2-RS配置" class="headerlink" title="1.2 RS配置"></a>1.2 RS配置</h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">ifconfig lo:1 192.168.100.80 broadcast 192.168.100.80 netmask 255.255.255.255 up<br></code></pre></div></td></tr></table></figure>
+
+<p>同时需要修改内核参数，修改ARP请求对应的响应限制</p>
+<figure class="highlight vim"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vim">[root@lvs82 ~]# <span class="hljs-keyword">cat</span> /etc/sysctl.<span class="hljs-keyword">conf</span> | <span class="hljs-keyword">grep</span> arp<br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_announce=<span class="hljs-number">2</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_announce=<span class="hljs-number">2</span><br></code></pre></div></td></tr></table></figure>
+
+<h2 id="1-3-测试"><a href="#1-3-测试" class="headerlink" title="1.3 测试"></a>1.3 测试</h2><p><img src="https://resource.tinychen.com/20200427142152.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200427142220.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200427142536.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="2、ipv6和ipv4的一些差别"><a href="#2、ipv6和ipv4的一些差别" class="headerlink" title="2、ipv6和ipv4的一些差别"></a>2、ipv6和ipv4的一些差别</h1><ul>
+<li><p>ipv6中没有广播地址的概念</p>
+<blockquote>
+<p>在IPv4中广泛的使用单播、广播、组播的方式。而在IPv6的应用环境中，使用单播，组播、任意播的新方式。</p>
+</blockquote>
+</li>
+<li><p>ipv6中没有ARP协议，使用了升级版本的<strong>邻居发现协议</strong>（NDR）协议</p>
+<blockquote>
+<p>邻居发现的这些功能主要通过邻居发现协议报文实现，邻居发现协议分组装载在ICMPv6分组内部。邻居发现协议中定义了五种ICMPv6分组类型，它们的名称和作用如下。</p>
+<ul>
+<li><strong>路由器请求（RS，Router Solicitation）报文</strong></li>
+</ul>
+<p>当主机的接口开始工作时，主机会发送路由器请求消息，请求可能存在的路由器答复，即是为了探寻与自己相连的路由器的情况。</p>
+<ul>
+<li><strong>路由器通告（RA，Router Advertisement）报文</strong></li>
+</ul>
+<p>路由器通告由路由器周期性地发送，也可作为收到的路由器请求（来自主机）的响应发送出去。每个路由器通告中还可能包含前缀信息、链路配置和IPv6协议参数等信息。路由器通告宣告着路由器的存在和一些自身配置。</p>
+<ul>
+<li><strong>邻居请求（NS，Neighbor Solicitation）报文</strong></li>
+</ul>
+<p>节点可以发送邻居请求用以解析另一个节点的链路层地址和验证另一个节点的可达性。邻居请求还用来验证一条特定链路上的地址是否是唯一的：当节点上产生了一个新地址时，会向整个链路上的其它节点发送邻居请求，询问该地址是否已经被占用。如果该地址已经被占用，那么占用该地址的节点会回复邻居通告，否则多次检测后没有收到回复，则该新地址生效。</p>
+<ul>
+<li><strong>邻居通告（NA，Neighbor Advertisement）报文</strong></li>
+</ul>
+<p>节点可以发送邻居通告来响应邻居请求分组，它还会发送未经请求的邻居通告，将节点的链路层地址变化通知其它节点。</p>
+<ul>
+<li><strong>重定向（Redirect）报文</strong></li>
+</ul>
+<p>路由器通过重定向报文通知主机，对于一条特定的路由，如果不是最佳路由，则通知主机最佳路由及下一跳。</p>
+</blockquote>
+<p>实际上在IPv6协议过程中使用NDP协议根据IP查找MAC的过程主要使用的是NS和NA两种报文，它们相当于ARP协议中的ARP Request和ARP Reply。</p>
+</li>
+</ul>
+<h2 id="2-1-ipv6的地址分类"><a href="#2-1-ipv6的地址分类" class="headerlink" title="2.1 ipv6的地址分类"></a>2.1 ipv6的地址分类</h2><h3 id="2-1-1-ipv6的地址表示"><a href="#2-1-1-ipv6的地址表示" class="headerlink" title="2.1.1 ipv6的地址表示"></a>2.1.1 ipv6的地址表示</h3><p>IPv6地址的长度是IPv4（32位）的4倍，达到了128位，复杂程度大大提升，表达上使用了8组不区分大小写的16进制数来表示，每组由4个16进制数组成。IPv6地址一般使用“零缩法”来表示，主要限制如下：</p>
+<ul>
+<li>16位地址块中的前导0可以省略，如果16位全为0，可以只写一个0</li>
+<li>当IPv6地址中有多个连续的，值为0的16位地址块时，可以用1个双冒号转换这 些连续的0，但双冒号在一个IPv6地址中只能出现一次，也就是在一个IPv6地址只 能用一个双冒号转换一个连续的、值为0的16位地址块</li>
+<li>不能用双冒号转换属于16位地址块中一部分的0，即使是地址块中的最后一个16 进制数0</li>
+</ul>
+<h3 id="2-1-2-ipv6地址类型"><a href="#2-1-2-ipv6地址类型" class="headerlink" title="2.1.2 ipv6地址类型"></a>2.1.2 ipv6地址类型</h3><p>IPv6协议主要定义了三种地址类型：单播地址（Unicast Address）、组播地址 （Multicast Address）和任播地址（Anycast Address）。相比IPv4而言取消了广播地址，新增了任意播，而IPv4中的广播功能在IPv6中主要通过组播实现。由于两者的组播标准并无过多的改动，因此IPv6中的组播地址其实与IPv4中的组播地址是类似的。</p>
+<ul>
+<li>单播地址：用来唯一标识一个接口，类似于IPv4中的单播地址。发送到单播地址 的数据报文将被传送给此地址所标识的一个接口。 </li>
+<li>组播地址：用来标识一组接口（通常这组接口属于不同的节点），类似于IPv4中的组播地址。发送到组播地址的数据报文被传送给此地址所标识的所有接口。 </li>
+<li>任播地址：用来标识一组接口（通常这组接口属于不同的节点）。发送到任播地 址的数据报文被传送给此地址所标识的一组接口中距离源节点最近（根据使用的路 由协议进行度量）的一个接口。</li>
+</ul>
+<p><img src="https://resource.tinychen.com/20200428095049.png" srcset="/img/loading.gif" lazyload></p>
+<p>整个IPv6单播地址包括以下五个类型：全局单播地址、链路本地地址、站点本地地址、特殊地址、兼容性地址。由于篇幅有限，这里重点讲一下和LVS要用到的全局单播地址和链路本地地址。</p>
+<p>全局单播地址等同于IPv4中的公网地址，可以在IPv6 Internet上进行全局路由和访问。</p>
+<p>在IPv6中，本地单播地址就是指本地网络使用的单播地址，也就是IPV4地址中经常 所说的局域网专用地址。本地单播地址又有两种，分别是链路本地地址和站点本地 地址。每个接口上至少要有一个链路本地单播地址，另外还可分配任何类型（单 播、任播和组播）或范围的IPv6地址。</p>
+<p>链路本地地址仅用于单个链路（注意，这里的“链路”就相当于IPv4中的子网）， 不能在不同子网中路由。结点使用链路本地地址与同一个链路上的相邻结点进行通 信。</p>
+<p>链路本地地址等效于169.254.0.0/16网段的自动专用IP寻址（APIPA）IPv4地址 （在运行Windows系统的计算机上自动配置）。邻居发现过程要求使用链路本地地 址，该地址始终自动配置（也就是无须手工配置），即使所有其他单播地址都不存 在也是如此。</p>
+<p><img src="https://resource.tinychen.com/20200428100632.png" srcset="/img/loading.gif" lazyload></p>
+<p>从图中可以看出，链路本地地址始终以“1111111010”（FE80）开头。后面紧跟着 的54位均为0，最后的64位是用来标识接口，称为接口ID。在IPv6单播地址中的接 口ID用来标识一个链路上的接口，不能在同一个链路上为不同结点分配相同的接口 ID。所以对于链路本地地址的前缀始终是FE80：/64。IPv6路由器永远不会将链路 本地通信转发出该链路。</p>
+<h2 id="2-2-ipv6的NDP协议"><a href="#2-2-ipv6的NDP协议" class="headerlink" title="2.2 ipv6的NDP协议"></a>2.2 ipv6的NDP协议</h2><p>要理解IPv6的组播，首先需要明白三个关键点：</p>
+<ul>
+<li><p>任何节点都能够成为一个多播组成员也叫做组播组成员</p>
+</li>
+<li><p>源节点可以发送数据包到多播组</p>
+</li>
+<li><p>在一个多播组的节点都能收到发往该组播组的数据</p>
+</li>
+</ul>
+<p>在IPv4环境的的ARP地址解析协议是使用目标地址为广播（255.255.255.255或者FFFF.FFFF.FFFF）将MAC地址请求消息发送到整个以太网链路上的所有主机，即便是LB（lvs81）主机请求RS（lvs82）主机的MAC，RS（lvs82）主机与RS（lvs83）主机是同样会收到这个请求广播，从性能与效率上讲这明显不科学。</p>
+<p>所以在IPv6的环境中放弃了广播的的方式，而是采用组播方式将MAC地址的解析请求，以点对点的形式直接组播到lvs82主机的请求节点组播地址。而不再将请求消息发送到无关的lvs83主机，所以IPv6的节点请求的确是高效率去替代IPv4的ARP协议。总而言之就是使用点到点的方式去代替广播。</p>
+<p><img src="https://resource.tinychen.com/20200428113025.png" srcset="/img/loading.gif" lazyload></p>
+<p>那么对于IPv6来说，发送组播数据包的时候，也是不知道目标IP主机的MAC地址的，这时候就要用到IPv6中对应的组播IP地址和组播MAC地址了：</p>
+<p><img src="https://resource.tinychen.com/20200505225723.png" srcset="/img/loading.gif" lazyload></p>
+<p>从上图中我们可以看到，组播的IPv6地址是根据目标IPv6地址生成的，组播IPv6地址会取目标IPv6地址的低24位（2进制）来加上固定的前缀<code>FF02::1:FF</code>（16进制）从而生成对应的组播地址，而组播的MAC地址则是根据组播的IPv6地址的低32位（2进制）再加上固定前缀3333（16进制）生成。</p>
+<p>由于在同一个局域网中，IPv6地址低24位相同的概率十分小，因此组播包发送出去之后，接受该组播包的客户端几乎只有一个，就无限接近于一对一的单播效果，从而有效地避免了ARP协议使用广播方式的诸多问题。</p>
+<h1 id="3、LVS-DR-via-IPv6"><a href="#3、LVS-DR-via-IPv6" class="headerlink" title="3、LVS DR via IPv6"></a>3、LVS DR via IPv6</h1><p>同样还是使用上面的三台机器，由于IPv6中没有ARP的困扰，所以在配置的时候反而要比IPv4更加简单，我们只需要直接添加ip即可：</p>
+<blockquote>
+<p>IPv6模式下还使用了elrepo库中的lt版本的4.4.219-1内核进行测试，两者结果一致。均可直接正常工作。</p>
+</blockquote>
+<h2 id="3-1-LB配置"><a href="#3-1-LB配置" class="headerlink" title="3.1 LB配置"></a>3.1 LB配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">ifconfig eth2 inet6 add 240e:c331:dead:beef::3c80/128<br>ipvsadm -A -t [240e:c331:dead:beef::3c80]:80 -s rr<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c82]:80 -g<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c83]:80 -g<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="3-2-RS配置"><a href="#3-2-RS配置" class="headerlink" title="3.2 RS配置"></a>3.2 RS配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">ifconfig lo inet6 add 240e:c331:dead:beef::3c80/128<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/20200427143253.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="3-3-测试"><a href="#3-3-测试" class="headerlink" title="3.3 测试"></a>3.3 测试</h2><p>使用客户端进行访问，可以看到返回的是ipv6的结果，并且产生了预设的轮询效果。</p>
+<p><img src="https://resource.tinychen.com/20200427142630.png" srcset="/img/loading.gif" lazyload></p>
+<p>查看ipv6网络中的邻居表，可以看到对应的两个RS状态为可达（REACHABLE）,并且对应的MAC地址为RIP的ipv6地址所在的网卡。此外和IPv4中不同的是，对应的两台RS上面的Link-local地址在邻居表中的状态也显示为可达（REACHABLE）。</p>
+<p><img src="https://resource.tinychen.com/Inkedimage-20200427142653585_LI.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>查看LB上面的ipvsadm中的连接状态，我们可以看到连接已经建立并且确实转发到了后端的RS上。</p>
+<p><img src="https://resource.tinychen.com/20200427142833.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/network/">network</a>
+                    
+                      <a class="hover-with-bg" href="/tags/loadbalance/">loadbalance</a>
+                    
+                      <a class="hover-with-bg" href="/tags/lvs/">lvs</a>
+                    
+                      <a class="hover-with-bg" href="/tags/ipv6/">ipv6</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200507-wireshark-analysis-smtp/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Wireshark对SMTP抓包分析</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200504-tomcat-04-deploy-manager-serverxml/">
+                        <span class="hidden-mobile">Tomcat篇04-部署和管理</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

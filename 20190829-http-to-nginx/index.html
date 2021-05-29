@@ -1,0 +1,545 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="记录一下个人博客的web服务器从apache换成nginx的过程。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>个人博客web服务器换用nginx - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="个人博客web服务器换用nginx">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-08-29 15:00" pubdate>
+        August 29, 2019 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      995 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      7
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">个人博客web服务器换用nginx</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：August 29, 2019 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>记录一下个人博客的web服务器从apache换成nginx的过程。</p>
+<span id="more"></span>
+
+<h1 id="0、前言"><a href="#0、前言" class="headerlink" title="0、前言"></a>0、前言</h1><p>关于apache和nginx的对比有很多，小七就不在这里赘述了，之前大一搭建博客的时候还没有接触过nginx就用了apache，后来考RHCE的时候也学习配置的是apache，最近开始学习nginx，考虑到对于小七自己的静态博客和渣渣服务器性能来说，nginx应该更合适一些，因此这里就把web服务器换成了nginx。</p>
+<h1 id="1、备份快照"><a href="#1、备份快照" class="headerlink" title="1、备份快照"></a>1、备份快照</h1><p>在阿里云的官网控制台里面创建快照备份。如果不小心翻车了，还能用快照恢复。</p>
+<p><img src="https://resource.tinychen.com/blog/20190829/zSXLRVHpyovS.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="2、停用apache服务"><a href="#2、停用apache服务" class="headerlink" title="2、停用apache服务"></a>2、停用apache服务</h1><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@aliyun ~]# systemctl stop httpd.service <br>[root@aliyun ~]# systemctl disable httpd.service <br>Removed symlink /etc/systemd/system/multi-user.target.wants/httpd.service.<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190829/AnLNm50hcuQi.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、安装nginx"><a href="#3、安装nginx" class="headerlink" title="3、安装nginx"></a>3、安装nginx</h1><h2 id="3-1-导入yum源"><a href="#3-1-导入yum源" class="headerlink" title="3.1 导入yum源"></a>3.1 导入yum源</h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">cat &gt;&gt; /etc/yum.repo.d/nginx.repo &lt;&lt; EOF<br>[nginx] <br>name=nginx repo <br>baseurl=http://nginx.org/packages/mainline/centos/7/x86_64/<br>gpgcheck=0 <br>enabled=1 <br>EOF<br><br>yum clean all<br>yum repolist<br>yum install nginx -y<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190829/KPKuzP1YKqDo.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>这里小七使用的是nginx提供的yum源，因此版本可能会稍微新一点。</p>
+<p>想要安装最新版的同学可以前往官网下载源码进行编译安装。</p>
+<p>官网地址：<a target="_blank" rel="noopener" href="http://nginx.org/en/download.html">http://nginx.org/en/download.html</a></p>
+</blockquote>
+<h2 id="3-2-启用nginx服务并设置开机启动"><a href="#3-2-启用nginx服务并设置开机启动" class="headerlink" title="3.2 启用nginx服务并设置开机启动"></a>3.2 启用nginx服务并设置开机启动</h2><figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">[root@aliyun ~]<span class="hljs-comment"># systemctl enable nginx.service </span><br>Created symlink from <span class="hljs-regexp">/etc/</span>systemd<span class="hljs-regexp">/system/mu</span>lti-user.target.wants<span class="hljs-regexp">/nginx.service to /u</span>sr<span class="hljs-regexp">/lib/</span>systemd<span class="hljs-regexp">/system/</span>nginx.service.<br>[root@aliyun ~]<span class="hljs-comment"># systemctl start nginx.service</span><br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190829/5FFk81nESijB.png" srcset="/img/loading.gif" lazyload></p>
+<p>访问服务器IP。可以看到nginx已经开始工作。</p>
+<p><img src="https://resource.tinychen.com/blog/20190829/5EtVh023LmPH.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>这里有可能会出现<code>Failed to read PID from file /run/nginx.pid</code>的错误</p>
+<p>原因是<code>nginx</code>还没有完全启动，<code>systemd</code>就去读取该进程的PID导致无法读取报错，解决方法是让<code>systemd</code>晚一点读取。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">mkdir /etc/systemd/system/nginx.service.d<br><br>cat &gt;&gt; /etc/systemd/system/nginx.service.d/override.conf &lt;&lt; EOF<br>[Service]<br>ExecStartPost=/bin/sleep 0.1<br>EOF<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 重启服务再次查看</span><br>systemctl daemon-reload<br>systemctl restart nginx.service<br>systemctl status nginx.service <br></code></pre></div></td></tr></table></figure>
+</blockquote>
+<h1 id="4、配置nginx"><a href="#4、配置nginx" class="headerlink" title="4、配置nginx"></a>4、配置nginx</h1><p>由于小七安装的版本里面的配置文件默认并没有nginx的web的相关配置，所以我们一次把<code>http</code>、<code>https</code>和<code>http</code>自动跳转<code>https</code>配好。</p>
+<h2 id="4-1-查看版本"><a href="#4-1-查看版本" class="headerlink" title="4.1 查看版本"></a>4.1 查看版本</h2><p><img src="https://resource.tinychen.com/blog/20190829/IFjsD5ibg8XI.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-2-配置https"><a href="#4-2-配置https" class="headerlink" title="4.2 配置https"></a>4.2 配置https</h2><p>从申请ssl认证的供应商那里下载nginx服务器对应的https认证证书，并存放在<code>/etc/pki/CA/certs</code>目录下。（如果没有就新建该目录）</p>
+<blockquote>
+<p>如果不知道怎么申请的可以查看这篇博客：</p>
+<p><a href="https://tinychen.com/20190407-aliyun-centos-apache-https/">阿里云轻量级应用服务器CentOS系统Apache配置Https</a></p>
+</blockquote>
+<p><img src="https://resource.tinychen.com/blog/20190829/XpbISE5RvAyB.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-3-编辑配置文件："><a href="#4-3-编辑配置文件：" class="headerlink" title="4.3 编辑配置文件："></a>4.3 编辑配置文件：</h2><p>这里小七直接放出整个配置文件给大家参考：</p>
+<p>默认的配置文件位于<code>/etc/nginx/nginx.conf</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 执行进程操作的用户，默认nginx</span><br>user  nginx;<br><span class="hljs-meta">#</span><span class="bash"> 这里的数字最好设置成和自己服务的核心数一样</span><br>worker_processes  1;<br><br>error_log  /var/log/nginx/error.log warn;<br>pid        /var/run/nginx.pid;<br><br><br>events &#123;<br>    worker_connections  1024;<br>&#125;<br><br><br>http &#123;<br>    include       /etc/nginx/mime.types;<br>    default_type  application/octet-stream;<br><br>    log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;<br>                      &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;<br>                      &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;<br><br>    access_log  /var/log/nginx/access.log  main;<br><br>    sendfile        on;<br>    #tcp_nopush     on;<br><br>    keepalive_timeout  65;<br><br>    #gzip  on;<br><br>    include /etc/nginx/conf.d/*.conf;<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> Settings <span class="hljs-keyword">for</span> a TLS enabled server.</span><br><span class="hljs-meta">#</span><span class="bash"> 这里我们把80和443端口一起配置</span><br>    server &#123;<br>		listen       80 default_server;<br>        listen       443 ssl;<br>        listen       [::]:443 ssl;<br>        # 这里填写自己的域名<br>        server_name  tiny777.com www.tiny777.com;<br>        # 判断端口，如果是http的80端口就跳转到https的443端口<br>		if ($server_port = 80) &#123;<br><span class="hljs-meta">			#</span><span class="bash"><span class="hljs-built_in">return</span> 301 https://$server_name<span class="hljs-variable">$request_uri</span>;</span><br>			return 301 https://$host$request_uri;<br>		&#125;<br><span class="hljs-meta">		#</span><span class="bash"> 这里是对应的html文件的目录</span><br>        root         /etc/nginx/html;<br>		index index.html index.htm;<br>		<br><span class="hljs-meta">		#</span><span class="bash"> 这里是https证书的密钥和证书存放位置</span><br>        ssl_certificate &quot;/etc/pki/CA/certs/tiny777.com.pem&quot;;<br>        ssl_certificate_key &quot;/etc/pki/CA/certs/tiny777.com.key&quot;;<br>        <br>        ssl_session_cache shared:SSL:1m;<br>        ssl_session_timeout  10m;<br>        # 这里是支持的加密方式<br>        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;<br>        ssl_prefer_server_ciphers on;<br><br>        # Load configuration files for the default server block.<br>        include /etc/nginx/default.d/*.conf;<br><br>        location / &#123;<br>			root	/etc/nginx/html;<br>			index index.html index.htm;<br>        &#125;<br><br>        error_page 404 /404.html;<br>            location = /40x.html &#123;<br>        &#125;<br><br>        error_page 500 502 503 504 /50x.html;<br>            location = /50x.html &#123;<br>        &#125;<br>    &#125;<br><br>&#125;<br><br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>最后我们重启<code>nginx</code>服务，就能查看到博客已经可以正常工作了。</p>
+<p><img src="https://resource.tinychen.com/blog/20190829/VbjsXnN1MF7L.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/frontend/">frontend</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/web/">web</a>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20190912-centos-install-docker/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">在CentOS中安装特定版本的docker</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20190823-ansible-intro/">
+                        <span class="hidden-mobile">Ansible入门初试</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

@@ -1,0 +1,713 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要包括tomcat服务器的主要概念介绍、在systemd上的tomcat守护进程的配置、jsvc的原理介绍和systemd的并发实现原理介绍。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>Tomcat篇01-概念简介和守护进程配置 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210111101726.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Tomcat篇01-概念简介和守护进程配置">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-03-27 10:00" pubdate>
+        March 27, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      8.6k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      50
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Tomcat篇01-概念简介和守护进程配置</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：March 27, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要包括tomcat服务器的主要概念介绍、在systemd上的tomcat守护进程的配置、jsvc的原理介绍和systemd的并发实现原理介绍。</p>
+<span id="more"></span>
+
+<h1 id="1、Tomcat简介"><a href="#1、Tomcat简介" class="headerlink" title="1、Tomcat简介"></a>1、Tomcat简介</h1><p>在了解tomcat之前我们需要了解一些基本的概念。</p>
+<h2 id="1-1-web应用"><a href="#1-1-web应用" class="headerlink" title="1.1 web应用"></a>1.1 web应用</h2><p>所谓Web应用，就是指需要通过编程来创建的Web站点。Web应用中不仅包括普通的静态HTML文档，还包含大量可被Web服务器动态执行的程序。用户在Internet上看到的能开展业务的各种Web站点都可看作Web应用，例如，网上商店和网上银行都是Web应用。此外，公司内部基于Web的Intranet工作平台也是Web应用。</p>
+<p>Web应用与传统的桌面应用程序相比，具有以下特点：</p>
+<ul>
+<li>以浏览器作为展示客户端界面的窗口。</li>
+<li>客户端界面一律表现为网页形式，网页由HTML语言写成。</li>
+<li>客户端与服务器端能进行和业务相关的<strong>动态交互</strong>。</li>
+<li>能完成与桌面应用程序类似的功能。</li>
+<li>使用浏览器—服务器架构（B/S），浏览器与服务器之间采用HTTP协议通信。</li>
+<li>Web应用通过Web服务器来发布。</li>
+</ul>
+<p>web应用的一大好处就是可以轻易地跨平台运行，不论是windows、mac、ios、android还是linux，只要安装了浏览器，一般都可以使用web应用，而浏览器在各个平台都是标配的软件，因此给web应用的普及提供了非常良好的条件。同样的，web应用使用的是B/S架构，即Browser/Server架构，主要的计算任务都交给Server端进行，因此都客户端的性能要求较低，同时也推动了服务端的负载均衡、高可用等技术的发展。</p>
+<blockquote>
+<p><code>Context</code>：在tomcat中一般指web应用</p>
+</blockquote>
+<h2 id="1-2-Servlet"><a href="#1-2-Servlet" class="headerlink" title="1.2 Servlet"></a>1.2 Servlet</h2><p><strong>Servlet（Server Applet），全称Java Servlet。是用Java编写的服务器端程序。</strong>其主要功能在于交互式地浏览和修改数据，生成动态Web内容。狭义的Servlet是指Java语言实现的一个接口，广义的Servlet是指任何实现了这个Servlet接口的类别，一般情况下，我们说的Servlet为后者。</p>
+<p>Servlet运行于支持Java的应用服务器中。从实现上讲，Servlet可以响应任何类型的请求，但绝大多数情况下Servlet只用来扩展基于HTTP协议的Web服务器。也就是说Web服务器可以访问任意一个Web应用中所有实现Servlet接口的类。而Web应用中用于被Web服务器动态调用的程序代码位于Servlet接口的实现类中。既然servlet和java关系密切，那么servlet接口的标准制定毫无疑问也是由甲骨文公司来主导。</p>
+<p><strong>Servlet规范把能够发布和运行Java Web应用的Web服务器称为Servlet容器。</strong>Servlet容器最主要的特征是动态执行Java Web应用中Servlet实现类的程序代码。由Apache开源软件组织创建的Tomcat是一个符合Servlet规范的优秀Servlet容器。</p>
+<p><img src="https://resource.tinychen.com/blog/20200324/dak4snL5hzJi.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-3-jsp"><a href="#1-3-jsp" class="headerlink" title="1.3 jsp"></a>1.3 jsp</h2><p>JSP（全称JavaServer Pages）是由Sun Microsystems公司主导建立的一种<strong>动态网页技术标准</strong>。JSP是HttpServlet的扩展。JSP将Java代码和特定变动内容嵌入到静态的页面中，实现以静态页面为模板，动态生成其中的部分内容。JSP在首次被访问的时候被应用服务器转换为servlet，在以后的运行中，容器直接调用这个servlet，而不再访问JSP页面。<strong>JSP的实质仍然是servlet。</strong></p>
+<h2 id="1-4-Tomcat"><a href="#1-4-Tomcat" class="headerlink" title="1.4 Tomcat"></a>1.4 Tomcat</h2><p><a target="_blank" rel="noopener" href="http://tomcat.apache.org/">Tomcat</a><br>是在Oracle公司的JSWDK（JavaServer Web DevelopmentKit，是Oracle公司推出的小型Servlet/JSP调试工具）的基础上发展起来的一个优秀的Servlet容器，<strong>Tomcat本身完全用Java语言编写</strong>。作为一个开源软件，Tomcat除了运行稳定、可靠，并且效率高之外，还可以和目前大部分的主流Web服务器（如IIS、Apache、Nginx等）一起工作。</p>
+<p>tomcat的版本实际上比较复杂，目前有7、8、9、10四个版本并行发布，具体的各个版本的兼容信息我们可以通过<a target="_blank" rel="noopener" href="https://tomcat.apache.org/whichversion.html">官网</a>查询。</p>
+<h1 id="2、Tomcat安装配置"><a href="#2、Tomcat安装配置" class="headerlink" title="2、Tomcat安装配置"></a>2、Tomcat安装配置</h1><p>tomcat的配置安装需要先在系统上配置好jdk环境，这里我们使用centos7.7版本的Linux系统和jdk8版本。</p>
+<h2 id="2-1-配置jdk8"><a href="#2-1-配置jdk8" class="headerlink" title="2.1 配置jdk8"></a>2.1 配置jdk8</h2><p>我们首先到<a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">官网</a>下载JDK8的安装包，这里我们选择<code>tar.gz</code>格式的压缩包下载，需要注意建议先使用浏览器下载再使用工具传输到Linux上，因为下载需要登录注册账号。</p>
+<p>接着我们解压将安装包解压到自己想要配置的jdk安装目录下，这里我们使用/home/目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">tar -zxvf jdk-8u241-linux-x64.tar.gz -C /home/<br></code></pre></div></td></tr></table></figure>
+
+<p>在<code>/etc/profile</code>中添加以下三个参数并导入</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">JAVA_HOME=/home/jdk_1.8.0_241<br>CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin<br>export JAVA_HOME CLASSPATH PATH<br></code></pre></div></td></tr></table></figure>
+
+<p>重新载入配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">source /etc/profile<br></code></pre></div></td></tr></table></figure>
+
+<p>检查配置是否生效，如不生效可以重启终端试试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-yun ~]# java -version<br>java version &quot;1.8.0_241&quot;<br>Java(TM) SE Runtime Environment (build 1.8.0_241-b07)<br>Java HotSpot(TM) 64-Bit Server VM (build 25.241-b07, mixed mode)<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="2-2-配置tomcat"><a href="#2-2-配置tomcat" class="headerlink" title="2.2 配置tomcat"></a>2.2 配置tomcat</h2><p>tomcat的安装配置和上面几乎一样，由于我们已经在<code>/etc/profile</code>中设定了全局的java环境变量，因此在tomcat中就不用再特殊配置，直接就会使用默认的全局变量。</p>
+<p>这里我们还是使用<a target="_blank" rel="noopener" href="https://downloads.apache.org/">官网</a><br>提供的<code>tar.gz</code>压缩包来安装。</p>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-comment"># tomcat可以直接使用wget下载</span><br><span class="hljs-attribute">wget</span> https://downloads.apache.org/tomcat/tomcat-<span class="hljs-number">8</span>/v<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>/bin/apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz<br><span class="hljs-comment"># 解压到安装目录并重命名</span><br><span class="hljs-attribute">tar</span> -zxvf apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz /home/<br><span class="hljs-attribute">cd</span> /home<br><span class="hljs-attribute">mv</span> apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span> tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span><br></code></pre></div></td></tr></table></figure>
+
+<h3 id="tomcat目录"><a href="#tomcat目录" class="headerlink" title="tomcat目录"></a>tomcat目录</h3><p>首先我们来看一下tomcat中的主要目录：</p>
+<ul>
+<li><strong>/bin</strong> 存放用于启动及关闭的文件，以及其他一些脚本。其中，UNIX 系统专用的 <code>*.sh</code> 文件在功能上等同于 Windows 系统专用的 <code>*.bat</code> 文件。因为 Win32 的命令行缺乏某些功能，所以又额外地加入了一些文件。</li>
+<li><strong>/conf</strong> 配置文件及相关的 DTD。其中最重要的文件是 server.xml，这是容器的主配置文件。</li>
+<li><strong>/log</strong> 日志文件的默认目录。</li>
+<li><strong>/webapps</strong> 存放 Web 应用的相关文件。</li>
+</ul>
+<p>接着我们进入tomcat目录下的<code>bin</code>目录就可以看到各种各样的脚本文件，主要分为<code>bat</code>和<code>sh</code>两类，其中bat主要是在windows系统上使用的，我们可以把它们删掉，接着我们执行一些<code>version.sh</code>这个脚本就可以看到版本信息。</p>
+<p><img src="https://resource.tinychen.com/blog/20200324/fL53hXHw5Q1I.png" srcset="/img/loading.gif" lazyload></p>
+<p>接下来我们来看一下和tomcat相关的几个变量：</p>
+<p><code>JRE_HOME</code></p>
+<p>这里我们可以看到<code>JRE_HOME</code>这个变量是之前设置了的<code>JAVA_HOME</code>环境变量。</p>
+<ul>
+<li>如果同时定义了<code>JRE_HOME</code>和<code>JAVA_HOME</code>这两个变量，那么使用的是<code>JRE_HOME</code></li>
+<li>如果只定义了<code>JAVA_HOME</code>，那么<code>JRE_HOME</code>变量值就是<code>JAVA_HOME</code>的变量值</li>
+<li>如果两个变量都没定义，那么tomcat无法运行</li>
+</ul>
+<blockquote>
+<p>前面我们提到过tomcat是使用Java编写的，这也就意味着它在运行的时候需要创建一个JVM虚拟机，所以如果没定义JAVA环境变量，tomcat是无法运行的</p>
+</blockquote>
+<h3 id="CATALINA-HOME"><a href="#CATALINA-HOME" class="headerlink" title="CATALINA_HOME"></a><code>CATALINA_HOME</code></h3><p>tomcat安装目录的根目录</p>
+<h3 id="CATALINA-BASE"><a href="#CATALINA-BASE" class="headerlink" title="CATALINA_BASE"></a><code>CATALINA_BASE</code></h3><p>tomcat实例运行的目录，默认情况下等于<code>CATALINA_HOME</code>，如果我们需要在一台机器上运行多个tomcat实例，可以设置多个<code>CATALINA_BASE</code></p>
+<h3 id="setenv-sh"><a href="#setenv-sh" class="headerlink" title="setenv.sh"></a><code>setenv.sh</code></h3><p>这个脚本默认是不存在的，需要我们自己手动创建在<code>bin</code>目录下，在windows系统则应该是<code>setenv.bat</code>，我们在里面指定了JRE_HOME环境变量以及PID文件的位置，这样在运行的时候就能比较方便的定位到运行进程</p>
+<blockquote>
+<p>注意前面提到的<code>CATALINA_HOME</code>和<code>CATALINA_BASE</code>两个变量不能在这里设定，因为tomcat就是根据这两个变量来找到 <code>setenv.sh</code>的。</p>
+</blockquote>
+<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">[admin@tiny-yun bin]$ cat setenv.sh <br><span class="hljs-attribute">JRE_HOME</span>=/home/jdk1.8.0_241/jre<br><span class="hljs-attribute">CATALINA_PID</span>=<span class="hljs-string">&quot;<span class="hljs-variable">$CATALINA_BASE</span>/tomcat.pid&quot;</span><br></code></pre></div></td></tr></table></figure>
+
+<p>这时候运行<code>./catalina.sh start</code>或者是<code>./startup.sh</code>文件就可以启动tomcat，注意要在防火墙中放行默认的8080端口。如果没有指定PID文件的位置，在关闭tomcat的时候可能会出现错误。此外，一般不建议使用root用户来运行tomcat。</p>
+<p><img src="https://resource.tinychen.com/blog/20200325/Jdtn5kIniRtV.png" srcset="/img/loading.gif" lazyload></p>
+<p>个人感觉使用<code>catalina.sh</code>加参数的方式来控制tomcat进程要更加灵活强大一些。</p>
+<figure class="highlight sql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs sql">[admin<span class="hljs-variable">@tiny</span><span class="hljs-operator">-</span>yun bin]$ .<span class="hljs-operator">/</span>catalina.sh <span class="hljs-operator">-</span>h<br><span class="hljs-keyword">Using</span> CATALINA_BASE:   <span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><br><span class="hljs-keyword">Using</span> CATALINA_HOME:   <span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><br><span class="hljs-keyword">Using</span> CATALINA_TMPDIR: <span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><span class="hljs-operator">/</span>temp<br><span class="hljs-keyword">Using</span> JRE_HOME:        <span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_241<span class="hljs-operator">/</span>jre<br><span class="hljs-keyword">Using</span> CLASSPATH:       <span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><span class="hljs-operator">/</span>bin<span class="hljs-operator">/</span>bootstrap.jar:<span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><span class="hljs-operator">/</span>bin<span class="hljs-operator">/</span>tomcat<span class="hljs-operator">-</span>juli.jar<br><span class="hljs-keyword">Using</span> CATALINA_PID:    <span class="hljs-operator">/</span>home<span class="hljs-operator">/</span>tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><span class="hljs-operator">/</span>tomcat.pid<br>Usage: catalina.sh ( commands ... )<br>commands:<br>  debug             <span class="hljs-keyword">Start</span> Catalina <span class="hljs-keyword">in</span> a debugger<br>  debug <span class="hljs-operator">-</span>security   Debug Catalina <span class="hljs-keyword">with</span> a security manager<br>  jpda <span class="hljs-keyword">start</span>        <span class="hljs-keyword">Start</span> Catalina under JPDA debugger<br>  run               <span class="hljs-keyword">Start</span> Catalina <span class="hljs-keyword">in</span> the <span class="hljs-keyword">current</span> <span class="hljs-keyword">window</span><br>  run <span class="hljs-operator">-</span>security     <span class="hljs-keyword">Start</span> <span class="hljs-keyword">in</span> the <span class="hljs-keyword">current</span> <span class="hljs-keyword">window</span> <span class="hljs-keyword">with</span> security manager<br>  <span class="hljs-keyword">start</span>             <span class="hljs-keyword">Start</span> Catalina <span class="hljs-keyword">in</span> a separate <span class="hljs-keyword">window</span><br>  <span class="hljs-keyword">start</span> <span class="hljs-operator">-</span>security   <span class="hljs-keyword">Start</span> <span class="hljs-keyword">in</span> a separate <span class="hljs-keyword">window</span> <span class="hljs-keyword">with</span> security manager<br>  stop              Stop Catalina, waiting up <span class="hljs-keyword">to</span> <span class="hljs-number">5</span> seconds <span class="hljs-keyword">for</span> the process <span class="hljs-keyword">to</span> <span class="hljs-keyword">end</span><br>  stop n            Stop Catalina, waiting up <span class="hljs-keyword">to</span> n seconds <span class="hljs-keyword">for</span> the process <span class="hljs-keyword">to</span> <span class="hljs-keyword">end</span><br>  stop <span class="hljs-operator">-</span>force       Stop Catalina, wait up <span class="hljs-keyword">to</span> <span class="hljs-number">5</span> seconds <span class="hljs-keyword">and</span> <span class="hljs-keyword">then</span> use kill <span class="hljs-operator">-</span>KILL if still <span class="hljs-keyword">running</span><br>  stop n <span class="hljs-operator">-</span>force     Stop Catalina, wait up <span class="hljs-keyword">to</span> n seconds <span class="hljs-keyword">and</span> <span class="hljs-keyword">then</span> use kill <span class="hljs-operator">-</span>KILL if still <span class="hljs-keyword">running</span><br>  configtest        Run a basic syntax <span class="hljs-keyword">check</span> <span class="hljs-keyword">on</span> server.xml <span class="hljs-operator">-</span> <span class="hljs-keyword">check</span> exit code <span class="hljs-keyword">for</span> <span class="hljs-keyword">result</span><br>  version           What version <span class="hljs-keyword">of</span> tomcat <span class="hljs-keyword">are</span> you <span class="hljs-keyword">running</span>?<br>Note: Waiting <span class="hljs-keyword">for</span> the process <span class="hljs-keyword">to</span> <span class="hljs-keyword">end</span> <span class="hljs-keyword">and</span> use <span class="hljs-keyword">of</span> the <span class="hljs-operator">-</span>force option require that $CATALINA_PID <span class="hljs-keyword">is</span> defined<br>[admin<span class="hljs-variable">@tiny</span><span class="hljs-operator">-</span>yun bin]$ <br></code></pre></div></td></tr></table></figure>
+
+<h1 id="3、-jsvc配置daemon（守护进程）"><a href="#3、-jsvc配置daemon（守护进程）" class="headerlink" title="3、 jsvc配置daemon（守护进程）"></a>3、 jsvc配置daemon（守护进程）</h1><p>在Windows上，tomcat会默认注册成系统服务，这样设置启动和运行都方便很多，而在Linux上，我们需要借助jsvc来实现这一效果。</p>
+<h2 id="3-1-什么是jsvc"><a href="#3-1-什么是jsvc" class="headerlink" title="3.1 什么是jsvc"></a>3.1 什么是jsvc</h2><p><strong>Commons Daemon</strong>（共享守护进程），<a target="_blank" rel="noopener" href="http://commons.apache.org/proper/commons-daemon/jsvc.html">原名JSVC</a>，是一个属于Apache的Commons项目的Java库。守护程序提供了一种启动和停止正在运行服务器端应用程序的Java虚拟机（JVM）的便携式方法。<strong>守护程序包括两部分：用C编写的操作系统接口的原生库 ，以及提供用Java编写的Daemon API的库。</strong></p>
+<p><strong>有两种使用Commons守护程序的方法：直接调用实现守护程序接口（interface）或调用为守护程序提供所需方法（method）的类（class）。</strong>例如，Tomcat-4.1.x使用守护程序接口，而Tomcat-5.0.x提供了一个类，该类的方法直接由JSVC调用。</p>
+<h2 id="3-2-jsvc工作原理"><a href="#3-2-jsvc工作原理" class="headerlink" title="3.2 jsvc工作原理"></a>3.2 jsvc工作原理</h2><p>jsvc使用了三个进程来工作：一个启动进程、一个控制进程、一个被控制进程。其中被控制进程一般来说就是java主线程（我们这里就是tomcat），如果JVM虚拟机崩溃了，那么控制进程会在下一分钟重启。因为jsvc是守护进程，所以它应该使用root用户来启动，同时我们可以使用-user参数来进行用户的降级（downgrade），即先使用root用户来创建进程，然后再降级到指定的非root用户而不丢失root用户的特殊权限，如监听1024以下的端口。</p>
+<h2 id="3-3-jsvc配置tomcat守护进程（daemon）"><a href="#3-3-jsvc配置tomcat守护进程（daemon）" class="headerlink" title="3.3 jsvc配置tomcat守护进程（daemon）"></a>3.3 jsvc配置tomcat守护进程（daemon）</h2><p>tomcat的二进制安装包中的bin目录下就有jsvc的安装包，我们需要使用GCC编译器对其进行编译安装。同时在编译的时候我们需要指定jdk的路径，由于我们前面已经手动指定了，这里不需要再指定。如果没有，可以使用<code>./configure --with-java=$JAVA_HOME</code>来进行操作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 首先我们进入tomcat的bin目录进行编译</span><br>cd $CATALINA_HOME/bin<br>tar xvfz commons-daemon-native.tar.gz<br>cd commons-daemon-1.2.2-native-src/unix<br>./configure<br>make<br><span class="hljs-meta">#</span><span class="bash"> 编译完成后，会在当前文件夹生成一个jsvc的文件，将它拷贝到tomcat的/bin/目录下</span><br>cp jsvc ../..<br>cd ../..<br><span class="hljs-meta">#</span><span class="bash"> 接着我们可以这样查看jsvc的帮助文档</span><br>./jsvc -help<br></code></pre></div></td></tr></table></figure>
+
+<p>使用jsvc来启动tomcat，我们使用下面的参数来进行启动</p>
+<figure class="highlight stylus"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs stylus">./jsvc \<br>    -user tomcat \<br>    -classpath <span class="hljs-variable">$CATALINA_HOME</span>/bin/bootstrap<span class="hljs-selector-class">.jar</span>:<span class="hljs-variable">$CATALINA_HOME</span>/bin/tomcat-juli<span class="hljs-selector-class">.jar</span> \<br>    -outfile <span class="hljs-variable">$CATALINA_BASE</span>/logs/catalina<span class="hljs-selector-class">.out</span> \<br>    -errfile <span class="hljs-variable">$CATALINA_BASE</span>/logs/catalina<span class="hljs-selector-class">.err</span> \<br>    -Dcatalina.home=<span class="hljs-variable">$CATALINA_HOME</span> \<br>    -Dcatalina.base=<span class="hljs-variable">$CATALINA_BASE</span> \<br>    -Djava<span class="hljs-selector-class">.util</span><span class="hljs-selector-class">.logging</span>.manager=org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.juli</span><span class="hljs-selector-class">.ClassLoaderLogManager</span> \<br>    -Djava<span class="hljs-selector-class">.util</span><span class="hljs-selector-class">.logging</span><span class="hljs-selector-class">.config</span>.file=<span class="hljs-variable">$CATALINA_BASE</span>/conf/logging<span class="hljs-selector-class">.properties</span> \<br>    org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.catalina</span><span class="hljs-selector-class">.startup</span>.Bootstrap<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20200326/jlQScDXanNG5.png" srcset="/img/loading.gif" lazyload></p>
+<p>注意看这时的用户和PID，上面的12839的用户为root，也就是我们前面说的控制进程，后面被12839进程控制的12840进程才是我们主要运行的tomcat进程，而这里的用户也符合我们使用-user参数指定的tomcat用户。如果我们不指定进程的PID文件位置，那么默认就会在/var/run目录下生成PID文件，我们可以看到这个jsvc.pid对应的正好是jsvc运行的三个进程中的被控制进程。</p>
+<p>如果需要关闭，我们可以使用下面的命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">./jsvc -stop org.apache.catalina.startup.Bootstrap stop<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 还可以指定pid文件位置，如果前面没有使用默认的pid文件目录的话</span><br>./jsvc -stop -pidfile /var/run/jsvc.pid org.apache.catalina.startup.Bootstrap stop<br></code></pre></div></td></tr></table></figure>
+
+<p>这个时候可能就会有同学发现，前面不是说jsvc主要有三个进程来工作的吗，怎么这里只有两个进程呢？</p>
+<p>我们在上面的启动命令的选项里面加入一个<code>-wait 10</code>的参数，然后启动之后迅速查看一下进程。</p>
+<blockquote>
+<p>一般情况下，启动进程在启动了控制进程之后就会结束，而当我们使用了<code>-wait</code>参数之后，启动进程会等待被控制进程启动好了之后向其发送一个”I am ready”信号，启动进程在收到信号之后就会结束。<code>-wait 10</code>表示等待时间为10秒，需要注意等待时间要是10的倍数。</p>
+</blockquote>
+<p><img src="https://resource.tinychen.com/blog/20200326/rGRNwKHxcWyh.png" srcset="/img/loading.gif" lazyload></p>
+<p>这时候可以看到存在三个jsvc相关的进程，等tomcat启动完之后再查看的时候我们就会发现最上面的19347号进程，也就是jsvc启动进程消失了。并且控制进程19350的父进程变成了1号进程。</p>
+<p><img src="https://resource.tinychen.com/blog/20200326/Wz45K8kzINLa.png" srcset="/img/loading.gif" lazyload></p>
+<p>我们再进一步查看以下进程的关系：</p>
+<p><img src="https://resource.tinychen.com/blog/20200326/5JVRVSUwyzte.png" srcset="/img/loading.gif" lazyload></p>
+<p>接着我们再来查看一下1号进程。可以发现，在centos7中的1号进程是<code>systemd</code>。</p>
+<p><img src="https://resource.tinychen.com/blog/20200326/N2GUtLLlwlRf.png" srcset="/img/loading.gif" lazyload></p>
+<p>接着我们可以总结以上的整个过程为下列步骤：</p>
+<ol>
+<li>系统启动，0号进程启动，0号通过fork()生成1号进程systemd；</li>
+<li>1号进程systemd通过fork()创建进程sshd，这就是我们使用的ssh服务的进程；</li>
+<li>用户使用ssh远程登录系统，sshd进程创建了对应的终端进程pts；</li>
+<li>用户在终端输入指令，pts根据系统中指定的该用户使用的shell（此处为bash shell）来执行对应的操作，这里具体表现为根据我们输入的指令来创建jsvc的启动进程；</li>
+<li>jsvc启动进程创建jsvc控制进程，并根据启动参数决定是否在等待jsvc控制进程的”I am ready”信号再结束，同时jsvc启动进程在结束之前会把jsvc控制进程交给1号进程systemd来管理控制；</li>
+<li>jsvc控制进程创建jsvc被控制进程，也就是我们的主要进程tomcat，同时jsvc控制进程会监视jsvc被控制进程，如果它崩溃了，jsvc控制进程则会重启，确保其正常运行；</li>
+</ol>
+<p>这里使用jsvc来启动tomcat的好处就是启动完成了之后即使我们的shell终端关闭了也不会影响它的运行，当然如果我们直接使用tomcat的bin目录下的启动脚本来进行启动然后再送入后台运行也是可以达到这样的效果。实际上我们还可以通过编写systemd的unit单元配置文件，将tomcat注册成系统服务。</p>
+<h2 id="3-4-daemon-sh"><a href="#3-4-daemon-sh" class="headerlink" title="3.4 daemon.sh"></a>3.4 daemon.sh</h2><p>同样的，在tomcat的bin目录下，集成了一个daemon.sh的脚本，用来调用jsvc从而实现tomcat的守护进程。daemon.sh的实现原理还是jsvc，只不过在脚本中加入了大量的变量判断和环境配置文件读取等操作</p>
+<p>在官网上会建议我们直接把daemon.sh脚本复制到 <code>/etc/init.d</code> 目录下，就可以实现开机自动启动了。不过在CentOS7等使用了systemd的系统上，我个人更推荐使用systemd来管理。</p>
+<h1 id="4、systemd配置"><a href="#4、systemd配置" class="headerlink" title="4、systemd配置"></a>4、systemd配置</h1><blockquote>
+<p>这里先放上archwiki和fedoraproject官网上面的链接作为参考资料：</p>
+<p><a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/Systemd">https://wiki.archlinux.org/index.php/Systemd</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.fedoraproject.org/en-US/quick-docs/understanding-and-administering-systemd/index.html">https://docs.fedoraproject.org/en-US/quick-docs/understanding-and-administering-systemd/index.html</a></p>
+</blockquote>
+<h2 id="4-1-systemd简介"><a href="#4-1-systemd简介" class="headerlink" title="4.1 systemd简介"></a>4.1 systemd简介</h2><p>systemd 是 Linux 下一个与 SysV 和 LSB 初始化脚本兼容的系统和服务管理器，是 Linux 系统中最新的初始化系统（init），它主要的设计目标是克服 sysvinit 固有的缺点，提高系统的启动速度。systemd 和 ubuntu 的 upstart 是竞争对手，不过现在ubuntu也使用了systemd。</p>
+<p>systemd 使用 socket 和 D-Bus 来开启服务，<strong>提供基于守护进程（daemon）的按需启动策略</strong>，保留了 Linux cgroups 的进程追踪功能，支持快照和系统状态恢复，维护挂载和自挂载点，实现了各服务间基于从属关系的一个更为精细的逻辑控制，拥有前卫的并行性能。systemd 无需经过任何修改便可以替代 sysvinit 。</p>
+<p><strong>systemd 开启和监督整个系统是基于 unit 的概念。</strong>unit 是由一个与配置文件对应的名字和类型组成的(例如：avahi.service unit 有一个具有相同名字的配置文件，是守护进程 Avahi 的一个封装单元)。一个unit单元配置文件可以描述的内容有：系统服务（<code>.service</code>）、挂载点（<code>.mount</code>）、sockets（<code>.sockets</code>） 、系统设备（<code>.device</code>）、交换分区（<code>.swap</code>）、文件路径（<code>.path</code>）、启动目标（<code>.target</code>）、由 systemd 管理的计时器（<code>.timer</code>）。</p>
+<ul>
+<li><code>service</code> ：守护进程的启动、停止、重启和重载是此类 unit 中最为明显的几个类型。</li>
+<li><code>socket</code> ：此类 unit 封装系统和互联网中的一个 socket 。当下，systemd 支持流式、数据报和连续包的 AF_INET、AF_INET6、AF_UNIX socket 。也支持传统的 FIFO（先进先出） 传输模式。<strong>每一个 socket unit 都有一个相应的服务 unit 。相应的服务在第一个连接（connection）进入 socket 或 FIFO 时就会启动(例如：nscd.socket 在有新连接后便启动 nscd.service)。</strong></li>
+<li><code>device</code> ：此类 <em>unit</em> 封装一个存在于 Linux 设备树中的设备。每一个使用 udev 规则标记的设备都将会在 systemd 中作为一个设备 <em>unit</em> 出现。udev 的属性设置可以作为配置设备 <em>unit</em> 依赖关系的配置源。</li>
+<li><code>mount</code> ：此类 <em>unit</em> 封装系统结构层次中的一个挂载点。</li>
+<li><code>automount</code> ：此类 <em>unit</em> 封装系统结构层次中的一个自挂载点。每一个自挂载 unit 对应一个已挂载的挂载 unit (需要在自挂载目录可以存取的情况下尽早挂载)。</li>
+<li><code>target</code> ：此类 unit 为其他 unit 进行逻辑分组。它们本身实际上并不做什么，只是引用其他 <em>unit</em> 而已。这样便可以对 unit 做一个统一的控制。(例如：multi-user.target 相当于在传统使用 SysV 的系统中运行级别5，即GUI图形化界面)；bluetooth.target 只有在蓝牙适配器可用的情况下才调用与蓝牙相关的服务，如：bluetooth 守护进程、obex 守护进程等）</li>
+<li>snapshot ：与 target unit 相似，快照本身不做什么，唯一的目的就是引用其他 unit 。</li>
+</ul>
+<p>systemd的unit文件可以从多个地方加载，使用<code>systemctl show --property=UnitPath</code> 可以按优先级从低到高显示加载目录。</p>
+<p><img src="https://resource.tinychen.com/blog/20200326/dqTDvbfsMkK7.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>主要的unit文件在下面的两个目录中：</p>
+<ul>
+<li><code>/usr/lib/systemd/system/</code> ：软件包安装的单元</li>
+<li><code>/etc/systemd/system/</code> ：系统管理员安装的单元</li>
+</ul>
+</blockquote>
+<h2 id="4-2-systemd原理"><a href="#4-2-systemd原理" class="headerlink" title="4.2 systemd原理"></a>4.2 systemd原理</h2><p>这里我们重点分析一下systemd的并行操作性能以及service服务的配置单元。</p>
+<p>和前任的sysvinit的完全串行相比，systemd为了加速整个系统启动，实现了几乎所有的进程都并行启动（包括需要上下进程依赖的进程也并行启动）。想要实现这一点，主要需要解决三个方面的依赖问题：socket、D-Bus和文件系统。</p>
+<h3 id="socket-依赖-inetd"><a href="#socket-依赖-inetd" class="headerlink" title="socket 依赖(inetd)"></a>socket 依赖(inetd)</h3><p>绝大多数的服务依赖是套接字依赖。比如服务 A 通过一个套接字端口 S1 提供自己的服务，其他的服务如果需要服务 A，则需要连接 S1。因此如果服务 A 尚未启动，S1 就不存在，其他的服务就会得到启动错误。</p>
+<p>所以传统地，人们需要先启动服务 A，等待它进入就绪状态，再启动其他需要它的服务。</p>
+<p>systemd 认为，只要我们预先把套接字端口S1建立好，那么其他所有的服务就可以同时启动而无需等待服务 A来创建套接字端口S1了。如果服务 A 尚未启动，那么其他进程向套接字端口S1发送的服务请求实际上会被 Linux 操作系统缓存，其他进程会在这个请求的地方等待（这里使用FIFO方式）。一旦服务A启动就绪，就可以立即处理缓存的请求，一切都开始正常运行。</p>
+<p>那么服务如何使用由 init 进程创建的套接字呢？</p>
+<p>Linux 操作系统有一个特性，当进程调用<code>fork</code>或者<code>exec</code>创建子进程之后，所有在父进程中被打开的文件句柄 (<code>file descriptor</code>) 都被子进程所继承。套接字也是一种文件句柄，进程A可以创建一个套接字，此后当进程 A调用 exec 启动一个新的子进程时，只要确保该套接字的<code>close_on_exec</code>标志位被清空，那么新的子进程就可以继承这个套接字。子进程看到的套接字和父进程创建的套接字是同一个系统套接字，就仿佛这个套接字是子进程自己创建的一样，没有任何区别。</p>
+<p>这个特性以前被一个叫做<code>inetd</code>的系统服务所利用。<code>Inetd</code>进程会负责监控一些常用套接字端口，比如 ssh，当该端口有连接请求时，<code>inetd</code>才启动<code>telnetd</code>进程，并把有连接的套接字传递给新的<code>telnetd</code>进程进行处理。这样，当系统没有 ssh 客户端连接时，就不需要启动 sshd 进程。Inetd 可以代理很多的网络服务，这样就可以节约很多的系统负载和内存资源，只有当有真正的连接请求时才启动相应服务，并把套接字传递给相应的服务进程。</p>
+<p>和 inetd 类似，systemd(1号进程)是所有其他进程的父进程，它可以先建立所有需要的套接字，然后在调用 exec 的时候将该套接字传递给新的服务进程，而新进程直接使用该套接字进行服务即可。</p>
+<h3 id="D-Bus-依赖-bus-activation"><a href="#D-Bus-依赖-bus-activation" class="headerlink" title="D-Bus 依赖(bus activation)"></a>D-Bus 依赖(bus activation)</h3><p><strong>D-Bus 是 <code>desktop-bus</code> 的简称，是一个低延迟、低开销、高可用性的进程间通信机制。</strong>它越来越多地用于应用程序之间通信，也用于应用程序和操作系统内核之间的通信。很多现代的服务进程都使用D-Bus 取代套接字作为进程间通信机制，对外提供服务。</p>
+<blockquote>
+<p>Linux的 <code>NetworkManager</code> 服务就使用 D-Bus 和其他的应用程序或者服务进行交互：Linux上常见的邮件客户端软件 <code>evolution</code> 可以通过 D-Bus 从 <code>NetworkManager</code> 服务获取网络状态的改变，以便做出相应的处理。</p>
+</blockquote>
+<p>D-Bus 支持所谓<code>&quot;bus activation&quot;</code>功能。如果服务 A 需要使用服务 B 的 D-Bus 服务，而服务 B 并没有运行，则 D-Bus 可以在服务 A 请求服务 B 的 D-Bus 时自动启动服务 B。而服务 A 发出的请求会被 D-Bus 缓存，服务 A 会等待服务 B 启动就绪。利用这个特性，依赖 D-Bus 的服务就可以实现并行启动。</p>
+<h3 id="文件系统依赖-automounter"><a href="#文件系统依赖-automounter" class="headerlink" title="文件系统依赖(automounter)"></a>文件系统依赖(automounter)</h3><p>系统启动过程中，文件系统相关的活动是最耗时的，比如挂载文件系统，对文件系统进行磁盘检查（fsck），磁盘配额检查等都是非常耗时的操作。在等待这些工作完成的同时，系统处于空闲状态。那些想使用文件系统的服务似乎必须等待文件系统初始化完成才可以启动。但是 systemd 发现这种依赖也是可以避免的。</p>
+<p>systemd 参考了 <a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/Autofs">autofs</a> 的设计思路，使得依赖文件系统的服务和文件系统本身初始化两者可以并行工作。autofs 可以监测到某个文件系统挂载点真正被访问到的时候才触发挂载操作，这是通过内核 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Automounter"><code>automounter</code></a> 模块的支持而实现的。systemd 集成了autofs的实现，对于系统中的挂载点，比如<code>/home</code>，当系统启动的时候，systemd 为其创建一个临时的自动挂载点。在这个时刻<code>/home</code> 真正的挂载设备尚未启动好，真正的挂载操作还没有执行，文件系统检测也还没有完成。可是那些依赖该目录的进程已经可以并发启动，他们的 <code>open()</code>操作被内建在 systemd 中的 <code>autofs</code> 捕获，将该 <code>open()</code>调用挂起（可中断睡眠状态）。然后等待真正的挂载操作完成，文件系统检测也完成后，systemd 将该自动挂载点替换为真正的挂载点，并让 <code>open()</code>调用返回。由此，实现了那些依赖于文件系统的服务和文件系统本身同时并发启动。</p>
+<p>对于<code>/</code>根目录的依赖实际上一定还是要<strong>串行执行</strong>，因为 systemd 自己也存放在<code>/</code>根目录之下，必须等待系统根目录挂载检查好。</p>
+<blockquote>
+<p>不过对于类似<code>/home</code>等挂载点，这种并发可以提高系统的启动速度，尤其是当<code>/home</code>是远程的 NFS 节点，或者是加密盘等，需要耗费较长的时间才可以准备就绪的情况下，因为并发启动，这段时间内，系统并不是完全无事可做，而是可以利用这段空余时间做更多的启动进程的事情，总的来说就缩短了系统启动时间。</p>
+</blockquote>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>从上面的三个办法我们可以看出，systemd让多个程序并行启动的解决思路就是先创建一个虚拟点，让各类需要依赖的服务先运行起来，最后再把虚拟点换成实际的服务使得能够正常运行。</p>
+<h2 id="4-3-systemd实现tomcat的daemon进程"><a href="#4-3-systemd实现tomcat的daemon进程" class="headerlink" title="4.3 systemd实现tomcat的daemon进程"></a>4.3 systemd实现tomcat的daemon进程</h2><p>我们在<code>/usr/lib/systemd/system/</code>目录下新建一个<code>tomcat9.service</code>文件，接下来我们可以使用<code>systemctl</code>命令来进行控制：</p>
+<blockquote>
+<ul>
+<li><p>使用 <code>systemctl</code> 控制单元时，通常需要使用unit文件的全名，包括扩展名（例如 <code>sshd.service</code> ）。但是有些unit可以在 <code>systemctl</code> 中使用简写方式。</p>
+</li>
+<li><p>如果无扩展名，systemctl 默认把扩展名当作 <code>.service</code> 。例如 tomcat 和 <code>tomcat.service</code> 是等价的。</p>
+</li>
+<li><p>挂载点会自动转化为相应的 <code>.mount</code> 单元。例如 <code>/home</code> 等价于 <code>home.mount</code> 。</p>
+</li>
+<li><p>设备会自动转化为相应的 <code>.device</code> 单元，所以 <code>/dev/sda1</code> 等价于 <code>dev-sda1.device</code> 。</p>
+</li>
+</ul>
+</blockquote>
+<h3 id="使用daemon-sh"><a href="#使用daemon-sh" class="headerlink" title="使用daemon.sh"></a>使用daemon.sh</h3><p>首先我们尝试在systemd中使用自带的脚本进行启动和关闭tomcat，这里我们先把<code>startup.sh</code>和<code>shutdown.sh</code>两个脚本给排除掉，虽然它们无法启动守护进程的缺陷可以使用systemd来进行弥补，但是还是无法使用jsvc，无法在特权端口和运行用户之间取得两全，我们直接使用<code>daemon.sh</code>来运行。</p>
+<p>需要注意的是，systemd并不会去读取我们先前在/etc/profile中设定的变量，因此我们直接把变量写进unit配置文件中。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[Unit]<br>Description=Apache Tomcat 9<br><br>[Service]<br>User=tomcat<br>Group=tomcat<br>PIDFile=/var/run/tomcat.pid<br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br>ExecStart=/home/tomcat9/bin/daemon.sh start<br>ExecStop=/home/tomcat9/bin/daemon.sh stop<br><br>[Install]<br>WantedBy=multi-user.target<br></code></pre></div></td></tr></table></figure>
+
+<p>添加了新的unit单元之后我们先<code>systemctl daemon-reload</code>重启一下daemon进程，再使用<code>systemctl start tomcat9.service</code>来启动服务，接着查看状态，发现无法正常运行，一启动进程就failed掉了，查看daemon脚本默认的日志文件（位于tomcat目录下的<code>logs/catalina-daemon.out</code>）我们发现返回了143错误。</p>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">Service <span class="hljs-keyword">exit</span> with a return value of <span class="hljs-number">143</span><br></code></pre></div></td></tr></table></figure>
+
+<p>网上搜索了一下，有个解决方案是把daemon.sh脚本中的wait参数时间从10调成240，在125行左右的位置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> Set the default service-start <span class="hljs-built_in">wait</span> time <span class="hljs-keyword">if</span> necessary</span><br>test &quot;.$SERVICE_START_WAIT_TIME&quot; = . &amp;&amp; SERVICE_START_WAIT_TIME=10<br></code></pre></div></td></tr></table></figure>
+
+<p>wait参数调大之后，等待启动成功之后（这里用的主机配置很低，启动比较耗时）就可以正常访问了</p>
+<p><img src="https://resource.tinychen.com/blog/20200327/KFmNuX2L0N1j.png" srcset="/img/loading.gif" lazyload></p>
+<p>但是在四分钟（240s）之后我们再查看tomcat9.service就会发现，进程已经结束了，再次访问默认的8080端口也无法访问，查找进程也没有找到相关的进程。</p>
+<p><img src="https://resource.tinychen.com/blog/20200327/4IS7HuajJiAC.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>试图分析一波</strong></p>
+<p>我们来根据上面的情况结合原理来试图分析一下：</p>
+<p>首先我们可以看到-wait参数时长调到240之后，bash shell进程的生命周期延长了，根据之前的jsvc工作原理部分我们可以知道-wait参数会影响jsvc的启动进程的生命周期，而从systemd输出的信息来看，有包括jsvc三个进程和bash shell进程在内共计四个进程，这和之前我们直接运行daemon.sh之后最终只有jsvc的两个进程（控制进程和被控制进程不同），且Main PID参数指向的是bash shell进程。</p>
+<p>于是乎我们大胆猜测一下：使用<code>daemon.sh start</code>命令启动tomcat，systemd会把启动daemon.sh的bash的PID作为整个service的PID来监控，而这个bash进程在启动了jsvc之后是会自行退出的，这也就导致了systemd认为service已经运行失败，从而清理掉了关联的进程，进而使得jsvc相关的tomcat进程也被清理掉了。而-wait参数时长调到240之后，bash shell进程的存活时间变长，我们就能在tomcat启动完成之后且bash shell进程结束之前访问到tomcat服务器。</p>
+<p>考虑到这种情况，我们可以试一下使用<code>daemon.sh run</code>来启动tomcat，因为在终端中使用run参数的时候会一直把log信息输出到终端，我猜测这个运行方式是和start不太一样的。</p>
+<p><strong>把systemd的unit文件的启动参数改为run，同时将-wait参数时长调回默认的10，再次启动服务。</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20200327/7fEtIOxNacQi.png" srcset="/img/loading.gif" lazyload></p>
+<p>这次我们可以看到systemd的Main PID对应为jsvc的主进程，tomcat服务也能一直正常的在后台运行。应该算是成功的使用systemd来管理jsvc启动的tomcat进程了。</p>
+<p>那么这两者的区别在哪里呢？接着我们打开daemon.sh这个脚本来查看一下两者的不同：</p>
+<p><img src="https://resource.tinychen.com/blog/20200327/SDqqCLNFjEKa.png" srcset="/img/loading.gif" lazyload></p>
+<p>从图中我们可以看到两者最大的不同就是使用run命令的时候是<code>exec</code>调用<code>jsvc</code>来启动tomcat并且使用了<code>-nodetach</code>参数。</p>
+<p>shell中的<code>exec</code>命令和直接调用不同，命令<code>exec</code>将并不启动新的shell，而是用要被执行命令替换当前的shell进程，并且将老进程的环境清理掉，<strong>而且exec命令后的其它命令将不再执行。</strong></p>
+<p>也就是说，run命令使用exec调用了jsvc，是直接替代原来启动daemon.sh的bash shell进程，并且在这个exec命令执行完之后才会执行后面的exit命令。这样就可以让systemd的Main PID从bash shell进程顺理成章地变为jsvc的启动进程。</p>
+<p>那么我们知道，jsvc的启动进程在启动完jsvc控制进程之后还是会退出的，这个时候systemd还是会监听失败。而<code>-nodetach</code>参数的作用就是不脱离父进程而成为守护进程（ don’t detach from parent process and become a daemon），这样就能顺利地使得jsvc控制进程从它的父进程jsvc启动进程那里“得到”systemd的Main PID的位置，成为该service的主要进程。</p>
+<p>我们直接在终端中运行jsvc并加上<code>-nodetach</code>参数，可以看到即使是运行成功了之后也不会退出（控制进程继承了启动进程成为守护进程一直运行），而没加的情况下则是jsvc启动进程退出后就会退出。</p>
+<p><img src="https://resource.tinychen.com/blog/20200327/nOEzacp0ewCV.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里再放上systemd使用daemon.sh启动tomcat的整个unit文件的配置及注释：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[Unit]<br>Description=Apache Tomcat 9<br><span class="hljs-meta">#</span><span class="bash"> 对整个serive的描述，相当于备注，会出现在systemd的<span class="hljs-built_in">log</span>中</span><br>After=network.target<br><span class="hljs-meta">#</span><span class="bash"> 在network服务启动之后再启动</span><br><br>[Service]<br>User=tomcat<br>Group=tomcat<br><span class="hljs-meta">#</span><span class="bash"> 运行该service的用户及用户组</span><br><br>PIDFile=/var/run/tomcat.pid<br><span class="hljs-meta">#</span><span class="bash"> 该service的PID文件</span><br><br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br><span class="hljs-meta">#</span><span class="bash"> 定义了运行时需要的变量</span><br><br>ExecStart=/home/tomcat9/bin/daemon.sh start<br>ExecStop=/home/tomcat9/bin/daemon.sh stop<br><span class="hljs-meta">#</span><span class="bash"> 对应systemd控制的start和stop命令</span><br><br>[Install]<br>WantedBy=multi-user.target<br><span class="hljs-meta">#</span><span class="bash"> 运行级别为第三级（带有网络的多用户模式）</span><br></code></pre></div></td></tr></table></figure>
+
+<h3 id="直接使用jsvc"><a href="#直接使用jsvc" class="headerlink" title="直接使用jsvc"></a>直接使用jsvc</h3><p>既然搞清楚了运行原理，我们也就可以跳过脚本直接在unit文件中定义各种参数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[Unit]<br>Description=Apache Tomcat 9<br>After=network.target<br><br>[Service]<br>User=root<br>Group=root<br><span class="hljs-meta">#</span><span class="bash"> 这里使用root用户启动方便jsvc监听特权端口</span><br><span class="hljs-meta">#</span><span class="bash"> 后面可以在jsvc参数中使用-user降权到tomcat用户</span><br><br>PIDFile=/var/run/tomcat.pid<br><br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br><br>ExecStart=/home/tomcat9/bin/jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home $&#123;JAVA_HOME&#125; \<br>        -pidfile $&#123;CATALINA_BASE&#125;/tomcat.pid \<br>        -classpath $&#123;CATALINA_HOME&#125;/bin/bootstrap.jar:$&#123;CATALINA_HOME&#125;/bin/tomcat-juli.jar \<br>        -outfile $&#123;CATALINA_BASE&#125;/logs/catalina.out \<br>        -errfile $&#123;CATALINA_BASE&#125;/logs/catalina.err \<br>        -Dcatalina.home=$&#123;CATALINA_HOME&#125; \<br>        -Dcatalina.base=$&#123;CATALINA_BASE&#125; \<br>        -Djava.io.tmpdir=$&#123;CATALINA_TMPDIR&#125; \<br>        -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.file=$&#123;CATALINA_BASE&#125;/conf/logging.properties \<br>        org.apache.catalina.startup.Bootstrap<br><br>ExecStop=/home/tomcat9/bin/jsvc \<br>        -stop \<br>        -classpath $&#123;CLASSPATH&#125; \<br>        -Dcatalina.base=$&#123;CATALINA_BASE&#125; \<br>        -Dcatalina.home=$&#123;CATALINA_HOME&#125; \<br>        -pidfile $&#123;CATALINA_BASE&#125;/tomcat.pid \<br>        -Djava.io.tmpdir=$&#123;CATALINA_TMPDIR&#125; \<br>        -Djava.util.logging.config.file=$&#123;CATALINA_BASE&#125;/conf/logging.properties \<br>        -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \<br>        org.apache.catalina.startup.Bootstrap<br> <br>[Install]<br>WantedBy=multi-user.target<br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>注意：ExecStart和ExecStop两个命令中的执行文件路径需要使用绝对路径</p>
+</blockquote>
+<p><img src="https://resource.tinychen.com/blog/20200327/xePF5uyykIOM.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/frontend/">frontend</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/tomcat/">tomcat</a>
+                    
+                      <a class="hover-with-bg" href="/tags/web/">web</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200331-mstsc-deploy-tls-cert/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">windows系统RDP远程桌面配置可信证书</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200323-nginx-06-sendfile/">
+                        <span class="hidden-mobile">Nginx篇06-Sendfile指令及其原理</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

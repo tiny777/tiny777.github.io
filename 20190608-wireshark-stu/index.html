@@ -1,0 +1,577 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="使用Wireshark抓包分析校园网登录过程，并使用curl实现模拟登录。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>Wireshark抓包分析校园网登录过程 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Wireshark抓包分析校园网登录过程">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-06-08 15:00" pubdate>
+        June 8, 2019 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.5k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      9
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Wireshark抓包分析校园网登录过程</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：June 8, 2019 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>使用Wireshark抓包分析校园网登录过程，并使用curl实现模拟登录。</p>
+<span id="more"></span>
+
+<h1 id="1、登录过程抓包"><a href="#1、登录过程抓包" class="headerlink" title="1、登录过程抓包"></a>1、登录过程抓包</h1><h2 id="1-1-TCP三次握手建立连接"><a href="#1-1-TCP三次握手建立连接" class="headerlink" title="1.1 TCP三次握手建立连接"></a>1.1 TCP三次握手建立连接</h2><p>下图是经典的TCP三次握手示意图。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/V0Ek4BI89C6j.png" srcset="/img/loading.gif" lazyload></p>
+<p>下面是抓到的和校园网登录界面1.1.1.2建立TCP链接的三个数据报文。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/lz8Ql9GgXXrd.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="1-1-1-第一次握手"><a href="#1-1-1-第一次握手" class="headerlink" title="1.1.1 第一次握手"></a>1.1.1 第一次握手</h3><p>客户端发送syn包(seq=x)到服务器，并进入SYN_SEND状态，等待服务器确认；</p>
+<p>从下图可以看到此时</p>
+<p><code>seq=x=0</code></p>
+<p>客户端发送一个TCP，标志位为SYN，序列号为0，代表客户端请求建立连接，如下图：</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/HEYEr0C0E4Ps.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="1-1-2-第二次握手"><a href="#1-1-2-第二次握手" class="headerlink" title="1.1.2 第二次握手"></a>1.1.2 第二次握手</h3><p>服务器收到syn包，必须确认客户的SYN(ack=x+1)，同时自己也发送一个SYN包(seq=y)，即SYN+ACK包，此时服务器进入SYN_RECV状态；</p>
+<p>从下图可以看到此时</p>
+<p><code>ack=x+1=0+1=1</code></p>
+<p><code>seq=y=0</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190610/B96cvKgXVqRN.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="1-1-3-第三次握手"><a href="#1-1-3-第三次握手" class="headerlink" title="1.1.3 第三次握手"></a>1.1.3 第三次握手</h3><p>客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack=y+1)，此包发送完毕，客户端和服务器进入ESTABLISHED状态，完成三次握手。</p>
+<p>从下图可以看到此时</p>
+<p><code>ack=y+1=0+1=1</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190610/cWVoD9q1jUWe.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-2-登录过程分析"><a href="#1-2-登录过程分析" class="headerlink" title="1.2 登录过程分析"></a>1.2 登录过程分析</h2><p>我们查看登录的报文，可以看到是一个HTTP POST请求，目标URL为<code>http://a.stu.edu.cn/ac_portal/login.php</code></p>
+<p>在后面的报文分析中我们可以发现不仅是登录，查询和注销的目标URL也是<code>http://a.stu.edu.cn/ac_portal/login.php</code>，不同之处是<code>opr</code>选项的不同。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/13lXl304O2Ob.png" srcset="/img/loading.gif" lazyload></p>
+<p>再来查看报文内容，我们发现登录的选项较多</p>
+<ul>
+<li>opr为登录选项，此处为pwdLogin，即账号密码登录</li>
+<li>userName为用户名</li>
+<li>pwd为用户密码</li>
+<li>ipv4or6实则为你的Temporary IPv6 Address，如果无则为空</li>
+<li>rememberPwd为是否记住密码</li>
+</ul>
+<p><img src="https://resource.tinychen.com/blog/20190610/scaCqdNtO6wK.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-3-查询过程分析"><a href="#1-3-查询过程分析" class="headerlink" title="1.3 查询过程分析"></a>1.3 查询过程分析</h2><p>查询登录状态的报文也非常简单，使用HTTP POST提交一个<code>opr=online_check</code>的请求。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/KtanrddSi2eX.png" srcset="/img/loading.gif" lazyload></p>
+<p>然后服务端会返回一条html的text消息，里面的主要内容是两个选项<code>online</code>和<code>username</code>。</p>
+<p>其中<code>online</code>有0和1两个状态，当<code>online</code>为1的时候，表示已经登录成功，且会返回用户名<code>username</code>；当<code>online</code>为0的时候，表示没有登录，不会返回用户名<code>username</code>。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/b32RnGaiXdny.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-4-注销过程分析"><a href="#1-4-注销过程分析" class="headerlink" title="1.4 注销过程分析"></a>1.4 注销过程分析</h2><h3 id="1-4-1-IPv4注销过程"><a href="#1-4-1-IPv4注销过程" class="headerlink" title="1.4.1 IPv4注销过程"></a>1.4.1 IPv4注销过程</h3><p>IPv4的注销过程非常简单，只需要提交一个带有<code>opr=logot</code>的HTTP POST请求即可。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/XnxRgTMygENg.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="1-4-2-IPv6注销过程"><a href="#1-4-2-IPv6注销过程" class="headerlink" title="1.4.2 IPv6注销过程"></a>1.4.2 IPv6注销过程</h3><p>在本机获得IPv6地址之后，注销的HTTP POST请求中还需要多加一项<code>ipv4or6=你的Temporary IPv6 Address</code>，才能成功注销。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/xKwg2xYgNrUz.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="2、Curl模拟登录"><a href="#2、Curl模拟登录" class="headerlink" title="2、Curl模拟登录"></a>2、Curl模拟登录</h1><h2 id="2-1-Curl简介"><a href="#2-1-Curl简介" class="headerlink" title="2.1 Curl简介"></a>2.1 Curl简介</h2><p>Curl是一个利用URL语法在命令行下工作的文件传输工具，1997年首次发行。它支持文件上传和下载，所以是综合传输工具，但按传统，习惯称Curl为下载工具。Curl还包含了用于程序开发的libcurl。</p>
+<p>Curl支持的通信协议有FTP、FTPS、HTTP、HTTPS、TFTP、SFTP、Gopher、SCP、Telnet、DICT、FILE、LDAP、LDAPS、IMAP、POP3、SMTP和RTSP。</p>
+<p>Curl还支持SSL认证、HTTP POST、HTTP PUT、FTP上传, HTTP form based upload、proxies、HTTP/2、cookies、用户名+密码认证(Basic, Plain, Digest, CRAM-MD5, NTLM, Negotiate and Kerberos)、file transfer resume、proxy tunneling。</p>
+<p>我们可以输入<code>curl --help</code>来查看相关的指令帮助。</p>
+<p>下面我们要用到的模拟登录主要是使用curl模拟表单登录。</p>
+<h2 id="2-2-登录过程分析"><a href="#2-2-登录过程分析" class="headerlink" title="2.2 登录过程分析"></a>2.2 登录过程分析</h2><p>从上面的报文分析我们得知，登录的时候http post请求提交了多个选项，但实际上需要登录成功只需要提交登录选项（opr）、账号（userName）和密码（pwd）即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">curl -d <span class="hljs-string">&quot;opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190610/pTadHYu65Kir.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-3-查询过程分析"><a href="#2-3-查询过程分析" class="headerlink" title="2.3 查询过程分析"></a>2.3 查询过程分析</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">curl -d <span class="hljs-string">&quot;opr=online_check&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190610/Dmw2TKmGvDah.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190610/Xhbo9mcqgVUx.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-4-注销过程分析"><a href="#2-4-注销过程分析" class="headerlink" title="2.4 注销过程分析"></a>2.4 注销过程分析</h2><p>在无IPv6地址的情况下，我们注销登录只需要提交一个注销请求（<code>opr=logout</code>）即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 因为返回的数据中有中文，可能会产生乱码，所以要使用iconv进行编码转换</span><br>curl -d <span class="hljs-string">&quot;opr=logout&quot;</span> http://a.stu.edu.cn/ac_portal/login.php | iconv -f utf-8 -t gb2312<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190610/C10ezIPVSBNV.png" srcset="/img/loading.gif" lazyload></p>
+<p>在有IPv6地址的情况下，我们从上面的报文分析可知，除了注销请求之外，我们还需要提交一个IPv6地址（``Temporary IPv6 Address`），才能够顺利注销。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 因为返回的数据中有中文，可能会产生乱码，所以要使用iconv进行编码转换</span><br>curl -d <span class="hljs-string">&quot;opr=logout&amp;ipv4or6=你的Temporary IPv6 Address&quot;</span> http://a.stu.edu.cn/ac_portal/login.php | iconv -f utf-8 -t gb2312<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190610/R6S30DXrTGCQ.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、实现定时登录和爆流量换账号"><a href="#3、实现定时登录和爆流量换账号" class="headerlink" title="3、实现定时登录和爆流量换账号"></a>3、实现定时登录和爆流量换账号</h1><p>首先要说明一下现在的网络状况，在宿舍里面，断网时间是从晚上12点到早上6:30，且每个账号每天有限制使用流量，而在早上6：30之后，如果宿舍接入路由器需要手动登录，这里我们可以通过定时任务来实现自动登录和一个账号流量用完之后切换到另一个账号。</p>
+<h2 id="3-1-定时登录"><a href="#3-1-定时登录" class="headerlink" title="3.1 定时登录"></a>3.1 定时登录</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">curl -d <span class="hljs-string">&quot;opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></div></td></tr></table></figure>
+
+<p>在linux中（树莓派或NAS）设置定时任务，6:32分执行该任务。</p>
+<h2 id="3-2-爆流量换账号"><a href="#3-2-爆流量换账号" class="headerlink" title="3.2 爆流量换账号"></a>3.2 爆流量换账号</h2><p>由于通过校园网登录界面查询是否爆流量会有延迟（大概5分钟），所以我们需要使用ping命令来实时检测。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ping baidu.com || curl -d <span class="hljs-string">&quot;opr=logout&quot;</span> http://a.stu.edu.cn/ac_portal/login.php &amp;&amp; curl -d <span class="hljs-string">&quot;opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></div></td></tr></table></figure>
+
+<p>使用linux中的crontab工具，设置该任务执行时间为每分钟执行一次，执行时间为7:00到23:59。</p>
+<p><img src="https://resource.tinychen.com/blog/20190610/gc4gnOB2UOQq.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/web/">web</a>
+                    
+                      <a class="hover-with-bg" href="/tags/network/">network</a>
+                    
+                      <a class="hover-with-bg" href="/tags/stu/">stu</a>
+                    
+                      <a class="hover-with-bg" href="/tags/wireshark/">wireshark</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20190609-wireshark-dhcp/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Wireshark抓包分析DHCP以及路由干扰过程</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20190605-linux-use-ali-source/">
+                        <span class="hidden-mobile">Ubuntu18.04和CentOS7更换阿里源</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

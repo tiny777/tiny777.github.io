@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要是对nginx官方的文章If is Evil... when used in location context的翻译和理解。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>nginx篇09-location中的if指令是魔鬼吧 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210527100718.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="nginx篇09-location中的if指令是魔鬼吧">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-05-27 12:00" pubdate>
+        May 27, 2021 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.1k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      7
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">nginx篇09-location中的if指令是魔鬼吧</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：May 27, 2021 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要是对nginx官方的文章<a target="_blank" rel="noopener" href="https://www.nginx.com/resources/wiki/start/topics/depth/ifisevil/"><code>If is Evil... when used in location context</code></a>的翻译和理解。</p>
+<span id="more"></span>
+
+<h1 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h1><p><strong>在<code>location</code>块中的<code>if</code>指令的有点问题</strong>，在某些情况下，<code>if</code>指令并不会按照我们预期的那般工作，而是有可能往完全不同的方向发展甚至可能会引起错误。因此最好的方法就是尽可能的不要使用<code>if</code>指令。</p>
+<p>在<code>location</code>块的<code>if</code>指令内100%安全的指令有：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_rewrite_module.html#return">return</a></li>
+<li><a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_rewrite_module.html#rewrite">rewrite</a> …… last</li>
+</ul>
+<p>除了上面的两个指令之外的任何操作都有可能导致不可预测的效果甚至可能是SIGSEGV错误（可能出现内存错误导致程序异常终止）。</p>
+<p>需要注意的是：<code>if</code>指令的执行结果是一致的，也就是说相同的两个请求操作，不可能会出现一个成功但是另一个失败的情况。这就意味着只要经过足够合适的测试以及我们对相应操作的足够了解，<code>if</code>指令是<em>“可以”</em>被使用的。这个建议对于其他的指令也是同样适用的。</p>
+<p>很多情况下我们是没办法避免使用if指令的，例如当我们需要判断某个变量是否等于某个值或者包含某个字段的时候，就会需要用到if指令：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">if</span> ($request_method = POST ) &#123;<br>  <span class="hljs-attribute">return</span> <span class="hljs-number">405</span>;<br>&#125;<br><span class="hljs-attribute">if</span> ($args <span class="hljs-regexp">~ post=140)</span>&#123;<br>  <span class="hljs-attribute">rewrite</span><span class="hljs-regexp"> ^</span> http://example.com/ <span class="hljs-literal">permanent</span>;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="2、替代方案"><a href="#2、替代方案" class="headerlink" title="2、替代方案"></a>2、替代方案</h1><p>我们可以使用 <a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_core_module.html#try_files">try_files</a> 指令、“return …”指令或者“rewrite … last”指令用来替代if指令。在某些条件允许的情况下，也可以把<code>if</code>指令移动到<code>server</code>块的层级，此时的if指令是可以安全使用的，因为这里只有其他的rewrite模块指令能被使用（原因下文会解释）。</p>
+<p>当然对于一些需要使用<code>if</code>指令来判断返回<code>4xx</code>和<code>5xx</code>之类的异常代码响应页面或者是操作也可以尝试使用<code>return</code>指令搭配<code>error_page</code>指令来保证安全，例如下面的这个例子：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> / &#123;<br>    <span class="hljs-attribute">error_page</span> <span class="hljs-number">418</span> = @other;<br>    <span class="hljs-attribute">recursive_error_pages</span> <span class="hljs-literal">on</span>;<br><br>    <span class="hljs-attribute">if</span> ($something) &#123;<br>        <span class="hljs-attribute">return</span> <span class="hljs-number">418</span>;<br>    &#125;<br><br>    <span class="hljs-comment"># some configuration</span><br>    ...<br>&#125;<br><br><span class="hljs-attribute">location</span> @other &#123;<br>    <span class="hljs-comment"># some other configuration</span><br>    ...<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>此外，在某些情况下使用一些嵌入的脚本模块（如lua，<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_perl_module.html">embedded perl</a>, 或者是其他的<a target="_blank" rel="noopener" href="https://www.nginx.com/resources/wiki/modules/">ngx第三方模块</a>）来完成一些较负责的逻辑操作和判断也不失为一个好主意。</p>
+<h1 id="3、已知错误"><a href="#3、已知错误" class="headerlink" title="3、已知错误"></a>3、已知错误</h1><p>下面列举了一些if指令不按照预期工作的的情况，请注意不要在生产环境上配置这些指令。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-comment"># Here is collection of unexpectedly buggy configurations to show that</span><br><span class="hljs-comment"># if inside location is evil.</span><br><br><span class="hljs-comment"># only second header will be present in response</span><br><span class="hljs-comment"># not really bug, just how it works</span><br><br><span class="hljs-attribute">location</span> /only-one-if &#123;<br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-attribute">add_header</span> X-First <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-attribute">add_header</span> X-Second <span class="hljs-number">2</span>;<br>    &#125;<br><br>    <span class="hljs-attribute">return</span> <span class="hljs-number">204</span>;<br>&#125;<br><br><span class="hljs-comment"># request will be sent to backend without uri changed</span><br><span class="hljs-comment"># to &#x27;/&#x27; due to if</span><br><br><span class="hljs-attribute">location</span> /proxy-pass-uri &#123;<br>    <span class="hljs-attribute">proxy_pass</span> http://127.0.0.1:8080/;<br><br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># nothing</span><br>    &#125;<br>&#125;<br><br><span class="hljs-comment"># try_files wont work due to if</span><br><br><span class="hljs-attribute">location</span> /if-try-files &#123;<br>     <span class="hljs-attribute">try_files</span>  /file  @fallback;<br><br>     <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>     <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>         <span class="hljs-comment"># nothing</span><br>     &#125;<br>&#125;<br><br><span class="hljs-comment"># nginx will SIGSEGV</span><br><br><span class="hljs-attribute">location</span> /crash &#123;<br><br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># fastcgi_pass here</span><br>        <span class="hljs-attribute">fastcgi_pass</span>  <span class="hljs-number">127.0.0.1:9000</span>;<br>    &#125;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># no handler here</span><br>    &#125;<br>&#125;<br><br><span class="hljs-comment"># alias with captures isn&#x27;t correcly inherited into implicit nested</span><br><span class="hljs-comment"># location created by if</span><br><br><span class="hljs-attribute">location</span> <span class="hljs-regexp">~* ^/if-and-alias/(?&lt;file&gt;.*)</span> &#123;<br>    <span class="hljs-attribute">alias</span> /tmp/$file;<br><br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># nothing</span><br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>如果发现了上面没有列出出来的情况，可以邮件到<a target="_blank" rel="noopener" href="https://mailman.nginx.org/mailman/listinfo/nginx-devel">NGINX development mailing list</a>.</p>
+<h1 id="4、原因分析"><a href="#4、原因分析" class="headerlink" title="4、原因分析"></a>4、原因分析</h1><p><code>if</code>指令本质上其实是<code>rewrite</code>模块的一部分，<code>rewrite</code>模块本身设计就是用来“命令式”地执行操作<strong>（这就是前面说的为什么if里面搭配return和rewrite指令会100%安全的原因）</strong>。另一方面。nginx的配置通常来说是声明式的，但是出于某些原因，用户需要在if中添加某些非重写(non-rewrite)的指令（例如使用if判断http_origin之类的参数然后添加header），就有可能出现我们前面说的不正常工作的情况，尽管大部分情况下是能够正常工作的……</p>
+<p>目前看来唯一的解决方案就是<strong>完全</strong>禁用掉<code>if</code>中的所有<strong>非重写指令</strong>（non-rewrite directives），但是这会导致很多已有的配置无法正常工作（会极大地影响前向兼容性），因此一直没有处理这个问题。</p>
+<h1 id="5、如仍使用"><a href="#5、如仍使用" class="headerlink" title="5、如仍使用"></a>5、如仍使用</h1><p>如果还是需要在location中使用if指令，请务必注意：</p>
+<ul>
+<li>明确<code>if</code>的<a target="_blank" rel="noopener" href="https://agentzh.blogspot.com/2011/03/how-nginx-location-if-works.html">工作原理</a>和流程</li>
+<li>事先进行足够的测试以确保能够正常工作</li>
+</ul>
+<p><em>You were warned.</em></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/frontend/">frontend</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/web/">web</a>
+                    
+                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20210520-dns-05-bind9-keepalived-ha-installation/">
+                        <span class="hidden-mobile">DNS系列之bind篇01-Bind+Keepalived安装高可用DNS集群</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

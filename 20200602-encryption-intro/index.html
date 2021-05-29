@@ -1,0 +1,663 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要对对称加密和非对称加密的原理以及过程进行分析，同时还会简单介绍一下TLS/SSL的一些相关内容，并且对比TLSv1.2和TLSv1.3的不同。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>SSL/TLS、对称加密和非对称加密和TLSv1.3 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106171332.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="SSL/TLS、对称加密和非对称加密和TLSv1.3">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-06-02 10:00" pubdate>
+        June 2, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.6k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      35
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SSL/TLS、对称加密和非对称加密和TLSv1.3</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：June 2, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要对对称加密和非对称加密的原理以及过程进行分析，同时还会简单介绍一下TLS/SSL的一些相关内容，并且对比TLSv1.2和TLSv1.3的不同。</p>
+<span id="more"></span>
+
+<h1 id="1、SSL和TLS的历史"><a href="#1、SSL和TLS的历史" class="headerlink" title="1、SSL和TLS的历史"></a>1、SSL和TLS的历史</h1><p>其实早期的互联网协议基本都是不加密进行传输的，如HTTP、FTP、telnet.等协议的</p>
+<p><strong>传输层安全性协议</strong>（英语：<strong>T</strong>ransport <strong>L</strong>ayer <strong>S</strong>ecurity，缩写：<strong>TLS</strong>）及其前身<strong>安全套接层</strong>（英语：<strong>S</strong>ecure <strong>S</strong>ockets <strong>L</strong>ayer，缩写：<strong>SSL</strong>）的历史进程如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th align="center">协议</th>
+<th align="center">发布时间</th>
+<th align="center">状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">SSL 1.0</td>
+<td align="center">未公布</td>
+<td align="center">未公布</td>
+</tr>
+<tr>
+<td align="center">SSL 2.0</td>
+<td align="center">1995年</td>
+<td align="center">已于2011年弃用</td>
+</tr>
+<tr>
+<td align="center">SSL 3.0</td>
+<td align="center">1996年</td>
+<td align="center">已于2015年弃用</td>
+</tr>
+<tr>
+<td align="center">TLS 1.0</td>
+<td align="center">1999年</td>
+<td align="center">已于2020年弃用</td>
+</tr>
+<tr>
+<td align="center">TLS 1.1</td>
+<td align="center">2006年</td>
+<td align="center">已于2020年弃用</td>
+</tr>
+<tr>
+<td align="center">TLS 1.2</td>
+<td align="center">2008年</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">TLS 1.3</td>
+<td align="center">2018年</td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<blockquote>
+<ul>
+<li>TLS 1.0 于1999年发布为<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/info/rfc2246">RFC 2246</a></li>
+<li>TLS 1.1 于2006年作为<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/info/rfc4346">RFC 4346</a>发布</li>
+<li>TLS 1.2 于2008年发布为<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/info/rfc5246">RFC 5246</a></li>
+<li>TLS 1.3 于2018年8月作为建议标准在<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc8446">RFC 8446</a>发布</li>
+</ul>
+</blockquote>
+<p>SSL（Secure Sockets Layer）是网景公司（Netscape）设计的主要用于Web的安全传输协议，这种协议在Web上获得了广泛的应用。SSL1.0没有被公开发布过，1995 网景公司发布SSL2.0，但是由于SSL2.0有严重的安全漏洞，因此1996年又发布了SSL3.0。</p>
+<blockquote>
+<p>但是在2014年10月，Google发布在SSL 3.0中发现设计缺陷，建议禁用此一协议。攻击者可以向TLS发送虚假错误提示，然后将安全连接强行降级到过时且不安全的SSL 3.0，然后就可以利用其中的设计漏洞窃取敏感信息。Google在自己公司相关产品中陆续禁止回溯兼容，强制使用TLS协议。Mozilla也在11月25日发布的Firefox 34中彻底禁用了SSL 3.0。微软同样发出了安全通告。<strong>这就是SSL3.0在2015年被弃用的原因。</strong>但是由于SSL存在的时间太长了，人们以及习惯用SSL这个名词来指代加密的安全传输协议，因此我们要知道现在说的SSL绝大多数都是说的TLS加密。</p>
+</blockquote>
+<p>众所周知当年的浏览器大战微软战胜了网景，而后网景将SSL协议的管理权交给了标准化组织IETF（Internet Engineering Task Force）。<strong>1999年</strong>，IETF在SSL3.0的基础上进行发布了TLS协议的1.0版本，需要注意的是TLS1.0版本和SSL3.0版本的区别很小，并且TLS1.0是可以降级到SSL3.0来使用的，之所以换名字主要是为了避免一些版权和法律的问题。这也就导致了后来谷歌禁止TLS回溯兼容SSL协议从而避免安全事故的发送。注意其实所有TLS版本在<strong>2011年3月</strong>发布的<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc6176">RFC 6176</a>中删除了对SSL2.0的兼容，这样TLS会话将永远无法协商使用的SSL 2.0以避免安全问题。<strong>但是还是可以降级协商到SSL3.0的。</strong></p>
+<blockquote>
+<figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql">RFC <span class="hljs-number">6176</span>的原文摘要如下：<br>   This document requires that <span class="hljs-keyword">when</span> Transport Layer <span class="hljs-keyword">Security</span> (TLS)<br>   clients <span class="hljs-keyword">and</span> servers establish connections, they never negotiate the<br>   use <span class="hljs-keyword">of</span> Secure Sockets Layer (SSL) <span class="hljs-keyword">version</span> <span class="hljs-number">2.0</span>.  This document updates<br>   the backward compatibility sections <span class="hljs-built_in">found</span> <span class="hljs-keyword">in</span> the Transport Layer<br>   <span class="hljs-keyword">Security</span> (TLS).<br></code></pre></div></td></tr></table></figure>
+</blockquote>
+<p>TLS 1.1在 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc4346">RFC 4346</a> 中定义，于2006年4月发表。TLS 1.2在 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc5246">RFC 5246</a> 中定义，于2008年8月发表。TLS 1.3在 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc8446">RFC 8446</a> 中定义，于2018年8月发表。实际上现代的浏览器已经基本不使用 SSL，使用的都是 TLS，而目前主流使用的加密协议版本是TLS1.2和TLS1.3。</p>
+<h1 id="2、SSL-TLS属于哪一层"><a href="#2、SSL-TLS属于哪一层" class="headerlink" title="2、SSL/TLS属于哪一层"></a>2、SSL/TLS属于哪一层</h1><p>这个问题十分有意思，从前面的发展历史中我们不难知道，TLS可以视为是SSL的高级版本（主要体现在更加安全上），而从TLS的名字（传输层安全性协议）就会觉得它应该是传输层的协议，当然这可能就望文生义了，实际上在网上有不少的文章在讨论TLS/SSL属于应用层还是传输层，实际上的情况要更为复杂一些，我们先来搞清楚在不同的网络模型中对于不同层的划分。</p>
+<p>首先我们需要知道一般说的七层协议指的是在OSI模型协议，而在TCP/IP模型中网络被划分为四层，我们直接来看下面的示意图：</p>
+<p><img src="https://resource.tinychen.com/image-20200518143710872.png" srcset="/img/loading.gif" lazyload></p>
+<p>原始版本的OSI模型划分得太细，TCP/IP模型又划分得太粗，于是人们把两者结合，将OSI模型中的5、6、7三层统一为应用层，就得到了一个升级版的五层网络模型。</p>
+<p>首先我们对SSL/TLS的作用进行分析：SSL/TLS最初是为了给HTTP协议加密使用，也就是HTTPS协议，通常来说我们可以认为<code>HTTP+SSL/TLS=HTTPS</code>，而实际上现在我们的很多其他应用层协议都可以使用SSL/TLS，比如SSH、FTPS、POP3S、IMAPS等等。再以HTTPS为例，一个HTTPS建立连接需要经过TCP握手建立连接这一步骤的，也就是说HTTPS还是基于TCP的，而TCP属于传输层这是毫无争论的。也就是说从划分最细的OSI七层参考模型来看，SSL/TLS应该是在传输层和应用层之间。</p>
+<p>实际上从SSL/TLS的功能来分析：</p>
+<p><img src="https://resource.tinychen.com/image-20200518185915178.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>SSL Record Protocol（SSL记录协议），它建立在可靠的传输协议（如TCP）之上，SSL/TLS使用了双向字节流传输（全双工），为高层协议提供数据封装、压缩、加密等基本功能的支持，从功能上看这应该是OSI的L6（表示层）</li>
+<li>SSL Handshake Protocol（SSL握手协议）：它建立在SSL记录协议之上，用于在实际的数据传输开始前，通讯双方进行身份认证、协商加密算法、交换加密密钥等，从功能上看这应该是OSI的L5（会话层）</li>
+</ul>
+<blockquote>
+<p> 首先，SSL协议分为SSL握手协议和SSL记录协议。记录协议工作在TCP之上，握手协议工作在记录协议之上。 </p>
+<p>而与之相对应的七层结构中，传输层之上是会话层，会话层之上是表示层。 </p>
+<p>一、会话层负责建立和位置会话，很明显SSL握手协议就是干这个事的。 </p>
+<p>二、表示层对统一传输方式，并对数据进行加密之类的前置处理。这个应该是SSL记录协议要做的事情。</p>
+<p> 所以如果真要说对应关系，应该是SSL握手协议对应会话层， SSL记录协议对应表示层，但是这又与SSL握手协议在SSL记录协议之上相违背。</p>
+</blockquote>
+<p>那么我们就可以得出结论：<strong>OSI七层模型并不适用于SSL/TLS协议，这个人为设计的理论参考模型并不能完美地套用在每一个网络协议上，</strong>可能这也是OSI模型被弃用的原因之一吧。</p>
+<p>那么对应五层的网络模型呢？由于OSI模型中的L5、L6、L7都合并成了应用层，所以SSL/TLS应该是属于传输层和应用层了。</p>
+<h1 id="3、对称加密和非对称加密"><a href="#3、对称加密和非对称加密" class="headerlink" title="3、对称加密和非对称加密"></a>3、对称加密和非对称加密</h1><p>讲到加密，必然需要理解加密算法，而加密算法一般来说可以分为<strong>对称加密</strong>和<strong>非对称加密</strong>两种。</p>
+<p><img src="https://resource.tinychen.com/image-20200518124623154.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里的对称和非对称是针对加密和解密这两个操作而言的，一般来说是消息发送方发送消息时需要加密，消息接收方在接收消息后需要进行解密。<strong>如果加密和解密用的密钥是相同的，则是对称加密；如果不同则是非对称加密。</strong></p>
+<h2 id="3-1-对称加密"><a href="#3-1-对称加密" class="headerlink" title="3.1 对称加密"></a>3.1 对称加密</h2><p><strong>对称加密算法的特点是算法公开、计算量小、加密速度快、加密效率高。</strong>常见的对称加密算法有AES、DES等。</p>
+<p><strong>对称加密最大的问题在于密钥的传输</strong>：因为如果信息的发送方和接收方是通过网络来进行通信的，而在网络中使用明文通信是不安全的，想要安全通信必须使用密钥加密，同时要保证密钥只有通信双方知道，但是在传输密钥之前双方并没有一个安全可靠双方都知道的密钥。如果最开始的密钥传输过程使用明文，就可能会被别有用心的人截获密钥，之后的加密就毫无意义。最保险的方法就是线下传输密钥然后再线上通信，可以参考谍战片中的特务舍生取义护送密码本，但是这在互联网时代显然不靠谱。</p>
+<h2 id="3-2-非对称加密"><a href="#3-2-非对称加密" class="headerlink" title="3.2 非对称加密"></a>3.2 非对称加密</h2><p>这时候非对称加密就出现了，<strong>非对称加密最大的特点就是把密钥进行分离，将其分成公钥和私钥两个部分，常见的非对称加密算法主要有 RSA 、 DSA 、ECC等</strong>。</p>
+<p>顾名思义，公钥是可以用在互联网中随意传播的，而私钥则是需要自己小心保存避免泄露的。消息的发送方只需要知道消息接受方的公钥，即可将明文通过公钥加密然后通过网络传输给消息接收方。消息接收方收到密文后，通过非对称加密算法，使用自己的私钥进行解密，即可获取消息内容。</p>
+<p><img src="https://resource.tinychen.com/image-20200518131644845.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里面有几个点需要额外关注一下：</p>
+<ul>
+<li>公钥是所有人都可以获取的，因此想要给接收方发送消息只需要获取公钥即可，所以公钥可以用明文直接传输，因为即使是在传输过程中泄露了公钥，由于解密只能使用私钥，因此整个数据传输也还是安全的</li>
+<li>在通信过程中一般两边都涉及到消息的发送和接收，因此在通信过程中一般会有两套密钥对</li>
+<li>可以根据私钥生成公钥，反之不行</li>
+<li>消息发送方是无法对发送出去的密文解密的，它只能读取自己保存的明文来了解之前发送过的消息</li>
+</ul>
+<h2 id="3-3-数字证书"><a href="#3-3-数字证书" class="headerlink" title="3.3 数字证书"></a>3.3 数字证书</h2><p><strong>在通信的过程中，我们使用公钥加密，私钥解密，因为私钥是自己才有的，而传输的信息是不安全的可能被别人截获的，但是只要对其进行加密，然后保证自己才能解密，就可以认为传输信息是安全的。</strong>这就好比使用了一个很安全的保险箱来存放重要资料再快递到别的地方去，只要保证只有自己能够解锁保险箱，那么运输过程中保险箱会被谁接触到都不重要，只要保险箱送到目的地就可以了。</p>
+<p>即便是非对称加密，也存在一个公钥传输的问题。基本上存在着两种方案，一种是直接把公钥放到网上，然后让需要使用的用户去下载，另一种就是在通信传输过程中，由服务器直接发送给客户端。这两种方法都存在一个问题就是无法保证公钥传输的安全性，虽然公钥是可以给任何人知道的，但是在通信过程中使用的公钥必须是通信双方的公钥，否则如果出现中间人劫持了通信并且将公钥替换为中间人自己的公钥，那么中间人就可以获取到通信内容。</p>
+<p>这个时候就需要数字证书了，基于非对称加密公私钥分离的特性，我们就可以对公钥进行单独操作，用于数字证书，也叫数字认证（digital certificate），即相当于现实生活中的签名，用于证实身份。</p>
+<p>数字证书是部署HTTPS认证的网站的必需品，我们在访问一个网站的时候，一般点击浏览器地址栏旁边的小锁就可以看到这时候正在使用的数字证书：</p>
+<p><img src="https://resource.tinychen.com/tinychencerts.png" srcset="/img/loading.gif" lazyload></p>
+<p>点击进去就可以看到相关的证书信息。证书中包含着十分多的信息，首先最重要的当然是对应的域名和公钥，其他的还有证书的生效时间，使用的加密算法、签名算法等各种相关信息。</p>
+<p><img src="https://resource.tinychen.com/image-20200602095500926.png" srcset="/img/loading.gif" lazyload></p>
+<p>签发证书的机构被称为 CA（ Certificate Authority），理论上每个人都可以成为CA，因为每个人都可以自己签发证书，但是只有极少数的权威CA颁发的证书才会被承认，这几大权威CA的称为ROOT CA，他们的证书一般都会内置在操作系统中，浏览器默认是信任这些ROOT CA的证书的，而这些ROOT CA下属还有其他的CA，这些下属的CA可以为各种网站颁发证书，根据层层信任的原则，浏览器也会信任这些CA下发的证书，最终就保证了通信中公钥传输的安全。</p>
+<p><img src="https://resource.tinychen.com/image-20200602100807932.png" srcset="/img/loading.gif" lazyload></p>
+<p>早期的证书是需要收费的，但是到了近几年加密通信的需求增加，很多网站的运营者并没有那么多钱来购买证书（证书过期了续费也是要钱的），这时候就出现了以Encryption Everywhere、 Let’s Encrypt等为首的CA开始大量普及免费的数字证书，如今国内的很多云厂商也提供了各种免费的数字证书，从而很好的推动了加密通信的发展。不过这些免费的数字证书在安全性上并没有企业级的收费证书那么高，大多数都只是DV证书，如果对安全性有很高的追求，还是建议购买收费的证书。</p>
+<p>一般来说数字证书可以按照安全程度分为以下三类：</p>
+<ul>
+<li>EV：**EV证书(Extended Validation Certificate)**是一种根据一系列特定标准颁发的X.509电子证书，根据要求，在颁发证书之前，证书颁发机构(CA)必须验证申请者的身份。不同机构根据证书标准发行的扩展验证证书并无太大差异，但是有时候根据一些具体的要求，特定机构发行的证书可以被特定的软件识别</li>
+<li>OV：**OV证书(Organization Validation SSL)**，指需要验证网站所有单位的真实身份的标准型SSL证书，此类证书不仅能够起到网站信息加密的作用，而且能向用户证明网站的真实身份</li>
+<li>DV：**DV证书(Domain Validation SSL)**，指需要验证域名的有效性。该类证书只提供基本的加密保障，不能提供域名所有者的信息</li>
+</ul>
+<h1 id="4、TLS加密的握手过程"><a href="#4、TLS加密的握手过程" class="headerlink" title="4、TLS加密的握手过程"></a>4、TLS加密的握手过程</h1><p>TLS本身是一个混合加密系统，也就是说它使用了对称加密和非对称加密两种方式，<strong>首先是使用非对称加密来传输在这次会话过程中生成的用于生成对称加密的密钥（ pre-master key），结合明文传输的随机数和算法生成堆成加密的密钥之后再使用对称加密进行通信。</strong>这样通信的原因是因为非对称加密虽然很安全，但是效率实在是太低了（比对称加密慢几个数量级），因此只用来传输对称加密的密钥，之后就使用效率更高的对称加密来通信。</p>
+<p>TLS支持多种密钥交换算法（key exchange algorithms） 和加密算法（ciphersuites），不同的客户端和服务器之间支持的也各不相同，因此在加密通信之间就需要进行协商，<strong>客户端和服务端需要协商清楚使用何种算法，使用何种加密方式，使用什么密钥等等问题，这一个过程称为握手过程（handshake）。</strong>就好像TCP连接在建立前需要进行三次握手一样，所有的TLS通信在开始之前都需要进行握手（handshake）。当客户端和服务器完成TCP三次握手建立TCP连接之后，就开始进行TLS的握手过程，具体的流程如下：</p>
+<ul>
+<li>首先由客户端发送Client Hello 消息到服务器，消息中主要包含了客户端支持的<code>ciphersuites</code>， TLS 版本信息和客户端随机数。<strong>注意此时是明文传输</strong></li>
+<li>服务器接收到消息后，返回自己支持的<code>ciphersuites</code>， TLS 版本，自己的数字证书和服务器端生成的随机数。<strong>注意此时是明文传输</strong></li>
+<li>客户端开始验证数字证书，可能会不断往上追溯 CA、CA 的 CA、CA 的 CA 的 CA，直到一个授信的 CA。验证完证书之后生成一个新的<code>pre-master key</code>，再使用证书中的公钥来对<code>pre-master key</code>进行加密，然后发送给服务器。<strong>注意此时是非对称加密传输</strong></li>
+<li>服务器接收到客户端发送过来的非对称加密的密文，使用自己的私钥进行解密，获得了<code>pre-master key</code>。<strong>注意此时是非对称加密传输</strong></li>
+<li>到这里为止，服务器和客户端都有三组数字，<strong>分别是客户端的随机数、服务器的随机数和pre-master key。</strong>其中由于客户端的随机数和服务器的随机数都是使用明文传输，所以这两个数字是有被暴露的风险的，但是由于<code>pre-master key</code>是使用非对称加密传输，十分安全，所以将这三者结合，使用之前协商好的特定的算法就可以生成一个密钥，这个密钥称为<code>shared secert</code>。也就是之后用来对称加密的密钥。</li>
+<li>客户端在计算出对称加密的密钥之后，使用该密钥进行对称加密通信，告知服务器之后都使用该密钥进行对称加密。<strong>注意此时是对称加密传输</strong></li>
+<li>服务器接收到密文后，使用之前计算出的密钥来进行对称解密，解密成功之后，再使用该密钥进行对称加密通信。告知客户端密钥确认无误，可以使用该密钥进行通信。<strong>注意此时是对称加密传输</strong></li>
+<li>至此，整个TLS的握手过程完整，之后就可以开始对称加密的通信了。</li>
+</ul>
+<p>全过程如下图所示：</p>
+<p><img src="https://resource.tinychen.com/TLSv1.2-handshake.png" srcset="/img/loading.gif" lazyload></p>
+<p>在<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc5246#page-35">RFC5246</a>文档中我们也可以看到对应的简单图示</p>
+<p><img src="https://resource.tinychen.com/image-20200607165105117.png" srcset="/img/loading.gif" lazyload></p>
+<p>整体流程和上面的基本相同，都是需要进行两个RTT操作。</p>
+<h1 id="5、TLS1-2的问题"><a href="#5、TLS1-2的问题" class="headerlink" title="5、TLS1.2的问题"></a>5、TLS1.2的问题</h1><p>纵观整个SSL/TLS协议的发展史，我们可以发现整个SSL/TLS协议就是不断地填坑的一个过程，不断地对旧版本的协议中的各种漏洞进行修补迭代更新，然后发布新的版本，直到TLSv1.2版本才算是一个不错的可用的加密协议版本。即便如此，对应TLSv1.2来说还是有着太多的历史包袱和兼容性的问题，尽管在功能实现上的漏洞可以通过补丁来进行修补，但是在协议设计之初就存在的问题是没有办法修复的，只能推倒重来，于是就出现了后面的TLSv1.3。这里我们先了解一下TLSv1.2版本中的一些主要的问题：</p>
+<h2 id="5-1-安全问题"><a href="#5-1-安全问题" class="headerlink" title="5.1 安全问题"></a>5.1 安全问题</h2><p>作为一个提供安全通信的协议，安全问题是首要的也是致命的问题。TLS发展到1.2以来，已经被很多机构和学者曝出有各种各样的安全漏洞，包括密钥交换算法（key exchange algorithms）、加密套件（ciphersuites）和数字签名（digital signatures）各个方面都存在安全问题，很多都是由于历史原因兼容问题而遗留下来的问题。</p>
+<p>还有一些则是设计协议本身就存在的问题如TLS重新协议（renegotiation）可以让心怀不轨的人将高版本的TLS协议重新协商降级到低版本的不安全的协议然后进行攻击。又或者是SNI的不加密问题，TLS1.2及之前的协议都不对SNI进行加密，这也存在了很大的风险。</p>
+<h2 id="5-2-性能问题"><a href="#5-2-性能问题" class="headerlink" title="5.2 性能问题"></a>5.2 性能问题</h2><p>互联网上一直存在着加密传输对性能有很大损耗的说法，实际上了解了上面的TLSv1.2握手过程之后，我们可以知道加密传输对性能确实有损耗，但是远没有到很多人鼓吹的那么严重的程度。而且在后面也加入了很多诸如OCSP、HSTS等技术来提高其性能表现，但是即便如此，整个TLSv1.2的握手过程也需要2-RTT，也就是在客户端和服务器之间来回两次才能顺利建立TLS传输，这还是在一切都进行顺利的情况下。</p>
+<h1 id="6、TLS1-3的改进"><a href="#6、TLS1-3的改进" class="headerlink" title="6、TLS1.3的改进"></a>6、TLS1.3的改进</h1><p>TLSv1.3是TLS协议更新中变化非常大的一个版本，加入了许多新的特性和性能优化，并且不完全前向兼容，因此也有些人认为应该称为TLSv2.0，不过最后还是命名为TLSv1.3。</p>
+<p>针对TLSv1.2中存在的安全和性能问题，TLSv1.3在设计的时候就放弃了前向兼容性，不再对之前的版本进行兼容，同时禁用了大量不安全的算法，使用了少量安全的算法来设计协议，这样的好处就是可以简化握手过程中的操作，使得握手过程从2-RTT变为1-RTT，同时有效提高安全性和性能。</p>
+<h2 id="6-1-TLS1-3和TLS1-2的主要不同"><a href="#6-1-TLS1-3和TLS1-2的主要不同" class="headerlink" title="6.1 TLS1.3和TLS1.2的主要不同"></a>6.1 TLS1.3和TLS1.2的主要不同</h2><ul>
+<li>部分新的密码套件（ciphersuite）只能在TLSv1.3中工作，并且TLSv1.3不支持之前在TLSv1.2前用的旧的密码套件<code>ciphersuites</code>。也就是说<strong>如果需要使用TLSv1.3就必须要添加新的只能在TLSv1.3中使用的密码套件</strong></li>
+<li>新的密码套件（<code>ciphersuites</code>）和之前的密码套件定义不同，并不需要指定对应的证书类型(e.g. RSA, DSA, ECDSA) 或者是密钥交换机制 (e.g. DHE or ECHDE)</li>
+<li>TLSv1.3不再支持DSA证书</li>
+<li>TLS1.3中不再支持重新协商（Renegotiation），即不可能像TLSv1.2之前那样通过重新协商来回退到更早的更不安全的版本</li>
+<li>TLS1.3中更多的握手过程都被加密了（Server Hello之后都会进行加密）</li>
+<li>TLSv1.3支持更多的的消息类型，即对自定义的扩展API和认证传输有更好的扩展性</li>
+<li>客户端在TLS握手阶段发送ClientHello数据包的时候需要提供支持的密码套件（ciphersuite）和密钥共享（key_share）从而提高速度，<strong>如果client发送的<code>keyshare</code>类型是server不支持，那就不是1-RTT。</strong></li>
+<li>sessions会话在TLS握手完成之后才会建立，所以在session和TLS握手之间可能会有空隙（即不是连续的）</li>
+</ul>
+<h2 id="6-2-TLS1-3中的密钥交换算法"><a href="#6-2-TLS1-3中的密钥交换算法" class="headerlink" title="6.2 TLS1.3中的密钥交换算法"></a>6.2 TLS1.3中的密钥交换算法</h2><p>TLS 1.3的核心宗旨是简单性。在新版本中，除去了<em>Diffie-Hellman</em>（DH）密钥交换以外的所有密钥交换算法。TLS 1.3还定义了一组经过测试的DH参数，无需与服务器协商参数。由于只有一个密钥交换算法（具有内置参数）和少数支持的密码，因此设置TLS 1.3通道所需的绝对带宽比早期版本要少得多。</p>
+<p>我们来看DH算法交换密钥的步骤。假设客户端和服务器双方需要传递密钥，他们之间可以这么做：</p>
+<ol>
+<li>客户端首选选择一个素数<code>p</code>，例如509，底数<code>g</code>，任选，例如5，随机数<code>a</code>，例如123，然后计算<code>A=g^a mod p</code>，结果是215，然后，客户端发送<code>p＝509</code>，<code>g=5</code>，<code>A=215</code>给服务器；</li>
+<li>服务器收到后，也选择一个随机数<code>b</code>，例如，456，然后计算<code>B=g^b mod p</code>，结果是181，服务器再同时计算<code>s=A^b mod p</code>，结果是121；</li>
+<li>服务器把计算的<code>B=181</code>发给客户端，客户端计算<code>s＝B^a mod p</code>的余数，计算结果与服务器算出的结果一样，都是121。</li>
+</ol>
+<p>所以最终双方协商出的密钥<code>s</code>是121。注意到这个密钥<code>s</code>并没有在网络上传输。而通过网络传输的<code>p</code>，<code>g</code>，<code>A</code>和<code>B</code>是无法推算出<code>s</code>的，因为实际算法选择的素数是非常大的。所以，更确切地说，DH算法是一个密钥协商算法，双方最终协商出一个共同的密钥，而这个密钥不会通过网络传输。</p>
+<h2 id="6-3-TLS1-3握手过程"><a href="#6-3-TLS1-3握手过程" class="headerlink" title="6.3 TLS1.3握手过程"></a>6.3 TLS1.3握手过程</h2><p><img src="https://resource.tinychen.com/TLSv1.3-handshake-1591540910347.png" srcset="/img/loading.gif" lazyload></p>
+<p>整个流程的目的和TLS 1.2是相似的，TLS握手过程就是为了让双方能够得到一个安全的可用于对称加密的密钥。和之前不一样的就是，无非就是客户端提前把所有的公钥计算了一遍，发给server，server再挑选。</p>
+<h1 id="7、wireshark抓包"><a href="#7、wireshark抓包" class="headerlink" title="7、wireshark抓包"></a>7、wireshark抓包</h1><p>使用wireshark对TLSv1.3握手过程进行抓包，未解密的情况如下图。我们可以看到在<code>Server Hello</code>阶段之后的数据就已经被加密了，无法查看具体的数据情况，均显示为Application Data</p>
+<p><img src="https://resource.tinychen.com/image-20200607034300317.png" srcset="/img/loading.gif" lazyload></p>
+<p>对其进行解密操作之后就可以看到其中的数据情况，其中的Encrypted Extensions就是对SNI部分进行了加密。</p>
+<p><img src="https://resource.tinychen.com/image-20200607034403684.png" srcset="/img/loading.gif" lazyload></p>
+<p>解密前的TLSv1.2握手过程，可以看到直到Change Cipher Spec阶段都是没有进行加密的。</p>
+<p><img src="https://resource.tinychen.com/image-20200607025947398.png" srcset="/img/loading.gif" lazyload></p>
+<p>解密后的TLSv1.2握手过程，我们可以看到被加密的部分也就是Encrypted Handshake Message实际上就是Finished消息，用于检验对称加密的密钥是可以正常工作的。</p>
+<p><img src="https://resource.tinychen.com/image-20200607030111002.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/tls/">tls</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200608-http2-introduction/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">HTTP2的特性解析</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200519-nginx-07-enable-http2-tls13/">
+                        <span class="hidden-mobile">nginx篇07-启用HTTP2和TLSv1.3</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

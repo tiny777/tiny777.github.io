@@ -1,0 +1,541 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="Ubuntu18.04发布了很长一段时间了，基本上系统本身也趋于稳定，那么我们现在来尝试一下在已经存在win10系统的情况下安装Ubuntu18.04。本文使用的是单硬盘+GPT分区表配置方案，也是目前的主流方案。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>Win10下安装Ubuntu双系统 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Win10下安装Ubuntu双系统">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2018-08-17 15:00" pubdate>
+        August 17, 2018 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.5k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      8
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Win10下安装Ubuntu双系统</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：August 17, 2018 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>Ubuntu18.04发布了很长一段时间了，基本上系统本身也趋于稳定，那么我们现在来尝试一下在已经存在win10系统的情况下安装Ubuntu18.04。本文使用的是单硬盘+GPT分区表配置方案，也是目前的主流方案。</p>
+<span id="more"></span>
+
+<h1 id="1、下载Ubuntu18-04及相关工具"><a href="#1、下载Ubuntu18-04及相关工具" class="headerlink" title="1、下载Ubuntu18.04及相关工具"></a>1、下载Ubuntu18.04及相关工具</h1><h2 id="1-1-下载Ubuntu"><a href="#1-1-下载Ubuntu" class="headerlink" title="1.1 下载Ubuntu"></a>1.1 下载Ubuntu</h2><p>Ubuntu已经有了中文官网，而且在国内也能正常访问，因此下载相对简单。需要注意的是，<strong>Ubuntu18.04只有64位的版本。</strong></p>
+<p>这是下载链接：        <a target="_blank" rel="noopener" href="http://releases.ubuntu.com/18.04/">http://releases.ubuntu.com/18.04/</a></p>
+<p>▼我们下载图中的第一个后缀为desktop-amd64的iso镜像文件。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%281%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-2-下载UltraISO"><a href="#1-2-下载UltraISO" class="headerlink" title="1.2 下载UltraISO"></a>1.2 下载UltraISO</h2><p>使用搜索引擎搜索下载UltraISO并安装，关于UltraISO的使用可以参考一下小七之前发过的文章<a href="https://tinychen.com/20180318-dou-boot-udisk/">（双启动U盘）</a>。</p>
+<p><img src="https://resource.tinychen.com/UbuntuInstall%20%282%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-3-准备U盘和硬盘分区"><a href="#1-3-准备U盘和硬盘分区" class="headerlink" title="1.3 准备U盘和硬盘分区"></a>1.3 准备U盘和硬盘分区</h2><p>准备一个8G左右的U盘即可，USB3.0最好，没有的话2.0的U盘也可以。</p>
+<p><strong>硬盘上需要划分出一块空白空间，最少应该要有20G左右，小七这里划分了50G左右的空间。如果只是想尝试一下Ubuntu的话，预留20到30G是比较合适的。</strong></p>
+<p>具体的划分空间操作可以使用windows系统自带的磁盘管理进行压缩操作，也可以使用DiskGenius进行分区，操作十分简单，这里不再赘述。</p>
+<h1 id="2、刻录安装U盘"><a href="#2、刻录安装U盘" class="headerlink" title="2、刻录安装U盘"></a>2、刻录安装U盘</h1><p>▼如图所示，打开UltraISO后，<strong>点击左上角的文件-&gt;打开，选择刚刚下载好的ISO镜像文件。</strong><br><img src="https://resource.tinychen.com/UbuntuInstall%20%283%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼再点击<strong>上方菜单栏的启动-&gt;写入硬盘，</strong>硬盘驱动器要选择对应的U盘，不能选错，然后点击<strong>便捷启动-&gt;写入新的驱动器引导扇区-&gt;Syslinux</strong>。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%284%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼接下来点击写入，就会对U盘进行格式化并将ISO文件刻录到U盘里面。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%285%29.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、进入安装界面"><a href="#3、进入安装界面" class="headerlink" title="3、进入安装界面"></a>3、进入安装界面</h1><p>刻录完成之后，我们<strong>重启电脑进入BIOS或者是快捷启动菜单选择启动项，</strong>一般来说都是ESC/F1/F2/F8/F9/F11/F12等按键，具体会因笔记本的型号不同或是台式机的主板不同而不同，<strong>进入之后我们选择对应的UEFI启动项，名称应该是对应的U盘型号。</strong><br><img src="https://resource.tinychen.com/UbuntuInstall%20%286%29.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>小七注：有些电脑可能需要关闭BIOS设置中的Security Boot选项才能顺利使用U盘启动。</p>
+</blockquote>
+<p>▼到这里我们选择Try Ubuntu without install，这样可以先看一下Ubuntu的界面UI和各种操作，当然也可以直接选择下面的Install Ubuntu。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%287%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼接下来就进入到了Ubuntu的界面，这里除了还没有对应的Ubuntu硬盘分区之外，其他的基本没有太大差别，我们点击桌面的Install Ubuntu 18.04.1LTS进行安装。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%288%29.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="4、开始安装"><a href="#4、开始安装" class="headerlink" title="4、开始安装"></a>4、开始安装</h1><p><strong>接下来到分区之前都是一些简单的设置，我们根据实际需要选择即可。</strong></p>
+<h2 id="4-1-语言设置"><a href="#4-1-语言设置" class="headerlink" title="4.1 语言设置"></a>4.1 语言设置</h2><p>▼语言选择中文<br><img src="https://resource.tinychen.com/UbuntuInstall%20%289%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-2-键盘设置"><a href="#4-2-键盘设置" class="headerlink" title="4.2 键盘设置"></a>4.2 键盘设置</h2><p>▼键盘布局选择汉语<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2810%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-3-网络设置"><a href="#4-3-网络设置" class="headerlink" title="4.3 网络设置"></a>4.3 网络设置</h2><p>▼WiFi暂时先不要连接<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2811%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-4-系统安装分区"><a href="#4-4-系统安装分区" class="headerlink" title="4.4 系统安装分区"></a>4.4 系统安装分区</h2><p>▼<strong>安装类型选择其他选项</strong><br><img src="https://resource.tinychen.com/UbuntuInstall%20%2812%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼如图所示，硬盘上的分区多数是NTFS分区，这是windows系统使用的分区，而上方的EFI分区则是使用UEFI+GPT分区表模式下产生的用于记录系统引导文件的分区<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2813%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>一般来说，Ubuntu的安装分区可以分为三种情况：</p>
+<h3 id="4-4-1-第一种"><a href="#4-4-1-第一种" class="headerlink" title="4.4.1 第一种"></a>4.4.1 第一种</h3><p><strong>简单粗暴，只分一个    / （主分区），将所有的空间全部分到这个分区里面。</strong></p>
+<p>这种方案比较适合刚入门Ubuntu的萌新，想先体验上手一下Ubuntu，不需要担心分区的设置合理情况。</p>
+<h3 id="4-4-2-第二种"><a href="#4-4-2-第二种" class="headerlink" title="4.4.2 第二种"></a>4.4.2 第二种</h3><p><strong>分两个，Swap交换分区和/主分区，swap分区一般根据内存大小来分，剩下的全部给/主分区</strong></p>
+<p><strong>Swap交换分区其实就是虚拟内存分区</strong>，如果电脑内存比较小（小于8G）而且平时需要用到较多内存的话可以划分大一点（4G左右），如果平时内存足够用可以划分小一点，几百M到一两G都是没问题的。</p>
+<p>有兴趣的同学可以点击这里跳转到小七之前的博客了解一下。<a href="https://tinychen.com/20170504-pagefiles/">（虚拟内存）</a></p>
+<h3 id="4-4-3-第三种"><a href="#4-4-3-第三种" class="headerlink" title="4.4.3 第三种"></a>4.4.3 第三种</h3><p><strong>分四个，/boot引导分区、/home用户分区、swap交换分区和 / 主分区</strong><br><strong>/boot（引导分区）：</strong>相当于windows的efi分区，大小设置为200M即可，也可以更大一点；</p>
+<p><strong>/（主分区）：</strong>用于存放Ubuntu系统，相当于windows的C盘，一般来说10到15G就够了。</p>
+<p><strong>Swap(交换分区）：</strong>虚拟内存分区，大小参看第二种分法。</p>
+<p><strong>/home（用户分区）：</strong>存储用户的各种数据，剩下的硬盘空间有多大就分多大给这个分区</p>
+<p>这里小七选择第二种分区方案，一来是因为小七这里只划了50G来安装Ubuntu，硬盘本身的空间就不大，分太多区不太好；二来就是小七自己也没有什么分区的习惯（windows下也只是分了两个盘）。<br>▼如图所示，给交换分区（Swap）分2G（这台电脑的内存是16G，不需要分太大的交换空间）<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2814%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼如图所示，剩下的空间全部分给    /    主分区<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2816%29.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/UbuntuInstall%20%2817%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼确认无误后点击确认。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2818%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-5-设置区域"><a href="#4-5-设置区域" class="headerlink" title="4.5 设置区域"></a>4.5 设置区域</h2><p>▼设置区域，选择中国，默认城市是上海。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2819%29.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-6-设置用户名"><a href="#4-6-设置用户名" class="headerlink" title="4.6 设置用户名"></a>4.6 设置用户名</h2><p>▼设置用户名和密码，也可以不设置，但是最好还是设置一下，一些超级用户操作需要输入密码解锁权限，没有密码的话会比较麻烦。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2820%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼接下来就静静地等待安装完成。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2821%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼安装完成后会提示重启进入系统。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2822%29.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="5、重启系统"><a href="#5、重启系统" class="headerlink" title="5、重启系统"></a>5、重启系统</h1><p>▼重启后我们再进入启动选项可以看到Ubuntu已经在默认的第一个启动项中，如果平时使用windows比较多的可以把第一个改回windows。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2823%29.png" srcset="/img/loading.gif" lazyload></p>
+<p>▼如图所示即可进入Ubuntu系统，下面的第三个就是windows系统。<br><img src="https://resource.tinychen.com/UbuntuInstall%20%2824%29.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/ubuntu/">ubuntu</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20180824-androidstudio-install/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Android Studio配置</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20180814-raidon-2-ahci/">
+                        <span class="hidden-mobile">硬盘RaidOn模式无损转换为AHCI模式</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

@@ -1,0 +1,555 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="记录一下小米MIX2从MIUI稳定版→解锁BL→刷入MIUI开发版→获取ROOT权限→安装Google相机的全过程。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>小米MIX2刷谷歌相机 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="小米MIX2刷谷歌相机">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-04-01 15:00" pubdate>
+        April 1, 2019 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.1k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      5
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">小米MIX2刷谷歌相机</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：April 1, 2019 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>记录一下小米MIX2从MIUI稳定版→解锁BL→刷入MIUI开发版→获取ROOT权限→安装Google相机的全过程。</p>
+<span id="more"></span>
+
+<hr>
+<h1 id="1、解锁BL"><a href="#1、解锁BL" class="headerlink" title="1、解锁BL"></a>1、解锁BL</h1><p>小米MIX2有BL锁，因此需要先去官网申请解锁BL</p>
+<p><a target="_blank" rel="noopener" href="http://www.miui.com/unlock/index.html">http://www.miui.com/unlock/index.html</a></p>
+<p><img src="https://resource.tinychen.com/blog/20190401/CTYv4vLRzyt2.png" srcset="/img/loading.gif" lazyload></p>
+<p>在一系列骚操作获得了解锁资格之后，下载解锁工具，按照指示来进行解锁。</p>
+<p><strong>需要注意的是，这会清除掉手机上的所有数据！</strong></p>
+<p><strong>需要注意的是，这会清除掉手机上的所有数据！</strong></p>
+<p><strong>需要注意的是，这会清除掉手机上的所有数据！</strong></p>
+<p>解锁BL之后没有那么安全了，因此需要将这台手机和小米账号进行绑定，之后每次重置手机都需要输入对应绑定的小米账号的密码，因此这里设置的小米账号的密码一定要记住了。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/JPzcrWEYR0Mv.png" srcset="/img/loading.gif" lazyload></p>
+<p>下载的解锁BL工具包中有驱动和解锁工具，建议先进入BL模式，然后安装驱动，再进行解锁BL操作。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/i38y7fckMtWA.png" srcset="/img/loading.gif" lazyload></p>
+<p>解锁BL成功之后，手机会重置，需要进行重新设置，相当于刚买回手机的时候。这时候随便设置一下就可以了，因为待会儿还要刷入开发版，还要重新设置一次。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/Qh8DjnTBqaCH.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="2、刷入MIUI开发版"><a href="#2、刷入MIUI开发版" class="headerlink" title="2、刷入MIUI开发版"></a>2、刷入MIUI开发版</h1><h2 id="2-1-下载刷机包和工具"><a href="#2-1-下载刷机包和工具" class="headerlink" title="2.1 下载刷机包和工具"></a>2.1 下载刷机包和工具</h2><p>首先前往官网下载开发版的刷机包和线刷工具，使用线刷刷入。</p>
+<p><a target="_blank" rel="noopener" href="http://www.miui.com/shuaji-393.html">http://www.miui.com/shuaji-393.html</a></p>
+<p><img src="https://resource.tinychen.com/blog/20190401/IGkpu1GCz2Ns.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-进入Fastboot模式"><a href="#2-2-进入Fastboot模式" class="headerlink" title="2.2 进入Fastboot模式"></a>2.2 进入Fastboot模式</h2><p>关机状态下，同时按住 <strong>音量下+电源键</strong> 进入Fastboot模式将手机USB连接电脑。</p>
+<h2 id="2-3-刷入刷机包"><a href="#2-3-刷入刷机包" class="headerlink" title="2.3 刷入刷机包"></a>2.3 刷入刷机包</h2><p>打开刷机工具，这里提示需要安装一些驱动，点击Install安装即可。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/4LXwNKgQXP57.png" srcset="/img/loading.gif" lazyload></p>
+<p>对下载完的tar压缩包进行二次解压，最后得到的文件夹目录应该类似下面的图片。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/2VXTPmIJjoTA.png" srcset="/img/loading.gif" lazyload></p>
+<p>打开刷机工具选择解压生成的<strong>文件夹</strong>，<strong>右下角要手动选择clean all</strong>而不是clean all and lock，lock会再次对BL上锁，此时之前的解锁操作就白忙活了。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/Xzgx0UIVE0hw.png" srcset="/img/loading.gif" lazyload></p>
+<p>确认上面的几处位置都没有问题之后，我们点击flash进行刷机，此时需要耐心等待一小会儿。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/3MKyPnxWND4l.png" srcset="/img/loading.gif" lazyload></p>
+<p>刷机成功之后手机会自动重启进入设置界面，这次我们可以认真按照自己的需要进行设置。</p>
+<p><img src="https://resource.tinychen.com/blog/20190401/02R9uof2J2HC.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、获取ROOT权限"><a href="#3、获取ROOT权限" class="headerlink" title="3、获取ROOT权限"></a>3、获取ROOT权限</h1><p>MIUI的开发版可以很方便的获取ROOT权限，虽然说是阉割版的ROOT，但是也够谷歌相机使用了。</p>
+<p>我们打开手机内置的<strong>安全中心</strong>，选择<strong>应用管理</strong>，点击<strong>权限</strong>，选择<strong>开启ROOT权限</strong>，这时候会<strong>下载ROOT包并且重启安装</strong>。</p>
+<h1 id="4、安装谷歌全家桶"><a href="#4、安装谷歌全家桶" class="headerlink" title="4、安装谷歌全家桶"></a>4、安装谷歌全家桶</h1><p>首先保证手机可以正常访问Google（需要科学上网），然后进入应用商店（推荐安智），搜索谷歌安装器下载安装谷歌全家桶。</p>
+<p><img src="https://resource.tinychen.com/blog/20190402/9nT6Dk9G1p5F.png" srcset="/img/loading.gif" lazyload></p>
+<p>安装好全家桶之后，登录谷歌账户，确认能正常访问GooglePlay商店，即可进入下一步。</p>
+<p><img src="https://resource.tinychen.com/blog/20190402/n2NH1PG8U90k.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="5、安装终端模拟器"><a href="#5、安装终端模拟器" class="headerlink" title="5、安装终端模拟器"></a>5、安装终端模拟器</h1><p>安装终端模拟器（下载链接在后面），在窗口输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">su<br></code></pre></div></td></tr></table></figure>
+
+<p>这时系统会提示终端模拟器获取ROOT权限被拒绝，我们需要打开安全中心的权限管理→ROOT权限管理，手动给它授予ROOT权限。</p>
+<p><img src="https://resource.tinychen.com/blog/20190402/WxRhOlyCYPaO.png" srcset="/img/loading.gif" lazyload></p>
+<p>此时我们再打开终端模拟器，再次输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">su<br><span class="hljs-comment">#切换到超级用户模式</span><br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setprop persist.camera.HAL3.enabled 1<br><span class="hljs-comment">#开启HAL3的支持</span><br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setprop persist.camera.eis.enable 1<br><span class="hljs-comment">#开启EIS的支持</span><br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">getprop persist.camera.HAL3.enabled<br><span class="hljs-comment">#返回1则成功，否则重启手机再次尝试</span><br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190402/t9Q6puW97zNb.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="6、安装谷歌相机"><a href="#6、安装谷歌相机" class="headerlink" title="6、安装谷歌相机"></a>6、安装谷歌相机</h1><p>谷歌相机和终端模拟器的下载地址在这里（MIX2版）</p>
+<p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1T-4_eXkiiFSwX03axsppZA">https://pan.baidu.com/s/1T-4_eXkiiFSwX03axsppZA</a><br>提取码：eo6r </p>
+<p>下载后直接安装即可，打开设置微调一下HDR，就能体验谷歌相机的变态级夜景模式和HDR+了。</p>
+<p><img src="https://resource.tinychen.com/blog/20190402/MppdAoWQVNb2.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="7、效果对比"><a href="#7、效果对比" class="headerlink" title="7、效果对比"></a>7、效果对比</h1><p>上面的是小米自带的相机，下面的是谷歌相机，都打开了夜景模式，谷歌的还多了一个HDR+，小米的貌似不能同时使用夜景增强和HDR。</p>
+<p><img src="https://resource.tinychen.com/blog/20190402/0ssxRW014Ail.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190402/XEfFwPdC9kUM.jpg" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/others/">others</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/hardware/">hardware</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20190404-make-cat6-cable/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">直通线和交叉线的制作</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20190331-base-know-of-cn-2/">
+                        <span class="hidden-mobile">100条计算机网络基本知识（下）</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

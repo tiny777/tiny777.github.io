@@ -1,0 +1,570 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要介绍了HTTP2相对于HTTP1.1的一些改进和新特性。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>HTTP2的特性解析 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106171319.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="HTTP2的特性解析">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-06-08 10:00" pubdate>
+        June 8, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3.3k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      17
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">HTTP2的特性解析</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：June 8, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要介绍了HTTP2相对于HTTP1.1的一些改进和新特性。</p>
+<span id="more"></span>
+
+<h1 id="1、HTTP1-1的不足"><a href="#1、HTTP1-1的不足" class="headerlink" title="1、HTTP1.1的不足"></a>1、HTTP1.1的不足</h1><p>HTTP协议采用“request-response”模式，当使用普通模式，即非KeepAlive模式时，每个请求/应答客户和服务器都要新建一个连接，完成之后立即断开连接（HTTP协议为无连接的协议）。对于一个复杂的页面，一般都会有多个资源需要获取。如果是每个资源都单独建立一个TCP连接去获取，每次都需要进行三次握手建立连接来通信，这是十分耗费资源的。</p>
+<p>随后出现了<code>Keep-Alive</code>，<code>Keep-Alive</code>解决的核心问题是一定时间内，同一域名多次请求数据，只建立一次HTTP请求，其他请求可复用每一次建立的连接通道，以达到提高请求效率的问题。这里面所说的<strong>一定时间</strong>一般是可以自行配置的。当使用Keep-Alive模式（又称持久连接、连接重用）时，Keep-Alive功能使客户端到服务器端的连接持续有效，当出现对服务器的后继请求时，Keep-Alive功能避免了建立或者重新建立连接。</p>
+<p>在<code>HTTP1.1</code>中是默认开启了<code>Keep-Alive</code>，虽然解决了多次连接的问题，但是依然有两个比较严重的问题：</p>
+<ul>
+<li><strong>串行传输</strong>：在单通道传输的前提下，假设要传输10个文件，那么只能依次逐个传输，传输完第一个再传输第二个，以此类推；</li>
+<li><strong>连接数问题</strong>：HTTP/1.1 虽然默认开启<code>keep-alive</code>可以复用一部分连接，但域名分片等情况下仍然需要建立多个connection，耗费资源，给服务器带来性能压力。</li>
+</ul>
+<blockquote>
+<p>作为 HTTP/1.x 的连接，请求是序列化的，哪怕本来是无序的，在没有足够庞大可用的带宽时，也无从优化。一个解决方案是，浏览器为每个域名建立多个连接，以实现并发请求。曾经默认的连接数量为 2 到 3 个，现在比较常用的并发连接数已经增加到 6 条。如果尝试大于这个数字，就有触发服务器 DoS 保护的风险。如果服务器端想要更快速的响应网站或应用程序的应答，它可以迫使客户端建立更多的连接。例如，不要在同一个域名下获取所有资源，假设有个域名是 <code>www.example.com</code>，我们可以把它拆分成好几个域名：<code>www1.example.com</code>、<code>www2.example.com</code>、<code>www3.example.com</code>。所有这些域名都指向同一台服务器，浏览器会同时为每个域名建立 6 条连接(在我们这个例子中，连接数会达到 18 条)。这一技术被称作<strong>域名分片</strong>。</p>
+</blockquote>
+<p><strong>HTTP1.1中的数据传输是基于文本来进行传输的，这就需要保证在传输的过程中必须是按照文本原有的顺序进行传输。</strong>按照顺序传输的一大弊端就是没办法进行并行传输，例如一句<code>Hello</code>就只能按照字母顺序逐个传输，如果并行传输，字母到达的先后顺序是不一定和在文本中的顺序一样的，而字母本身又没有顺序标号，就没有办法对其进行排序，很有可能就会导致内容错乱，<code>Hello</code>就可能变成<code>leloH</code>。</p>
+<h1 id="2、HTTP2的特性"><a href="#2、HTTP2的特性" class="headerlink" title="2、HTTP2的特性"></a>2、HTTP2的特性</h1><h2 id="2-1-二进制分帧"><a href="#2-1-二进制分帧" class="headerlink" title="2.1 二进制分帧"></a>2.1 二进制分帧</h2><p><strong>http2</strong>采用<strong>二进制格式</strong>传输数据，而<strong>非 HTTP 1.x 的文本格式</strong>，二进制协议解析起来更高效。 HTTP / 1 的请求和响应报文，都是由起始行，首部和实体正文（可选）组成，各部分之间以文本换行符分隔。<strong>HTTP/2 将请求和响应数据分割为更小的帧，并且它们采用二进制编码</strong>。HTTP/2 中，同域名下所有通信都在单个连接上完成，该连接可以承载任意数量的双向数据流。每个数据流都以消息的形式发送，而消息又由一个或多个帧组成。多个帧之间可以乱序发送，根据帧首部的流标识可以重新组装。</p>
+<ul>
+<li>流：流是连接中的一个虚拟信道，可以承载双向的消息；每个流都有一个唯一的整数标识符（1、2…N）；</li>
+<li>消息：是指逻辑上的 HTTP 消息，比如请求、响应等，由一或多个帧组成。</li>
+<li>帧：HTTP 2.0 通信的最小单位，每个帧包含帧首部，至少也会标识出当前帧所属的流，承载着特定类型的数据，如 HTTP 首部、负荷，等等</li>
+</ul>
+<p>HTTP/2引入的<code>二进制数据帧</code>和<code>流</code>的概念，其中帧对数据进行顺序标识，这样浏览器收到数据之后，就可以按照序列对数据进行合并，而不会出现合并后数据错乱的情况。同样是因为有了序列，服务器就可以并行的传输数据，这就是<code>流</code>所做的事情。</p>
+<p>我们可以从下面的两张图来对其进行了解：</p>
+<p><img src="https://resource.tinychen.com/HTTP1.1_text.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/HTTP2_frame.jpg" srcset="/img/loading.gif" lazyload></p>
+<h2 id="多路复用-（multiplexing）"><a href="#多路复用-（multiplexing）" class="headerlink" title="多路复用 （multiplexing）"></a>多路复用 （multiplexing）</h2><p><img src="https://resource.tinychen.com/HTTP1.1_connection-1591562306871.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>在HTTP/2 协议中， <code>Connection</code> 和 <code>Keep-Alive</code> 是被忽略的；主要使用了多路复用来进行连接管理。在 HTTP/2 中，有了二进制分帧之后，HTTP /2 不再依赖 TCP 连接去实现多流并行了，在 HTTP/2 中</p>
+<ul>
+<li>同域名下所有通信都在单个连接上完成</li>
+<li>单个连接可以承载任意数量的双向数据流</li>
+<li>数据流以消息的形式发送，而消息又由一个或多个帧组成，多个帧之间可以乱序发送，因为根据帧首部的流标识可以重新组装。</li>
+</ul>
+<p>这一特性，使性能有了极大提升：</p>
+<ul>
+<li>同个域名只需要占用一个 TCP 连接，使用一个连接并行发送多个请求和响应,消除了因多个 TCP 连接而带来的延时和内存消耗</li>
+<li>并行交错地发送多个请求和响应，两两之间互不影响</li>
+<li>在 HTTP/2 中，每个请求都可以带一个 31bit 的优先值，0 表示最高优先级， 数值越大优先级越低。有了这个优先值，客户端和服务器就可以在处理不同的流时采取不同的策略，以最优的方式发送流、消息和帧。</li>
+</ul>
+<p><img src="https://resource.tinychen.com/HTTP2_connection-1591562284381.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>使用浏览器的开发者模式查看相关资源的加载情况，可以看到对应的http2的资源在加载的时候会使用多路复用，客户端可以同时请求多个资源；而下方的http1.1则在请求资源的时候出现了等待的情况。</p>
+<p><img src="https://resource.tinychen.com/image-20200605154932686.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-首部压缩（header-compression）"><a href="#2-2-首部压缩（header-compression）" class="headerlink" title="2.2 首部压缩（header compression）"></a>2.2 首部压缩（header compression）</h2><p>在同一个HTTP页面中，许多资源的Header是高度相似的，但是在HTTP2之前都是不会对其进行压缩的，这使得在多次传输中白白浪费了资源来进行重复无谓的操作。</p>
+<p>在HTTP中，首部字段是一个键值对，所有的首部字段组成首部字段列表。在HTTP/1.x中，首部字段都被表示为字符串，一行一行的首部字段字符串组成首部字段列表。而在HTTP/2的首部压缩<code>HPACK</code>算法中，则有着不同的表示方法。</p>
+<blockquote>
+<p>HPACK算法的具体细节可以参考<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc7541">RFC7541</a></p>
+</blockquote>
+<p>HPACK算法表示的对象，主要有原始数据类型的整型值和字符串，头部字段，以及头部字段列表。</p>
+<p><img src="https://resource.tinychen.com/hpack-header-compression.png" srcset="/img/loading.gif" lazyload></p>
+<p>头部压缩需要在支持 HTTP/2 的浏览器和服务端之间：</p>
+<ul>
+<li><strong>维护一份相同的<a target="_blank" rel="noopener" href="https://httpwg.org/specs/rfc7541.html#static.table.definition">静态字典</a>（Static Table），包含常见的头部名称，以及特别常见的头部名称与值的组合。</strong>其主要作用有两个：对于完全匹配的头部键值对，例如 <code>:method: GET</code>，可以直接使用一个字符表示；对于头部名称可以匹配的键值对，例如 <code>cookie: xxxxxxx</code>，可以将<code>名称cookie</code>使用一个字符表示。</li>
+<li><strong>维护一份相同的动态字典（Dynamic Table），可以动态地添加内容。</strong>对于<code>cookie: xxxxxxx</code> 这样的内容，可以将其添加到动态字典中，之后整个键值对只使用字段中替代的字符来表示即可。需要注意的是，动态字典上下文有关，需要为每个 HTTP/2 连接维护不同的字典。</li>
+<li>支持基于静态哈夫曼码表的哈夫曼编码（Huffman Coding）；</li>
+</ul>
+<p>使用字典可以极大地提升压缩效果，其中静态字典在首次请求中就可以使用。对于静态、动态字典中不存在的内容，还可以使用哈夫曼编码来减小体积。HTTP/2 使用了一份<a target="_blank" rel="noopener" href="https://httpwg.github.io/specs/rfc7541.html#huffman.code">静态哈夫曼码表</a>，也需要内置在客户端和服务端之中。</p>
+<p>下面的表格截取了部分静态字典的内容：</p>
+<p><img src="https://resource.tinychen.com/image-20200608052741835.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-3-服务器推送（server-push）"><a href="#2-3-服务器推送（server-push）" class="headerlink" title="2.3 服务器推送（server push）"></a>2.3 服务器推送（server push）</h2><p><code>Server Push</code> 即服务端能通过 push 的方式将客户端需要的内容预先推送过去，也叫“cache push”。这个新特性是有些颠覆了传统的HTTP模式的，因为传统的HTTP模式是客户端请求（request）资源，然后服务器才会返回（response）对应的资源，而<code>Server Push</code>的方式是服务器主动将资源推送到客户端。</p>
+<p><img src="https://resource.tinychen.com/2019-03-06-6.png" srcset="/img/loading.gif" lazyload></p>
+<p>可以想象以下情况，某些资源客户端是一定会请求的，这时就可以采取服务端 push 的技术，提前给客户端推送必要的资源，这样就可以相对减少一点延迟时间。例如服务端可以主动把 JS 和 CSS 文件推送给客户端，而不需要客户端解析 HTML 时再发送这些请求。</p>
+<p>服务端可以主动推送，客户端也有权利选择是否接收。如果服务端推送的资源已经被浏览器缓存过，浏览器可以通过发送 RST_STREAM 帧来拒收。实际上服务器应该避免推送已经被客户端缓存了的资源，一般可以通过判断请求中的缓存相关字段来确定是否需要推送。主动推送也遵守同源策略，换句话说，服务器不能随便将第三方资源推送给客户端，而必须是经过双方确认才行。</p>
+<p>还可以使用server push可以提前将需要加载的资源推送到客户端，这样还可以有效提升页面的加载速度：</p>
+<p><img src="https://resource.tinychen.com/image-20200605165305709.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/image-20200605165158159.png" srcset="/img/loading.gif" lazyload></p>
+<p>从上面两张图片的对比中我们可以看到一个大小为50KB左右的<code>main.css</code>文件在使用了服务器推送功能之后的加载时间从原来的<code>73.98ms</code>变为<code>19.54ms</code>。</p>
+<h1 id="3、HTTP2协商机制"><a href="#3、HTTP2协商机制" class="headerlink" title="3、HTTP2协商机制"></a>3、HTTP2协商机制</h1><p>由于目前并不是所有的客户端和服务器都支持HTTP2，因此在建立HTTP连接的过程中必然会存在一个协商的过程，具体的协商流程如下：</p>
+<p><img src="https://resource.tinychen.com/HTTP2_Negotiation-1591563270203.jpg" srcset="/img/loading.gif" lazyload></p>
+<h1 id="4、HTTP2的不足"><a href="#4、HTTP2的不足" class="headerlink" title="4、HTTP2的不足"></a>4、HTTP2的不足</h1><p>HTTP2在我个人看来在协议的设计方面应该已经是发挥了目前的全部性能，除非有什么惊人的压缩算法之类的出现，否则很难再有极大的改进（实际上HTTP2对比HTTP1.1在实际应用上的性能提升也并不算特别大）。但是由于HTTP协议的传输层还是使用的TCP，这就导致了可能会出现TCP的一些问题。</p>
+<p>例如在多路复用的情况下， 一般来说同一域名下只需要使用一个 TCP 连接。但当这个连接中出现了丢包的情况，TCP的特性会需要重新传输，也就是需要把所有的请求都重新传输一次，那就会导致 HTTP/2 的表现情况反倒不如 HTTP/1.1 了。因为在出现丢包的情况下，整个 TCP 都要开始等待重传，也就导致了后面的所有数据都被阻塞了。但是对于 HTTP/1.1 来说，可以开启多个 TCP 连接，出现这种情况反到只会影响其中一个连接，剩余的 TCP 连接还可以正常传输数据。这种情况和<strong>队头堵塞</strong>情况有些类似，但是HTTP2的这种情况一般会出现在网络较差的情况下，也就是说HTTP2会有一种<code>快的更快，慢的更慢</code>的倾向。</p>
+<blockquote>
+<p><strong>Head-Of-Line Blocking（HOLB）</strong>：导致带宽无法被充分利用，以及后续健康请求被阻塞。<a target="_blank" rel="noopener" href="http://stackoverflow.com/questions/25221954/spdy-head-of-line-blocking">HOLB</a><br>是指一系列包（package）因为第一个包被阻塞；当页面中需要请求很多资源的时候，HOLB（队头阻塞）会导致在达到最大请求数量时，剩余的资源需要等待其他资源请求完成后才能发起请求。</p>
+</blockquote>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/frontend/">frontend</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/web/">web</a>
+                    
+                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
+                    
+                      <a class="hover-with-bg" href="/tags/http/">http</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200616-centos-modify-hostname/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RHEL/CentOS修改hostname</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200602-encryption-intro/">
+                        <span class="hidden-mobile">SSL/TLS、对称加密和非对称加密和TLSv1.3</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

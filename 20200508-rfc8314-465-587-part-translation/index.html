@@ -1,0 +1,526 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="最近在学习SMTP的时候发现SMTP在使用加密传输的时候涉及到465和587两个端口，网上对两者之间的区别众说纷纭，后来查到了RFC官方文档中对于这个争论较久的问题的定义和详细说明，这里做转载和翻译用于记录。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>RFC8314文档中对465端口和587端口的阐述 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106171426.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="RFC8314文档中对465端口和587端口的阐述">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-05-08 10:00" pubdate>
+        May 8, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.7k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      12
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">RFC8314文档中对465端口和587端口的阐述</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：May 8, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>最近在学习SMTP的时候发现SMTP在使用加密传输的时候涉及到465和587两个端口，网上对两者之间的区别众说纷纭，后来查到了RFC官方文档中对于这个争论较久的问题的定义和详细说明，这里做转载和翻译用于记录。</p>
+<span id="more"></span>
+
+<h1 id="1、RFC8314原文"><a href="#1、RFC8314原文" class="headerlink" title="1、RFC8314原文"></a>1、RFC8314原文</h1><p>我们查看<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc8314">RFC8314官方文档</a>中的相关叙述，和该问题相关的主要是3.3、4.2、5.5和7.3这四个部分，由于本文只讨论两个端口的作用和历史缘由，因此涉及到加密过程和原理的4.2、5.5两个部分不在这里提及，其余部分的原文内容如下：</p>
+<blockquote>
+<p><strong>3.3.  Implicit TLS for SMTP Submission</strong></p>
+<p>   When a TCP connection is established for the “submissions” service<br>   (default port 465), a TLS handshake begins immediately.  Clients MUST<br>   implement the certificate validation mechanism described in<br>   [RFC7817].  Once the TLS session is established, Message Submission<br>   protocol data [RFC6409] is exchanged as TLS application data for the<br>   remainder of the TCP connection.  (Note: The “submissions” service<br>   name is defined in Section 7.3 of this document and follows the usual<br>   convention that the name of a service layered on top of Implicit TLS<br>   consists of the name of the service as used without TLS, with an “s”<br>   appended.)</p>
+<p>   The STARTTLS mechanism on port 587 is relatively widely deployed due<br>   to the situation with port 465 (discussed in Section 7.3).  This<br>   differs from IMAP and POP services where Implicit TLS is more widely<br>   deployed on servers than STARTTLS.  It is desirable to migrate core<br>   protocols used by MUA software to Implicit TLS over time, for<br>   consistency as well as for the additional reasons discussed in<br>   Appendix A.  However, to maximize the use of encryption for<br>   submission, it is desirable to support both mechanisms for Message<br>   Submission over TLS for a transition period of several years.  As a<br>   result, clients and servers SHOULD implement both STARTTLS on<br>   port 587 and Implicit TLS on port 465 for this transition period.<br>   Note that there is no significant difference between the security<br>   properties of STARTTLS on port 587 and Implicit TLS on port 465 if<br>   the implementations are correct and if both the client and the server<br>   are configured to require successful negotiation of TLS prior to<br>   Message Submission.</p>
+<p>   Note that the “submissions” port provides access to a Message<br>   Submission Agent (MSA) as defined in [RFC6409], so requirements and<br>   recommendations for MSAs in that document, including the requirement<br>   to implement SMTP AUTH [RFC4954] and the requirements of Email<br>   Submission Operations [RFC5068], also apply to the submissions port.</p>
+<p>   See Sections 5.5 and 4.2 for additional information on client<br>   certificate authentication.  See Section 7.3 for port registration<br>   information.</p>
+</blockquote>
+<blockquote>
+<p><strong>7.3.  Submissions Port Registration</strong></p>
+<p>   IANA has assigned an alternate usage of TCP port 465 in addition to<br>   the current assignment using the following template [RFC6335]:</p>
+<p>​     Service Name: submissions<br>​     Transport Protocol: TCP<br>​     Assignee: IESG <a href="mailto:&#105;&#x65;&#x73;&#103;&#64;&#105;&#101;&#116;&#x66;&#46;&#x6f;&#114;&#103;">&#105;&#x65;&#x73;&#103;&#64;&#105;&#101;&#116;&#x66;&#46;&#x6f;&#114;&#103;</a><br>​     Contact: IETF Chair <a href="mailto:&#99;&#x68;&#x61;&#105;&#x72;&#64;&#105;&#x65;&#116;&#102;&#46;&#x6f;&#114;&#103;">&#99;&#x68;&#x61;&#105;&#x72;&#64;&#105;&#x65;&#116;&#102;&#46;&#x6f;&#114;&#103;</a><br>​     Description: Message Submission over TLS protocol<br>​     Reference: RFC 8314<br>​     Port Number: 465</p>
+<p>   This is a one-time procedural exception to the rules in [RFC6335].<br>   This requires explicit IESG approval and does not set a precedent.<br>   Note: Since the purpose of this alternate usage assignment is to<br>   align with widespread existing practice and there is no known usage<br>   of UDP port 465 for Message Submission over TLS, IANA has not<br>   assigned an alternate usage of UDP port 465.</p>
+<p>   Historically, port 465 was briefly registered as the “smtps” port.<br>   This registration made no sense, as the SMTP transport MX<br>   infrastructure has no way to specify a port, so port 25 is always<br>   used.  As a result, the registration was revoked and was subsequently<br>   reassigned to a different service.  In hindsight, the “smtps”<br>   registration should have been renamed or reserved rather than<br>   revoked.  Unfortunately, some widely deployed mail software<br>   interpreted “smtps” as “submissions” [RFC6409] and used that port for<br>   email submission by default when an end user requested security<br>   during account setup.  If a new port is assigned for the submissions<br>   service, either (a) email software will continue with unregistered<br>   use of port 465 (leaving the port registry inaccurate relative to</p>
+<p>   de facto practice and wasting a well-known port) or (b) confusion<br>   between the de facto and registered ports will cause harmful<br>   interoperability problems that will deter the use of TLS for Message<br>   Submission.  The authors of this document believe that both of these<br>   outcomes are less desirable than a “wart” in the registry documenting<br>   real-world usage of a port for two purposes.  Although STARTTLS on<br>   port 587 has been deployed, it has not replaced the deployed use of<br>   Implicit TLS submission on port 465.</p>
+</blockquote>
+<h1 id="2、个人理解"><a href="#2、个人理解" class="headerlink" title="2、个人理解"></a>2、个人理解</h1><p>将上面的几段原文阅读整合之后，个人的理解如下：</p>
+<p><strong>首先要说明原文中多次出现的<code>submission</code>的意思实际上是指客户端使用SMTP协议来对服务端进行数据传输，下面提及的<code>SMTPS</code>等价于原文的<code>TLS submission</code>。</strong></p>
+<p>当年IANA为TCP的465端口注册了用途，用于SMTP的TLS加密传输，且没有指定UDP的465端口用途，这就是465端口在历史上被用为SMTPS端口的由来。</p>
+<p>为什么说是历史上呢，因为这个注册在不久之后就被撤销了，也就是说这个注册没用了，465端口要被回收拿去给其他的服务用了。而撤销的原因是<em>“这种注册没有意义，因为SMTP传输MX基础结构无法指定端口，因此始终使用端口25。（This registration made no sense, as the SMTP transport MX infrastructure has no way to specify a port, so port 25 is always used. ）”</em></p>
+<p>但是后来又觉得当时<strong>应该把这个465的SMTPS（隐式TLS）端口保留或者是重命名而不是撤销</strong>，因为已经有许多邮件服务软件使用了465端口作为SMTPS（隐式TLS）的传输端口，如果为SMTPS（隐式TLS）服务分配了新端口，则已经使用被注销的465端口作为SMTPS服务端口的电子邮件软件相当于是使用了一个和实际SMTPS（隐式TLS）端口不匹配的端口，并且实际使用端口和理论注册端口的不同也有可能导致各种问题。</p>
+<p>因此尽管已在端口587上部署了STARTTLS，但它尚未取代在端口465上部署的SMTPS（隐式TLS）的使用。</p>
+<p>随着时间的推移，出于一致性以及其他原因，需要将MUA软件使用的核心协议迁移到隐式TLS。但是，为了最大程度地使用加密来进行提交，需要在几年的过渡期内支持两种通过TLS进行消息提交的机制。因此，在此过渡期间，客户端和服务器应在端口587上实施STARTTLS，并在端口465上实施隐式TLS。请注意，如果实施正确且客户端和服务器都配置为要求在消息提交之前成功协商TLS，则端口587上的STARTTLS和端口465上的隐式TLS的安全属性之间没有显着差异。</p>
+<blockquote>
+<p>A mail user agent (MUA) is a program that allows you to receive and send e-mail messages; it’s usually just called an e-mail program.</p>
+<p>MUA软件即指我们平时使用的集收发读写邮件于一体的邮件客户端软件。</p>
+</blockquote>
+<p><strong>简而言之，465端口最开始被注册用于SMTPS，随后被撤销，但是因为已经被用了，现在又恢复了，并且还多增加了一个587端口用于STARTTLS加密传输，并且在配置正确的前提下两者一样安全。目前的主要任务是把邮件从明文传输迁移到加密传输，在迁移的过渡期间应当支持587端口的STARTTLS和465端口的隐式TLS。</strong></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/mail/">mail</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200511-wireshark-analysis-pop3/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Wireshark对pop3抓包分析</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200507-wireshark-analysis-smtp/">
+                        <span class="hidden-mobile">Wireshark对SMTP抓包分析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

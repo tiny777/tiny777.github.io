@@ -1,0 +1,598 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="nginx中http模块使用http长连接的相关配置（主要是keepalive指令）和http长连接的原理解释。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>Nginx篇05-http长连接和keeplive - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210110180429.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Nginx篇05-http长连接和keeplive">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-03-20 16:00" pubdate>
+        March 20, 2020 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      16
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Nginx篇05-http长连接和keeplive</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：March 20, 2020 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>nginx中http模块使用http长连接的相关配置（主要是keepalive指令）和http长连接的原理解释。</p>
+<span id="more"></span>
+
+<h1 id="1、http长连接"><a href="#1、http长连接" class="headerlink" title="1、http长连接"></a>1、http长连接</h1><h2 id="1-1-预备知识"><a href="#1-1-预备知识" class="headerlink" title="1.1 预备知识"></a>1.1 预备知识</h2><p>连接管理是一个 HTTP 的关键话题：打开和保持连接在很大程度上影响着网站和 Web 应用程序的性能。在 HTTP/1.x 里有多种模型：短连接, 长连接, 和 HTTP 流水线。在解释这三种模型之前，我们需要先明确一些前提知识：</p>
+<ul>
+<li>HTTP是属于应用层（七层）的协议，同时它的传输层（四层）使用的是TCP协议，那么也就是说，HTTP的长连接和短连接，其本质就是TCP的长连接和短连接；</li>
+<li>HTTP是一个无状态的面向连接的协议（使用TCP，面向连接、可靠传输），指的是协议对于事务处理没有记忆能力，服务器不知道客户端是什么状态，无状态不代表HTTP不能保持TCP连接，更不能代表HTTP使用的是UDP协议（无连接）；</li>
+<li>TCP建立连接和断开连接是需要三握四挥的，由于这个属于计算机网络基本知识，所以原理这里不再赘述；</li>
+</ul>
+<p>接下来我们开始解释。</p>
+<h2 id="1-2-HTTP短连接模型"><a href="#1-2-HTTP短连接模型" class="headerlink" title="1.2 HTTP短连接模型"></a>1.2 HTTP短连接模型</h2><p>在早期，HTTP 使用一个简单的模型来处理这样的连接。这些连接的生命周期是短暂的：每发起一个请求时都会创建一个新的连接，并在收到应答时立即关闭。这就是类似上面说的三次握手，在互联网发展的早期一个网页的资源并没有现在这么多，很多可能只是一个简单的静态页面而已，所以这样的模型显然很OK。客户端获取完所需资源之后，就断开连接，不再占用服务器的资源。</p>
+<blockquote>
+<p>套用TCP连接的三握四挥的模型来举例：</p>
+</blockquote>
+<blockquote>
+<p>三次握手：</p>
+<p>A→B：今晚下班一起吃饭吗？</p>
+<p>B→A：好的，今晚下班一起吃饭。</p>
+<p>A→B：好的，我知道你答应我今晚下班一起吃饭的邀请了。</p>
+<hr>
+<p>然后开始去吃饭，吃完饭到了两个人需要各自回家的时候：</p>
+<hr>
+<p>四次挥手：</p>
+<p>A→B：我吃完饭准备走了</p>
+<p>B→A：等一下，我快吃完了</p>
+<p>B→A：好了，我吃完了可以走了</p>
+<p>A→B：好的，我知道你吃完了我们可以走了</p>
+<hr>
+<p>然后两人吃完饭就各回各家了</p>
+</blockquote>
+<p>HTTP 短连接模型是最早期的模型，也是  HTTP/1.0 的默认模型。每一个 HTTP 请求都由它自己独立的连接完成；这意味着发起每一个 HTTP 请求之前都会有一次 TCP 握手，而且是连续不断的。<strong>实际上，TCP 协议握手本身就是耗费时间的，所以 TCP 可以保持更多的热连接来适应负载。短连接破坏了 TCP 具备的能力，新的冷连接降低了其性能。</strong></p>
+<blockquote>
+<p>在 HTTP/1.0 中如果没有指定 <code>Connection</code>协议头，或者是值被设置为 <code>close</code>就会启用短连接模型，要在 HTTP/1.0 中启用长连接模型，需要在协议头中指定<code>Connection: Keep-Alive</code> ，不过并不建议这样操作。</p>
+<p>而在 HTTP/1.1 中，默认使用长连接模型，只有当 <code>Connection</code>被设置为 <code>close</code> 时才会用到这个短连接模型，协议头都不用再去声明它(但是一般还是会把它加上，以防万一因为某种原因要退回到 HTTP/1.0 )。</p>
+</blockquote>
+<h2 id="1-3-HTTP长连接模型"><a href="#1-3-HTTP长连接模型" class="headerlink" title="1.3 HTTP长连接模型"></a>1.3 HTTP长连接模型</h2><p>后来，网页需要请求的资源越来越多，短连接模型显然已经十分吃力了。因为短连接有两个比较大的问题：创建新连接耗费的时间尤为明显（三次握手很耗费时间），另外 TCP 连接的性能只有在该连接被使用一段时间后(热连接)才能得到改善。因此在HTTP/1.1中引入了长连接模型和流水线模型。</p>
+<blockquote>
+<p>在 HTTP/1.1 之前，长连接也被称为keep-alive 连接。</p>
+</blockquote>
+<p>一个长连接会保持一段时间，重复用于发送一系列请求，节省了新建 TCP 连接握手的时间，还可以利用 TCP 的性能增强能力。当然这个连接也不会一直保留着：连接在空闲一段时间后会被关闭(服务器可以使用 Keep-Alive 协议头来指定一个最小的连接保持时间)。</p>
+<blockquote>
+<p>套用上面的例子来进一步解释：</p>
+</blockquote>
+<blockquote>
+<p>三次握手：</p>
+<p>A→B：今晚下班一起吃饭吗？</p>
+<p>B→A：好的，今晚下班一起吃饭。</p>
+<p>A→B：好的，我知道你答应我今晚下班一起吃饭的邀请了。</p>
+<hr>
+<p>然后开始去吃饭，但是这时吃完饭就不是马上四次挥手断开连接，AB两人还顺便去逛街、看电影（相当于省去了三次握手使用已建立的连接来传输多个资源）</p>
+<hr>
+<p>此处省略四次挥手</p>
+<hr>
+<p>最后两人就各回各家了</p>
+</blockquote>
+<p>长连接也还是有缺点的；也就是前面提到的资源占用问题，就算是在空闲状态，它还是会消耗服务器资源，也更容易被DDoS攻击。<strong>本质上长连接是因为不断地三次握手建立连接消耗的资源要大于维持连接所需要的资源才使用的</strong>，如果服务器处于高负载时段或者被DDoS，可以使用非长连接，即尽快关闭那些空闲的连接，也能对性能有所提升。</p>
+<h2 id="1-4-HTTP流水线模型"><a href="#1-4-HTTP流水线模型" class="headerlink" title="1.4 HTTP流水线模型"></a>1.4 HTTP流水线模型</h2><p>流水线模型的实现要复杂很多，而已效果也并不是特别好，主要还要考虑到各种兼容性，所以默认是不启用这个流水线模型的，而在HTTP/2中，流水线已经被更好的算法给代替，如<code>multiplexing</code>。</p>
+<p>默认情况下，HTTP 请求是按顺序发出的。<strong>下一个请求只有在当前请求收到应答过后才会被发出。</strong>由于会受到网络延迟和带宽的限制，在下一个请求被发送到服务器之前，可能需要等待很长时间。<strong>流水线是在同一条长连接上发出连续的请求，而不用等待应答返回。这样可以避免连接延迟。</strong>理论上讲，性能还会因为两个 HTTP 请求有可能被打包到一个 TCP 消息包中而得到提升。就算 HTTP 请求不断的继续，尺寸会增加，但设置 TCP 的 <code>MSS(Maximum Segment Size)</code> 选项，仍然足够包含一系列简单的请求。</p>
+<p>并不是所有类型的 HTTP 请求都能用到流水线：只有 <code>idempotent</code>方式，比如 <code>GET</code>、<code>HEAD</code>、<code>PUT</code>和 <code>DELETE</code>能够被安全的重试：因为有故障发生时，流水线的内容要能被轻易的重试，即出现了问题重试的成本要尽可能低，否则还不如使用长连接模型。</p>
+<p>正确的实现流水线是复杂的：传输中的资源大小，多少有效的 <code>RTT</code> 会被用到，还有有效带宽，流水线带来的改善有多大的影响范围。不知道这些的话，重要的消息可能被延迟到不重要的消息后面。这个重要性的概念甚至会演变为影响到页面布局！因此 HTTP 流水线在大多数情况下带来的改善并不明显。此外，流水线受制于 HOL 问题。</p>
+<blockquote>
+<p>摘自wiki</p>
+<p><strong>队头阻塞</strong>（<strong>Head-of-line blocking</strong>或缩写为<strong>HOL blocking</strong>）在<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C">计算机网络</a>的范畴中是一种性能受限的现象。它的原因是一列的第一个数据包（队头）受阻而导致整列数据包受阻。例如它有可能在缓存式输入的交换机中出现，有可能因为传输顺序错乱而出现，亦有可能在HTTP流水线中有多个请求的情况下出现。</p>
+</blockquote>
+<p>我们还是使用上面的例子来进行解释，这次的握手请求就变了，A一次向B发出了三个请求：</p>
+<blockquote>
+<p>三次握手：</p>
+<p>A→B：今晚下班一起吃饭、逛街、看电影吗？</p>
+<p>B→A：好的，今晚下班一起吃饭、逛街、看电影。</p>
+<p>A→B：好的，我知道你答应我今晚下班一起吃饭、逛街、看电影的邀请了。</p>
+<hr>
+<p>实际上这样子是有很大的风险的</p>
+<p>如果是按照长连接模型，A可以根据B在吃饭的时候的反应来决定要不要继续去逛街看电影，也就是如果传输完了一次数据之后还保持连接就继续传输，万一连接突然断开或者是不稳定，那可能就要重新建立连接。（万一B在吃饭的时候吃的不开心不想继续逛街看电影那就等下次再吃饭逛街看电影）</p>
+<p>但是如果按照流水线模型，A一次发送三个请求，虽然发送请求的时候省事儿了（三次握手的时候TCP打包传输请求更省事），但是谁也不知道吃饭逛街看电影的过程中会发生什么意外，时间越长越不稳定，而且还容易出现万一B想减肥不想吃饭，只想逛街看电影的情况呢？（<strong>HOL问题</strong>）</p>
+</blockquote>
+<p>最后这里补充一张图片来对比三种模型之间的差别：</p>
+<p><img src="https://resource.tinychen.com/blog/20200320/wWfgR6m9rdCV.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="2、Nginx中的keepalive指令"><a href="#2、Nginx中的keepalive指令" class="headerlink" title="2、Nginx中的keepalive指令"></a>2、Nginx中的keepalive指令</h1><blockquote>
+<p>当我们配置Nginx作为代理服务器的时候，想要支持HTTP长连接，需要client到Nginx和Nginx到server都是长连接，因为此时Nginx既是client的server也是server的client。</p>
+</blockquote>
+<p>了解了上面的原理之后，Nginx中的keepalive指令我们就非常好理解了，相关的指令主要有三个，我们逐个进行解释：</p>
+<h2 id="2-1-keepalive"><a href="#2-1-keepalive" class="headerlink" title="2.1 keepalive"></a>2.1 <code>keepalive</code></h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">Syntax</span>:	keepalive connections;<br><span class="hljs-attribute">Default</span>:	—<br><span class="hljs-attribute">Context</span>:	upstream<br><span class="hljs-attribute">This</span> directive appeared in version <span class="hljs-number">1</span>.<span class="hljs-number">1</span>.<span class="hljs-number">4</span>.<br></code></pre></div></td></tr></table></figure>
+
+<p>在upstream模块中配置，启用连接到upstream中的服务器的缓存，<code>connections</code>参数的主要作用是设定每个Nginx的<strong>单个worker进程（each worker process）</strong>对于upstream中的server的最大空闲连接数，当超过该数字的时候，会关闭使用得最少的连接。</p>
+<ul>
+<li><p>对于HTTP，应将<code>proxy_http_version</code>指令设置为“ <code>1.1</code>”，并且应清除<code>Connection</code>标题字段</p>
+</li>
+<li><p>对于FastCGI服务器，需要设置<code>fastcgi_keep_conn</code>以启用<code>keepalive</code>连接</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">upstream http_backend &#123;<br>    server 127.0.0.1:8080;<br>    keepalive 16;<br>&#125;<br><br>server &#123;<br>    location /http/ &#123;<br>        proxy_pass http://http_backend;<br>        proxy_http_version 1.1;<br>        proxy_set_header Connection &quot;&quot;;<br>    &#125;<br>    <br>    lcaotion /FastCGI/ &#123;<br>    	fastcgi_pass fastcgi_backend;<br>    	fastcgi_keep_conn on;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>需要注意的是，keepalive指令并不会限制Nginx的<strong>所有worker</strong>进程能开启的连接到upstream服务器中的<strong>连接总数（total number）</strong>。也就是如果设得太大了，会导致过多的空闲连接占满了upstream中的server资源，导致新的连接无法建立，因此这个数值的设定需要根据worker进程数量来调整。</p>
+<h2 id="2-2-keepalive-requests"><a href="#2-2-keepalive-requests" class="headerlink" title="2.2 keepalive_requests"></a>2.2 <code>keepalive_requests</code></h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">Syntax:	keepalive_requests number;<br>Default:	keepalive_requests 100;<br>Context:	upstream<br>This directive appeared in version 1.15.3.<br></code></pre></div></td></tr></table></figure>
+
+<p><code>keepalive_requests</code>设定可以通过一个连接（connection）发送的请求（request）数量，超过最大请求数量之后，该连接会被关闭。为了释放每个连接的内存分配，定期关闭连接是很有必要的。因此，不建议将<code>keepalive_requests</code>设定过大，否则可能会导致过高的内存占用。</p>
+<h2 id="2-3-keepalive-timeout"><a href="#2-3-keepalive-timeout" class="headerlink" title="2.3 keepalive_timeout"></a>2.3 <code>keepalive_timeout</code></h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">Syntax</span>:	keepalive_timeout timeout;<br><span class="hljs-attribute">Default</span>:	keepalive_timeout <span class="hljs-number">60</span>s;<br><span class="hljs-attribute">Context</span>:	upstream<br><span class="hljs-attribute">This</span> directive appeared in version <span class="hljs-number">1</span>.<span class="hljs-number">15</span>.<span class="hljs-number">3</span>.<br></code></pre></div></td></tr></table></figure>
+
+<p>设定连接超时时间，在此设定的时间内，client与upstream中的server的空闲keepalive连接将保持打开状态（open）。此外，虽然官方文档说的默认值是60s，但是1.17.9版本的Nginx在安装之后配置文件nginx.conf上面设定的是65s。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/frontend/">frontend</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/web/">web</a>
+                    
+                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
+                    
+                      <a class="hover-with-bg" href="/tags/http/">http</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200323-nginx-06-sendfile/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Nginx篇06-Sendfile指令及其原理</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200320-nginx-04-http-map-module/">
+                        <span class="hidden-mobile">Nginx篇04-map模块</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

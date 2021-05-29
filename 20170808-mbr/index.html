@@ -1,0 +1,548 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="目前来说，比较主流的两种硬盘的分区表是MBR和GPT（GUID）。今天小七带大家了解一下比较旧一点的MBR分区表（相对于GPT）。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>MBR分区表 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="MBR分区表">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2017-08-08 15:00" pubdate>
+        August 8, 2017 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.9k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      10
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MBR分区表</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：August 8, 2017 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>目前来说，比较主流的两种硬盘的分区表是MBR和GPT（GUID）。今天小七带大家了解一下比较旧一点的MBR分区表（相对于GPT）。</p>
+<span id="more"></span>
+
+<h1 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h1><p><strong>MBR这个概念首次出现，是在1983年的IBM PC DOS 2.0操作系统当中，因此也被称为DOS分区结构。</strong>实际上，MBR分区结构是一种应用非常广泛的硬盘分区结构，不仅仅是DOS，包括windows系列操作系统、Linux以及基于X86架构的UNIX操作系统等平台均有使用。</p>
+<p><strong>MBR的英文全称是Main Boot Record（一说Master Boot Record）</strong>，翻译过来的中文名称是主引导记录。</p>
+<p><strong>它主要有以下几个特点：</strong></p>
+<p>1、在我们常见的电脑中，一般是BIOS+MBR、(U)efi+GPT的组合；</p>
+<p>2、MBR分区表中单个分区最大仅支持2TB，而整个分区表最大也是仅支持2TB的硬盘；</p>
+<p>3、MBR分区表最大只支持四个主分区（可少不可多），如果觉得四个不够用，可以使用三个主分区+一个扩展分区的组合（扩展分区仅能存在一个，但扩展分区下可以分出无数个逻辑分区）；</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2801%29.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>▲图为MBR分区常见的两种组成</p>
+<h1 id="2、结构"><a href="#2、结构" class="headerlink" title="2、结构"></a>2、结构</h1><p>MBR分区表占用一个扇区，位于硬盘的0磁头、0柱面、1扇区。</p>
+<p>这里需要引用一下度娘百科对于磁头柱面扇区这三个概念的解释。</p>
+<p>**磁头(Heads)**：每张磁片的正反两面各有一个磁头，一个磁头对应一张磁片的一个面。因此，用第几磁 头就可以表示数据在哪个磁面。</p>
+<p>**柱面(Cylinder)**：所有磁片中半径相同的同心磁道构成“柱面”，意思是这一系列的磁道垂直叠在一起，就形成一个柱面的形状。简单地理解，柱面数=磁道数。</p>
+<p>**扇区(Sector)**：将磁道划分为若干个小的区段，就是扇区。虽然很小，但实际是一个扇子的形状，故称为扇区。</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2802%29.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>▲图为磁头、柱面、扇区示意图</p>
+<p>①不管是CHS寻址还是LBA寻址，都需要知道磁头柱面和扇区来对数据进行定位；</p>
+<p>②通常来说，一个扇区的大小为512字节（Byte）；</p>
+<p>③该扇区为隐藏扇区，实际上，0磁头0柱面的扇区均为隐藏扇区，一般的硬盘访问命令无法访问，因此MBR分区表放在此处比较安全，不容易遭到破坏，同理，许多病毒也会隐藏在这里，不容易被查杀。</p>
+<p>由于MBR扇区中大部分都被MBR所占领，因此这个扇区就被称为MBR扇区。而MBR扇区主要是由MBR、DPT和结束标识三个部分组成。</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2803%29.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>▲图为标准MBR结构</p>
+<h1 id="3、工作原理"><a href="#3、工作原理" class="headerlink" title="3、工作原理"></a>3、工作原理</h1><p>MBR的产生并不依赖于任何一个操作系统，在电脑开机通电后，BIOS进行自检，自检完成后就开始执行MBR中的启动代码（Bootloader），通过读取启动代码来确定需要引导的系统。因此，双系统或者是多系统安装完成之后，需要修改引导启动项，即为修改此处的启动代码（Bootloader）。</p>
+<p>执行完启动代码之后，系统下一步就会读取MBR扇区中的最后两个字节，如果是55AA，则继续读取磁盘分区表DPT来确定是否有活动分区，从而启动系统；如果不是55AA，系统会认为该MBR为非法MBR，系统将停止操作并报错。</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2804%29.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>▲图为MBR分区表的硬盘开机过程</p>
+<p>这里再额外提一下。</p>
+<p>MBR中的选用磁盘标识，这个在MBR分区中比较重要。如果安装的是windows操作系统的话，系统在启动时需要依赖该磁盘签名来识别硬盘并确定该磁盘是否初始化。</p>
+<p><strong>而DPT的作用其实非常简单，就是管理磁盘的分区信息。如果DPT被破坏，那么系统将无法识别该磁盘上的所有分区，并且有可能会提示需要格式化磁盘。</strong></p>
+<p>一般小白遇到这种情况会比较无奈，只能格式化，对磁盘中宝贵的数据说拜拜，<strong>但是，其实只要修复DPT，就可以读取分区，找回数据，实际上，硬盘的数据一直都在那里。那怕是对硬盘进行一般的格式化操作，也只是将DPT中对应的分区的数据清空，并没有影响到原来的在其他扇区的数据，此时只要不进行数据的读写操作（防止覆盖原有数据），还是有可能找回丢失的数据的。</strong></p>
+<h1 id="4、DPT"><a href="#4、DPT" class="headerlink" title="4、DPT"></a>4、DPT</h1><p>DPT其实有挺多可以讲的地方，这里拿一个分区（16Byte）为例，<strong>讲解一下MBR分区最大只能识别2TB硬盘的原因。</strong></p>
+<h1 id="5、分区项表内容及含义"><a href="#5、分区项表内容及含义" class="headerlink" title="5、分区项表内容及含义"></a>5、分区项表内容及含义</h1><p><strong>注：1 Byte=8 bit</strong></p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2805%29.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>▲图为MBR中的DPT的分区项表的内容及含义</p>
+<p>再对其作进一步的解释：</p>
+<p>第1字节的引导标识：如果该分区内安装了操作系统，则该分区必须为活动分区，方可成功引导该分区内的操作系统（即为80H）；</p>
+<p>第5字节的分区类型符：记录该分区的类型，每一种类型都有一个对应的值，如00H——表示该分区未用（即没有指定，DOS和win不识别该类型分区）、06H——FAT16分区；0BH——FAT32分区、 07H——NTFS分区等；</p>
+<p>第2、3、4、6、7、8字节：记录了这个分区的起始和结束磁头、扇区、柱面，即可确定该分区在硬盘中的位置以及该分区的容量；</p>
+<p><strong>最后的8个字节就是MBR分区为何最大只能识别2TB容量的原因了。</strong></p>
+<p><strong>前提知识背景：</strong></p>
+<p>①    计算机中采用2进制，bit是最小的大小计量单位；</p>
+<p>②    1 Byte=8 bit；</p>
+<p>③    一个扇区的大小是512Byte；</p>
+<p>④    Byte、KB、MB、GB、TB、PB这六者按照从小到大的顺序排列，且相邻两者间差1024倍（即2^10）；</p>
+<p>⑤    在上面的缩写中，大写的B表示Byte，小写的b表示bit，两者相差8倍；</p>
+<p>由于只有4 Byte来记录本分区的总扇区数，4 Byte=32 bit，在2进制即有2^32种状态，假设全部为1，则最多有2^32个扇区。即</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2806%29.jpg" srcset="/img/loading.gif" lazyload></p>
+<p>所以MBR分区中单个分区最多只能识别2TB容量，而由于记录已使用的扇区的字节数也是4，所以整个分区最多也只能识别2TB容量。</p>
+<h1 id="6、扩展分区"><a href="#6、扩展分区" class="headerlink" title="6、扩展分区"></a>6、扩展分区</h1><p>前面我们已经提到了当四个主分区无法满足需求的时候，可以使用三个主分区+一个扩展分区的方法，在扩展分区下，理论上可以分出无数个分区（实际还要看操作系统的限制等其他因素）。</p>
+<p>这里还要介绍一个概念——<strong>EBR（Extended Boot Record），即扩展分区引导记录。其原理和工作模式与MBR非常相似，但它是链式的，</strong>也就是说一个EBR不够用，可以再增加一个，新增加的EBR链接在旧的EBR之后，一个链接着一个，就像链条一样。理论上就可以实现无数个分区。</p>
+<p>MBR分区表的内容介绍到这里就结束了，如果对它还有兴趣的话，或者觉得这里的介绍太过简单的话，可以去查询一些相关书籍和论坛。另外，如果文中有任何错误，还望不吝赐教。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/harddisk/">harddisk</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20170810-wzd-n-sina/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">王志东和新浪</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20170703-filqlo/">
+                        <span class="hidden-mobile">Filqlo时钟屏保</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

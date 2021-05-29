@@ -1,0 +1,628 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="使用qemu-kvm在CentOS8上通过GUI创建虚拟机。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>CentOS创建KVM虚拟机 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210111101644.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="CentOS创建KVM虚拟机">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-04-05 10:00" pubdate>
+        April 5, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      2.7k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      18
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">CentOS创建KVM虚拟机</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：April 5, 2020 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>使用qemu-kvm在CentOS8上通过GUI创建虚拟机。</p>
+<span id="more"></span>
+
+<h1 id="1、安装系统组件"><a href="#1、安装系统组件" class="headerlink" title="1、安装系统组件"></a>1、安装系统组件</h1><p>首先我们需要安装epel源和相应的虚拟机工具</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">yum install epel-release -y<br>yum install qemu-kvm qemu-img libvirt virt-manager virt-top.x86_64 virtio-win.noarch virt-viewer.x86_64 virt-install.noarch -y<br><br>virt-install <br>libvirt #安装libvirt会将libvirt-client作为依赖进行安装，libvirt-client即libvirt的客户端，最重要的功能之一就是就在宿主机关机时可以通知虚拟机也关机，使虚拟机系统正常关机，而不是被强制关机，造成数据丢失<br>ipxe-roms-qemu #虚拟机iPXE的启动固件，支持虚拟机从网络启动<br>qemu-kvm #KVM在用户空间运行的程序<br>virt-manager  #基于 Libvirt 的图像化虚拟机管理软件<br>libvirt   #用于管理虚拟机，它提供了一套虚拟机操作API<br>virt-viewer  #显示虚拟机的控制台console<br>virt-top  #类似于top命令，查看虚拟机的资源使用情况<br>virt-what  #在虚拟机内部执行，查看虚拟机运行的虚拟化平台<br>qemu-img  #用于操作虚拟机硬盘镜像的创建、查看和格式转化<br></code></pre></div></td></tr></table></figure>
+
+<p>一些主要组件的功能介绍如下：</p>
+<ul>
+<li><p><code>virt-install</code></p>
+<p>Description  : Package includes several command line utilities, including virt-install</p>
+<div class="hljs code-wrapper"><pre><code>         : (build and install new VMs) and virt-clone (clone an existing virtual
+         : machine).
+</code></pre></div>
+</li>
+<li><p><code>virt-who</code></p>
+<p>Description  : Agent that collects information about virtual guests present in the system and</p>
+<div class="hljs code-wrapper"><pre><code>         : report them to the subscription manager.
+</code></pre></div>
+</li>
+<li><p><code>virt-top</code></p>
+<p>Description  : virt-top is a ‘top(1)’-like utility for showing stats of virtualized</p>
+<div class="hljs code-wrapper"><pre><code>         : domains.  Many keys and command line options are the same as for
+         : ordinary &#39;top&#39;.
+         : 
+         : It uses libvirt so it is capable of showing stats across a variety of
+         : different virtualization systems.
+</code></pre></div>
+</li>
+<li><p><code>virt-viewer</code></p>
+<p>Description  : Virtual Machine Viewer provides a graphical console client for connecting</p>
+<div class="hljs code-wrapper"><pre><code>         : to virtual machines. It uses the GTK-VNC or SPICE-GTK widgets to provide
+         : the display, and libvirt for looking up VNC/SPICE server details.
+</code></pre></div>
+</li>
+<li><p><code>virt-manager</code></p>
+<p>Description  : Virtual Machine Manager provides a graphical tool for administering virtual</p>
+<div class="hljs code-wrapper"><pre><code>         : machines for KVM, Xen, and LXC. Start, stop, add or remove virtual devices,
+         : connect to a graphical or serial console, and see resource usage statistics
+         : for existing VMs on local or remote machines. Uses libvirt as the backend
+         : management API.
+</code></pre></div>
+</li>
+<li><p><code>libvirt</code></p>
+<p>Description  : Libvirt is a C toolkit to interact with the virtualization capabilities</p>
+<div class="hljs code-wrapper"><pre><code>         : of recent versions of Linux (and other OSes). The main package includes
+         : the libvirtd server exporting the virtualization support.
+</code></pre></div>
+</li>
+<li><p><code>qemu-kvm</code></p>
+<p>Description  : qemu-kvm is an open source virtualizer that provides hardware</p>
+<div class="hljs code-wrapper"><pre><code>         : emulation for the KVM hypervisor. qemu-kvm acts as a virtual
+         : machine monitor together with the KVM kernel modules, and emulates the
+         : hardware for a full system such as a PC and its associated peripherals.
+</code></pre></div>
+</li>
+</ul>
+<h1 id="2、创建虚拟机"><a href="#2、创建虚拟机" class="headerlink" title="2、创建虚拟机"></a>2、创建虚拟机</h1><h2 id="2-1-配置虚拟机存储目录"><a href="#2-1-配置虚拟机存储目录" class="headerlink" title="2.1 配置虚拟机存储目录"></a>2.1 配置虚拟机存储目录</h2><p>这里我们直接开启宿主机Linux系统上面的GUI模式并且使用xrdp远程到桌面，然后使用<code>virt-manager</code>来进行GUI模式的创建虚拟机。</p>
+<blockquote>
+<p>这里需要注意的是因为我们使用的是ISO镜像文件来进行虚拟机系统的安装，因此必须需要一个GUI界面来进行最开始的系统安装，等待系统安装完成之后，我们可以直接使用命令行操作来克隆虚拟机，就不用每次都打开GUI模式安装系统这么麻烦了。</p>
+</blockquote>
+<p>接着我们创建一个目录专门用来存放虚拟机相关的镜像和文件，同时我们还需要注意权限的问题：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">sudo mkdir -p /kvm/iso<br>sudo chown tinychen:tinychen /kvm -R<br></code></pre></div></td></tr></table></figure>
+
+<p>接着我们把相应的系统安装镜像复制进去（对应的系统安装镜像文件均可直接在对应的官网下载），然后打开<code>Virtual Machine Manager</code>（以下简称VMM）来创建虚拟机</p>
+<p><img src="https://resource.tinychen.com/20200407222046.png" srcset="/img/loading.gif" lazyload></p>
+<p>首先我们在<code>Edit→Preferences</code>里面开启XML文件编辑功能，XML模式可以最大程度的控制虚拟机的所有配置，一些特殊的配置或者组件操作无法通过VMM的GUI界面完成的我们可以直接编辑对应的XML文件块来实现。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/91RrPRPkxwoW.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-创建虚拟机"><a href="#2-2-创建虚拟机" class="headerlink" title="2.2 创建虚拟机"></a>2.2 创建虚拟机</h2><p>直接点击<code>加号</code>或者上面的<code>File→New Virtual Machine</code>然后选择使用本地媒体创建虚拟机（这里我们使用刚刚复制进去的ISO镜像文件）</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/qBG6f4K8RFTr.png" srcset="/img/loading.gif" lazyload></p>
+<p>接着我们可以看到有四种创建虚拟机的方式：</p>
+<ul>
+<li>从本地的媒体资源安装（iso文件或者CD光盘）</li>
+<li>通过网络协议获取安装的镜像文件然后进行安装</li>
+<li>通过PXE进行安装</li>
+<li>导入已有的虚拟机硬盘镜像文件</li>
+</ul>
+<p>我们选择第一种方式进行新建虚拟机操作。</p>
+<p><img src="https://resource.tinychen.com/20200407222856.png" srcset="/img/loading.gif" lazyload></p>
+<p>由于是第一次创建虚拟机，我们需要先在VMM中添加一个池（pool），把先前创建的存放iso镜像文件的目录作为一个池添加到VMM中。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/89XGBr704Dfa.png" srcset="/img/loading.gif" lazyload></p>
+<p>添加完成之后我们就可以看到里面的镜像文件，这里我们选择CentOS7的版本进行安装。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/K4HnyMvgqE9O.png" srcset="/img/loading.gif" lazyload></p>
+<p>选择镜像之后VMM会自动检测镜像文件内包含的操作系统。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/F8PIaR58VKl2.png" srcset="/img/loading.gif" lazyload></p>
+<p>接下来是设定CPU和内存，注意这里的内存单位是MB，而CPU的单位是个，即并不是我们常说的CPU核心数量或者是超线程的线程数量，而是虚拟设定的多少个CPU，这里选择4即为4个CPU而不是一个4核CPU，<strong>这个选项我们后面需要再进行修改</strong>。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/9MRcgr72BaSj.png" srcset="/img/loading.gif" lazyload></p>
+<p>接下来便是进行虚拟机的硬盘参数设置，我们这里选择手动创建一个硬盘。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/VSyuFbMf2B2p.png" srcset="/img/loading.gif" lazyload></p>
+<p>和之前一样我们再创建一个池专门用来存放虚拟机的系统镜像文件。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/iBtfNknt1AfQ.png" srcset="/img/loading.gif" lazyload></p>
+<p>接着在对应的池中新建一个qcow2磁盘文件。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/Ytw3FHQ40o80.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里我们可以看到硬盘的格式主要有raw和qcow2两种。qcow2 镜像格式是 QEMU 模拟器支持的一种磁盘镜像。它也是可以用一个文件的形式来表示一块固定大小的块设备磁盘。与普通的 raw 格式的镜像相比，有以下特性：</p>
+<ul>
+<li>更小的空间占用，即使文件系统不支持空洞(holes)；</li>
+<li>支持写时拷贝（COW, copy-on-write），镜像文件只反映底层磁盘的变化；</li>
+<li>支持快照（snapshot），镜像文件能够包含多个快照的历史；</li>
+<li>可选择基于 zlib 的压缩方式</li>
+<li>可以选择 AES 加密</li>
+</ul>
+<p>qcow2最大的特点就是可以节省硬盘空间，只有在虚拟机实际占用了磁盘空间时，其文件才会增长。比如这里我们创建了一个40G的硬盘镜像文件，但是实际占用并没有40G，只有在虚拟机实际使用了硬盘空间之后，qcow2格式的镜像文件才会增大。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/cf1T1J4cVIXl.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/ib6Kd21DvzIP.png" srcset="/img/loading.gif" lazyload></p>
+<p>最后需要设置的就是虚拟机的网卡，这里我们要勾选<code>Customize configuration before install</code>，在系统开始安装之前进行一些参数的设置。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/j6YvgD4OwvDS.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-3-配置虚拟机其他参数"><a href="#2-3-配置虚拟机其他参数" class="headerlink" title="2.3 配置虚拟机其他参数"></a>2.3 配置虚拟机其他参数</h2><p>首先我们看到<code>Overview</code>中的<code>Chipset</code>和<code>Firmware</code>两个参数，它们分别相当于物理机电脑主板的芯片组和固件模式（BIOS或UEFI），如果有新版本的需求（如虚拟机KVM直通GPU）可以选择UEFI（OVMF）来进行启动，需要注意VMM中的快照（snapshot）功能不支持UEFI（OVMF）固件的虚拟机，因此这里我们选择默认的Q35和BIOS即可。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/qDsvA9Bjbo7M.png" srcset="/img/loading.gif" lazyload></p>
+<p>接下来我们需要对前面设定的CPU参数进行更改。这里我们编辑对应的XML文件将CPU模式修改为<code>host-passthrough</code>以便将CPU的全部特性传递到虚拟机中，同时修改CPU个数为1，核心数为4，每个核心的线程数为1。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/vRQpHOifxppU.png" srcset="/img/loading.gif" lazyload></p>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">cpu</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;host-passthrough&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">topology</span> <span class="hljs-attr">sockets</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">cores</span>=<span class="hljs-string">&quot;4&quot;</span> <span class="hljs-attr">threads</span>=<span class="hljs-string">&quot;1&quot;</span>/&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">cpu</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/oQANCFXRzPE9.png" srcset="/img/loading.gif" lazyload></p>
+<p>设定安装系统的ISO为只读，保证ISO文件不会被修改，同时设置数据总线方式为SATA保证最好的兼容性。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/nCeP9DhIJ3pr.png" srcset="/img/loading.gif" lazyload></p>
+<p>配置两个网卡，分别为桥接宿主机的网卡和NAT模式，其中桥接网卡使用e1000e型号保证最好的兼容性，NAT模式的网卡使用VirtIO型号可以达到最大100G的传输速度。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/gasot4Fqknrk.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/EEYNsA6KwRCo.png" srcset="/img/loading.gif" lazyload></p>
+<p>其他还会默认添加一些常用的组件，我们根据自己的需求进行修改，这里我只保留了常用的USB重定向设备，声卡、网卡、串行总线等基本设备，如果不清楚具体需求，建议保留。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/rI4NlOMgUI2P.png" srcset="/img/loading.gif" lazyload></p>
+<p>最后整个完整的xml文件如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">domain</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;kvm&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>centos7_demo<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">uuid</span>&gt;</span>2e80a698-c4f9-464b-bb3e-28c4987cbe9a<span class="hljs-tag">&lt;/<span class="hljs-name">uuid</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">metadata</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">libosinfo:libosinfo</span> <span class="hljs-attr">xmlns:libosinfo</span>=<span class="hljs-string">&quot;http://libosinfo.org/xmlns/libvirt/domain/1.0&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">libosinfo:os</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;http://centos.org/centos/7.0&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">libosinfo:libosinfo</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">metadata</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">memory</span>&gt;</span>8388608<span class="hljs-tag">&lt;/<span class="hljs-name">memory</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">currentMemory</span>&gt;</span>8388608<span class="hljs-tag">&lt;/<span class="hljs-name">currentMemory</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">vcpu</span> <span class="hljs-attr">current</span>=<span class="hljs-string">&quot;4&quot;</span>&gt;</span>4<span class="hljs-tag">&lt;/<span class="hljs-name">vcpu</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">os</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">type</span> <span class="hljs-attr">arch</span>=<span class="hljs-string">&quot;x86_64&quot;</span> <span class="hljs-attr">machine</span>=<span class="hljs-string">&quot;q35&quot;</span>&gt;</span>hvm<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">boot</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;hd&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">os</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">features</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">acpi</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">apic</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">vmport</span> <span class="hljs-attr">state</span>=<span class="hljs-string">&quot;off&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">features</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">cpu</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;host-passthrough&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">topology</span> <span class="hljs-attr">sockets</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">cores</span>=<span class="hljs-string">&quot;4&quot;</span> <span class="hljs-attr">threads</span>=<span class="hljs-string">&quot;1&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">cpu</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">clock</span> <span class="hljs-attr">offset</span>=<span class="hljs-string">&quot;utc&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">timer</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;rtc&quot;</span> <span class="hljs-attr">tickpolicy</span>=<span class="hljs-string">&quot;catchup&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">timer</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;pit&quot;</span> <span class="hljs-attr">tickpolicy</span>=<span class="hljs-string">&quot;delay&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">timer</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;hpet&quot;</span> <span class="hljs-attr">present</span>=<span class="hljs-string">&quot;no&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">clock</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">pm</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">suspend-to-mem</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">&quot;no&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">suspend-to-disk</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">&quot;no&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">pm</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">devices</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">emulator</span>&gt;</span>/usr/libexec/qemu-kvm<span class="hljs-tag">&lt;/<span class="hljs-name">emulator</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">disk</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;file&quot;</span> <span class="hljs-attr">device</span>=<span class="hljs-string">&quot;disk&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">driver</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;qemu&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;qcow2&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">file</span>=<span class="hljs-string">&quot;/kvm/vm/centos7_demo.qcow2&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;vda&quot;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&quot;virtio&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">disk</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">disk</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;file&quot;</span> <span class="hljs-attr">device</span>=<span class="hljs-string">&quot;cdrom&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">driver</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;qemu&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;raw&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">file</span>=<span class="hljs-string">&quot;/kvm/iso/centos7.7.iso&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;sda&quot;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&quot;sata&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">readonly</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">disk</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">interface</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;network&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">network</span>=<span class="hljs-string">&quot;default&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">mac</span> <span class="hljs-attr">address</span>=<span class="hljs-string">&quot;52:54:00:83:cc:6d&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">model</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;virtio&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">interface</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">console</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;pty&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">channel</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;unix&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;bind&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;virtio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;org.qemu.guest_agent.0&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">channel</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">channel</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;spicevmc&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;virtio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;com.redhat.spice.0&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">channel</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;tablet&quot;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&quot;usb&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">graphics</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;spice&quot;</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;-1&quot;</span> <span class="hljs-attr">tlsPort</span>=<span class="hljs-string">&quot;-1&quot;</span> <span class="hljs-attr">autoport</span>=<span class="hljs-string">&quot;yes&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">image</span> <span class="hljs-attr">compression</span>=<span class="hljs-string">&quot;off&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">graphics</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">video</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">model</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;qxl&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">video</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">memballoon</span> <span class="hljs-attr">model</span>=<span class="hljs-string">&quot;virtio&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">rng</span> <span class="hljs-attr">model</span>=<span class="hljs-string">&quot;virtio&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">backend</span> <span class="hljs-attr">model</span>=<span class="hljs-string">&quot;random&quot;</span>&gt;</span>/dev/urandom<span class="hljs-tag">&lt;/<span class="hljs-name">backend</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">rng</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">interface</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;direct&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;enp6s0&quot;</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;bridge&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">mac</span> <span class="hljs-attr">address</span>=<span class="hljs-string">&quot;52:54:00:31:ad:1d&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">model</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;e1000e&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">interface</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">devices</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">domain</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
+
+<h2 id="2-4开始安装"><a href="#2-4开始安装" class="headerlink" title="2.4开始安装"></a>2.4开始安装</h2><p><img src="https://resource.tinychen.com/blogphotos/20200407/8Vpx09lXQTBp.png" srcset="/img/loading.gif" lazyload></p>
+<p>接下来的安装就和正常的物理机安装操作系统一样，这里我们就不再赘述了，由于是CentOS的虚拟机，为了节约系统资源，我选择了最小化安装（Minimal Install）、关闭了KDUMP功能，并且使用LVM来设定分区以便后期扩容</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/HJ6YRVr8Xo2t.png" srcset="/img/loading.gif" lazyload></p>
+<p>最后可以通过virsh命令来查看虚拟机的状态</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/ILuYhcJWiObV.png" srcset="/img/loading.gif" lazyload></p>
+<p>如果需要开启虚拟机只需要使用<code>virsh start 虚拟机名</code>即可。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/devops/">devops</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/graduation/">graduation</a>
+                    
+                      <a class="hover-with-bg" href="/tags/kvm/">kvm</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20200409-tomcat-03-jmeter-nio-nio2-apr/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20200402-tomcat-02-structure-io-model/">
+                        <span class="hidden-mobile">Tomcat篇02-整体架构和I/O模型</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

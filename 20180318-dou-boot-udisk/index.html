@@ -1,0 +1,555 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="一般来说，修电脑的各位老铁们，在制作PE启动盘的时候，就会需要格式化U盘，然后将PE所需要的文件刻录进U盘里面。
+对于像小七这样喜欢使用U盘刻录安装原生纯净的操作系统的人，就需要准备两个U盘，一个用来制作PE工具盘，一个用来安装操作系统，现在小七给大家介绍一个方法，让一个U盘实现双启动或者三启动。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>双启动U盘 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="双启动U盘">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2018-03-18 15:00" pubdate>
+        March 18, 2018 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      984 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      5
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">双启动U盘</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：March 18, 2018 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>一般来说，修电脑的各位老铁们，在制作PE启动盘的时候，就会需要格式化U盘，然后将PE所需要的文件刻录进U盘里面。</p>
+<p>对于像小七这样喜欢使用U盘刻录安装原生纯净的操作系统的人，就需要准备两个U盘，一个用来制作PE工具盘，一个用来安装操作系统，现在小七给大家介绍一个方法，让一个U盘实现双启动或者三启动。</p>
+<span id="more"></span>
+
+<p><strong>此处先上一张成品图</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%981.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>图中三个盘其实都是一个U盘的，第一个里面的是PE工具箱，第三个是原装win10刻录文件，第二个则可以当作普通U盘使用。</strong></p>
+<p>这样的好处是一个U盘双启动，平时放的文件和工具箱/win10镜像的文件不容易混淆。</p>
+<blockquote>
+<p>有些同学说在刻录win10镜像的盘符里面用文件夹存放文件也可以，这个方法虽然简单，但是作为启动盘一般都是FAT32格式，是无法存放单个文件大小超过4G的文件的。</p>
+</blockquote>
+<p><strong>（PE工具箱也可以安装操作系统，习惯用PE安装系统的朋友可以忽略这篇推文）</strong></p>
+<h1 id="1、准备工作"><a href="#1、准备工作" class="headerlink" title="1、准备工作"></a>1、准备工作</h1><ul>
+<li><p>原装系统镜像（此处使用最新版的64位win10，可在msdn itellyou中下载）</p>
+</li>
+<li><p>PE工具箱的ISO文件（此处使用微PE2.0版本，后台回复PE有惊喜）</p>
+</li>
+<li><p>Ultra ISO软件（试用版即可）</p>
+</li>
+<li><p>一个8G以上的U盘（此处使用一个32G的USB3.0的U盘）</p>
+</li>
+<li><p>一台能用的正常的电脑</p>
+</li>
+</ul>
+<h1 id="2、刻录原版win10镜像"><a href="#2、刻录原版win10镜像" class="headerlink" title="2、刻录原版win10镜像"></a>2、刻录原版win10镜像</h1><p>首先，安装并打开UltraISO，点击上方的菜单栏中的 <strong>文件 —&gt; 打开，然后选择win10镜像文件</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%983.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%984.png" srcset="/img/loading.gif" lazyload></p>
+<p>然后再点击上方的菜单栏中的** 启动 —&gt; 写入硬盘映像**</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%985.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>在弹出的界面中，检查下图红框的两项：</strong></p>
+<ul>
+<li><p><strong>硬盘驱动器要确定是自己用来制作的U盘</strong></p>
+</li>
+<li><p><strong>隐藏启动分区里面要选择高端隐藏</strong></p>
+</li>
+</ul>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%986.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>接下来会格式化U盘，请务必要备份U盘中的重要文件</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%987.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%988.png" srcset="/img/loading.gif" lazyload></p>
+<p>刻录完成之后，打开我的电脑，会发现U盘已经被分成两个分区</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%989.png" srcset="/img/loading.gif" lazyload></p>
+<p><strong>如果不需要PE工具箱，到这里就可以停了，因为到这里已经制作了一个正常的win10安装盘，需要重装系统的话，用这个U盘就已经OK了。</strong></p>
+<h1 id="3、利用磁盘管理进行二次分区"><a href="#3、利用磁盘管理进行二次分区" class="headerlink" title="3、利用磁盘管理进行二次分区"></a>3、利用磁盘管理进行二次分区</h1><p>右键我的电脑，点击管理，在左边找到磁盘管理，然后在下方找到自己的U盘，删除掉上图中的20多G的磁盘</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9810.png" srcset="/img/loading.gif" lazyload></p>
+<p>然后新建两个磁盘，<strong>一个大小为800M，文件系统类型记得选择FAT32，否则PE工具箱会无法正常启动</strong></p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9811.png" srcset="/img/loading.gif" lazyload></p>
+<p>剩下的全部分到另一个盘，文件系统类型随意选择<strong>（建议exFAT）</strong>。</p>
+<p>最后应该和下图类似。</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9812.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="4、解压ISO文件制作PE工具箱"><a href="#4、解压ISO文件制作PE工具箱" class="headerlink" title="4、解压ISO文件制作PE工具箱"></a>4、解压ISO文件制作PE工具箱</h1><p>解压PE工具箱的ISO文件，PE工具箱的文件一般都是两三百MB，将解压后的文件全部复制到容量比较小的磁盘中</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9813.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="5、测试"><a href="#5、测试" class="headerlink" title="5、测试"></a>5、测试</h1><p>将U盘插入电脑，按下开机键的时候按ESC或者F1/F2/F9/F12等按键即可进入启动项选择菜单（不同电脑情况不同），如果像下图这样出现了两个一样的启动项，那么就制作成功。</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9814.jpg" srcset="/img/loading.gif" lazyload></p>
+<p><strong>最后，如何区分哪个才是PE，哪个才是WIN10呢？</strong></p>
+<p>你可能会说，直接点进去试一下不就行了。</p>
+<p>对的，没错这确实可以，但是这样的话就太没有技术含量了。</p>
+<p>我们还是打开我的电脑中的磁盘管理，会发现左边的是PE，右边的是WIN10，所以上图的第一个就是PE，第二个才是win10。</p>
+<p><img src="https://resource.tinychen.com/%E5%8F%8C%E5%90%AF%E5%8A%A8U%E7%9B%9815.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/others/">others</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/windows/">windows</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20180630-data-structure/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">数据结构复习提纲</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20180225-disable-keyboard/">
+                        <span class="hidden-mobile">禁用笔记本内置键盘</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

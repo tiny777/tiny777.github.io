@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要对coredns的原理和特性进行介绍，同时会对其二进制的安装方法进行尝试。">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>DNS系列之CoreDNS篇1-CoreDNS简介和安装 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210512164201.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="DNS系列之CoreDNS篇1-CoreDNS简介和安装">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-05-09 11:00" pubdate>
+        May 9, 2021 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      2.4k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      17
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">DNS系列之CoreDNS篇1-CoreDNS简介和安装</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：May 9, 2021 am
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要对coredns的原理和特性进行介绍，同时会对其二进制的安装方法进行尝试。</p>
+<span id="more"></span>
+
+<h1 id="1、coredns简介"><a href="#1、coredns简介" class="headerlink" title="1、coredns简介"></a>1、coredns简介</h1><p>coredns是一个用go语言编写的开源的DNS服务，它的官网可以点击<a target="_blank" rel="noopener" href="https://coredns.io/">这里</a>，github页面可以点击<a target="_blank" rel="noopener" href="https://github.com/coredns/coredns">这里</a>。需要额外注意的是，coredns是首批加入<a target="_blank" rel="noopener" href="https://www.cncf.io/">CNCF</a>组织的云原生开源项目，并且作为已经在CNCF毕业的项目，coredns还是目前kubernetes中默认的dns服务。同时，由于coredns可以集成插件，它还能够实现服务发现的功能。</p>
+<p>coredns和其他的诸如bind、knot、powerdns、unbound等DNS服务不同的是：coredns非常的灵活，并且几乎把所有的核心功能实现都外包给了插件。比如说如果你想要在coredns中加入Prometheus的监控支持，那么只需要安装对应的prometheus插件并且启用即可，因此官方也说coredns是由插件驱动的。</p>
+<blockquote>
+<p><em>CoreDNS is powered by plugins.</em></p>
+</blockquote>
+<p>对于coredns插件的定义，官网是这样表示的：<strong>插件是能够单独或者共同实现一个“DNS的功能（DNS function）”</strong>。</p>
+<blockquote>
+<p>Plugins can be stand-alone or work together to perform a “DNS function”.</p>
+<p>So what’s a “DNS function”? For the purpose of CoreDNS, we define it as a piece of software that implements the CoreDNS Plugin API. The functionality implemented can wildly deviate. There are plugins that don’t themselves create a response, such as <a target="_blank" rel="noopener" href="https://coredns.io/plugins/metrics">metrics</a> or <a target="_blank" rel="noopener" href="https://coredns.io/plugins/cache">cache</a>, but that add functionality. Then there are plugins that <em>do</em> generate a response. These can also do anything: There are plugins that communicate with <a target="_blank" rel="noopener" href="https://coredns.io/plugins/kubernetes">Kubernetes</a> to provide service discovery, plugins that read data from a <a target="_blank" rel="noopener" href="https://coredns.io/plugins/file">file</a> or a <a target="_blank" rel="noopener" href="https://coredns.io/explugins/pdsql">database</a>.</p>
+</blockquote>
+<h1 id="2、coredns安装"><a href="#2、coredns安装" class="headerlink" title="2、coredns安装"></a>2、coredns安装</h1><p>和大多数的软件一样，<strong>coredns提供了源码编译、预编译包和docker镜像三种安装方式</strong>。这里我们使用预编译包的方式进行安装。coredns在<a target="_blank" rel="noopener" href="https://github.com/coredns/coredns/releases/">github</a>上面提供了各种版本的预编译包，我们只需要下载对应的硬件版本即可。</p>
+<p>解压对应的版本后可以得到一个二进制文件，直接执行就可以使用。</p>
+<figure class="highlight vim"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vim">[root@tiny-server coredns]# ./coredns --<span class="hljs-keyword">help</span><br>Usage of ./coredn<span class="hljs-variable">s:</span><br>  -<span class="hljs-keyword">conf</span> <span class="hljs-built_in">string</span><br>        Corefile <span class="hljs-keyword">to</span> load (default <span class="hljs-string">&quot;Corefile&quot;</span>)<br>  -dns.port <span class="hljs-built_in">string</span><br>        Default port (default <span class="hljs-string">&quot;53&quot;</span>)<br>  -pidfile <span class="hljs-built_in">string</span><br>        Path <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> pid <span class="hljs-keyword">file</span><br>  -plugins<br>        List installed plugins<br>  -quiet<br>        Quiet <span class="hljs-keyword">mode</span> (<span class="hljs-keyword">no</span> initialization output)<br>  -<span class="hljs-keyword">version</span><br>        Show <span class="hljs-keyword">version</span><br></code></pre></div></td></tr></table></figure>
+
+<p>需要注意的是，对于预编译的版本，会内置全部官方认证的插件，也就是官网的<a target="_blank" rel="noopener" href="https://coredns.io/plugins/">插件页面</a>列出来的全部插件</p>
+<figure class="highlight fortran"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs fortran">[root@<span class="hljs-built_in">tiny</span>-server coredns]# ./coredns -plugins<br>Server types:<br>  dns<br><br>Caddyfile loaders:<br>  flag<br>  <span class="hljs-keyword">default</span><br><br>Other plugins:<br>  dns.acl<br>  dns.<span class="hljs-built_in">any</span><br>  dns.auto<br>  dns.autopath<br>  dns.azure<br>  dns.<span class="hljs-keyword">bind</span><br>  dns.bufsize<br>  dns.cache<br>  dns.cancel<br>  dns.chaos<br>  dns.clouddns<br>  dns.debug<br>  dns.dns64<br>  dns.dnssec<br>  dns.dnstap<br>  dns.erratic<br>  dns.errors<br>  dns.etcd<br>  dns.<span class="hljs-keyword">file</span><br>  dns.forward<br>  dns.grpc<br>  dns.health<br>  dns.hosts<br>  dns.k8s_external<br>  dns.kubernetes<br>  dns.loadbalance<br>  dns.<span class="hljs-keyword">local</span><br>  dns.<span class="hljs-built_in">log</span><br>  dns.loop<br>  dns.metadata<br>  dns.nsid<br>  dns.pprof<br>  dns.prometheus<br>  dns.ready<br>  dns.reload<br>  dns.rewrite<br>  dns.root<br>  dns.route53<br>  dns.secondary<br>  dns.<span class="hljs-built_in">sign</span><br>  dns.template<br>  dns.tls<br>  dns.trace<br>  dns.<span class="hljs-built_in">transfer</span><br>  dns.whoami<br>  on<br></code></pre></div></td></tr></table></figure>
+
+<p>coredns的运行也非常简单，直接运行二进制文件即可，默认情况下可以添加的参数不多，主要是指定配置文件，指定运行端口和设置quiet模式。</p>
+<figure class="highlight autoit"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@tiny</span>-server coredns]<span class="hljs-meta"># ./coredns</span><br>.:<span class="hljs-number">53</span><br>CoreDNS<span class="hljs-number">-1.8</span><span class="hljs-number">.3</span><br>linux/amd64, go1<span class="hljs-number">.16</span>, <span class="hljs-number">4293992</span><br></code></pre></div></td></tr></table></figure>
+
+<p>默认情况下会直接监听53端口，并且读取和自己在相同目录下的Corefile配置文件。但是在这种情况下，虽然coredns正常运行了，但是由于没有配置文件，是无法正常解析任何域名请求的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 直接运行coredns让其监听30053端口</span><br>[root@tiny-server coredns-test]# ./coredns -dns.port 30053<br>.:30053<br>CoreDNS-1.8.3<br>linux/amd64, go1.16, 4293992<br>[INFO] 127.0.0.1:47910 - 63992 &quot;A IN tinychen.com. udp 53 false 4096&quot; NOERROR qr,aa,rd 94 0.000162476s<br>[INFO] 127.0.0.1:48764 - 26598 &quot;A IN tinychen.com. udp 53 false 4096&quot; NOERROR qr,aa,rd 94 0.000135895s<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用dig命令进行测试，发现能够正常返回请求但是解析的结果不正确</span><br>[root@tiny-server coredns-test]# dig tinychen.com @127.0.0.1 -p30053<br><br>; &lt;&lt;&gt;&gt; DiG 9.11.20-RedHat-9.11.20-5.el8_3.1 &lt;&lt;&gt;&gt; tinychen.com @127.0.0.1 -p30053<br>;; global options: +cmd<br>;; Got answer:<br>;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 26598<br>;; flags: qr aa rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 3<br>;; WARNING: recursion requested but not available<br><br>;; OPT PSEUDOSECTION:<br>; EDNS: version: 0, flags:; udp: 4096<br>; COOKIE: 4429aa454c031afe (echoed)<br>;; QUESTION SECTION:<br>;tinychen.com.                  IN      A<br><br>;; ADDITIONAL SECTION:<br>tinychen.com.           0       IN      A       127.0.0.1<br>_udp.tinychen.com.      0       IN      SRV     0 0 48764 .<br><br>;; Query time: 0 msec<br>;; SERVER: 127.0.0.1#30053(127.0.0.1)<br>;; WHEN: Tue May 11 11:39:47 CST 2021<br>;; MSG SIZE  rcvd: 117<br></code></pre></div></td></tr></table></figure>
+
+<p>这里我们简单编写一个Corefile配置文件就能够先让coredns正常解析域名，这个配置文件的意识是对所有域的请求都forward到114DNS进行解析，并且记录正常的日志和错误的日志。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-server coredns]# cat Corefile<br>. &#123;<br>    forward . 114.114.114.114 223.5.5.5<br>    log<br>    errors<br>    whoami<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>然后我们再进行测试就发现coredns可以正常解析域名了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-server coredns-test]# dig tinychen.com @127.0.0.1 -p30053<br><br>; &lt;&lt;&gt;&gt; DiG 9.11.20-RedHat-9.11.20-5.el8_3.1 &lt;&lt;&gt;&gt; tinychen.com @127.0.0.1 -p30053<br>;; global options: +cmd<br>;; Got answer:<br>;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 49732<br>;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1<br><br>;; OPT PSEUDOSECTION:<br>; EDNS: version: 0, flags:; udp: 4096<br>;; QUESTION SECTION:<br>;tinychen.com.                  IN      A<br><br>;; ANSWER SECTION:<br>tinychen.com.           35      IN      A       47.107.188.168<br><br>;; Query time: 29 msec<br>;; SERVER: 127.0.0.1#30053(127.0.0.1)<br>;; WHEN: Tue May 11 14:02:41 CST 2021<br>;; MSG SIZE  rcvd: 69<br><br>[root@tiny-server coredns-test]# ./coredns -dns.port 30053<br>.:30053<br>CoreDNS-1.8.3<br>linux/amd64, go1.16, 4293992<br>[INFO] 127.0.0.1:42293 - 51799 &quot;A IN tinychen.com. udp 53 false 4096&quot; NOERROR qr,rd,ra 58 0.244014828s<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="3、systemd管理"><a href="#3、systemd管理" class="headerlink" title="3、systemd管理"></a>3、systemd管理</h1><p>coredns作为一个二进制执行文件，并没有向其他的如nginx、bind等服务提供种类繁多的进程控制（reload stop restart等等）选项，因此为了方便我们管理和在后台一直运行coredns，这里我们使用systemd对其进行管理，只需要编写一个systemd的unit文件即可：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-server coredns]# cat /usr/lib/systemd/system/coredns.service<br>[Unit]<br>Description=CoreDNS<br>Documentation=https://coredns.io/manual/toc/<br>After=network.target<br><br>[Service]<br><span class="hljs-meta">#</span><span class="bash"> Type设置为notify时，服务会不断重启</span><br><span class="hljs-meta">#</span><span class="bash"> 关于<span class="hljs-built_in">type</span>的设置，可以参考https://www.freedesktop.org/software/systemd/man/systemd.service.html<span class="hljs-comment">#Options</span></span><br>Type=simple<br>User=root<br><span class="hljs-meta">#</span><span class="bash"> 指定运行端口和读取的配置文件</span><br>ExecStart=/home/coredns/coredns -dns.port=53 -conf /home/coredns/Corefile<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br></code></pre></div></td></tr></table></figure>
+
+<p>编写完成之后我们依次reload配置文件并且设置开机启动服务和开启服务，即可看到服务正常运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-server coredns]# systemctl daemon-reload<br>[root@tiny-server coredns]# systemctl enable coredns.service<br>[root@tiny-server coredns]# systemctl start coredns.service<br>[root@tiny-server coredns]# systemctl status coredns.service<br>● coredns.service - CoreDNS<br>   Loaded: loaded (/usr/lib/systemd/system/coredns.service; enabled; vendor preset: disabled)<br>   Active: active (running) since Tue 2021-05-11 11:29:53 CST; 2h 37min ago<br>     Docs: https://coredns.io/manual/toc/<br> Main PID: 131287 (coredns)<br>    Tasks: 10 (limit: 49835)<br>   Memory: 27.3M<br>   CGroup: /system.slice/coredns.service<br>           └─131287 /home/coredns/coredns -dns.port=53 -conf /home/coredns/Corefile<br><br>May 11 11:29:53 tiny-server systemd[1]: Started CoreDNS.<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="4、coredns日志处理"><a href="#4、coredns日志处理" class="headerlink" title="4、coredns日志处理"></a>4、coredns日志处理</h1><p>coredns的日志输出并不如nginx那么完善（并不能在配置文件中指定输出的文件目录，但是可以指定日志的格式），默认情况下不论是log插件还是error插件都会把所有的相关日志输出到程序的<code>standard output</code>中，使用systemd来管理coredns之后，</p>
+<h2 id="4-1-StandardOutput"><a href="#4-1-StandardOutput" class="headerlink" title="4.1 StandardOutput"></a>4.1 StandardOutput</h2><p>根据网上的<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/37585758/how-to-redirect-output-of-systemd-service-to-a-file">参考资料</a>我们可以得知较新版本的systemd是可以直接在systemd的unit文件里面配置<code>StandardOutput</code>和<code>StandardError</code>两个参数来将相关运行日志输出到指定的文件中。</p>
+<p><img src="https://resource.tinychen.com/20210511112440.png" srcset="/img/loading.gif" lazyload></p>
+<p>因此对于centos8等较新的系统，我们的unit文件可以这样编写：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[Unit]<br>Description=CoreDNS<br>Documentation=https://coredns.io/manual/toc/<br>After=network.target<br><span class="hljs-meta">#</span><span class="bash"> StartLimit这两个相关参数也是centos8等systemd版本较新的系统才支持的</span><br>StartLimitBurst=1<br>StartLimitIntervalSec=15s<br><br>[Service]<br><span class="hljs-meta">#</span><span class="bash"> Type设置为notify时，服务会不断重启</span><br>Type=simple<br>User=root<br><span class="hljs-meta">#</span><span class="bash"> 指定运行端口和读取的配置文件</span><br>ExecStart=/home/coredns/coredns -dns.port=53 -conf /home/coredns/Corefile<br><span class="hljs-meta">#</span><span class="bash"> append类型可以在原有文件末尾继续追加内容，而file类型则是重新打开一个新文件</span><br><span class="hljs-meta">#</span><span class="bash"> 两者的区别类似于 <span class="hljs-built_in">echo</span> &gt;&gt; 和 <span class="hljs-built_in">echo</span> &gt;</span><br>StandardOutput=append:/home/coredns/logs/coredns.log<br>StandardError=append:/home/coredns/logs/coredns_error.log<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>参考链接：<a target="_blank" rel="noopener" href="https://www.freedesktop.org/software/systemd/man/systemd.exec.html#StandardOutput=">systemd.exec (www.freedesktop.org)</a></p>
+<p>The <code>file:*</code>path<code>*</code> option may be used to connect a specific file system object to standard output. The semantics are similar to the same option of <code>StandardInput=</code>, see above. If <em><code>path</code></em> refers to a regular file on the filesystem, it is opened (created if it doesn’t exist yet) for writing at the beginning of the file, but without truncating it. If standard input and output are directed to the same file path, it is opened only once, for reading as well as writing and duplicated. This is particularly useful when the specified path refers to an <code>AF_UNIX</code> socket in the file system, as in that case only a single stream connection is created for both input and output.</p>
+<p><code>append:*</code>path<code>*</code> is similar to <code>file:*</code>path<code>*</code> above, but it opens the file in append mode.</p>
+</blockquote>
+<p>修改完成之后我们再重启服务就可以看到日志已经被重定向输出到我们指定的文件中</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-server coredns]# systemctl daemon-reload<br>[root@tiny-server coredns]# systemctl restart coredns.service<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="4-2-rsyslog"><a href="#4-2-rsyslog" class="headerlink" title="4.2 rsyslog"></a>4.2 rsyslog</h2><p>对于centos7等系统而言，是不支持上面的append和file两个参数的，那么在开启了<code>rsyslog.service</code>服务的情况下，日志就会输出到<code>/var/log/messages</code>文件中，或者可以使用<code>journalctl -u coredns</code>命令来查看全部的日志。</p>
+<p>如果想要将coredns的日志全部集中到一个文件进行统一管理，我们可以对负责管理<code>systemd</code>的日志的<code>rsyslog</code>服务的配置进行修改：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> vim /etc/rsyslog.conf</span><br>if $programname == &#x27;coredns&#x27; then /home/coredns/logs/coredns.log<br>&amp; stop<br><br>[root@tiny-server coredns]# systemctl restart rsyslog.service<br></code></pre></div></td></tr></table></figure>
+
+<p>从下图我们可以看到两种方式打出来的日志稍微有些不同，对于<code>StandardOutput</code>这种方式输出的日志缺少了前面的时间和主机名等信息，相对而言还是修改rsyslog的方式要更加的可靠。</p>
+<p><img src="https://resource.tinychen.com/20210511145618.png" srcset="/img/loading.gif" lazyload></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/network/">network</a>
+                    
+                      <a class="hover-with-bg" href="/tags/dns/">dns</a>
+                    
+                      <a class="hover-with-bg" href="/tags/coredns/">coredns</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/20210516-dns-04-coredns-02--install-external-plugins/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">DNS系列之CoreDNS篇2-CoreDNS编译安装External Plugins</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20210408-centos8-create-bridge/">
+                        <span class="hidden-mobile">在centos8中使用nmcli工具创建虚拟网桥</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
