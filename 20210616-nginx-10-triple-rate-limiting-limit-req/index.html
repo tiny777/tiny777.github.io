@@ -16,11 +16,12 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="本文主要是对nginx官方模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGINX and NGINX Plus和nginx的ngx_http_limit_req_module的详细说明。">
+  <meta name="description" content="目前来说在nginx上面我们常见的三种限速操作分别是：限制请求数(request)、限制连接数(connection)、限制响应速度(rate)，对应在nginx的模块相关指令分别是limit_req、limit_con
+本文主要是对nginx官方limit_req相关模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGINX and NGINX Plus">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
-  <title>nginx篇10-rate-limiting工作原理 - TinyChen&#39;s Studio</title>
+  <title>nginx篇10-限速三剑客工作原理之limit_req系列 - TinyChen&#39;s Studio</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
 
@@ -166,7 +167,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="nginx篇10-rate-limiting工作原理">
+            <span class="h2" id="subtitle" title="nginx篇10-限速三剑客工作原理之limit_req系列">
               
             </span>
 
@@ -188,7 +189,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      4.8k 字
+      4.9k 字
     </span>
   
 
@@ -228,7 +229,7 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">nginx篇10-rate-limiting工作原理</h1>
+            <h1 style="display: none">nginx篇10-限速三剑客工作原理之limit_req系列</h1>
             
               <p class="note note-info">
                 
@@ -237,7 +238,8 @@
               </p>
             
             <div class="markdown-body">
-              <p>本文主要是对nginx官方模块的限速原理的解释和一些个人理解，主要参考的文章为<a target="_blank" rel="noopener" href="https://www.nginx.com/blog/rate-limiting-nginx/"><code>Rate Limiting with NGINX and NGINX Plus</code></a>和nginx的<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"><code>ngx_http_limit_req_module</code></a>的详细说明。</p>
+              <p>目前来说在nginx上面我们常见的三种限速操作分别是：限制请求数(request)、限制连接数(connection)、限制响应速度(rate)，对应在nginx的模块相关指令分别是limit_req、limit_con</p>
+<p>本文主要是对nginx官方<code>limit_req</code>相关模块的限速原理的解释和一些个人理解，主要参考的文章为<a target="_blank" rel="noopener" href="https://www.nginx.com/blog/rate-limiting-nginx/"><code>Rate Limiting with NGINX and NGINX Plus</code></a>和nginx的<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"><code>ngx_http_limit_req_module</code></a>的详细说明。</p>
 <span id="more"></span>
 
 <h1 id="1、前言"><a href="#1、前言" class="headerlink" title="1、前言"></a>1、前言</h1><p>限速（rate limiting）是NGINX中一个非常有用但是经常被误解且误用的功能特性。我们可以用它来限制在一段时间内的HTTP请求的数量，这些请求可以是如<code>GET</code>这样的简单请求又或者是用来填充登录表单的<code>POST</code>请求。</p>
