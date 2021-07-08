@@ -16,8 +16,7 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="目前来说在nginx上面我们常见的三种限速操作分别是：限制请求数(request)、限制连接数(connection)、限制响应速度(rate)，对应在nginx的模块相关指令分别是limit_req、limit_conn和limit_rate三个系列。
-本文主要是对nginx官方limit_req相关模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGI">
+  <meta name="description" content="本文主要是对nginx官方limit_req相关模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGINX and NGINX Plus和nginx的ngx_http_limit_req_module的详细说明。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
@@ -238,10 +237,10 @@
               </p>
             
             <div class="markdown-body">
-              <p>目前来说在nginx上面我们常见的三种限速操作分别是：限制请求数(request)、限制连接数(connection)、限制响应速度(rate)，对应在nginx的模块相关指令分别是<code>limit_req</code>、<code>limit_conn</code>和<code>limit_rate</code>三个系列。</p>
-<p>本文主要是对nginx官方<code>limit_req</code>相关模块的限速原理的解释和一些个人理解，主要参考的文章为<a target="_blank" rel="noopener" href="https://www.nginx.com/blog/rate-limiting-nginx/"><code>Rate Limiting with NGINX and NGINX Plus</code></a>和nginx的<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"><code>ngx_http_limit_req_module</code></a>的详细说明。</p>
+              <p>本文主要是对nginx官方<code>limit_req</code>相关模块的限速原理的解释和一些个人理解，主要参考的文章为<a target="_blank" rel="noopener" href="https://www.nginx.com/blog/rate-limiting-nginx/"><code>Rate Limiting with NGINX and NGINX Plus</code></a>和nginx的<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"><code>ngx_http_limit_req_module</code></a>的详细说明。</p>
 <span id="more"></span>
 
+<p>目前来说在nginx上面我们常见的三种限速操作分别是：限制请求数(request)、限制连接数(connection)、限制响应速度(rate)，对应在nginx的模块相关指令分别是<code>limit_req</code>、<code>limit_conn</code>和<code>limit_rate</code>三个系列。</p>
 <h1 id="1、前言"><a href="#1、前言" class="headerlink" title="1、前言"></a>1、前言</h1><p>限速（rate limiting）是NGINX中一个非常有用但是经常被误解且误用的功能特性。我们可以用它来限制在一段时间内的HTTP请求的数量，这些请求可以是如<code>GET</code>这样的简单请求又或者是用来填充登录表单的<code>POST</code>请求。</p>
 <p>限速还可以用于安全防护用途，例如限制密码撞库暴力破解等操作的频率，也可以通过把请求频率限制在一个正常范围来抵御<a target="_blank" rel="noopener" href="https://www.nginx.com/blog/mitigating-ddos-attacks-with-nginx-and-nginx-plus/">DDoS攻击</a>。不过更常见的使用情况是通过限制请求的数量来确保后端的upstream服务器不会在短时间内遭受到大量的流量访问从而导致服务异常。</p>
 <p>本文会尽量覆盖nginx中限速（rate limiting）的基本概念也相关知识同时会顺带尽可能多的提一下相关的进阶配置方法。限速（rate limiting）在付费版本的nginx（Nginx Plus）中也是同样可以使用的。</p>
