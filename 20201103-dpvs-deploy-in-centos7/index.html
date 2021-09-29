@@ -266,7 +266,7 @@
 <p><strong>从设备支持上看</strong>：DPVS支持主流的硬件网卡设备，同时还支持了<code>Bonding（mode 0 and 4 ）</code>, <code>VLAN</code>, <code>kni</code>, <code>ipip</code>/<code>GRE</code>等虚拟设备</p>
 <p><strong>从管理工具上看</strong>：可以使用包括 ipvsadm、keepalived、dpip等工具对DPVS进行配置和管理，也支持使用进行 quagga 集群化部署</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>从上面列出的几个DPVS的主要特点我们不难发现，<strong>DPVS的主要设计思路就是通过减少各种切换和避免加锁来提高性能</strong>，具体的实现上则主要依赖了DPDK的许多功能特性以及使用了常用的几个开源负载均衡软件（ipvsadm、keepalived、dpip等），结合用户态的轻量级网络协议栈（只保留了四层负载均衡所必须的），就实现了超强性能的四层负载均衡系统。</p>
-<p><img src="https://resource.tinychen.com/20210114110527.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="D:\tinychen\Desktop\20210114110527.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="1、机器配置"><a href="#1、机器配置" class="headerlink" title="1、机器配置"></a>1、机器配置</h1><p>DPVS由于引入了DPDK套件作为底层的支撑，因此想要最大化发挥它的性能，需要对硬件有一定的要求，dpdk官方给出了一份<a target="_blank" rel="noopener" href="http://core.dpdk.org/supported/">支持列表</a>，虽然支持性列表上面的平台支持得很广泛，但是实际上兼容性和表现最好的似乎还是要Intel的硬件平台。网卡的兼容性方面，主流的Intel网卡几乎都支持，需要注意的是不同型号的网卡在<code>flow-director</code>功能和网卡的收发数据包支持的队列数可能会有不同。</p>
 <h2 id="机器参数"><a href="#机器参数" class="headerlink" title="机器参数"></a>机器参数</h2><ul>
 <li><p>CPU：两颗 <code>Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz</code> </p>
