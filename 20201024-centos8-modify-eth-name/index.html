@@ -16,11 +16,11 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="本文主要介绍将centos7/8中引入的新网卡命名方式修改为传统的ethx命名的方法。">
+  <meta name="description" content="本文主要介绍将centos7/8中引入的新网卡命名方式修改为传统的ethx命名并将命名和mac地址进行持久化绑定的方法">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
-  <title>centos7/8修改网卡名称 - TinyChen&#39;s Studio</title>
+  <title>centos7/8修改网卡名称并持久化配置 - TinyChen&#39;s Studio</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
 
@@ -166,7 +166,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="centos7/8修改网卡名称">
+            <span class="h2" id="subtitle" title="centos7/8修改网卡名称并持久化配置">
               
             </span>
 
@@ -188,7 +188,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      377 字
+      654 字
     </span>
   
 
@@ -198,7 +198,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      2
+      4
        分钟
     </span>
   
@@ -228,7 +228,7 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">centos7/8修改网卡名称</h1>
+            <h1 style="display: none">centos7/8修改网卡名称并持久化配置</h1>
             
               <p class="note note-info">
                 
@@ -237,7 +237,7 @@
               </p>
             
             <div class="markdown-body">
-              <p>本文主要介绍将centos7/8中引入的新网卡命名方式修改为传统的ethx命名的方法。</p>
+              <p>本文主要介绍将centos7/8中引入的新网卡命名方式修改为传统的ethx命名并将命名和mac地址进行持久化绑定的方法</p>
 <span id="more"></span>
 
 <p>默认情况下的网卡名称会根据网卡的型号和连接方式，如USB网卡、PCIe网卡等各种方式不同而显示出不同的名称，例如这里就显示为eno1：</p>
@@ -251,6 +251,9 @@
 
 <p>重启系统之后原来的网卡已经失效无法使用，此时无法正常连接网络，因此我们需要使用nmcli工具新建网卡</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 其中con-name为新建的网卡名称，而后面的ifname为已有的硬件网卡名称</span><br><span class="hljs-meta">#</span><span class="bash"> nmcli connection add <span class="hljs-built_in">type</span> ethernet con-name eth0 ifname eth0</span><br><span class="hljs-meta">#</span><span class="bash"> 新建后查看如下</span><br>[root@tiny-server ~]# nmcli connection show<br>NAME        UUID                                  TYPE      DEVICE<br>eth1        363bd12e-34aa-435d-83db-2e966c50854b  ethernet  eth1<br></code></pre></div></td></tr></table></figure>
+
+<p>修改为传统的ethx命名方式之后，对应的ethx和物理网卡并没有一一对应的强绑定关系，也就是说我们对eth1网络进行配置变更之后，可能机器上面新增了一张网卡，或者是原来的网卡的pcie插槽位置变更了，都可能会导致eth1网卡对应的物理网卡发生变化，解决这个问题的最好方法就是将名字和mac地址进行绑定。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 修改下面的这个配置文件，如果没有就新建一个，然后写入对应的mac地址和网卡名字，最后重启机器即可</span><br>[root@tiny-dpvs ~]# cat /etc/udev/rules.d/70-persistent-net.rules<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;11:22:33:44:55:66&quot;, NAME=&quot;eth0&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;11:22:33:44:55:77&quot;, NAME=&quot;eth1&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;11:22:33:44:55:88&quot;, NAME=&quot;eth2&quot;<br></code></pre></div></td></tr></table></figure>
 
 
             </div>
