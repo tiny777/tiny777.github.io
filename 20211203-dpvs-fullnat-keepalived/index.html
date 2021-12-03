@@ -1,0 +1,667 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="本文主要介绍基于CentOS7.9系统部署DPVS的FullNAT模式在使用keepalived进行主备模式配置高可用集群在线上生产环境落地实践时遇到的一些问题和处理的思路。
+
+文中所有IP地址、主机名、MAC地址信息均已进行脱敏或魔改处理，客户端IP使用模拟器生成，但不影响阅读体验。
+">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+  <title>DPVS-FullNAT模式keepalived篇 - TinyChen&#39;s Studio</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/202112031815229.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="DPVS-FullNAT模式keepalived篇">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-12-03 17:00" pubdate>
+        December 3, 2021 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      7.9k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      52
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">DPVS-FullNAT模式keepalived篇</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：December 3, 2021 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要介绍基于<code>CentOS7.9</code>系统部署DPVS的FullNAT模式在使用keepalived进行主备模式配置高可用集群在线上生产环境落地实践时遇到的一些问题和处理的思路。</p>
+<blockquote>
+<p>文中所有IP地址、主机名、MAC地址信息均已进行脱敏或魔改处理，客户端IP使用模拟器生成，但不影响阅读体验。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="1、keepalived架构"><a href="#1、keepalived架构" class="headerlink" title="1、keepalived架构"></a>1、keepalived架构</h1><h2 id="1-1-单机架构图"><a href="#1-1-单机架构图" class="headerlink" title="1.1 单机架构图"></a>1.1 单机架构图</h2><p><img src="https://resource.tinychen.com/202111161128671.svg" srcset="/img/loading.gif" lazyload></p>
+<p>为了方便理解我们可以把上面的架构图分为DPVS网络栈、Linux网络栈、RS集群和使用者（SA和Users）这四大部分。在Linux网络栈中的物理网卡使用<code>eth</code>表示，在DPVS网络栈中的物理网卡使用<code>dpdk</code>表示，DPVS网络栈中的网卡虚拟到Linux网络栈中则使用<code>kni后缀</code>表示，在两个网络栈中做了<code>bonding</code>的网卡都使用<code>BOND</code>表示。</p>
+<blockquote>
+<p><strong>默认情况下，对于所有的kni网卡来说，它们的流量都会被DPVS程序劫持。</strong></p>
+</blockquote>
+<h2 id="1-2-网卡用途"><a href="#1-2-网卡用途" class="headerlink" title="1.2 网卡用途"></a>1.2 网卡用途</h2><p>keepalived双臂模式架构下，每台DPVS机器最少需要三组网卡，bonding可做可不做，不影响该架构图。上图为做了bonding4的网卡架构，因此网卡名称使用<code>bond0、1、2</code>来表示，只要理解清楚每一组网卡的作用，就能很容易理解图中的架构。</p>
+<ul>
+<li><p><code>bond0</code>：**<code>bond0</code>网卡主要用于运维人员管理机器以及keepalived程序对后端的RS节点进行探活**</p>
+<p>只存在于Linux网络栈中的网卡，因为DPVS网络栈的网卡（包括其虚拟出的kni网卡）都是随着DPVS程序的存在而存在的，因此必须有一个独立于DPVS进程之外的网卡用于管理机器（机器信息监控报警，ssh登录操作等）。</p>
+<p>keepalived程序对后端的RS节点探活的时候只能使用Linux网络栈，因此在上图的架构中，正好也是使用bond0网卡进行探活操作，如果有多个Linux网络栈的内网网卡，则根据Linux系统中的路由来判断（单张网卡的时候也是根据路由判断）。</p>
+</li>
+<li><p><code>bond1.kni</code>：**<code>bond1.kni</code>在上述架构正常运行的时候是没有任何作用的**</p>
+<p><code>bond1.kni</code>作为DPVS中的bond1网卡在Linux网络栈中的虚拟网卡，在定位上和<code>bond0</code>是几乎完成重合的，因此<strong>最好将其关闭避免对bond0产生干扰。</strong></p>
+<p><strong>之所以不将其彻底删除，是因为当DPVS程序运行异常或者需要对<code>bond1</code>抓包的时候，可以将<code>bond1</code>的流量forward到<code>bond1.kni</code>进行操作。</strong></p>
+</li>
+<li><p><code>bond2.kni</code>：<strong>bond2.kni主要用于刷新VIP的MAC地址</strong></p>
+<p>kni网卡的mac地址和DPVS中的bond网卡的mac地址是一致的，由于我们常用的ping和arping等命令无法对DPVS中的网卡操作，因此当我们需要发送garp数据包或者是gna数据包来刷新IPv4或者IPv6的VIP地址在交换机中的MAC地址的时候，可以通过DPVS网卡对应的kni网卡来进行操作。</p>
+</li>
+<li><p><code>bond1</code>：业务流量网卡，主要用于加载LIP、与RS建立连接并转发请求</p>
+<p><code>local_address_group</code>这个字段配置的LIP一般就是配置在bond1网卡。</p>
+</li>
+<li><p><code>bond2</code>：业务流量网卡，主要用于加载VIP、与客户端建立连接并转发请求</p>
+<p><code>dpdk_interface</code>这个字段就是DPVS定制版的keepalived程序特有的字段，能够将VIP配置到dpvs网卡上。</p>
+</li>
+</ul>
+<blockquote>
+<p>注意：keepalived主备节点之间的通信必须使用Linux网络栈内的网卡，在这个架构中可以是bond0或者是bond2.kni网卡</p>
+</blockquote>
+<h1 id="2、dpdk网卡相关"><a href="#2、dpdk网卡相关" class="headerlink" title="2、dpdk网卡相关"></a>2、dpdk网卡相关</h1><h2 id="2-1-原理分析"><a href="#2-1-原理分析" class="headerlink" title="2.1 原理分析"></a>2.1 原理分析</h2><p>DPVS中的网卡命名是按照PCIe编号的顺序来命名的，使用dpdk-devbind工具我们可以看到网卡对应的PCIe编号和Linux网络栈中的网卡名称。</p>
+<p>如果Linux系统的网卡命名是使用<code>eth*</code>的命名方式并且在<code>/etc/udev/rules.d/70-persistent-net.rules</code>文件中固化了MAC地址和网卡名称的对应关系，那么就需要特别注意<code>PCIe编号</code>、<code>DPVS网卡名</code>、<code>MAC地址</code>、<code>Linux网卡名</code>四者之间的对应关系。</p>
+<p>尤其是当机器存在多个网段的网卡且做了bonding的时候，Linux网卡中的<code>eth*</code>和DPVS网卡中的<code>dpdk*</code>并不一定能一一对应，此时最好能修改相关配置并且让机房的同学调整网卡接线（当然直接在dpvs的配置文件中修改对应的网卡顺序也可以）。</p>
+<h2 id="2-2-解决方案"><a href="#2-2-解决方案" class="headerlink" title="2.2 解决方案"></a>2.2 解决方案</h2><p>下面的案例是一个仅供参考的比较不容易出问题的组合，eth网卡根据对应的PCIe编号升序进行命名，和dpdk网卡的命名规则一致，同时<code>eth[0-3]</code>为内网网卡，<code>eth[4-5]</code>为外网网卡，与本文的架构图对应，不容易出错。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@dpvs dpvs]# dpdk-devbind --status-dev net<br><br>Network devices using DPDK-compatible driver<br>============================================<br>0000:04:00.0 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; drv=igb_uio unused=ixgbe<br>0000:04:00.1 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; drv=igb_uio unused=ixgbe<br>0000:82:00.0 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; drv=igb_uio unused=ixgbe<br>0000:82:00.1 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; drv=igb_uio unused=ixgbe<br><br>Network devices using kernel driver<br>===================================<br>0000:01:00.0 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; if=eth0 drv=ixgbe unused=igb_uio<br>0000:01:00.1 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; if=eth1 drv=ixgbe unused=igb_uio<br><br><br>[root@dpvs dpvs]# cat /etc/udev/rules.d/70-persistent-net.rules<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;28:6e:45:c4:0e:48&quot;, NAME=&quot;eth0&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;28:6e:45:c4:0e:4a&quot;, NAME=&quot;eth1&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;38:e2:ba:1c:dd:74&quot;, NAME=&quot;eth2&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;38:e2:ba:1c:dd:76&quot;, NAME=&quot;eth3&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;b4:45:99:18:6c:5c&quot;, NAME=&quot;eth4&quot;<br>SUBSYSTEM==&quot;net&quot;, ACTION==&quot;add&quot;, DRIVERS==&quot;?*&quot;, ATTR&#123;address&#125;==&quot;b4:45:99:18:6c:5e&quot;, NAME=&quot;eth5&quot;<br><br>[root@dpvs dpvs]# dpip link -v show | grep -A4 dpdk<br>1: dpdk0: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 10000 Mbps full-duplex auto-nego promisc<br>    addr 38:E2:BA:1C:DD:74 OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br>    pci_addr                        driver_name<br>    0000:04:00:0                    net_ixgbe<br>--<br>2: dpdk1: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 10000 Mbps full-duplex auto-nego promisc<br>    addr 38:E2:BA:1C:DD:76 OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br>    pci_addr                        driver_name<br>    0000:04:00:1                    net_ixgbe<br>--<br>3: dpdk2: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 10000 Mbps full-duplex auto-nego promisc<br>    addr B4:45:99:18:6C:5C OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br>    pci_addr                        driver_name<br>    0000:82:00:0                    net_ixgbe<br>--<br>4: dpdk3: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 10000 Mbps full-duplex auto-nego promisc<br>    addr B4:45:99:18:6C:5E OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br>    pci_addr                        driver_name<br>    0000:82:00:1                    net_ixgbe<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="2-3-抓包排障"><a href="#2-3-抓包排障" class="headerlink" title="2.3 抓包排障"></a>2.3 抓包排障</h2><p>正常情况下，DPVS网络栈会劫持对应DPVS网卡的全部流量到DPVS网络栈中，因此我们使用tcpdump工具对相应的kni网卡进行抓包是没办法抓到相关的数据包的，比较方便的解决方案是使用dpip相关命令把dpvs网卡的流量forward到对应的kni网卡上，再对kni网卡进行抓包。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">dpip link set &lt;port&gt; forward2kni on      # enable forward2kni on &lt;port&gt;<br>dpip link set &lt;port&gt; forward2kni off     # disable forward2kni on &lt;port&gt;<br></code></pre></div></td></tr></table></figure>
+
+<p>对于本文架构图中的dpvs节点，命令中的<code>&lt;port&gt;</code>一般为使用<code>dpip</code>命令查看到的<code>bond1网卡</code>和<code>bond2网卡</code>。</p>
+<blockquote>
+<p>也可以查看下面这个官方的参考链接：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/iqiyi/dpvs/blob/master/doc/tutorial.md#packet-capture-and-tcpdump">https://github.com/iqiyi/dpvs/blob/master/doc/tutorial.md#packet-capture-and-tcpdump</a></p>
+</blockquote>
+<p><strong>注意：<code>forward2kni</code>操作非常影响性能，请不要在线上服务节点进行此操作！</strong></p>
+<h1 id="3、kni网卡相关"><a href="#3、kni网卡相关" class="headerlink" title="3、kni网卡相关"></a>3、kni网卡相关</h1><p>这里主要承接上面介绍kni网卡的作用以及相关的一些问题和解决思路</p>
+<h2 id="3-1-kni网卡的作用"><a href="#3-1-kni网卡的作用" class="headerlink" title="3.1 kni网卡的作用"></a>3.1 kni网卡的作用</h2><p>一般来说DPVS的网卡都会在Linux网络栈中虚拟一个对应的kni网卡，<strong>考虑到默认情况下，对于所有的kni网卡来说，它们的流量都会被DPVS程序劫持。</strong>在本文的架构中，<strong>kni网卡的主要作用还是辅助定位故障以及做少量补充工作。</strong></p>
+<ul>
+<li>当dpvs网卡出现问题时，可以把流量forward到kni网卡进行DEBUG，当VIP出现问题的时候，可以用于刷新VIP的MAC地址</li>
+<li>kni网卡本身也是一个虚拟网卡，只是所有流量都被DPVS劫持，可以在DPVS中配置路由放行特定的流量到kni网卡实现补充工作，如DPVS节点偶尔需要连接外网的时候可以通过bond2.kni放行该外网IP然后访问外网</li>
+</ul>
+<h2 id="3-2-kni网卡路由干扰"><a href="#3-2-kni网卡路由干扰" class="headerlink" title="3.2 kni网卡路由干扰"></a>3.2 kni网卡路由干扰</h2><h3 id="3-2-1-案例复现"><a href="#3-2-1-案例复现" class="headerlink" title="3.2.1 案例复现"></a>3.2.1 案例复现</h3><p>在本图的架构中，<code>bond1.kni</code>和<code>bond0</code>网卡在定位上都是属于内网网卡，如果两个网卡都是同一个网段的话，就需要尤其注意内网流量进出网卡的情况。这里我们使用一台虚拟机进行示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-centos7 ~]# ip a<br>...<br>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000<br>    link/ether 52:54:00:66:3b:08 brd ff:ff:ff:ff:ff:ff<br>    inet 10.31.100.2/16 brd 10.31.255.255 scope global noprefixroute eth0<br>       valid_lft forever preferred_lft forever<br>3: eth1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000<br>    link/ether 52:54:00:47:37:3e brd ff:ff:ff:ff:ff:ff<br>    inet 10.31.100.22/16 brd 10.31.255.255 scope global noprefixroute eth1<br>       valid_lft forever preferred_lft forever<br>...<br>[root@tiny-centos7 ~]# ip r<br>...<br>10.31.0.0/16 dev eth0 proto kernel scope link src 10.31.100.2 metric 100<br>10.31.0.0/16 dev eth1 proto kernel scope link src 10.31.100.22 metric 101<br>...<br></code></pre></div></td></tr></table></figure>
+
+<p>上面的这台虚拟机有两个处于<code>10.31.0.0/16</code>网段的网卡，分别是<code>eth0（10.31.100.2）</code>和<code>eth1（10.31.100.22）</code>，查看路由表的时候可以看到对<code>10.31.0.0/16</code>这个网段有两条路由分别指向<code>eth0</code>和<code>eth1</code>的IP，不同的是两者的<code>metric</code>。接下来我们做个测试：</p>
+<p>首先我们在<code>10.31.100.1</code>这台机器上面<code>ping</code>这台虚拟机的<code>eth1（10.31.100.22）</code>，然后直接使用tcpdump进行抓包</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 对eth1（10.31.100.22）网卡进行抓包的时候抓不到对应的icmp包</span><br>[root@tiny-centos7 ~]# tcpdump -A -n -vv -i eth1 icmp<br>tcpdump: listening on eth1, link-type EN10MB (Ethernet), capture size 262144 bytes<br>^C<br>0 packets captured<br>0 packets received by filter<br>0 packets dropped by kernel<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 接着我们对eth0（10.31.100.2）网卡进行抓包的时候发现能够抓到外部机器（10.31.100.1）对eth1（10.31.100.22）网卡的icmp数据包</span><br>[root@tiny-centos7 ~]# tcpdump -A -n -vv -i eth0 icmp<br>tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes<br>16:29:44.789831 IP (tos 0x0, ttl 64, id 1197, offset 0, flags [DF], proto ICMP (1), length 84)<br>    10.31.100.1 &gt; 10.31.100.22: ICMP echo request, id 16846, seq 54, length 64<br>E..T..@.@.Y.<br>.d.<br>.d...VSA..6y2.a....yA...................... !&quot;#$%&amp;&#x27;()*+,-./01234567<br>16:29:44.789898 IP (tos 0x0, ttl 64, id 16187, offset 0, flags [none], proto ICMP (1), length 84)<br>    10.31.100.22 &gt; 10.31.100.1: ICMP echo reply, id 16846, seq 54, length 64<br>E..T?;..@._.<br>.d.<br>.d...^SA..6y2.a....yA...................... !&quot;#$%&amp;&#x27;()*+,-./01234567<br>16:29:45.813740 IP (tos 0x0, ttl 64, id 1891, offset 0, flags [DF], proto ICMP (1), length 84)<br>    10.31.100.1 &gt; 10.31.100.22: ICMP echo request, id 16846, seq 55, length 64<br>E..T.c@.@.V.<br>.d.<br><br></code></pre></div></td></tr></table></figure>
+
+<h3 id="3-2-2-原理分析"><a href="#3-2-2-原理分析" class="headerlink" title="3.2.2 原理分析"></a>3.2.2 原理分析</h3><p>到这里我们就可以发现：尽管<code>10.31.100.22</code>是在<code>eth1</code>上面，但是实际上流量是经过<code>eth0</code>，也就是说<code>eth1</code>上面实际并没有流量。这也就很好地对应了路由表中<code>10.31.100.2 metric 100</code>要小于<code>10.31.100.22 metric 101</code>，<strong>符合<code>metric</code>越小优先级越高</strong>的原则。</p>
+<p>将上面的情况套用到<code>bond0</code>和<code>bond1.kni</code>网卡上，也会存在相似的问题，如果开启了IPv6网络，还需要考虑是否会有<code>bond1.kni</code>网卡在IPv6网络路由通告下发默认网关路由。这样一来就容易存在路由流量可能走<code>bond0</code>也可能走<code>bond1.kni</code>的问题，抛开两者物理网卡和虚拟网卡的性能差距先不谈，更重要的是：</p>
+<ul>
+<li>默认情况下<code>bond1.kni</code>网卡的流量都会被DPVS程序劫持，所以走<code>bond1.kni</code>网卡的请求都会不正常；</li>
+<li>而恰好RS节点的探活是通过Linux网络栈实现的，如果这时候到RS节点的路由是走<code>bond1.kni</code>网卡，就会让keepalived误认为该后端RS节点处于不可用状态，从而将其weight降为0；</li>
+<li>如果整个集群的RS都是如此，就会导致这个集群的VIP后无可用RS（weight均为0），最终的结果就是请求无法正常转发到RS导致服务彻底不可用。</li>
+</ul>
+<h3 id="3-2-3-解决思路"><a href="#3-2-3-解决思路" class="headerlink" title="3.2.3 解决思路"></a>3.2.3 解决思路</h3><p>因此在这里最方便的一种解决方案就是直接关闭<code>bond1.kni</code>，直接禁用，仅当需要DEBUG的时候再启用，就可以有效地避免这类问题。</p>
+<h2 id="3-3-kni网卡IP不通"><a href="#3-3-kni网卡IP不通" class="headerlink" title="3.3 kni网卡IP不通"></a>3.3 kni网卡IP不通</h2><h3 id="3-3-1-原理分析"><a href="#3-3-1-原理分析" class="headerlink" title="3.3.1 原理分析"></a>3.3.1 原理分析</h3><p>因为Linux网络栈中的kni网卡和DPVS网络栈中的网卡实际上对应的是一个物理网卡（或一组物理网卡），流经这个网卡的网络流量只能由一个网络栈处理。<strong>默认情况下，对于所有的kni网卡来说，它们的流量都会被DPVS程序劫持。</strong>这也就意味着bond2.kni网卡上的IP不仅是无法ping通，也无法进行其他的正常访问操作。但是DPVS程序支持针对特定的IP放行相关的流量到Linux网络栈中（通过kni_host路由实现），就可以实现该IP的正常访问。</p>
+<p>举个例子：一组x520网卡组bonding，在Linux网络栈中显示为bond2.kni，在DPVS网络中显示为bond2，而另外的bond0网卡则只是一个在linux网络栈中的bonding网卡，与DPVS无关。我们使用一些简单的命令来进行对比：</p>
+<p>使用ethtool工具查看，bond0网卡能正常获取网卡速率等信息，而kni网卡则完全无法获取任何有效信息，同时在DPVS网络栈中使用dpip命令则能够看到该bond2网卡非常详细的物理硬件信息。</p>
+<p>使用<code>lspci -nnv</code>命令查看两组网卡的详细信息，我们还可以看到<code>bond0</code>网卡使用的是Linux的网卡驱动<code>ixgbe</code>，而bond2网卡使用的是DPVS的PMD<code>igb_uio</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@dpvs dpvs]# ethtool bond0<br>Settings for bond0:<br>        Supported ports: [ ]<br>        Supported link modes:   Not reported<br>        Supported pause frame use: No<br>        Supports auto-negotiation: No<br>        Supported FEC modes: Not reported<br>        Advertised link modes:  Not reported<br>        Advertised pause frame use: No<br>        Advertised auto-negotiation: No<br>        Advertised FEC modes: Not reported<br>        Speed: 20000Mb/s<br>        Duplex: Full<br>        Port: Other<br>        PHYAD: 0<br>        Transceiver: internal<br>        Auto-negotiation: off<br>        Link detected: yes<br>[root@dpvs dpvs]# ethtool bond2.kni<br>Settings for bond2.kni:<br>No data available<br><br>[root@dpvs dpvs]# dpip -s -v link show bond2<br>3: bond2: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 20000 Mbps full-duplex auto-nego<br>    addr 00:1C:34:EE:46:E4<br>    ipackets            opackets            ibytes              obytes<br>    15451492            31306               6110603685          4922260<br>    ierrors             oerrors             imissed             rx_nombuf<br>    0                   0                   0                   0<br>    mbuf-avail          mbuf-inuse<br>    1012315             36260<br>    pci_addr                        driver_name<br>                                    net_bonding<br>    if_index        min_rx_bufsize  max_rx_pktlen   max_mac_addrs<br>    0               0               15872           16<br>    max_rx_queues   max_tx_queues   max_hash_addrs  max_vfs<br>    127             63              0               0<br>    max_vmdq_pools  rx_ol_capa      tx_ol_capa      reta_size<br>    0               0x1AE9F         0x2A03F         128<br>    hash_key_size   flowtype_rss_ol vmdq_que_base   vmdq_que_num<br>    0               0x38D34         0               0<br>    rx_desc_max     rx_desc_min     rx_desc_align   vmdq_pool_base<br>    4096            0               1               0<br>    tx_desc_max     tx_desc_min     tx_desc_align   speed_capa<br>    4096            0               1               0<br>    Queue Configuration:<br>    rx0-tx0     cpu1-cpu1<br>    rx1-tx1     cpu2-cpu2<br>    rx2-tx2     cpu3-cpu3<br>    rx3-tx3     cpu4-cpu4<br>    rx4-tx4     cpu5-cpu5<br>    rx5-tx5     cpu6-cpu6<br>    rx6-tx6     cpu7-cpu7<br>    rx7-tx7     cpu8-cpu8<br>    rx8-tx8     cpu9-cpu9<br>    rx9-tx9     cpu10-cpu10<br>    rx10-tx10   cpu11-cpu11<br>    rx11-tx11   cpu12-cpu12<br>    rx12-tx12   cpu13-cpu13<br>    rx13-tx13   cpu14-cpu14<br>    rx14-tx14   cpu15-cpu15<br>    rx15-tx15   cpu16-cpu16<br>    HW mcast list:<br>        link 33:33:00:00:00:01<br>        link 33:33:00:00:00:02<br>        link 01:80:c2:00:00:0e<br>        link 01:80:c2:00:00:03<br>        link 01:80:c2:00:00:00<br>        link 01:00:5e:00:00:01<br>        link 33:33:ff:bf:43:e4<br>        <br>        <br>        <br>[root@dpvs dpvs]# lspci -nnv<br>...<br><br>01:00.0 Ethernet controller [0200]: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection [8086:10fb] (rev 01)<br>...<br>        Kernel driver in use: ixgbe<br>        Kernel modules: ixgbe<br><br>...<br><br>81:00.0 Ethernet controller [0200]: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection [8086:10fb] (rev 01)<br>...<br>        Kernel driver in use: igb_uio<br>        Kernel modules: ixgbe<br><br></code></pre></div></td></tr></table></figure>
+
+<h3 id="3-3-2-解决思路"><a href="#3-3-2-解决思路" class="headerlink" title="3.3.2 解决思路"></a>3.3.2 解决思路</h3><p>如果想要bond2.kni的网卡上面的IP相关操作正常，可以针对该IP添加<code>kni_host</code>路由，具体操作如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> bond2.kni_ip可以替换为任意的一个IP</span><br>dpip route add &lt;bond2.kni_ip&gt;/32 scope kni_host dev bond2<br>dpip route del &lt;bond2.kni_ip&gt;/32 scope kni_host dev bond2<br><span class="hljs-meta">#</span><span class="bash"> ipv6网络操作也是一样</span><br>dpip route -6 add &lt;bond2.kni_ip&gt;/128 scope kni_host dev bond2<br>dpip route -6 del &lt;bond2.kni_ip&gt;/128 scope kni_host dev bond2<br></code></pre></div></td></tr></table></figure>
+
+<p><strong>注意：放行的时候一定要一个IP一个IP放行，掩码一定要是32或者是128，一次批量放行多个IP会非常影响性能！</strong></p>
+<h2 id="3-4-VIP能ping通但http请求异常"><a href="#3-4-VIP能ping通但http请求异常" class="headerlink" title="3.4 VIP能ping通但http请求异常"></a>3.4 VIP能ping通但http请求异常</h2><p>对于DPVS来说，ping请求和http请求的处理逻辑是完全不一样的。对于ping请求的icmp和icmpv6数据包，都是由DPVS网络栈本身来进行处理，并不会涉及到后面的RS节点。</p>
+<p>能ping通则说明DPVS程序工作正常，http请求异常则说明后端的RS节点状态异常，也有可能是LIP和RS之间的通信出现了问题导致数据包无法顺利到达。</p>
+<p>当然还有一种可能就是：LIP和RS之间的通信正常，但是用来RS探活的网卡和RS之间的通信异常导致keepalived进程误认为RS节点出现了问题从而将weight降为0。</p>
+<blockquote>
+<p>这种情况的一个常见案例就是IPv6网络下的DPVS节点和RS节点跨网段通信，而DPVS节点上面没有添加ipv6的跨网段路由。</p>
+</blockquote>
+<h1 id="4、keepalived相关"><a href="#4、keepalived相关" class="headerlink" title="4、keepalived相关"></a>4、keepalived相关</h1><p><strong>keepalived出现的问题主要可以分为两个方面：脑裂和主备切换。</strong></p>
+<h2 id="4-1-脑裂"><a href="#4-1-脑裂" class="headerlink" title="4.1 脑裂"></a>4.1 脑裂</h2><p>一般来说，keepalived脑裂的最根本原因就是两台机器都以为自己是老大（master），造成这种情况的原因主要有两个：网络不通或者配置文件错误。这两种故障原因和排查思路在网上很多帖子都十分常见，此处不做赘述。<strong>比较少见的是一种由于交换机存在BUG，使得同一个vlan内出现两组不同的<code>vrrp_instance</code>使用相同的<code>virtual_router_id</code>引发的脑裂。</strong></p>
+<h3 id="4-1-1-交换机BUG导致脑裂"><a href="#4-1-1-交换机BUG导致脑裂" class="headerlink" title="4.1.1 交换机BUG导致脑裂"></a>4.1.1 交换机BUG导致脑裂</h3><p>当使用组播通信的时候，对于部分有BUG的交换机，不同的<code>vrrp_instance</code>之间如果<code>virtual_router_id</code>一致也有可能会出现脑裂。注意这里说的<code>virtual_router_id</code>一致指的是仅仅<code>virtual_router_id</code>这一个参数一样，就算<code>authentication</code>配置不同的密码，也是会收到对方的组播包，但是只是会报错提示<code>received an invalid passwd</code>，并不会出现脑裂（因为这里是不同的<code>vrrp_instance</code>而不是同一个<code>vrrp_instance</code>内的不同节点）。</p>
+<p>一般来说<code>virtual_router_id</code>的范围是1-255，很明显这个变量设计之初就是假定一个vlan内的IP数量不要超过一个C，这样<code>virtual_router_id</code>就可以直接使用IP的最后一截。实际上如果vlan划分合理或者规划得当的话不太容易遇到这种问题，但是如果机房网络的vlan划分过大，又或者是机房网络质量差、交换机老旧的时候，就需要额外注意<code>virtual_router_id</code>冲突的问题。</p>
+<p>下面摘录一段keepalived官网的相关描述：</p>
+<blockquote>
+<p>arbitrary unique number from 1 to 255 used to differentiate multiple instances of vrrpd running on the same network interface and address family (and hence same socket).</p>
+<p>Note: using the same virtual_router_id with the same address family on different interfaces has been known to cause problems with some network switches; if you are experiencing problems with using the same virtual_router_id on different interfaces, but the problems are resolved by not duplicating virtual_router_ids, the your network switches are probably not functioning correctly.</p>
+</blockquote>
+<h3 id="4-1-2-解决思路"><a href="#4-1-2-解决思路" class="headerlink" title="4.1.2 解决思路"></a>4.1.2 解决思路</h3><h4 id="组播"><a href="#组播" class="headerlink" title="组播"></a>组播</h4><p>keepalived主备节点之间的通信默认情况下是通过组播来进行的，组播的原理这里不赘述，默认情况下不论是IPv4还是IPv6都会使用一个组播地址，对于一些常见的如BGP、VRRP协议的数据包，RFC是有提前定义划分好相对应的组播地址供其使用，keepalived官方使用的组播地址遵循定义规范，具体如下：</p>
+<blockquote>
+<p>Multicast Group to use for IPv4 VRRP adverts Defaults to the RFC5798 IANA assigned VRRP multicast address 224.0.0.18 which You typically do not want to change.<br>        vrrp_mcast_group4 224.0.0.18</p>
+<p>Multicast Group to use for IPv6 VRRP adverts (default: ff02::12)<br>        vrrp_mcast_group6 ff02::12</p>
+</blockquote>
+<p>如果我们没办法确认节点所处网络中是否有使用了该<code>virtual_router_id</code>的<code>vrrp_instance</code>，可以尝试修改组播地址来避免冲突。</p>
+<h4 id="单播"><a href="#单播" class="headerlink" title="单播"></a>单播</h4><p>还有一种解决方案就是不使用组播，改为使用单播。单播不仅在网络通信质量上往往比组播更好，而且也很难出现<code>virtual_router_id</code>冲突的问题。同样的，如果keepalived集群之间出现因为主备节点之间组播通信质量差导致频繁出现主备切换，除了改善节点之间的通信网络质量之外，也可以尝试修改通信方式为单播。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> ipv4网络配置单播</span><br>unicast_src_ip 192.168.229.1<br>unicast_peer &#123;<br>    192.168.229.2<br>&#125;<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> ipv6网络配置单播</span><br>unicast_src_ip 2000::1<br>unicast_peer &#123;<br>    2000::2<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>上图中的<code>unicast_src_ip</code>是本机的IP，而<code>unicast_peer</code>则是对端的IP，注意这里的<code>unicast_peer</code>是可以有多个IP的（对应一主一备和一主多备或者多备抢占等情况）。</p>
+<p>单播虽然在稳定性上的表现更加优秀，但是相应的配置量也大大增加，需要运维同学在每一组<code>vrrp_instance</code>都增加对应的单播配置，并且主备节点之间的配置内容也不同（一般都是<code>unicast_src_ip</code>和<code>unicast_peer</code>对调）。并且单播相关配置一旦改错几乎就会发生脑裂，这就对配置管理检查和分发提出了更高的要求。</p>
+<h2 id="4-2-主备切换"><a href="#4-2-主备切换" class="headerlink" title="4.2 主备切换"></a>4.2 主备切换</h2><p>keepalived主备切换的时候容易出现的问题主要是当IP已经切换到了另一台机器，但是对应交换机上面的MAC地址表记录的VIP对应的MAC地址还没有更新。这种情况常见的解决方案就是使用arping（IPv4）操作或者是ping6（IPv6）来快速手动刷新MAC记录或者是配置keepalived来自动持续刷新MAC记录。</p>
+<h3 id="4-2-1-手动刷新MAC"><a href="#4-2-1-手动刷新MAC" class="headerlink" title="4.2.1 手动刷新MAC"></a>4.2.1 手动刷新MAC</h3><p>对于DPVS程序，刷新IPv4的VIP的MAC地址时，如果VIP和对应的kni网卡上的IP是同一个网段，则可以直接对kni网卡使用arping命令来刷新MAC地址（kni网卡和DPVS网卡的MAC地址一致）；但是IPv6网络并没有arp这个东西，刷新MAC记录需要使用ping6命令，而这在DPVS的kni网卡中是行不通的。个人建议使用python或go之类的能够网络编程的语言编写一个简单的程序实现发送gna数据包，然后在keepalived中配置脚本当进入master状态的时候就执行脚本刷新MAC地址，即可解决IPv6下VIP切换的MAC地址更新问题。</p>
+<h3 id="4-2-2-keepalived刷新MAC"><a href="#4-2-2-keepalived刷新MAC" class="headerlink" title="4.2.2 keepalived刷新MAC"></a>4.2.2 keepalived刷新MAC</h3><p>还有一种方案就是配置keepalived，让keepalived自己发送garp和gna数据包，keepalived配置中有比较多的<code>vrrp_garp*</code>相关的配置可以调整发送garp和gna数据包的参数</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 发送garp/gna数据包的间隔。这里是每10秒发送一轮</span><br>vrrp_garp_master_refresh 10<br><span class="hljs-meta">#</span><span class="bash"> 每次发送三个garp/gna数据包</span><br>vrrp_garp_master_refresh_repeat 3<br><span class="hljs-meta">#</span><span class="bash"> 每个garp数据包的发送间隔为0.001秒</span><br>vrrp_garp_interval 0.001<br><span class="hljs-meta">#</span><span class="bash"> 每个gna数据包的发送间隔为0.001秒</span><br>vrrp_gna_interval 0.001<br></code></pre></div></td></tr></table></figure>
+
+<p>不过使用keepalived配置还有一个问题：</p>
+<ul>
+<li>keepalived发送<code>garp/gna</code>数据包的网卡是<code>interface</code>参数指定的网卡，也就是主备节点用来通信的网卡</li>
+<li>keepalived发送的<code>garp/gna</code>数据包想要生效必须要是VIP所在的DPVS中的网卡或者是对应的<code>kni</code>网卡</li>
+</ul>
+<p>因此如果想让keepalived来刷新VIP的MAC地址，需要将这个网卡修改为本文架构图中的<code>bond2.kni</code>网卡，也就是对应双臂网络架构模式下的外网网卡，同时如果使用单播通信的话还需要加上对应节点的<code>kni_host</code>路由以确保单播能正常通信。</p>
+<h3 id="4-2-3-小结"><a href="#4-2-3-小结" class="headerlink" title="4.2.3 小结"></a>4.2.3 小结</h3><p>以上两种方案各有优劣，需要结合内外网网络质量、使用单播还是多播、网络路由配置管理、keepalived文件管理等多个因素考虑。</p>
+<h1 id="5、集群最大连接数"><a href="#5、集群最大连接数" class="headerlink" title="5、集群最大连接数"></a>5、集群最大连接数</h1><p>这部分主要是分析对比传统的LVS-DR模式和DPVS-FNAT模式下两者的最大TCP连接数性能限制瓶颈。</p>
+<h2 id="5-1-LVS-DR模式"><a href="#5-1-LVS-DR模式" class="headerlink" title="5.1 LVS-DR模式"></a>5.1 LVS-DR模式</h2><p>首先我们看一下传统的LVS-DR模式下的连接表</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">[root@lvs]#</span><span class="bash"> ipvsadm -lnc | head | column -t</span><br>IPVS  connection  entries<br>pro   expire      state        source                 virtual            destination<br>TCP   00:16       FIN_WAIT     44.73.152.152:54300    10.0.96.104:80  192.168.229.111:80<br>TCP   00:34       FIN_WAIT     225.155.149.221:55182  10.0.96.104:80  192.168.229.117:80<br>TCP   00:22       ESTABLISHED  99.251.37.22:53601     10.0.96.104:80  192.168.229.116:80<br>TCP   01:05       FIN_WAIT     107.111.180.141:15997  10.0.96.104:80  192.168.229.117:80<br>TCP   00:46       FIN_WAIT     44.108.145.205:57801   10.0.96.104:80  192.168.229.116:80<br>TCP   12:01       ESTABLISHED  236.231.219.215:36811  10.0.96.104:80  192.168.229.111:80<br>TCP   01:36       FIN_WAIT     91.90.162.249:52287    10.0.96.104:80  192.168.229.116:80<br>TCP   01:41       FIN_WAIT     85.35.41.0:44148       10.0.96.104:80  192.168.229.112:80<br></code></pre></div></td></tr></table></figure>
+
+<p>从上面我们可以看出DPVS的连接表和LVS的连接表基本上大同小异，DPVS多了一列CPU核心数和LIP信息，但是从原理上有着极大的区别。</p>
+<blockquote>
+<p>以下分析假定其他性能限制条件无瓶颈</p>
+</blockquote>
+<p>首先对于<strong>LVS-DR</strong>模式而言，我们知道Client是直接和RS建立连接的，LVS在此过程中是只做数据包转发的工作，不涉及建立连接这个步骤，那么影响连接数量的<strong>就是<code>Protocol</code>、<code>CIP:Port</code>、<code>RIP:Port</code>这五个变量，也就是常说的五元组。</strong></p>
+<figure class="highlight vhdl"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vhdl">Protocol CIP:<span class="hljs-keyword">Port</span> RIP:<span class="hljs-keyword">Port</span><br></code></pre></div></td></tr></table></figure>
+
+<p>考虑到Protocol不是TCP就是UDP，可以将其视为常量，也就是<strong>针对LVS-DR而言：真正影响TCP连接数的是CIP:Port（RIP:Port往往是固定的），但是由于CIP:Port理论上是可以足够多的，所以这个时候TCP连接数的最大限制往往是在RS上面，也就是RS的数量和RS的性能决定了整个LVS-DR集群的最大TCP连接数。</strong></p>
+<h2 id="5-2-DPVS-FNAT模式"><a href="#5-2-DPVS-FNAT模式" class="headerlink" title="5.2 DPVS-FNAT模式"></a>5.2 DPVS-FNAT模式</h2><p>接着我们使用<code>ipvsadm -lnc</code>命令来查看一下FNAT模式下的<code>Client&lt;--&gt;DPVS&lt;--&gt;RS</code>之间的连接情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@dpvs dpvs]# ipvsadm -lnc | head<br>[1]tcp  90s  TCP_EST    197.194.123.33:56058   10.0.96.216:443  192.168.228.1:41136  192.168.229.80:443<br>[1]tcp  7s   TIME_WAIT  26.251.198.234:21164   10.0.96.216:80   192.168.228.1:44896  192.168.229.89:80<br>[1]tcp  7s   TIME_WAIT  181.112.211.168:46863  10.0.96.216:80   192.168.228.1:62976  192.168.229.50:80<br>[1]tcp  90s  TCP_EST    242.73.154.166:9611    10.0.96.216:443  192.168.228.1:29552  192.168.229.87:443<br>[1]tcp  3s   TCP_CLOSE  173.137.182.178:53264  10.0.96.216:443  192.168.228.1:8512   192.168.229.87:443<br>[1]tcp  90s  TCP_EST    14.53.6.35:23820       10.0.96.216:443  192.168.228.1:44000  192.168.229.50:443<br>[1]tcp  3s   TCP_CLOSE  35.13.251.48:15348     10.0.96.216:443  192.168.228.1:16672  192.168.229.79:443<br>[1]tcp  90s  TCP_EST    249.109.242.104:5566   10.0.96.216:443  192.168.228.1:10112  192.168.229.77:443<br>[1]tcp  3s   TCP_CLOSE  20.145.41.157:6179     10.0.96.216:443  192.168.228.1:15136  192.168.229.86:443<br>[1]tcp  90s  TCP_EST    123.34.92.153:15118    10.0.96.216:443  192.168.228.1:9232   192.168.229.87:443<br>[root@dpvs dpvs]# ipvsadm -lnc | tail<br>[16]tcp  90s  TCP_EST    89.99.59.41:65197      10.0.96.216:443  192.168.228.1:7023   192.168.229.50:443<br>[16]tcp  3s   TCP_CLOSE  185.97.221.45:18862    10.0.96.216:443  192.168.228.1:48159  192.168.229.50:443<br>[16]tcp  90s  TCP_EST    108.240.236.85:64013   10.0.96.216:443  192.168.228.1:49199  192.168.229.50:443<br>[16]tcp  90s  TCP_EST    85.173.18.255:53586    10.0.96.216:443  192.168.228.1:63007  192.168.229.87:443<br>[16]tcp  90s  TCP_EST    182.123.32.10:5912     10.0.96.216:443  192.168.228.1:19263  192.168.229.77:443<br>[16]tcp  90s  TCP_EST    135.35.212.181:51666   10.0.96.216:443  192.168.228.1:22223  192.168.229.88:443<br>[16]tcp  90s  TCP_EST    134.210.227.47:29393   10.0.96.216:443  192.168.228.1:26975  192.168.229.90:443<br>[16]tcp  7s   TIME_WAIT  110.140.221.121:54046  10.0.96.216:443  192.168.228.1:5967   192.168.229.84:443<br>[16]tcp  3s   TCP_CLOSE  123.129.23.120:18550   10.0.96.216:443  192.168.228.1:7567   192.168.229.83:443<br>[16]tcp  90s  TCP_EST    72.250.60.207:33043    10.0.96.216:443  192.168.228.1:53279  192.168.229.86:443<br></code></pre></div></td></tr></table></figure>
+
+<p>然后我们逐个分析这些字段的含义：</p>
+<ul>
+<li><p><code>[1]</code>：这个数字表示的是CPU核心数，对应我们在dpvs.conf中配置的<code>worker cpu</code>的<code>cpu_id</code>，从这个字段可以看到每个DPVS进程的worker线程工作的负载情况</p>
+</li>
+<li><p><code>tcp</code>：tcp或者udp，对应这一条连接的类型，这个无需解释</p>
+</li>
+<li><p><code>90s</code>、<code>30s</code>、<code>7s</code>、<code>3s</code>：对应这一条连接的时间</p>
+</li>
+<li><p><code>CLOSE_WAIT</code>、<code>FIN_WAIT</code>、<code>SYN_RECV</code>、<code>TCP_CLOSE</code>、<code>TCP_EST</code>、<code>TIME_WAIT</code>：对应这一条tcp连接的状态</p>
+</li>
+<li><p>最后这一组四个IP+Port的组合就是<code>Client&lt;--&gt;DPVS&lt;--&gt;RS</code>的对应关系：</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">CIP:Port VIP:Port LIP:Port RIP:Port<br></code></pre></div></td></tr></table></figure></li>
+</ul>
+<p>那么对于<strong>DPVS-FNAT</strong>模式来说，<strong>加入了LIP之后变成了四组IP+Port的组合，再加上前面的<code>cpu_id</code>和<code>Protocol</code>就是影响连接数的十元组。</strong></p>
+<figure class="highlight vhdl"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vhdl">cpu_id Protocol CIP:<span class="hljs-keyword">Port</span> VIP:<span class="hljs-keyword">Port</span> LIP:<span class="hljs-keyword">Port</span> RIP:<span class="hljs-keyword">Port</span><br></code></pre></div></td></tr></table></figure>
+
+<ul>
+<li>开始分析之前我们需要知道上面的这四组IP+Port的组合实际上是分为两个四元组，即<code>CIP:Port VIP:Port</code>为一个四元组，<code>LIP:Port RIP:Port</code>为一个四元组，<strong>两个四元组之间为一一对应关系</strong></li>
+<li>首先我们还是排除掉<code>Protocol</code>、<code>VIP:Port</code>和<code>RIP:Port</code>，因为这三组五个变量基本也是固定的，可以<strong>视为常量</strong></li>
+<li>接着是<code>CIP:Port</code>理论上是可以<strong>足够多</strong>的，不会对我们的集群最大TCP连接数产生影响</li>
+<li>然后是<code>cpu_id</code>，虽然一台机器最多可以有16个<code>work cpu</code>，但是并不意味着<code>十元组的最大连接数</code>=<code>除cpu_id外的九元组的最大连接数*16</code>，DPVS程序会把<code>cpu_id</code>根据LIP的端口号进行分配，从而尽可能地把负载均分到所有的CPU上面。所以这里的<code>cpu_id</code>和LIP的端口号也是<strong>一一对应</strong>的关系</li>
+<li>最后是<code>LIP:Port</code>，我们知道一个IP可以使用的端口数量最多不超过65536个，由于<code>RIP:Port</code>是固定的，因此这个<code>四元组的最大TCP连接数&lt;=LIP数量*65536*RIP数量</code></li>
+</ul>
+<p>又因为两个四元组之间为一一对应关系，<code>cpu_id</code>和LIP的端口号也是<strong>一一对应</strong>的关系，所以对于<strong>DPVS-FNAT</strong>模式来说，LIP的数量往往才是限制整个集群最大连接数的关键，如果集群有多连接数的需求，建议在规划之初就要预留足够数量的IP给LIP使用。</p>
+<blockquote>
+<p>这里顺便提一下，结合官方文档和实测，x520/82599、x710网卡在使用<code>igb_uio</code>这个PMD的时候，在ipv6网络下fdir不支持<code>perfect</code>模式，建议使用<code>signature</code>模式，但是注意这个模式下仅可使用一个LIP，会对集群的最大连接数有限制。</p>
+<p>官方文档链接可以点击<a target="_blank" rel="noopener" href="https://github.com/iqiyi/dpvs/blob/master/doc/tutorial.md#ipv6_support">这里</a>查看。</p>
+<p>We found there exists some NICs do not (fully) support Flow Control of IPv6 required by IPv6. For example, the rte_flow of 82599 10GE Controller (ixgbe PMD) relies on an old fashion flow type <code>flow director</code> (fdir), which doesn’t support IPv6 in its <em>perfect mode</em>, and support only one local IPv4 or IPv6 in its <em>signature mode</em>. DPVS supports the fdir mode config for compatibility.</p>
+</blockquote>
+<h1 id="6、写在最后"><a href="#6、写在最后" class="headerlink" title="6、写在最后"></a>6、写在最后</h1><p>DPVS确实在性能和功能方面都有着非常优秀的表现，也确实在落地初期会踩很多坑，建议多看文档，多查资料，多看源码，等到真正用起来之后也确实会给我们带来很多的惊喜和收获。最后顺便提一句，如果只想搭建一个小规模集群尝尝鲜，普通的IPv4网络和常见的x520网卡就足够了，当然有条件的同学可以尝试使用ECMP架构和一些比较好的网卡（如Mellanox）。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/frontend/">frontend</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/network/">network</a>
+                    
+                      <a class="hover-with-bg" href="/tags/loadbalance/">loadbalance</a>
+                    
+                      <a class="hover-with-bg" href="/tags/lvs/">lvs</a>
+                    
+                      <a class="hover-with-bg" href="/tags/dpdk/">dpdk</a>
+                    
+                      <a class="hover-with-bg" href="/tags/dpvs/">dpvs</a>
+                    
+                      <a class="hover-with-bg" href="/tags/keepalived/">keepalived</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20210810-dpvs-fullnat-management/">
+                        <span class="hidden-mobile">DPVS-FullNAT模式管理篇</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2021 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
