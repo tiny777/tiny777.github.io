@@ -188,7 +188,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.2k 字
+      1.3k 字
     </span>
   
 
@@ -198,7 +198,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      8
+      9
        分钟
     </span>
   
@@ -259,10 +259,15 @@
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> grep <span class="hljs-string">&quot;CGO_ENABLED&quot;</span> Makefile</span><br>CGO_ENABLED:=1<br></code></pre></div></td></tr></table></figure>
 
 <p>随后进行编译安装，安装完成后查看当前目录下的coredns二进制文件是否包含unbound插件来确定是否顺利编译安装完成。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> go generate</span><br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> go build</span><br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> make</span><br>CGO_ENABLED=1  go build -v -ldflags=&quot;-s -w -X github.com/coredns/coredns/coremain.GitCommit=7b43d042-dirty&quot; -o coredns<br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> ./coredns -plugins | grep unbound</span><br>  dns.unbound<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;unbound:github.com/coredns/unbound&quot;</span> &gt;&gt; plugin.cfg</span><br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> go generate</span><br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> go build</span><br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> make</span><br>CGO_ENABLED=1  go build -v -ldflags=&quot;-s -w -X github.com/coredns/coredns/coremain.GitCommit=7b43d042-dirty&quot; -o coredns<br><span class="hljs-meta">[/home/coredns]#</span><span class="bash"> ./coredns -plugins | grep unbound</span><br>  dns.unbound<br></code></pre></div></td></tr></table></figure>
 
 <p>对比是否编译安装了<code>unbound</code>插件的coredns，可以发现从原来的静态二进制文件，变成了需要动态加载依赖库。因此如果需要提前编译然后大范围使用，最好保证编译环境的系统和最终的使用环境系统一致或全兼容（本文的编译环境为CentOS8.2，使用环境为RockyLinux8.4）。</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-rockylinux coredns]# file coredns.static<br>coredns.static: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped<br>[root@tiny-rockylinux coredns]# file coredns<br>coredns: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, stripped<br><br>[root@tiny-rockylinux coredns]# file /lib64/ld-linux-x86-64.so.2<br>/lib64/ld-linux-x86-64.so.2: symbolic link to ld-2.28.so<br>[root@tiny-rockylinux coredns]# file /lib64/ld-2.28.so<br>/lib64/ld-2.28.so: ELF 64-bit LSB shared object, x86-64, version 1 (GNU/Linux), dynamically linked, BuildID[sha1]=04c0b62c6350fa6ec9158369de8b5b489e3d084b, not stripped<br></code></pre></div></td></tr></table></figure>
+
+<p>如果在运行的机器上面遇到下面的报错，则需要安装上面提到的<code>unbound-devel</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@coredns sbin]# ./coredns<br>./coredns: error while loading shared libraries: libunbound.so.2: cannot open shared object file: No such file or directory<br></code></pre></div></td></tr></table></figure>
+
+
 
 <h1 id="3、配置使用"><a href="#3、配置使用" class="headerlink" title="3、配置使用"></a>3、配置使用</h1><h2 id="语法配置"><a href="#语法配置" class="headerlink" title="语法配置"></a>语法配置</h2><figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">unbound</span> [FROM] &#123;<br>    <span class="hljs-attribute">except</span> IGNORED_NAMES...<br>    option NAME VALUE<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
