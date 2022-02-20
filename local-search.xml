@@ -8,7 +8,7 @@
     <link href="/20220221-dns10-coredns-07-queryperf-performance-testing/"/>
     <url>/20220221-dns10-coredns-07-queryperf-performance-testing/</url>
     
-    <content type="html"><![CDATA[<p>本文主要用于介绍如何编译安装queryperf来对DNS服务器进行压测，以及CoreDNS常见的几种配置下的压测性能表现。</p><span id="more"></span><h1 id="1、queryperf"><a href="#1、queryperf" class="headerlink" title="1、queryperf"></a>1、queryperf</h1><h2 id="1-1-编译安装"><a href="#1-1-编译安装" class="headerlink" title="1.1 编译安装"></a>1.1 编译安装</h2><p><code>queryperf</code>是bind9出品的一款测试dns服务器性能的工具，目前在<code>9.12.4</code>版本的bind源码中还存在，再往后的新版本就没看到有<code>queryperf</code>了。</p><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@coredns1 home]# wget https://ftp.isc.org/isc/bind9/9.12.4/bind-9.12.4.tar.gz<br>[root@coredns1 home]# tar -zxvf bind-9.12.4.tar.gz<br>[root@coredns1 home]# cd bind-9.12.4/contrib/queryperf<br>[root@coredns1 queryperf]# ./configure<br>[root@coredns1 queryperf]# make<br>[root@coredns1 queryperf]# file queryperf<br>queryperf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, not stripped<br></code></pre></div></td></tr></table></figure><h2 id="1-2-常用操作"><a href="#1-2-常用操作" class="headerlink" title="1.2 常用操作"></a>1.2 常用操作</h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 将编译好的二进制文件直接复制到系统的bin目录中即可全局操作</span><br>[root@coredns1 queryperf]# cp queryperf /usr/local/bin/<br><br><br>[root@coredns1 home]# queryperf -h<br><br>DNS Query Performance Testing Tool<br>Version: $Id: queryperf.c,v 1.12 2007/09/05 07:36:04 marka Exp $<br><br><br>Usage: queryperf [-d datafile] [-s server_addr] [-p port] [-q num_queries]<br>                 [-b bufsize] [-t timeout] [-n] [-l limit] [-f family] [-1]<br>                 [-i interval] [-r arraysize] [-u unit] [-H histfile]<br>                 [-T qps] [-e] [-D] [-R] [-c] [-v] [-h]<br>  -d specifies the input data file (default: stdin)<br>  -s sets the server to query (default: 127.0.0.1)<br>  -p sets the port on which to query the server (default: 53)<br>  -q specifies the maximum number of queries outstanding (default: 20)<br>  -t specifies the timeout for query completion in seconds (default: 5)<br>  -n causes configuration changes to be ignored<br>  -l specifies how a limit for how long to run tests in seconds (no default)<br>  -1 run through input only once (default: multiple iff limit given)<br>  -b set input/output buffer size in kilobytes (default: 32 k)<br>  -i specifies interval of intermediate outputs in seconds (default: 0=none)<br>  -f specify address family of DNS transport, inet or inet6 (default: any)<br>  -r set RTT statistics array size (default: 50000)<br>  -u set RTT statistics time unit in usec (default: 100)<br>  -H specifies RTT histogram data file (default: none)<br>  -T specify the target qps (default: 0=unspecified)<br>  -e enable EDNS 0<br>  -D set the DNSSEC OK bit (implies EDNS)<br>  -R disable recursion<br>  -c print the number of packets with each rcode<br>  -v verbose: report the RCODE of each response on stdout<br>  -h print this usage<br><br></code></pre></div></td></tr></table></figure><p>在压测之前需要我们自己准备压测的测试数据，格式为<code>域名 查询类型</code>，如：</p><figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">tinychen.com <span class="hljs-keyword">A</span><br>tiny777.com <span class="hljs-keyword">A</span><br>tinychen.com <span class="hljs-keyword">MX</span><br>tiny777.com <span class="hljs-keyword">MX</span><br>t <span class="hljs-keyword">AAAA</span><br></code></pre></div></td></tr></table></figure><p>常用的操作命令有：</p><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -d query.domain.list<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps，每次查询超时时间为3s</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000 -t 3<br></code></pre></div></td></tr></table></figure><h1 id="2、压测数据"><a href="#2、压测数据" class="headerlink" title="2、压测数据"></a>2、压测数据</h1><h2 id="2-1-机器硬件配置"><a href="#2-1-机器硬件配置" class="headerlink" title="2.1 机器硬件配置"></a>2.1 机器硬件配置</h2><ul><li><p>虚拟机为16核16G配置，宿主机为R730，配置是<code>双路E5-2640 v4</code>+<code>82599万兆网卡</code></p></li><li><p>物理机为R640，配置是<code>双路银牌Silver 4114</code>+<code>128G内存</code>+<code>x710万兆万卡</code></p></li></ul><p>这里需要额外提一下，CoreDNS比较吃网卡和CPU，对于硬盘IO的要求并不算特别高（主要取决于写日志的量），对内存占用较低</p><h2 id="2-2-CoreDNS配置"><a href="#2-2-CoreDNS配置" class="headerlink" title="2.2 CoreDNS配置"></a>2.2 CoreDNS配置</h2><p>CoreDNS配置的复杂程度会直接影响具体实例的性能表现，简单来说就是启用的插件越多，性能表现越差；比较影响性能表现的插件主要是日志相关的插件，如log插件开启全量日志记录，我们测试启用的插件主要有：<code>log、errors、bind、reload、ready、prometheus、loadbalance、cache、acl、secondary、transfer、hosts、forward、import、file、kubernetes</code>。</p><h2 id="2-3-数据汇总"><a href="#2-3-数据汇总" class="headerlink" title="2.3 数据汇总"></a>2.3 数据汇总</h2><table><thead><tr><th align="center">机器配置</th><th align="center">CoreDNS配置</th><th align="center">性能表现</th></tr></thead><tbody><tr><td align="center">虚拟机</td><td align="center">多插件配置</td><td align="center">30K qps</td></tr><tr><td align="center">物理机</td><td align="center">多插件配置</td><td align="center">55K qps</td></tr><tr><td align="center">物理机</td><td align="center">多插件配置+关闭log和error插件</td><td align="center">70K qps</td></tr><tr><td align="center">物理机</td><td align="center">最少插件配置</td><td align="center">75K qps</td></tr></tbody></table><h2 id="2-4-Q-amp-A"><a href="#2-4-Q-amp-A" class="headerlink" title="2.4 Q&amp;A"></a>2.4 Q&amp;A</h2><ol><li><p><strong>虚拟机和物理机数据差距并不算特别大？</strong></p><p>首先要明确：CoreDNS并没有完全吃满物理机上面的所有硬件配置，因此在物理机这里的性能表现瓶颈处于CoreDNS本身，而虚拟机的性能表现瓶颈才是硬件配置；</p><p>其次要知道：我们的虚拟机相互之间的影响比较严重，30K qps的性能表现是同宿主机上面的其他虚拟机基本处于摸鱼状态，由于宿主机资源超售严重，一旦其他虚拟机利用率过高，必然会影响性能表现；而使用物理机则不用担心这类问题；</p></li><li><p><strong>log插件对性能的影响？</strong></p><p>log插件对性能的影响确实较大，但是仅限于全量写入查询日志的时候，如果对普通的查询日志的需求低于性能需求，可以考虑只配置部分特殊类型日志，如只记录错误日志<code>log denial error</code>；</p><p>还有些同学可能会担心日志落盘速度慢是否会影响查询响应速度，实测在使用rsyslog记录日志的时候，所有查询请求均响应完之后一段时候内，rsyslog还在落盘相关日志，因此可以确定逻辑上并非是必须要等日志落盘结束后才响应请求；</p></li><li><p><strong>Prometheus插件采集到的数据和queryperf的数据不一致？</strong></p><p>如果压测的时间太短（几秒到几分钟不等），会导致高峰时间持续太短而Prometheus插件无法准确暴露数据，同时还要考虑Prometheus服务端的采集频率已经Grafana面板的显示设置等；最好的方式是进行一段时间较长的压测，如三十分钟以上；</p></li></ol>]]></content>
+    <content type="html"><![CDATA[<p>本文主要用于介绍如何编译安装queryperf来对DNS服务器进行压测，以及CoreDNS常见的几种配置下的压测性能表现。</p><span id="more"></span><h1 id="1、queryperf"><a href="#1、queryperf" class="headerlink" title="1、queryperf"></a>1、queryperf</h1><h2 id="1-1-编译安装"><a href="#1-1-编译安装" class="headerlink" title="1.1 编译安装"></a>1.1 编译安装</h2><p><code>queryperf</code>是bind9出品的一款测试dns服务器性能的工具，目前在<code>9.12.4</code>版本的bind源码中还存在，再往后的新版本就没看到有<code>queryperf</code>了。</p><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@coredns1 home]# wget https://ftp.isc.org/isc/bind9/9.12.4/bind-9.12.4.tar.gz<br>[root@coredns1 home]# tar -zxvf bind-9.12.4.tar.gz<br>[root@coredns1 home]# cd bind-9.12.4/contrib/queryperf<br>[root@coredns1 queryperf]# ./configure<br>[root@coredns1 queryperf]# make<br>[root@coredns1 queryperf]# file queryperf<br>queryperf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, not stripped<br></code></pre></div></td></tr></table></figure><h2 id="1-2-常用操作"><a href="#1-2-常用操作" class="headerlink" title="1.2 常用操作"></a>1.2 常用操作</h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 将编译好的二进制文件直接复制到系统的bin目录中即可全局操作</span><br>[root@coredns1 queryperf]# cp queryperf /usr/local/bin/<br><br><br>[root@coredns1 home]# queryperf -h<br><br>DNS Query Performance Testing Tool<br>Version: $Id: queryperf.c,v 1.12 2007/09/05 07:36:04 marka Exp $<br><br><br>Usage: queryperf [-d datafile] [-s server_addr] [-p port] [-q num_queries]<br>                 [-b bufsize] [-t timeout] [-n] [-l limit] [-f family] [-1]<br>                 [-i interval] [-r arraysize] [-u unit] [-H histfile]<br>                 [-T qps] [-e] [-D] [-R] [-c] [-v] [-h]<br>  -d specifies the input data file (default: stdin)<br>  -s sets the server to query (default: 127.0.0.1)<br>  -p sets the port on which to query the server (default: 53)<br>  -q specifies the maximum number of queries outstanding (default: 20)<br>  -t specifies the timeout for query completion in seconds (default: 5)<br>  -n causes configuration changes to be ignored<br>  -l specifies how a limit for how long to run tests in seconds (no default)<br>  -1 run through input only once (default: multiple iff limit given)<br>  -b set input/output buffer size in kilobytes (default: 32 k)<br>  -i specifies interval of intermediate outputs in seconds (default: 0=none)<br>  -f specify address family of DNS transport, inet or inet6 (default: any)<br>  -r set RTT statistics array size (default: 50000)<br>  -u set RTT statistics time unit in usec (default: 100)<br>  -H specifies RTT histogram data file (default: none)<br>  -T specify the target qps (default: 0=unspecified)<br>  -e enable EDNS 0<br>  -D set the DNSSEC OK bit (implies EDNS)<br>  -R disable recursion<br>  -c print the number of packets with each rcode<br>  -v verbose: report the RCODE of each response on stdout<br>  -h print this usage<br><br></code></pre></div></td></tr></table></figure><p>在压测之前需要我们自己准备压测的测试数据，格式为<code>域名 查询类型</code>，如：</p><figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">tinychen.com <span class="hljs-keyword">A</span><br>tiny777.com <span class="hljs-keyword">A</span><br>tinychen.com <span class="hljs-keyword">MX</span><br>tiny777.com <span class="hljs-keyword">MX</span><br>tinychen777.com <span class="hljs-keyword">AAAA</span><br></code></pre></div></td></tr></table></figure><p>常用的操作命令有：</p><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -d query.domain.list<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps，每次查询超时时间为3s</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000 -t 3<br></code></pre></div></td></tr></table></figure><h1 id="2、压测数据"><a href="#2、压测数据" class="headerlink" title="2、压测数据"></a>2、压测数据</h1><h2 id="2-1-机器硬件配置"><a href="#2-1-机器硬件配置" class="headerlink" title="2.1 机器硬件配置"></a>2.1 机器硬件配置</h2><ul><li><p>虚拟机为16核16G配置，宿主机为R730，配置是<code>双路E5-2640 v4</code>+<code>82599万兆网卡</code></p></li><li><p>物理机为R640，配置是<code>双路银牌Silver 4114</code>+<code>128G内存</code>+<code>x710万兆万卡</code></p></li></ul><p>这里需要额外提一下，CoreDNS比较吃网卡和CPU，对于硬盘IO的要求并不算特别高（主要取决于写日志的量），对内存占用较低</p><h2 id="2-2-CoreDNS配置"><a href="#2-2-CoreDNS配置" class="headerlink" title="2.2 CoreDNS配置"></a>2.2 CoreDNS配置</h2><p>CoreDNS配置的复杂程度会直接影响具体实例的性能表现，简单来说就是启用的插件越多，性能表现越差；比较影响性能表现的插件主要是日志相关的插件，如log插件开启全量日志记录，我们测试启用的插件主要有：<code>log、errors、bind、reload、ready、prometheus、loadbalance、cache、acl、secondary、transfer、hosts、forward、import、file、kubernetes</code>。</p><h2 id="2-3-数据汇总"><a href="#2-3-数据汇总" class="headerlink" title="2.3 数据汇总"></a>2.3 数据汇总</h2><table><thead><tr><th align="center">机器配置</th><th align="center">CoreDNS配置</th><th align="center">性能表现</th></tr></thead><tbody><tr><td align="center">虚拟机</td><td align="center">多插件配置+全量日志记录</td><td align="center">30K qps</td></tr><tr><td align="center">物理机</td><td align="center">多插件配置+全量日志记录</td><td align="center">55K qps</td></tr><tr><td align="center">物理机</td><td align="center">多插件配置+关闭log和error插件</td><td align="center">70K qps</td></tr><tr><td align="center">物理机</td><td align="center">最少插件配置</td><td align="center">75K qps</td></tr></tbody></table><h2 id="2-4-Q-amp-A"><a href="#2-4-Q-amp-A" class="headerlink" title="2.4 Q&amp;A"></a>2.4 Q&amp;A</h2><ol><li><p><strong>虚拟机和物理机数据差距并不算特别大？</strong></p><p>首先要明确：CoreDNS并没有完全吃满物理机上面的所有硬件配置，因此在物理机这里的性能表现瓶颈处于CoreDNS本身，而虚拟机的性能表现瓶颈才是硬件配置；</p><p>其次要知道：我们的虚拟机相互之间的影响比较严重，30K qps的性能表现是同宿主机上面的其他虚拟机基本处于摸鱼状态，由于宿主机资源超售严重，一旦其他虚拟机利用率过高，必然会影响性能表现；而使用物理机则不用担心这类问题；</p></li><li><p><strong>log插件对性能的影响？</strong></p><p>log插件对性能的影响确实较大，但是仅限于全量写入查询日志的时候，如果对普通的查询日志的需求低于性能需求，可以考虑只配置部分特殊类型日志，如只记录错误日志<code>log denial error</code>；</p><p>还有些同学可能会担心日志落盘速度慢是否会影响查询响应速度，实测在使用rsyslog记录日志的时候，所有查询请求均响应完之后一段时候内，rsyslog还在落盘相关日志，因此可以确定逻辑上并非是必须要等日志落盘结束后才响应请求；</p></li><li><p><strong>Prometheus插件采集到的数据和queryperf的数据不一致？</strong></p><p>如果压测的时间太短（几秒到几分钟不等），会导致高峰时间持续太短而Prometheus插件无法准确暴露数据，同时还要考虑Prometheus服务端的采集频率已经Grafana面板的显示设置等；最好的方式是进行一段时间较长的压测，如三十分钟以上；</p></li></ol>]]></content>
     
     
     <categories>
@@ -552,9 +552,9 @@
     
     <tags>
       
-      <tag>web</tag>
-      
       <tag>centos</tag>
+      
+      <tag>web</tag>
       
       <tag>nginx</tag>
       
@@ -973,9 +973,9 @@
     
     <tags>
       
-      <tag>network</tag>
-      
       <tag>centos</tag>
+      
+      <tag>network</tag>
       
     </tags>
     
@@ -1025,9 +1025,9 @@
     
     <tags>
       
-      <tag>network</tag>
-      
       <tag>centos</tag>
+      
+      <tag>network</tag>
       
       <tag>ssh</tag>
       
@@ -1468,7 +1468,7 @@
     <link href="/20200508-rfc8314-465-587-part-translation/"/>
     <url>/20200508-rfc8314-465-587-part-translation/</url>
     
-    <content type="html"><![CDATA[<p>最近在学习SMTP的时候发现SMTP在使用加密传输的时候涉及到465和587两个端口，网上对两者之间的区别众说纷纭，后来查到了RFC官方文档中对于这个争论较久的问题的定义和详细说明，这里做转载和翻译用于记录。</p><span id="more"></span><h1 id="1、RFC8314原文"><a href="#1、RFC8314原文" class="headerlink" title="1、RFC8314原文"></a>1、RFC8314原文</h1><p>我们查看<a href="https://tools.ietf.org/html/rfc8314">RFC8314官方文档</a>中的相关叙述，和该问题相关的主要是3.3、4.2、5.5和7.3这四个部分，由于本文只讨论两个端口的作用和历史缘由，因此涉及到加密过程和原理的4.2、5.5两个部分不在这里提及，其余部分的原文内容如下：</p><blockquote><p><strong>3.3.  Implicit TLS for SMTP Submission</strong></p><p>   When a TCP connection is established for the “submissions” service<br>   (default port 465), a TLS handshake begins immediately.  Clients MUST<br>   implement the certificate validation mechanism described in<br>   [RFC7817].  Once the TLS session is established, Message Submission<br>   protocol data [RFC6409] is exchanged as TLS application data for the<br>   remainder of the TCP connection.  (Note: The “submissions” service<br>   name is defined in Section 7.3 of this document and follows the usual<br>   convention that the name of a service layered on top of Implicit TLS<br>   consists of the name of the service as used without TLS, with an “s”<br>   appended.)</p><p>   The STARTTLS mechanism on port 587 is relatively widely deployed due<br>   to the situation with port 465 (discussed in Section 7.3).  This<br>   differs from IMAP and POP services where Implicit TLS is more widely<br>   deployed on servers than STARTTLS.  It is desirable to migrate core<br>   protocols used by MUA software to Implicit TLS over time, for<br>   consistency as well as for the additional reasons discussed in<br>   Appendix A.  However, to maximize the use of encryption for<br>   submission, it is desirable to support both mechanisms for Message<br>   Submission over TLS for a transition period of several years.  As a<br>   result, clients and servers SHOULD implement both STARTTLS on<br>   port 587 and Implicit TLS on port 465 for this transition period.<br>   Note that there is no significant difference between the security<br>   properties of STARTTLS on port 587 and Implicit TLS on port 465 if<br>   the implementations are correct and if both the client and the server<br>   are configured to require successful negotiation of TLS prior to<br>   Message Submission.</p><p>   Note that the “submissions” port provides access to a Message<br>   Submission Agent (MSA) as defined in [RFC6409], so requirements and<br>   recommendations for MSAs in that document, including the requirement<br>   to implement SMTP AUTH [RFC4954] and the requirements of Email<br>   Submission Operations [RFC5068], also apply to the submissions port.</p><p>   See Sections 5.5 and 4.2 for additional information on client<br>   certificate authentication.  See Section 7.3 for port registration<br>   information.</p></blockquote><blockquote><p><strong>7.3.  Submissions Port Registration</strong></p><p>   IANA has assigned an alternate usage of TCP port 465 in addition to<br>   the current assignment using the following template [RFC6335]:</p><p>​     Service Name: submissions<br>​     Transport Protocol: TCP<br>​     Assignee: IESG <a href="mailto:&#105;&#101;&#x73;&#103;&#x40;&#x69;&#101;&#x74;&#x66;&#x2e;&#111;&#114;&#103;">&#105;&#101;&#x73;&#103;&#x40;&#x69;&#101;&#x74;&#x66;&#x2e;&#111;&#114;&#103;</a><br>​     Contact: IETF Chair <a href="mailto:&#99;&#104;&#97;&#105;&#x72;&#64;&#x69;&#101;&#x74;&#102;&#46;&#111;&#114;&#103;">&#99;&#104;&#97;&#105;&#x72;&#64;&#x69;&#101;&#x74;&#102;&#46;&#111;&#114;&#103;</a><br>​     Description: Message Submission over TLS protocol<br>​     Reference: RFC 8314<br>​     Port Number: 465</p><p>   This is a one-time procedural exception to the rules in [RFC6335].<br>   This requires explicit IESG approval and does not set a precedent.<br>   Note: Since the purpose of this alternate usage assignment is to<br>   align with widespread existing practice and there is no known usage<br>   of UDP port 465 for Message Submission over TLS, IANA has not<br>   assigned an alternate usage of UDP port 465.</p><p>   Historically, port 465 was briefly registered as the “smtps” port.<br>   This registration made no sense, as the SMTP transport MX<br>   infrastructure has no way to specify a port, so port 25 is always<br>   used.  As a result, the registration was revoked and was subsequently<br>   reassigned to a different service.  In hindsight, the “smtps”<br>   registration should have been renamed or reserved rather than<br>   revoked.  Unfortunately, some widely deployed mail software<br>   interpreted “smtps” as “submissions” [RFC6409] and used that port for<br>   email submission by default when an end user requested security<br>   during account setup.  If a new port is assigned for the submissions<br>   service, either (a) email software will continue with unregistered<br>   use of port 465 (leaving the port registry inaccurate relative to</p><p>   de facto practice and wasting a well-known port) or (b) confusion<br>   between the de facto and registered ports will cause harmful<br>   interoperability problems that will deter the use of TLS for Message<br>   Submission.  The authors of this document believe that both of these<br>   outcomes are less desirable than a “wart” in the registry documenting<br>   real-world usage of a port for two purposes.  Although STARTTLS on<br>   port 587 has been deployed, it has not replaced the deployed use of<br>   Implicit TLS submission on port 465.</p></blockquote><h1 id="2、个人理解"><a href="#2、个人理解" class="headerlink" title="2、个人理解"></a>2、个人理解</h1><p>将上面的几段原文阅读整合之后，个人的理解如下：</p><p><strong>首先要说明原文中多次出现的<code>submission</code>的意思实际上是指客户端使用SMTP协议来对服务端进行数据传输，下面提及的<code>SMTPS</code>等价于原文的<code>TLS submission</code>。</strong></p><p>当年IANA为TCP的465端口注册了用途，用于SMTP的TLS加密传输，且没有指定UDP的465端口用途，这就是465端口在历史上被用为SMTPS端口的由来。</p><p>为什么说是历史上呢，因为这个注册在不久之后就被撤销了，也就是说这个注册没用了，465端口要被回收拿去给其他的服务用了。而撤销的原因是<em>“这种注册没有意义，因为SMTP传输MX基础结构无法指定端口，因此始终使用端口25。（This registration made no sense, as the SMTP transport MX infrastructure has no way to specify a port, so port 25 is always used. ）”</em></p><p>但是后来又觉得当时<strong>应该把这个465的SMTPS（隐式TLS）端口保留或者是重命名而不是撤销</strong>，因为已经有许多邮件服务软件使用了465端口作为SMTPS（隐式TLS）的传输端口，如果为SMTPS（隐式TLS）服务分配了新端口，则已经使用被注销的465端口作为SMTPS服务端口的电子邮件软件相当于是使用了一个和实际SMTPS（隐式TLS）端口不匹配的端口，并且实际使用端口和理论注册端口的不同也有可能导致各种问题。</p><p>因此尽管已在端口587上部署了STARTTLS，但它尚未取代在端口465上部署的SMTPS（隐式TLS）的使用。</p><p>随着时间的推移，出于一致性以及其他原因，需要将MUA软件使用的核心协议迁移到隐式TLS。但是，为了最大程度地使用加密来进行提交，需要在几年的过渡期内支持两种通过TLS进行消息提交的机制。因此，在此过渡期间，客户端和服务器应在端口587上实施STARTTLS，并在端口465上实施隐式TLS。请注意，如果实施正确且客户端和服务器都配置为要求在消息提交之前成功协商TLS，则端口587上的STARTTLS和端口465上的隐式TLS的安全属性之间没有显着差异。</p><blockquote><p>A mail user agent (MUA) is a program that allows you to receive and send e-mail messages; it’s usually just called an e-mail program.</p><p>MUA软件即指我们平时使用的集收发读写邮件于一体的邮件客户端软件。</p></blockquote><p><strong>简而言之，465端口最开始被注册用于SMTPS，随后被撤销，但是因为已经被用了，现在又恢复了，并且还多增加了一个587端口用于STARTTLS加密传输，并且在配置正确的前提下两者一样安全。目前的主要任务是把邮件从明文传输迁移到加密传输，在迁移的过渡期间应当支持587端口的STARTTLS和465端口的隐式TLS。</strong></p>]]></content>
+    <content type="html"><![CDATA[<p>最近在学习SMTP的时候发现SMTP在使用加密传输的时候涉及到465和587两个端口，网上对两者之间的区别众说纷纭，后来查到了RFC官方文档中对于这个争论较久的问题的定义和详细说明，这里做转载和翻译用于记录。</p><span id="more"></span><h1 id="1、RFC8314原文"><a href="#1、RFC8314原文" class="headerlink" title="1、RFC8314原文"></a>1、RFC8314原文</h1><p>我们查看<a href="https://tools.ietf.org/html/rfc8314">RFC8314官方文档</a>中的相关叙述，和该问题相关的主要是3.3、4.2、5.5和7.3这四个部分，由于本文只讨论两个端口的作用和历史缘由，因此涉及到加密过程和原理的4.2、5.5两个部分不在这里提及，其余部分的原文内容如下：</p><blockquote><p><strong>3.3.  Implicit TLS for SMTP Submission</strong></p><p>   When a TCP connection is established for the “submissions” service<br>   (default port 465), a TLS handshake begins immediately.  Clients MUST<br>   implement the certificate validation mechanism described in<br>   [RFC7817].  Once the TLS session is established, Message Submission<br>   protocol data [RFC6409] is exchanged as TLS application data for the<br>   remainder of the TCP connection.  (Note: The “submissions” service<br>   name is defined in Section 7.3 of this document and follows the usual<br>   convention that the name of a service layered on top of Implicit TLS<br>   consists of the name of the service as used without TLS, with an “s”<br>   appended.)</p><p>   The STARTTLS mechanism on port 587 is relatively widely deployed due<br>   to the situation with port 465 (discussed in Section 7.3).  This<br>   differs from IMAP and POP services where Implicit TLS is more widely<br>   deployed on servers than STARTTLS.  It is desirable to migrate core<br>   protocols used by MUA software to Implicit TLS over time, for<br>   consistency as well as for the additional reasons discussed in<br>   Appendix A.  However, to maximize the use of encryption for<br>   submission, it is desirable to support both mechanisms for Message<br>   Submission over TLS for a transition period of several years.  As a<br>   result, clients and servers SHOULD implement both STARTTLS on<br>   port 587 and Implicit TLS on port 465 for this transition period.<br>   Note that there is no significant difference between the security<br>   properties of STARTTLS on port 587 and Implicit TLS on port 465 if<br>   the implementations are correct and if both the client and the server<br>   are configured to require successful negotiation of TLS prior to<br>   Message Submission.</p><p>   Note that the “submissions” port provides access to a Message<br>   Submission Agent (MSA) as defined in [RFC6409], so requirements and<br>   recommendations for MSAs in that document, including the requirement<br>   to implement SMTP AUTH [RFC4954] and the requirements of Email<br>   Submission Operations [RFC5068], also apply to the submissions port.</p><p>   See Sections 5.5 and 4.2 for additional information on client<br>   certificate authentication.  See Section 7.3 for port registration<br>   information.</p></blockquote><blockquote><p><strong>7.3.  Submissions Port Registration</strong></p><p>   IANA has assigned an alternate usage of TCP port 465 in addition to<br>   the current assignment using the following template [RFC6335]:</p><p>​     Service Name: submissions<br>​     Transport Protocol: TCP<br>​     Assignee: IESG <a href="mailto:&#x69;&#x65;&#x73;&#103;&#x40;&#105;&#101;&#116;&#102;&#x2e;&#111;&#x72;&#x67;">&#x69;&#x65;&#x73;&#103;&#x40;&#105;&#101;&#116;&#102;&#x2e;&#111;&#x72;&#x67;</a><br>​     Contact: IETF Chair <a href="mailto:&#99;&#104;&#97;&#105;&#114;&#64;&#x69;&#x65;&#116;&#102;&#x2e;&#111;&#x72;&#x67;">&#99;&#104;&#97;&#105;&#114;&#64;&#x69;&#x65;&#116;&#102;&#x2e;&#111;&#x72;&#x67;</a><br>​     Description: Message Submission over TLS protocol<br>​     Reference: RFC 8314<br>​     Port Number: 465</p><p>   This is a one-time procedural exception to the rules in [RFC6335].<br>   This requires explicit IESG approval and does not set a precedent.<br>   Note: Since the purpose of this alternate usage assignment is to<br>   align with widespread existing practice and there is no known usage<br>   of UDP port 465 for Message Submission over TLS, IANA has not<br>   assigned an alternate usage of UDP port 465.</p><p>   Historically, port 465 was briefly registered as the “smtps” port.<br>   This registration made no sense, as the SMTP transport MX<br>   infrastructure has no way to specify a port, so port 25 is always<br>   used.  As a result, the registration was revoked and was subsequently<br>   reassigned to a different service.  In hindsight, the “smtps”<br>   registration should have been renamed or reserved rather than<br>   revoked.  Unfortunately, some widely deployed mail software<br>   interpreted “smtps” as “submissions” [RFC6409] and used that port for<br>   email submission by default when an end user requested security<br>   during account setup.  If a new port is assigned for the submissions<br>   service, either (a) email software will continue with unregistered<br>   use of port 465 (leaving the port registry inaccurate relative to</p><p>   de facto practice and wasting a well-known port) or (b) confusion<br>   between the de facto and registered ports will cause harmful<br>   interoperability problems that will deter the use of TLS for Message<br>   Submission.  The authors of this document believe that both of these<br>   outcomes are less desirable than a “wart” in the registry documenting<br>   real-world usage of a port for two purposes.  Although STARTTLS on<br>   port 587 has been deployed, it has not replaced the deployed use of<br>   Implicit TLS submission on port 465.</p></blockquote><h1 id="2、个人理解"><a href="#2、个人理解" class="headerlink" title="2、个人理解"></a>2、个人理解</h1><p>将上面的几段原文阅读整合之后，个人的理解如下：</p><p><strong>首先要说明原文中多次出现的<code>submission</code>的意思实际上是指客户端使用SMTP协议来对服务端进行数据传输，下面提及的<code>SMTPS</code>等价于原文的<code>TLS submission</code>。</strong></p><p>当年IANA为TCP的465端口注册了用途，用于SMTP的TLS加密传输，且没有指定UDP的465端口用途，这就是465端口在历史上被用为SMTPS端口的由来。</p><p>为什么说是历史上呢，因为这个注册在不久之后就被撤销了，也就是说这个注册没用了，465端口要被回收拿去给其他的服务用了。而撤销的原因是<em>“这种注册没有意义，因为SMTP传输MX基础结构无法指定端口，因此始终使用端口25。（This registration made no sense, as the SMTP transport MX infrastructure has no way to specify a port, so port 25 is always used. ）”</em></p><p>但是后来又觉得当时<strong>应该把这个465的SMTPS（隐式TLS）端口保留或者是重命名而不是撤销</strong>，因为已经有许多邮件服务软件使用了465端口作为SMTPS（隐式TLS）的传输端口，如果为SMTPS（隐式TLS）服务分配了新端口，则已经使用被注销的465端口作为SMTPS服务端口的电子邮件软件相当于是使用了一个和实际SMTPS（隐式TLS）端口不匹配的端口，并且实际使用端口和理论注册端口的不同也有可能导致各种问题。</p><p>因此尽管已在端口587上部署了STARTTLS，但它尚未取代在端口465上部署的SMTPS（隐式TLS）的使用。</p><p>随着时间的推移，出于一致性以及其他原因，需要将MUA软件使用的核心协议迁移到隐式TLS。但是，为了最大程度地使用加密来进行提交，需要在几年的过渡期内支持两种通过TLS进行消息提交的机制。因此，在此过渡期间，客户端和服务器应在端口587上实施STARTTLS，并在端口465上实施隐式TLS。请注意，如果实施正确且客户端和服务器都配置为要求在消息提交之前成功协商TLS，则端口587上的STARTTLS和端口465上的隐式TLS的安全属性之间没有显着差异。</p><blockquote><p>A mail user agent (MUA) is a program that allows you to receive and send e-mail messages; it’s usually just called an e-mail program.</p><p>MUA软件即指我们平时使用的集收发读写邮件于一体的邮件客户端软件。</p></blockquote><p><strong>简而言之，465端口最开始被注册用于SMTPS，随后被撤销，但是因为已经被用了，现在又恢复了，并且还多增加了一个587端口用于STARTTLS加密传输，并且在配置正确的前提下两者一样安全。目前的主要任务是把邮件从明文传输迁移到加密传输，在迁移的过渡期间应当支持587端口的STARTTLS和465端口的隐式TLS。</strong></p>]]></content>
     
     
     <categories>
@@ -2790,9 +2790,9 @@
     
     <tags>
       
-      <tag>web</tag>
-      
       <tag>centos</tag>
+      
+      <tag>web</tag>
       
       <tag>nginx</tag>
       
@@ -3180,9 +3180,9 @@
     
     <tags>
       
-      <tag>network</tag>
-      
       <tag>centos</tag>
+      
+      <tag>network</tag>
       
       <tag>ssh</tag>
       
@@ -3311,9 +3311,9 @@
       
       <tag>windows</tag>
       
-      <tag>network</tag>
-      
       <tag>centos</tag>
+      
+      <tag>network</tag>
       
     </tags>
     
@@ -3338,9 +3338,9 @@
     
     <tags>
       
-      <tag>database</tag>
-      
       <tag>stu</tag>
+      
+      <tag>database</tag>
       
     </tags>
     
@@ -3417,9 +3417,9 @@
     
     <tags>
       
-      <tag>network</tag>
-      
       <tag>stu</tag>
+      
+      <tag>network</tag>
       
       <tag>wireshark</tag>
       
@@ -3446,11 +3446,11 @@
     
     <tags>
       
+      <tag>stu</tag>
+      
       <tag>web</tag>
       
       <tag>network</tag>
-      
-      <tag>stu</tag>
       
       <tag>wireshark</tag>
       
@@ -3531,9 +3531,9 @@
     
     <tags>
       
-      <tag>network</tag>
-      
       <tag>stu</tag>
+      
+      <tag>network</tag>
       
     </tags>
     
@@ -3560,9 +3560,9 @@
       
       <tag>mysql</tag>
       
-      <tag>database</tag>
-      
       <tag>centos</tag>
+      
+      <tag>database</tag>
       
     </tags>
     
@@ -3670,9 +3670,9 @@
     
     <tags>
       
-      <tag>web</tag>
-      
       <tag>centos</tag>
+      
+      <tag>web</tag>
       
     </tags>
     
@@ -3878,9 +3878,9 @@
       
       <tag>mysql</tag>
       
-      <tag>database</tag>
-      
       <tag>centos</tag>
+      
+      <tag>database</tag>
       
     </tags>
     
@@ -4690,7 +4690,7 @@
   
   
   <entry>
-    <title>categories</title>
+    <title>about</title>
     <link href="/"/>
     <url>/</url>
     
@@ -4701,7 +4701,7 @@
   
   
   <entry>
-    <title>about</title>
+    <title>categories</title>
     <link href="/"/>
     <url>/</url>
     
