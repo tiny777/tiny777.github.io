@@ -21,7 +21,7 @@
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
-  <title>k8s系列04-在CentOS7上部署cilium网络的k8s集群 - TinyChen&#39;s Studio</title>
+  <title>k8s系列04-kubeadm部署cilium网络的k8s集群 - TinyChen&#39;s Studio</title>
 
   <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
 
@@ -167,7 +167,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="k8s系列04-在CentOS7上部署cilium网络的k8s集群">
+            <span class="h2" id="subtitle" title="k8s系列04-kubeadm部署cilium网络的k8s集群">
               
             </span>
 
@@ -194,7 +194,7 @@
     
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      8.8k 字
+      9k 字
     </span>
   
 
@@ -204,7 +204,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      69
+      71
        分钟
     </span>
   
@@ -234,7 +234,7 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">k8s系列04-在CentOS7上部署cilium网络的k8s集群</h1>
+            <h1 style="display: none">k8s系列04-kubeadm部署cilium网络的k8s集群</h1>
             
               <p class="note note-info">
                 
@@ -463,6 +463,17 @@
 </blockquote>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">sudo mkdir /etc/docker<br>cat &lt;&lt;EOF | sudo tee /etc/docker/daemon.json<br>&#123;<br>  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],<br>  &quot;log-driver&quot;: &quot;json-file&quot;,<br>  &quot;log-opts&quot;: &#123;<br>    &quot;max-size&quot;: &quot;100m&quot;<br>  &#125;,<br>  &quot;storage-driver&quot;: &quot;overlay2&quot;<br>&#125;<br>EOF<br><br>sudo systemctl enable docker<br>sudo systemctl daemon-reload<br>sudo systemctl restart docker<br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 最后检查一下Cgroup Driver是否为systemd</span><br>[root@tiny-calico-master-88-1 ~]# docker info | grep systemd<br> Cgroup Driver: systemd<br></code></pre></div></td></tr></table></figure>
 
+<h2 id="2-3-关于kubelet的cgroup-driver"><a href="#2-3-关于kubelet的cgroup-driver" class="headerlink" title="2.3 关于kubelet的cgroup driver"></a>2.3 关于kubelet的cgroup driver</h2><p>k8s官方有<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/">详细的文档</a>介绍了如何设置kubelet的<code>cgroup driver</code>，需要特别注意的是，在1.22版本开始，如果没有手动设置kubelet的cgroup driver，那么默认会设置为systemd</p>
+<blockquote>
+<p><strong>Note:</strong> In v1.22, if the user is not setting the <code>cgroupDriver</code> field under <code>KubeletConfiguration</code>, <code>kubeadm</code> will default it to <code>systemd</code>.</p>
+</blockquote>
+<p>一个比较简单的指定kubelet的<code>cgroup driver</code>的方法就是在<code>kubeadm-config.yaml</code>加入<code>cgroupDriver</code>字段</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># kubeadm-config.yaml</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-string">v1.21.0</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeletConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubelet.config.k8s.io/v1beta1</span><br><span class="hljs-attr">cgroupDriver:</span> <span class="hljs-string">systemd</span><br></code></pre></div></td></tr></table></figure>
+
+<p>我们可以直接查看configmaps来查看初始化之后集群的kubeadm-config配置。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs asciidoc">[root@tiny-calico-master-88-1 tiny-calico]# kubectl describe configmaps kubeadm-config -n kube-system<br>Name:         kubeadm-config<br>Namespace:    kube-system<br>Labels:       &lt;none&gt;<br>Annotations:  &lt;none&gt;<br><br><span class="hljs-section">Data</span><br><span class="hljs-section">====</span><br><span class="hljs-section">ClusterConfiguration:</span><br><span class="hljs-section">----</span><br>apiServer:<br><span class="hljs-code">  extraArgs:</span><br><span class="hljs-code">    authorization-mode: Node,RBAC</span><br><span class="hljs-code">  timeoutForControlPlane: 4m0s</span><br>apiVersion: kubeadm.k8s.io/v1beta3<br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br>controllerManager: &#123;&#125;<br>dns: &#123;&#125;<br>etcd:<br><span class="hljs-code">  local:</span><br><span class="hljs-code">    dataDir: /var/lib/etcd</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.23.6<br>networking:<br><span class="hljs-code">  dnsDomain: cali-cluster.tclocal</span><br><span class="hljs-code">  serviceSubnet: 10.88.0.0/18</span><br>scheduler: &#123;&#125;<br><br><br><span class="hljs-section">BinaryData</span><br><span class="hljs-section">====</span><br><br>Events:  &lt;none&gt;<br></code></pre></div></td></tr></table></figure>
+
+<p>当然因为我们需要安装的版本高于1.22.0并且使用的就是systemd，因此可以不用再重复配置。</p>
 <h1 id="3、安装kube三件套"><a href="#3、安装kube三件套" class="headerlink" title="3、安装kube三件套"></a>3、安装kube三件套</h1><blockquote>
 <p>对应的官方文档可以参考这里</p>
 <p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl">https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl</a></p>
@@ -510,7 +521,6 @@
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-cilium-master-188-1 tiny-cilium]# kubectl cluster-info<br>Kubernetes control plane is running at https://10.31.188.1:6443<br>CoreDNS is running at https://10.31.188.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy<br><br>To further debug and diagnose cluster problems, use &#x27;kubectl cluster-info dump&#x27;.<br><br><br>[root@tiny-cilium-master-188-1 tiny-cilium]# kubectl get nodes -o wide<br>NAME                                      STATUS     ROLES                  AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION               CONTAINER-RUNTIME<br>tiny-cilium-master-188-1.k8s.tcinternal   NotReady   control-plane,master   84s   v1.23.6   10.31.188.1   &lt;none&gt;        CentOS Linux 7 (Core)   5.17.6-1.el7.elrepo.x86_64   docker://20.10.14<br><br>[root@tiny-cilium-master-188-1 tiny-cilium]# kubectl get pods -A -o wide<br>NAMESPACE     NAME                                                              READY   STATUS    RESTARTS   AGE   IP            NODE                                      NOMINATED NODE   READINESS GATES<br>kube-system   coredns-6d8c4cb4d-285cl                                           0/1     Pending   0          78s   &lt;none&gt;        &lt;none&gt;                                    &lt;none&gt;           &lt;none&gt;<br>kube-system   coredns-6d8c4cb4d-6zntv                                           0/1     Pending   0          78s   &lt;none&gt;        &lt;none&gt;                                    &lt;none&gt;           &lt;none&gt;<br>kube-system   etcd-tiny-cilium-master-188-1.k8s.tcinternal                      1/1     Running   0          90s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-apiserver-tiny-cilium-master-188-1.k8s.tcinternal            1/1     Running   0          92s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-controller-manager-tiny-cilium-master-188-1.k8s.tcinternal   1/1     Running   0          90s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-m7q5n                                                  1/1     Running   0          78s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-scheduler-tiny-cilium-master-188-1.k8s.tcinternal            1/1     Running   0          91s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br></code></pre></div></td></tr></table></figure>
 
 <h2 id="4-4-添加worker节点"><a href="#4-4-添加worker节点" class="headerlink" title="4.4 添加worker节点"></a>4.4 添加worker节点</h2><p>这时候我们还需要继续添加剩下的两个节点作为worker节点运行负载，直接在剩下的节点上面运行集群初始化成功时输出的命令就可以成功加入集群。</p>
-<p>因为我们前面的kubeadm初始化master节点的时候没有启用kube-proxy，所以在添加节点的时候会出现警告，但是不影响我们继续添加节点。</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-cilium-worker-188-11 ~]# kubeadm join 10.31.188.1:6443 --token abcdef.0123456789abcdef \<br><span class="hljs-meta">&gt;</span><span class="bash">         --discovery-token-ca-cert-hash sha256:fbe33f0dbda199b487a78948a4c693660d742d0dfc270bad2963a035b4971ade</span><br>[preflight] Running pre-flight checks<br>[preflight] Reading configuration from the cluster...<br>[preflight] FYI: You can look at this config file with &#x27;kubectl -n kube-system get cm kubeadm-config -o yaml&#x27;<br>[kubelet-start] Writing kubelet configuration to file &quot;/var/lib/kubelet/config.yaml&quot;<br>[kubelet-start] Writing kubelet environment file with flags to file &quot;/var/lib/kubelet/kubeadm-flags.env&quot;<br>[kubelet-start] Starting the kubelet<br>[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...<br><br>This node has joined the cluster:<br>* Certificate signing request was sent to apiserver and a response was received.<br>* The Kubelet was informed of the new secure connection details.<br><br>Run &#x27;kubectl get nodes&#x27; on the control-plane to see this node join the cluster.<br></code></pre></div></td></tr></table></figure>
 
 <p>如果不小心没保存初始化成功的输出信息也没有关系，我们可以使用kubectl工具查看或者生成token</p>
@@ -584,7 +594,7 @@
                     
                     
                       <a href="/20220508-k8s-03-deploy-k8s-with-calico/">
-                        <span class="hidden-mobile">k8s系列03-在CentOS7上部署calico网络的k8s集群</span>
+                        <span class="hidden-mobile">k8s系列03-kubeadm部署calico网络的k8s集群</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
