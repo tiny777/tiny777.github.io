@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          12k words
+          13k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          103 mins
+          109 mins
         
       </span>
     
@@ -300,14 +298,7 @@
 </blockquote>
 <p>PowerDNS-Recursor(以下简称pdns-rec)的官方文档可以点击<a target="_blank" rel="noopener" href="https://doc.powerdns.com/recursor/index.html">这里</a>查看。官方指的内置脚本能力是指在4.0.0版本之后的配置文件里面添加了对lua脚本的支持。</p>
 <h1 id="2、PowerDNS安装"><a href="#2、PowerDNS安装" class="headerlink" title="2、PowerDNS安装"></a>2、PowerDNS安装</h1><h2 id="2-1-PowerDNS-Authoritative-Server安装"><a href="#2-1-PowerDNS-Authoritative-Server安装" class="headerlink" title="2.1 PowerDNS Authoritative Server安装"></a>2.1 PowerDNS Authoritative Server安装</h2><p>这里我们还是使用经典的CentOS7系统进行安装测试，系统的相关版本和内核信息如下：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ lsb_release -a
-LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
-Distributor ID: CentOS
-Description:    CentOS Linux release <span class="token number">7.9</span>.2009 <span class="token punctuation">(</span>Core<span class="token punctuation">)</span>
-Release:        <span class="token number">7.9</span>.2009
-Codename:       Core
-$ <span class="token function">uname</span> -r
-<span class="token number">3.10</span>.0-1160.11.1.el7.x86_64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ lsb_release -a<br>LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br>$ uname -r<br>3.10.0-1160.11.1.el7.x86_64<br></code></pre></td></tr></table></figure>
 
 <p>pdns对主流的操作系统都有着较好的支持，在centos上面可以直接通过repo仓库来安装，红帽系的Linux可以通过epel源，monshouwer提供的第三方源和powerdns官方源三种源来进行安装。</p>
 <blockquote>
@@ -316,31 +307,18 @@ $ <span class="token function">uname</span> -r
 <p>使用epel源来进行安装的话可能会导致无法安装最新版本</p>
 <p><img src="https://resource.tinychen.com/20210118145131.png" srcset="/img/loading.gif" lazyload></p>
 <p>如果网络条件允许的话，最好的办法是直接通过官方的<a target="_blank" rel="noopener" href="https://repo.powerdns.com/">repo源</a>来进行安装，如果使用的是master源，则可以安装到最新的测试版本：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install epel-release yum-plugin-priorities
-curl -o &#x2F;etc&#x2F;yum.repos.d&#x2F;powerdns-auth-master.repo https:&#x2F;&#x2F;repo.powerdns.com&#x2F;repo-files&#x2F;centos-auth-master.repo
-yum install pdns
-yum install pdns-backend-$backend<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">yum install epel-release yum-plugin-priorities<br>curl -o <span class="hljs-regexp">/etc/yum</span>.repos.d<span class="hljs-regexp">/powerdns-auth-master.repo https:/</span><span class="hljs-regexp">/repo.powerdns.com/</span>repo-files/centos-auth-master.repo<br>yum install pdns<br>yum install pdns-backend-<span class="hljs-variable">$backend</span><br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210118145142.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们使用最新的稳定版4.4版本进行安装，<code>backend</code>这里我们选择<code>pdns-backend-mysql</code></p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install epel-release yum-plugin-priorities
-curl -o &#x2F;etc&#x2F;yum.repos.d&#x2F;powerdns-auth-44.repo https:&#x2F;&#x2F;repo.powerdns.com&#x2F;repo-files&#x2F;centos-auth-44.repo
-yum install pdns
-yum install pdns-backend-$backend<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">yum install epel-release yum-plugin-priorities<br>curl -o <span class="hljs-regexp">/etc/yum</span>.repos.d<span class="hljs-regexp">/powerdns-auth-44.repo https:/</span><span class="hljs-regexp">/repo.powerdns.com/</span>repo-files/centos-auth-<span class="hljs-number">44</span>.repo<br>yum install pdns<br>yum install pdns-backend-<span class="hljs-variable">$backend</span><br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210118145147.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>请注意对于某些软件包源，bind backend作为基本pdns软件包的一部分提供，并且没有单独的pdns-backend-bind软件包。</p>
 </blockquote>
 <h2 id="2-2-PowerDNS-Recursor安装"><a href="#2-2-PowerDNS-Recursor安装" class="headerlink" title="2.2 PowerDNS-Recursor安装"></a>2.2 PowerDNS-Recursor安装</h2><p>这里我们还是使用经典的CentOS7系统进行安装测试，系统的相关版本和内核信息如下：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@tiny-cloud /home<span class="token punctuation">]</span><span class="token comment"># lsb_release -a</span>
-LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
-Distributor ID: CentOS
-Description:    CentOS Linux release <span class="token number">7.9</span>.2009 <span class="token punctuation">(</span>Core<span class="token punctuation">)</span>
-Release:        <span class="token number">7.9</span>.2009
-Codename:       Core
-<span class="token punctuation">[</span>root@tiny-cloud /home<span class="token punctuation">]</span><span class="token comment"># uname -r</span>
-<span class="token number">3.10</span>.0-1160.24.1.el7.x86_64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@tiny-cloud /home]<span class="hljs-comment"># lsb_release -a</span><br>LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br>[root@tiny-cloud /home]<span class="hljs-comment"># uname -r</span><br>3.10.0-1160.24.1.el7.x86_64<br></code></pre></td></tr></table></figure>
 
 <p>pdns对主流的操作系统都有着较好的支持，在红帽系和CentOS系相关的发行版本上面可以之间通过epel源来进行安装，不过使用epel源来进行安装的话可能会导致无法安装最新版本。</p>
 <blockquote>
@@ -348,315 +326,55 @@ Codename:       Core
 </blockquote>
 <p><img src="https://resource.tinychen.com/20210430141702.png" srcset="/img/loading.gif" lazyload></p>
 <p>如果网络条件允许的话，最好的办法是直接通过官方的<a target="_blank" rel="noopener" href="https://repo.powerdns.com/">repo源</a>来进行安装，如果使用的是master分支的repo源，则可以安装到最新的测试版本。官方表示master存储库对应的是他们在<a target="_blank" rel="noopener" href="https://github.com/PowerDNS/pdns">github</a>上面正在开发的master分支。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install epel-release yum-plugin-priorities &amp;&amp;
-curl -o &#x2F;etc&#x2F;yum.repos.d&#x2F;powerdns-rec-master.repo https:&#x2F;&#x2F;repo.powerdns.com&#x2F;repo-files&#x2F;centos-rec-master.repo &amp;&amp;
-yum install pdns-recursor<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">yum install epel-release yum-plugin-priorities &amp;&amp;<br>curl -o <span class="hljs-regexp">/etc/yum</span>.repos.d<span class="hljs-regexp">/powerdns-rec-master.repo https:/</span><span class="hljs-regexp">/repo.powerdns.com/</span>repo-files/centos-rec-master.repo &amp;&amp;<br>yum install pdns-recursor<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210430143317.png" srcset="/img/loading.gif" lazyload></p>
 <p>当然我们也可以通过官方提供的不同版本yum源来安装对应版本的pdns，不同的版本分支对应的支持时间也是不一样的，官方表示在对应版本的生命周期结束之后，对应的仓库也不会再提供支持，pdns-rec的EOL信息可以点击<a target="_blank" rel="noopener" href="https://doc.powerdns.com/recursor/appendices/EOL.html">这里</a>查看。由于目前4.5.x版本还处于rc阶段，因此这里我们还是安装最新的稳定版本4.4.x版本。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install epel-release yum-plugin-priorities &amp;&amp;
-curl -o &#x2F;etc&#x2F;yum.repos.d&#x2F;powerdns-rec-44.repo https:&#x2F;&#x2F;repo.powerdns.com&#x2F;repo-files&#x2F;centos-rec-44.repo &amp;&amp;
-yum install pdns-recursor<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">yum install epel-release yum-plugin-priorities &amp;&amp;<br>curl -o <span class="hljs-regexp">/etc/yum</span>.repos.d<span class="hljs-regexp">/powerdns-rec-44.repo https:/</span><span class="hljs-regexp">/repo.powerdns.com/</span>repo-files/centos-rec-<span class="hljs-number">44</span>.repo &amp;&amp;<br>yum install pdns-recursor<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210430143305.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、pdns-auth的mysql安装配置"><a href="#3、pdns-auth的mysql安装配置" class="headerlink" title="3、pdns-auth的mysql安装配置"></a>3、pdns-auth的mysql安装配置</h1><h2 id="3-1-安装mysql"><a href="#3-1-安装mysql" class="headerlink" title="3.1 安装mysql"></a>3.1 安装mysql</h2><p>pdns对于mysql的版本和安装方式并没有什么特殊的要求，个人推荐版本在5.7+或者8.0+都可以，这里使用yum安装8.0版本的mysql。</p>
 <p>最新版的mysql的repo文件我们可以直接前往官网下载：<code>https://dev.mysql.com/downloads/repo/yum/</code></p>
 <blockquote>
 <p>如果需要使用5.7的版本可以到这里下载</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">wget http:&#x2F;&#x2F;repo.mysql.com&#x2F;mysql57-community-release-el7-9.noarch.rpm<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">wget</span> http://repo.mysql.com/mysql<span class="hljs-number">57</span>-community-release-el<span class="hljs-number">7</span>-<span class="hljs-number">9</span>.noarch.rpm<br></code></pre></td></tr></table></figure>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">rpm</span> -ivh mysql80-community-release-el7-3.noarch.rpm
-$ yum update
-$ yum <span class="token function">install</span> mysql-server
-$ mysqladmin --version
-mysqladmin  Ver <span class="token number">8.0</span>.23 <span class="token keyword">for</span> Linux on x86_64 <span class="token punctuation">(</span>MySQL Community Server - GPL<span class="token punctuation">)</span>
-
-<span class="token comment"># MYSQL8的初始密码可以在log中查看</span>
-$ <span class="token function">grep</span> <span class="token string">'temporary password'</span> /var/log/mysqld.log
-$ mysql -u root -p<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ rpm -ivh mysql80-community-release-el7-3.noarch.rpm<br>$ yum update<br>$ yum install mysql-server<br>$ mysqladmin --version<br>mysqladmin  Ver 8.0.23 <span class="hljs-keyword">for</span> Linux on x86_64 (MySQL Community Server - GPL)<br><br><span class="hljs-comment"># MYSQL8的初始密码可以在log中查看</span><br>$ grep <span class="hljs-string">&#x27;temporary password&#x27;</span> /var/<span class="hljs-built_in">log</span>/mysqld.log<br>$ mysql -u root -p<br></code></pre></td></tr></table></figure>
 
 <h2 id="3-2-创建用户"><a href="#3-2-创建用户" class="headerlink" title="3.2 创建用户"></a>3.2 创建用户</h2><p>接下来需要进行基本的数据库操作，给pdns创建对应的数据库和用户并简单设置相关权限：</p>
-<div class="code-wrapper"><pre class="line-numbers language-mysql" data-language="mysql"><code class="language-mysql">-- 修改密码
-ALTER user &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;你的新密码&#39;;
--- 注意这里的&#39;localhost&#39;也有可能是别的参数，具体可以通过下面这条命令来进行查询：
-select user, host, authentication_string, plugin from mysql.user;
-
--- 创建一个mysql的用户名为powerdns，只能本机登录
--- 创建一个mysql的数据库名为powerdns，并允许powerdns用户访问
-CREATE USER &#39;powerdns&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;你的新密码&#39;;
-CREATE DATABASE powerdns;
-GRANT ALL ON powerdns.* TO &#39;powerdns&#39;@&#39;localhost&#39;;
-FLUSH PRIVILEGES;
-
--- 对于MYSQL8需要额外指定加密方式避免ERROR 2059 (HY000)的问题
-ALTER USER &#39;powerdns&#39;@&#39;localhost&#39; IDENTIFIED WITH mysql_native_password BY &#39;你的新密码&#39;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs mysql">-- 修改密码<br>ALTER user &#x27;root&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;你的新密码&#x27;;<br>-- 注意这里的&#x27;localhost&#x27;也有可能是别的参数，具体可以通过下面这条命令来进行查询：<br>select user, host, authentication_string, plugin from mysql.user;<br><br>-- 创建一个mysql的用户名为powerdns，只能本机登录<br>-- 创建一个mysql的数据库名为powerdns，并允许powerdns用户访问<br>CREATE USER &#x27;powerdns&#x27;@&#x27;localhost&#x27; IDENTIFIED BY &#x27;你的新密码&#x27;;<br>CREATE DATABASE powerdns;<br>GRANT ALL ON powerdns.* TO &#x27;powerdns&#x27;@&#x27;localhost&#x27;;<br>FLUSH PRIVILEGES;<br><br>-- 对于MYSQL8需要额外指定加密方式避免ERROR 2059 (HY000)的问题<br>ALTER USER &#x27;powerdns&#x27;@&#x27;localhost&#x27; IDENTIFIED WITH mysql_native_password BY &#x27;你的新密码&#x27;;<br></code></pre></td></tr></table></figure>
 
 <h2 id="3-3-创建数据表"><a href="#3-3-创建数据表" class="headerlink" title="3.3 创建数据表"></a>3.3 创建数据表</h2><p>创建数据表的操作完全按照<a target="_blank" rel="noopener" href="https://doc.powerdns.com/authoritative/backends/generic-mysql.html#default-schema">官方的文档</a>进行，有特殊需要的也可以根据实际情况进行修改：</p>
-<div class="code-wrapper"><pre class="line-numbers language-mysql" data-language="mysql"><code class="language-mysql">CREATE TABLE domains (
-  id                    INT AUTO_INCREMENT,
-  name                  VARCHAR(255) NOT NULL,
-  master                VARCHAR(128) DEFAULT NULL,
-  last_check            INT DEFAULT NULL,
-  type                  VARCHAR(6) NOT NULL,
-  notified_serial       INT UNSIGNED DEFAULT NULL,
-  account               VARCHAR(40) CHARACTER SET &#39;utf8&#39; DEFAULT NULL,
-  PRIMARY KEY (id)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE domains (<br>  id                    INT AUTO_INCREMENT,<br>  name                  VARCHAR(255) NOT NULL,<br>  master                VARCHAR(128) DEFAULT NULL,<br>  last_check            INT DEFAULT NULL,<br>  type                  VARCHAR(6) NOT NULL,<br>  notified_serial       INT UNSIGNED DEFAULT NULL,<br>  account               VARCHAR(40) CHARACTER SET &#x27;utf8&#x27; DEFAULT NULL,<br>  PRIMARY KEY (id)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br>CREATE UNIQUE INDEX name_index ON domains(name);<br><br><br>CREATE TABLE records (<br>  id                    BIGINT AUTO_INCREMENT,<br>  domain_id             INT DEFAULT NULL,<br>  name                  VARCHAR(255) DEFAULT NULL,<br>  type                  VARCHAR(10) DEFAULT NULL,<br>  content               VARCHAR(64000) DEFAULT NULL,<br>  ttl                   INT DEFAULT NULL,<br>  prio                  INT DEFAULT NULL,<br>  disabled              TINYINT(1) DEFAULT 0,<br>  ordername             VARCHAR(255) BINARY DEFAULT NULL,<br>  auth                  TINYINT(1) DEFAULT 1,<br>  PRIMARY KEY (id)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br>CREATE INDEX nametype_index ON records(name,type);<br>CREATE INDEX domain_id ON records(domain_id);<br>CREATE INDEX ordername ON records (ordername);<br><br><br>CREATE TABLE supermasters (<br>  ip                    VARCHAR(64) NOT NULL,<br>  nameserver            VARCHAR(255) NOT NULL,<br>  account               VARCHAR(40) CHARACTER SET &#x27;utf8&#x27; NOT NULL,<br>  PRIMARY KEY (ip, nameserver)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br><br>CREATE TABLE comments (<br>  id                    INT AUTO_INCREMENT,<br>  domain_id             INT NOT NULL,<br>  name                  VARCHAR(255) NOT NULL,<br>  type                  VARCHAR(10) NOT NULL,<br>  modified_at           INT NOT NULL,<br>  account               VARCHAR(40) CHARACTER SET &#x27;utf8&#x27; DEFAULT NULL,<br>  comment               TEXT CHARACTER SET &#x27;utf8&#x27; NOT NULL,<br>  PRIMARY KEY (id)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br>CREATE INDEX comments_name_type_idx ON comments (name, type);<br>CREATE INDEX comments_order_idx ON comments (domain_id, modified_at);<br><br><br>CREATE TABLE domainmetadata (<br>  id                    INT AUTO_INCREMENT,<br>  domain_id             INT NOT NULL,<br>  kind                  VARCHAR(32),<br>  content               TEXT,<br>  PRIMARY KEY (id)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br>CREATE INDEX domainmetadata_idx ON domainmetadata (domain_id, kind);<br><br><br>CREATE TABLE cryptokeys (<br>  id                    INT AUTO_INCREMENT,<br>  domain_id             INT NOT NULL,<br>  flags                 INT NOT NULL,<br>  active                BOOL,<br>  published             BOOL DEFAULT 1,<br>  content               TEXT,<br>  PRIMARY KEY(id)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br>CREATE INDEX domainidindex ON cryptokeys(domain_id);<br><br><br>CREATE TABLE tsigkeys (<br>  id                    INT AUTO_INCREMENT,<br>  name                  VARCHAR(255),<br>  algorithm             VARCHAR(50),<br>  secret                VARCHAR(255),<br>  PRIMARY KEY (id)<br>) Engine=InnoDB CHARACTER SET &#x27;latin1&#x27;;<br><br>CREATE UNIQUE INDEX namealgoindex ON tsigkeys(name, algorithm);<br></code></pre></td></tr></table></figure>
 
-CREATE UNIQUE INDEX name_index ON domains(name);
+<h1 id="4、pdns配置mysql"><a href="#4、pdns配置mysql" class="headerlink" title="4、pdns配置mysql"></a>4、pdns配置mysql</h1><h2 id="4-1-mysql-相关配置"><a href="#4-1-mysql-相关配置" class="headerlink" title="4.1 mysql 相关配置"></a>4.1 mysql 相关配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># gmysql-host</span><br><span class="hljs-comment"># 需要连接的mysql的IP地址，和gmysql-socket变量互斥</span><br><br><span class="hljs-comment"># gmysql-port</span><br><span class="hljs-comment"># 需要连接的mysql的端口号，默认是3306</span><br><br><span class="hljs-comment"># gmysql-socket</span><br><span class="hljs-comment"># 需要连接的mysql的UNIX socket地址，和gmysql-host互斥</span><br><br><span class="hljs-comment"># gmysql-dbname</span><br><span class="hljs-comment"># 需要连接的数据库，默认：powerdns</span><br><br><span class="hljs-comment"># gmysql-user</span><br><span class="hljs-comment"># 连接数据库的用户名，默认：powerdns</span><br><br><span class="hljs-comment"># gmysql-group</span><br><span class="hljs-comment"># 连接数据库的组，默认：client</span><br><br><span class="hljs-comment"># gmysql-password</span><br><span class="hljs-comment"># 连接数据库的用户的密码</span><br><br><span class="hljs-comment"># gmysql-dnssec</span><br><span class="hljs-comment"># 是否启用dnssec功能，默认：no</span><br><br><span class="hljs-comment"># gmysql-innodb-read-committed</span><br><span class="hljs-comment"># 使用InnoDB的READ-COMMITTED事务隔离，默认：yes</span><br><br><span class="hljs-comment"># gmysql-ssl</span><br><span class="hljs-comment"># 是否开启SSL支持，默认：no</span><br><br><span class="hljs-comment"># gmysql-timeout</span><br><span class="hljs-comment"># 尝试读取数据库的超时时间，0为禁用，默认：10</span><br><br><span class="hljs-comment"># gmysql-thread-cleanup</span><br><span class="hljs-comment"># 对于一些老旧版本的MySQL/MariaDB（比如RHEL7内置的版本）会出现内存泄露的问题，除非应用程序明确向该库报告每个线程的结束。启用gmysql-thread-cleanup告诉PowerDNS每当线程结束时就调用mysql_thread_end（）。</span><br><span class="hljs-comment"># 只有当确定自己需要开启这个功能的时候再开启，详情可以查看https://github.com/PowerDNS/pdns/issues/6231.</span><br></code></pre></td></tr></table></figure>
 
-
-CREATE TABLE records (
-  id                    BIGINT AUTO_INCREMENT,
-  domain_id             INT DEFAULT NULL,
-  name                  VARCHAR(255) DEFAULT NULL,
-  type                  VARCHAR(10) DEFAULT NULL,
-  content               VARCHAR(64000) DEFAULT NULL,
-  ttl                   INT DEFAULT NULL,
-  prio                  INT DEFAULT NULL,
-  disabled              TINYINT(1) DEFAULT 0,
-  ordername             VARCHAR(255) BINARY DEFAULT NULL,
-  auth                  TINYINT(1) DEFAULT 1,
-  PRIMARY KEY (id)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
-
-CREATE INDEX nametype_index ON records(name,type);
-CREATE INDEX domain_id ON records(domain_id);
-CREATE INDEX ordername ON records (ordername);
-
-
-CREATE TABLE supermasters (
-  ip                    VARCHAR(64) NOT NULL,
-  nameserver            VARCHAR(255) NOT NULL,
-  account               VARCHAR(40) CHARACTER SET &#39;utf8&#39; NOT NULL,
-  PRIMARY KEY (ip, nameserver)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
-
-
-CREATE TABLE comments (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT NOT NULL,
-  name                  VARCHAR(255) NOT NULL,
-  type                  VARCHAR(10) NOT NULL,
-  modified_at           INT NOT NULL,
-  account               VARCHAR(40) CHARACTER SET &#39;utf8&#39; DEFAULT NULL,
-  comment               TEXT CHARACTER SET &#39;utf8&#39; NOT NULL,
-  PRIMARY KEY (id)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
-
-CREATE INDEX comments_name_type_idx ON comments (name, type);
-CREATE INDEX comments_order_idx ON comments (domain_id, modified_at);
-
-
-CREATE TABLE domainmetadata (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT NOT NULL,
-  kind                  VARCHAR(32),
-  content               TEXT,
-  PRIMARY KEY (id)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
-
-CREATE INDEX domainmetadata_idx ON domainmetadata (domain_id, kind);
-
-
-CREATE TABLE cryptokeys (
-  id                    INT AUTO_INCREMENT,
-  domain_id             INT NOT NULL,
-  flags                 INT NOT NULL,
-  active                BOOL,
-  published             BOOL DEFAULT 1,
-  content               TEXT,
-  PRIMARY KEY(id)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
-
-CREATE INDEX domainidindex ON cryptokeys(domain_id);
-
-
-CREATE TABLE tsigkeys (
-  id                    INT AUTO_INCREMENT,
-  name                  VARCHAR(255),
-  algorithm             VARCHAR(50),
-  secret                VARCHAR(255),
-  PRIMARY KEY (id)
-) Engine&#x3D;InnoDB CHARACTER SET &#39;latin1&#39;;
-
-CREATE UNIQUE INDEX namealgoindex ON tsigkeys(name, algorithm);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<h1 id="4、pdns配置mysql"><a href="#4、pdns配置mysql" class="headerlink" title="4、pdns配置mysql"></a>4、pdns配置mysql</h1><h2 id="4-1-mysql-相关配置"><a href="#4-1-mysql-相关配置" class="headerlink" title="4.1 mysql 相关配置"></a>4.1 mysql 相关配置</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># gmysql-host</span>
-<span class="token comment"># 需要连接的mysql的IP地址，和gmysql-socket变量互斥</span>
-
-<span class="token comment"># gmysql-port</span>
-<span class="token comment"># 需要连接的mysql的端口号，默认是3306</span>
-
-<span class="token comment"># gmysql-socket</span>
-<span class="token comment"># 需要连接的mysql的UNIX socket地址，和gmysql-host互斥</span>
-
-<span class="token comment"># gmysql-dbname</span>
-<span class="token comment"># 需要连接的数据库，默认：powerdns</span>
-
-<span class="token comment"># gmysql-user</span>
-<span class="token comment"># 连接数据库的用户名，默认：powerdns</span>
-
-<span class="token comment"># gmysql-group</span>
-<span class="token comment"># 连接数据库的组，默认：client</span>
-
-<span class="token comment"># gmysql-password</span>
-<span class="token comment"># 连接数据库的用户的密码</span>
-
-<span class="token comment"># gmysql-dnssec</span>
-<span class="token comment"># 是否启用dnssec功能，默认：no</span>
-
-<span class="token comment"># gmysql-innodb-read-committed</span>
-<span class="token comment"># 使用InnoDB的READ-COMMITTED事务隔离，默认：yes</span>
-
-<span class="token comment"># gmysql-ssl</span>
-<span class="token comment"># 是否开启SSL支持，默认：no</span>
-
-<span class="token comment"># gmysql-timeout</span>
-<span class="token comment"># 尝试读取数据库的超时时间，0为禁用，默认：10</span>
-
-<span class="token comment"># gmysql-thread-cleanup</span>
-<span class="token comment"># 对于一些老旧版本的MySQL/MariaDB（比如RHEL7内置的版本）会出现内存泄露的问题，除非应用程序明确向该库报告每个线程的结束。启用gmysql-thread-cleanup告诉PowerDNS每当线程结束时就调用mysql_thread_end（）。</span>
-<span class="token comment"># 只有当确定自己需要开启这个功能的时候再开启，详情可以查看https://github.com/PowerDNS/pdns/issues/6231.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<h2 id="4-2-pdns-conf配置"><a href="#4-2-pdns-conf配置" class="headerlink" title="4.2 pdns.conf配置"></a>4.2 pdns.conf配置</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">cat</span> /etc/pdns/pdns.conf
-<span class="token assign-left variable">api</span><span class="token operator">=</span>yes
-api-key<span class="token operator">=</span>你的API-KEY
-config-dir<span class="token operator">=</span>/etc/pdns
-write-pid<span class="token operator">=</span>yes
-
-<span class="token assign-left variable">daemon</span><span class="token operator">=</span>no
-<span class="token assign-left variable">guardian</span><span class="token operator">=</span>no
-
-<span class="token assign-left variable">launch</span><span class="token operator">=</span>gmysql
-gmysql-host<span class="token operator">=</span>localhost
-gmysql-port<span class="token operator">=</span><span class="token number">3306</span>
-gmysql-dbname<span class="token operator">=</span>你的数据库名
-gmysql-user<span class="token operator">=</span>你的用户名
-gmysql-password<span class="token operator">=</span>你的密码
-
-log-dns-details<span class="token operator">=</span>yes
-log-dns-queries<span class="token operator">=</span>yes
-log-timestamp<span class="token operator">=</span>yes
-<span class="token assign-left variable">loglevel</span><span class="token operator">=</span><span class="token number">9</span>
-logging-facility<span class="token operator">=</span><span class="token number">0</span>
-log-timestamp<span class="token operator">=</span>yes
-
-<span class="token assign-left variable">setgid</span><span class="token operator">=</span>root
-<span class="token assign-left variable">setuid</span><span class="token operator">=</span>root
-
-<span class="token assign-left variable">webserver</span><span class="token operator">=</span>yes
-webserver-address<span class="token operator">=</span><span class="token number">192.168</span>.100.100
-webserver-loglevel<span class="token operator">=</span>detailed
-webserver-port<span class="token operator">=</span><span class="token number">8081</span>
-<span class="token comment"># webserver-allow-from指定允许访问webserver和API的IP白名单，多个IP可以使用英文逗号隔开</span>
-webserver-allow-from<span class="token operator">=</span><span class="token number">192.168</span>.100.0/24
-<span class="token comment"># pdns服务监听的地址，多个IP可以使用英文逗号隔开</span>
-local-address<span class="token operator">=</span><span class="token number">192.168</span>.100.100
-query-local-address<span class="token operator">=</span><span class="token number">192.168</span>.100.100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="4-2-pdns-conf配置"><a href="#4-2-pdns-conf配置" class="headerlink" title="4.2 pdns.conf配置"></a>4.2 pdns.conf配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ cat /etc/pdns/pdns.conf<br>api=yes<br>api-key=你的API-KEY<br>config-dir=/etc/pdns<br>write-pid=yes<br><br>daemon=no<br>guardian=no<br><br>launch=gmysql<br>gmysql-host=localhost<br>gmysql-port=3306<br>gmysql-dbname=你的数据库名<br>gmysql-user=你的用户名<br>gmysql-password=你的密码<br><br>log-dns-details=yes<br>log-dns-queries=yes<br>log-timestamp=yes<br>loglevel=9<br>logging-facility=0<br>log-timestamp=yes<br><br>setgid=root<br>setuid=root<br><br>webserver=yes<br>webserver-address=192.168.100.100<br>webserver-loglevel=detailed<br>webserver-port=8081<br><span class="hljs-comment"># webserver-allow-from指定允许访问webserver和API的IP白名单，多个IP可以使用英文逗号隔开</span><br>webserver-allow-from=192.168.100.0/24<br><span class="hljs-comment"># pdns服务监听的地址，多个IP可以使用英文逗号隔开</span><br>local-address=192.168.100.100<br>query-local-address=192.168.100.100<br></code></pre></td></tr></table></figure>
 
 <h2 id="4-3-pdns-rec配置"><a href="#4-3-pdns-rec配置" class="headerlink" title="4.3 pdns-rec配置"></a>4.3 pdns-rec配置</h2><p>pdns-rec的配置文件除了默认文件命名和少数特殊的配置项外，其他的绝大部分配置都和pdns-auth一致，这里不作赘述。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[root@tiny-cloud &#x2F;etc&#x2F;pdns-recursor]# realpath recursor.conf
-&#x2F;etc&#x2F;pdns-recursor&#x2F;recursor.conf<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">[root@tiny-cloud <span class="hljs-regexp">/etc/</span>pdns-recursor]<span class="hljs-comment"># realpath recursor.conf</span><br><span class="hljs-regexp">/etc/</span>pdns-recursor/recursor.conf<br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="5、pdns日志处理"><a href="#5、pdns日志处理" class="headerlink" title="5、pdns日志处理"></a>5、pdns日志处理</h1><p>官网的相关文档可以点击<a target="_blank" rel="noopener" href="https://doc.powerdns.com/authoritative/running.html#logging-to-syslog">这里</a>查看，debug阶段我们把日志级别调到了最高的9，为了避免错过重要信息，我们把日志按照不同的级别分别写入不同的文件中。</p>
 <p>修改centos对应的rsyslog配置文件并且重启服务</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># mkdir -p /etc/pdns/logs</span>
-
-<span class="token comment"># cat /etc/rsyslog.conf | grep pdns</span>
-local0.info                       /etc/pdns/logs/pdns.info.log
-local0.warn                       /etc/pdns/logs/pdns.warn.log
-local0.err                        /etc/pdns/logs/pdns.err.log
-
-systemctl restart rsyslog.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># mkdir -p /etc/pdns/logs</span><br><br><span class="hljs-comment"># cat /etc/rsyslog.conf | grep pdns</span><br>local0.info                       /etc/pdns/logs/pdns.info.log<br>local0.warn                       /etc/pdns/logs/pdns.warn.log<br>local0.err                        /etc/pdns/logs/pdns.err.log<br><br>systemctl restart rsyslog.service<br></code></pre></td></tr></table></figure>
 
 <p>修改pdns的<code>systemd</code>的<code>unit</code>文件，将里面的禁用<code>syslog</code>参数去掉，同时将其他多余的控制选项也一并去除，统一将各类参数设置集中到<code>pdns.conf</code>文件中，方便后期的管理和运维。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">vim</span> /usr/lib/systemd/system/pdns.service
-
-<span class="token comment"># 将原来的启动参数全部替换掉</span>
-<span class="token comment"># ExecStart=/usr/sbin/pdns_server --socket-dir=%t/pdns --guardian=no --daemon=no --disable-syslog --log-timestamp=no --write-pid=no</span>
-<span class="token comment"># 替换为</span>
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/usr/sbin/pdns_server --socket-dir<span class="token operator">=</span>%t/pdns
-
-systemctl daemon-reload<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /usr/lib/systemd/system/pdns.service<br><br><span class="hljs-comment"># 将原来的启动参数全部替换掉</span><br><span class="hljs-comment"># ExecStart=/usr/sbin/pdns_server --socket-dir=%t/pdns --guardian=no --daemon=no --disable-syslog --log-timestamp=no --write-pid=no</span><br><span class="hljs-comment"># 替换为</span><br>ExecStart=/usr/sbin/pdns_server --socket-dir=%t/pdns<br><br>systemctl daemon-reload<br></code></pre></td></tr></table></figure>
 
 <h1 id="6、pdns-auth的API请求"><a href="#6、pdns-auth的API请求" class="headerlink" title="6、pdns-auth的API请求"></a>6、pdns-auth的API请求</h1><p>PDNS提供了API功能，请求的时候需要注意正确携带配置中的<code>api-key</code>，否则会无法返回正确的结果，而是显示<code>401 Unauthorized</code>错误。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">curl</span> -v http://192.168.100.100:8081/api/v1/servers
-*   Trying <span class="token number">192.168</span>.100.100<span class="token punctuation">..</span>.
-* TCP_NODELAY <span class="token builtin class-name">set</span>
-* Connected to <span class="token number">192.168</span>.100.100 <span class="token punctuation">(</span><span class="token number">192.168</span>.100.100<span class="token punctuation">)</span> port <span class="token number">8081</span> <span class="token punctuation">(</span><span class="token comment">#0)</span>
-<span class="token operator">></span> GET /api/v1/servers HTTP/1.1
-<span class="token operator">></span> Host: <span class="token number">192.168</span>.100.100:8081
-<span class="token operator">></span> User-Agent: curl/7.61.1
-<span class="token operator">></span> Accept: */*
-<span class="token operator">></span>
-<span class="token operator">&lt;</span> HTTP/1.1 <span class="token number">401</span> Unauthorized
-<span class="token operator">&lt;</span> Connection: close
-<span class="token operator">&lt;</span> Content-Length: <span class="token number">12</span>
-<span class="token operator">&lt;</span> Content-Type: text/plain<span class="token punctuation">;</span> <span class="token assign-left variable">charset</span><span class="token operator">=</span>utf-8
-<span class="token operator">&lt;</span> Server: PowerDNS/4.4.0
-<span class="token operator">&lt;</span> Www-Authenticate: X-API-Key <span class="token assign-left variable">realm</span><span class="token operator">=</span><span class="token string">"PowerDNS"</span>
-<span class="token operator">&lt;</span>
-* Closing connection <span class="token number">0</span>
-Unauthorized<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ curl -v http://192.168.100.100:8081/api/v1/servers<br>*   Trying 192.168.100.100...<br>* TCP_NODELAY <span class="hljs-built_in">set</span><br>* Connected to 192.168.100.100 (192.168.100.100) port 8081 (<span class="hljs-comment">#0)</span><br>&gt; GET /api/v1/servers HTTP/1.1<br>&gt; Host: 192.168.100.100:8081<br>&gt; User-Agent: curl/7.61.1<br>&gt; Accept: */*<br>&gt;<br>&lt; HTTP/1.1 401 Unauthorized<br>&lt; Connection: close<br>&lt; Content-Length: 12<br>&lt; Content-Type: text/plain; charset=utf-8<br>&lt; Server: PowerDNS/4.4.0<br>&lt; Www-Authenticate: X-API-Key realm=<span class="hljs-string">&quot;PowerDNS&quot;</span><br>&lt;<br>* Closing connection 0<br>Unauthorized<br></code></pre></td></tr></table></figure>
 
 <p>请求正确的情况下会返回<code>json</code>格式的信息。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">curl</span> -v -H <span class="token string">'X-API-Key: 配置中的api-key'</span> http://192.168.100.100:8081/api/v1/servers
-*   Trying <span class="token number">192.168</span>.100.100<span class="token punctuation">..</span>.
-* TCP_NODELAY <span class="token builtin class-name">set</span>
-* Connected to <span class="token number">192.168</span>.100.100 <span class="token punctuation">(</span><span class="token number">192.168</span>.100.100<span class="token punctuation">)</span> port <span class="token number">8081</span> <span class="token punctuation">(</span><span class="token comment">#0)</span>
-<span class="token operator">></span> GET /api/v1/servers HTTP/1.1
-<span class="token operator">></span> Host: <span class="token number">192.168</span>.100.100:8081
-<span class="token operator">></span> User-Agent: curl/7.61.1
-<span class="token operator">></span> Accept: */*
-<span class="token operator">></span> X-API-Key: 配置中的api-key
-<span class="token operator">></span>
-<span class="token operator">&lt;</span> HTTP/1.1 <span class="token number">200</span> OK
-<span class="token operator">&lt;</span> Access-Control-Allow-Origin: *
-<span class="token operator">&lt;</span> Connection: close
-<span class="token operator">&lt;</span> Content-Length: <span class="token number">249</span>
-<span class="token operator">&lt;</span> Content-Security-Policy: default-src <span class="token string">'self'</span><span class="token punctuation">;</span> style-src <span class="token string">'self'</span> <span class="token string">'unsafe-inline'</span>
-<span class="token operator">&lt;</span> Content-Type: application/json
-<span class="token operator">&lt;</span> Server: PowerDNS/4.4.0
-<span class="token operator">&lt;</span> X-Content-Type-Options: nosniff
-<span class="token operator">&lt;</span> X-Frame-Options: deny
-<span class="token operator">&lt;</span> X-Permitted-Cross-Domain-Policies: none
-<span class="token operator">&lt;</span> X-Xss-Protection: <span class="token number">1</span><span class="token punctuation">;</span> <span class="token assign-left variable">mode</span><span class="token operator">=</span>block
-<span class="token operator">&lt;</span>
-* Closing connection <span class="token number">0</span>
-<span class="token punctuation">[</span><span class="token punctuation">&#123;</span><span class="token string">"config_url"</span><span class="token builtin class-name">:</span> <span class="token string">"/api/v1/servers/localhost/config&#123;/config_setting&#125;"</span>, <span class="token string">"daemon_type"</span><span class="token builtin class-name">:</span> <span class="token string">"authoritative"</span>, <span class="token string">"id"</span><span class="token builtin class-name">:</span> <span class="token string">"localhost"</span>, <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"Server"</span>, <span class="token string">"url"</span><span class="token builtin class-name">:</span> <span class="token string">"/api/v1/servers/localhost"</span>, <span class="token string">"version"</span><span class="token builtin class-name">:</span> <span class="token string">"4.4.0"</span>, <span class="token string">"zones_url"</span><span class="token builtin class-name">:</span> <span class="token string">"/api/v1/servers/localhost/zones&#123;/zone&#125;"</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ curl -v -H <span class="hljs-string">&#x27;X-API-Key: 配置中的api-key&#x27;</span> http://192.168.100.100:8081/api/v1/servers<br>*   Trying 192.168.100.100...<br>* TCP_NODELAY <span class="hljs-built_in">set</span><br>* Connected to 192.168.100.100 (192.168.100.100) port 8081 (<span class="hljs-comment">#0)</span><br>&gt; GET /api/v1/servers HTTP/1.1<br>&gt; Host: 192.168.100.100:8081<br>&gt; User-Agent: curl/7.61.1<br>&gt; Accept: */*<br>&gt; X-API-Key: 配置中的api-key<br>&gt;<br>&lt; HTTP/1.1 200 OK<br>&lt; Access-Control-Allow-Origin: *<br>&lt; Connection: close<br>&lt; Content-Length: 249<br>&lt; Content-Security-Policy: default-src <span class="hljs-string">&#x27;self&#x27;</span>; style-src <span class="hljs-string">&#x27;self&#x27;</span> <span class="hljs-string">&#x27;unsafe-inline&#x27;</span><br>&lt; Content-Type: application/json<br>&lt; Server: PowerDNS/4.4.0<br>&lt; X-Content-Type-Options: nosniff<br>&lt; X-Frame-Options: deny<br>&lt; X-Permitted-Cross-Domain-Policies: none<br>&lt; X-Xss-Protection: 1; mode=block<br>&lt;<br>* Closing connection 0<br>[&#123;<span class="hljs-string">&quot;config_url&quot;</span>: <span class="hljs-string">&quot;/api/v1/servers/localhost/config&#123;/config_setting&#125;&quot;</span>, <span class="hljs-string">&quot;daemon_type&quot;</span>: <span class="hljs-string">&quot;authoritative&quot;</span>, <span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;localhost&quot;</span>, <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Server&quot;</span>, <span class="hljs-string">&quot;url&quot;</span>: <span class="hljs-string">&quot;/api/v1/servers/localhost&quot;</span>, <span class="hljs-string">&quot;version&quot;</span>: <span class="hljs-string">&quot;4.4.0&quot;</span>, <span class="hljs-string">&quot;zones_url&quot;</span>: <span class="hljs-string">&quot;/api/v1/servers/localhost/zones&#123;/zone&#125;&quot;</span>&#125;]<br></code></pre></td></tr></table></figure>
 
 <h1 id="7、DNS解析"><a href="#7、DNS解析" class="headerlink" title="7、DNS解析"></a>7、DNS解析</h1><p>对于pdns-rec而言，是单纯的一个递归查询器（Recursor），会根据设置的缓存时间来缓存向上查询到的DNS记录。</p>
 <p>理论上PDNS Auth只会查询自己已有的DNS记录，如果不存在则会直接返回空，而不是继续向上递归查询。这里我们使用轻量型的DNS服务器dnsmasq作为对比，两者都没有手动添加任何的DNS解析记录。</p>
 <p><img src="https://resource.tinychen.com/20210126165523.png" srcset="/img/loading.gif" lazyload></p>
 <p>从上面的测试结果我们可以看出pdns auth只会返回自己的数据库中存在的记录。于是我们手动添加记录到pdns中再进行查询。</p>
 <p>这里我们使用<code>pdnsutil</code>工具来简单测试，首先我们简单的创建一个关于example.org的zone，然后我们再创建关于example.org的一条A记录和MX记录，接着使用dig命令来进行测试：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ pdnsutil create-zone example.org ns1.example.com
-Feb <span class="token number">24</span> <span class="token number">16</span>:54:48 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-Feb <span class="token number">24</span> <span class="token number">16</span>:54:48 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-Creating empty zone <span class="token string">'example.org'</span>
-Feb <span class="token number">24</span> <span class="token number">16</span>:54:48 No serial <span class="token keyword">for</span> <span class="token string">'example.org'</span> found - zone is missing?
-Also adding one NS record
-
-$ pdnsutil list-all-zones
-Feb <span class="token number">24</span> <span class="token number">16</span>:54:59 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-Feb <span class="token number">24</span> <span class="token number">16</span>:54:59 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-tinychen.com
-example.org
-
-$  pdnsutil add-record example.org <span class="token string">''</span> MX <span class="token string">'25 mail.example.org'</span>
-Feb <span class="token number">24</span> <span class="token number">16</span>:55:36 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-Feb <span class="token number">24</span> <span class="token number">16</span>:55:36 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-New rrset:
-example.org. <span class="token number">3600</span> IN MX <span class="token number">25</span> mail.example.org
-
-$  pdnsutil add-record example.org. www A <span class="token number">192.168</span>.100.100
-Feb <span class="token number">24</span> <span class="token number">16</span>:56:09 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-Feb <span class="token number">24</span> <span class="token number">16</span>:56:09 gmysql Connection successful. Connected to database <span class="token string">'powerdns'</span> on <span class="token string">'localhost'</span><span class="token builtin class-name">.</span>
-New rrset:
-www.example.org. <span class="token number">3600</span> IN A <span class="token number">192.168</span>.100.100<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ pdnsutil create-zone example.org ns1.example.com<br>Feb 24 16:54:48 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>Feb 24 16:54:48 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>Creating empty zone <span class="hljs-string">&#x27;example.org&#x27;</span><br>Feb 24 16:54:48 No serial <span class="hljs-keyword">for</span> <span class="hljs-string">&#x27;example.org&#x27;</span> found - zone is missing?<br>Also adding one NS record<br><br>$ pdnsutil list-all-zones<br>Feb 24 16:54:59 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>Feb 24 16:54:59 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>tinychen.com<br>example.org<br><br>$  pdnsutil add-record example.org <span class="hljs-string">&#x27;&#x27;</span> MX <span class="hljs-string">&#x27;25 mail.example.org&#x27;</span><br>Feb 24 16:55:36 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>Feb 24 16:55:36 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>New rrset:<br>example.org. 3600 IN MX 25 mail.example.org<br><br>$  pdnsutil add-record example.org. www A 192.168.100.100<br>Feb 24 16:56:09 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>Feb 24 16:56:09 gmysql Connection successful. Connected to database <span class="hljs-string">&#x27;powerdns&#x27;</span> on <span class="hljs-string">&#x27;localhost&#x27;</span>.<br>New rrset:<br>www.example.org. 3600 IN A 192.168.100.100<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210224170528.png" srcset="/img/loading.gif" lazyload></p>
 <p>同样的我们对tinychen.com进行相同的操作，可以看到这时已经能够解析出对应的IP了。</p>
@@ -955,8 +673,6 @@ www.example.org. <span class="token number">3600</span> IN A <span class="token 
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

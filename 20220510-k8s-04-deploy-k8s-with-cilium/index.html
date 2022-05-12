@@ -47,8 +47,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -226,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          34k words
+          36k words
         
       </span>
     
@@ -237,7 +235,7 @@
         
         
         
-          287 mins
+          299 mins
         
       </span>
     
@@ -317,136 +315,47 @@
 </tr>
 </tbody></table>
 <h2 id="1-2-检查mac和product-uuid"><a href="#1-2-检查mac和product-uuid" class="headerlink" title="1.2 检查mac和product_uuid"></a>1.2 检查mac和product_uuid</h2><p>同一个k8s集群内的所有节点需要确保<code>mac</code>地址和<code>product_uuid</code>均唯一，开始集群初始化之前需要检查相关信息</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查mac地址</span>
-<span class="token function">ip</span> <span class="token function">link</span> 
-<span class="token function">ifconfig</span> -a
-
-<span class="token comment"># 检查product_uuid</span>
-<span class="token function">sudo</span> <span class="token function">cat</span> /sys/class/dmi/id/product_uuid<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 检查mac地址</span><br>ip link <br>ifconfig -a<br><br><span class="hljs-comment"># 检查product_uuid</span><br>sudo cat /sys/class/dmi/id/product_uuid<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-3-配置ssh免密登录（可选）"><a href="#1-3-配置ssh免密登录（可选）" class="headerlink" title="1.3 配置ssh免密登录（可选）"></a>1.3 配置ssh免密登录（可选）</h2><p>如果k8s集群的节点有多个网卡，确保每个节点能通过正确的网卡互联访问</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在root用户下面生成一个公用的key，并配置可以使用该key免密登录</span>
-<span class="token function">su</span> root
-ssh-keygen
-<span class="token builtin class-name">cd</span> /root/.ssh/
-<span class="token function">cat</span> id_rsa.pub <span class="token operator">>></span> authorized_keys
-<span class="token function">chmod</span> <span class="token number">600</span> authorized_keys
-
-
-<span class="token function">cat</span> <span class="token operator">>></span> ~/.ssh/config <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-Host tiny-cilium-master-188-1.k8s.tcinternal
-    HostName 10.31.188.1
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_rsa
-
-Host tiny-cilium-worker-188-11.k8s.tcinternal
-    HostName 10.31.188.11
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_rsa
-
-Host tiny-cilium-worker-188-12.k8s.tcinternal
-    HostName 10.31.188.12
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_rsa
-EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在root用户下面生成一个公用的key，并配置可以使用该key免密登录</span><br>su root<br>ssh-keygen<br><span class="hljs-built_in">cd</span> /root/.ssh/<br>cat id_rsa.pub &gt;&gt; authorized_keys<br>chmod 600 authorized_keys<br><br><br>cat &gt;&gt; ~/.ssh/config &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">Host tiny-cilium-master-188-1.k8s.tcinternal</span><br><span class="hljs-string">    HostName 10.31.188.1</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host tiny-cilium-worker-188-11.k8s.tcinternal</span><br><span class="hljs-string">    HostName 10.31.188.11</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host tiny-cilium-worker-188-12.k8s.tcinternal</span><br><span class="hljs-string">    HostName 10.31.188.12</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-4-修改hosts文件"><a href="#1-4-修改hosts文件" class="headerlink" title="1.4 修改hosts文件"></a>1.4 修改hosts文件</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">>></span> /etc/hosts <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-10.31.188.1  tiny-cilium-master-188-1 tiny-cilium-master-188-1.k8s.tcinternal
-10.31.188.11 tiny-cilium-worker-188-11 tiny-cilium-worker-188-11.k8s.tcinternal
-10.31.188.12 tiny-cilium-worker-188-12 tiny-cilium-worker-188-12.k8s.tcinternal
-EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-4-修改hosts文件"><a href="#1-4-修改hosts文件" class="headerlink" title="1.4 修改hosts文件"></a>1.4 修改hosts文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat &gt;&gt; /etc/hosts &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">10.31.188.1  tiny-cilium-master-188-1 tiny-cilium-master-188-1.k8s.tcinternal</span><br><span class="hljs-string">10.31.188.11 tiny-cilium-worker-188-11 tiny-cilium-worker-188-11.k8s.tcinternal</span><br><span class="hljs-string">10.31.188.12 tiny-cilium-worker-188-12 tiny-cilium-worker-188-12.k8s.tcinternal</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-5-关闭swap内存"><a href="#1-5-关闭swap内存" class="headerlink" title="1.5 关闭swap内存"></a>1.5 关闭swap内存</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用命令直接关闭swap内存</span>
-swapoff -a
-<span class="token comment"># 修改fstab文件禁止开机自动挂载swap分区</span>
-<span class="token function">sed</span> -i <span class="token string">'/swap / s/^\(.*\)$/#<span class="token entity" title="\1">\1</span>/g'</span> /etc/fstab<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-5-关闭swap内存"><a href="#1-5-关闭swap内存" class="headerlink" title="1.5 关闭swap内存"></a>1.5 关闭swap内存</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用命令直接关闭swap内存</span><br>swapoff -a<br><span class="hljs-comment"># 修改fstab文件禁止开机自动挂载swap分区</span><br>sed -i <span class="hljs-string">&#x27;/swap / s/^\(.*\)$/#\1/g&#x27;</span> /etc/fstab<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-6-配置时间同步"><a href="#1-6-配置时间同步" class="headerlink" title="1.6 配置时间同步"></a>1.6 配置时间同步</h2><p>这里可以根据自己的习惯选择ntp或者是chrony同步均可，同步的时间源服务器可以选择阿里云的<code>ntp1.aliyun.com</code>或者是国家时间中心的<code>ntp.ntsc.ac.cn</code>。</p>
-<h3 id="使用ntp同步"><a href="#使用ntp同步" class="headerlink" title="使用ntp同步"></a>使用ntp同步</h3><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 使用yum安装ntpdate工具
-yum install ntpdate -y
+<h3 id="使用ntp同步"><a href="#使用ntp同步" class="headerlink" title="使用ntp同步"></a>使用ntp同步</h3><figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs vala"><span class="hljs-meta"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-meta"># 使用国家时间中心的源同步时间</span><br>ntpdate ntp.ntsc.ac.cn<br><br><span class="hljs-meta"># 最后查看一下时间</span><br>hwclock<br></code></pre></td></tr></table></figure>
 
-# 使用国家时间中心的源同步时间
-ntpdate ntp.ntsc.ac.cn
-
-# 最后查看一下时间
-hwclock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<h3 id="使用chrony同步"><a href="#使用chrony同步" class="headerlink" title="使用chrony同步"></a>使用chrony同步</h3><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用yum安装chrony</span>
-yum <span class="token function">install</span> chrony -y
-
-<span class="token comment"># 设置开机启动并开启chony并查看运行状态</span>
-systemctl <span class="token builtin class-name">enable</span> chronyd.service
-systemctl start chronyd.service
-systemctl status chronyd.service
-
-<span class="token comment"># 当然也可以自定义时间服务器</span>
-<span class="token function">vim</span> /etc/chrony.conf
-
-<span class="token comment"># 修改前</span>
-$ <span class="token function">grep</span> server /etc/chrony.conf
-<span class="token comment"># Use public servers from the pool.ntp.org project.</span>
-server <span class="token number">0</span>.centos.pool.ntp.org iburst
-server <span class="token number">1</span>.centos.pool.ntp.org iburst
-server <span class="token number">2</span>.centos.pool.ntp.org iburst
-server <span class="token number">3</span>.centos.pool.ntp.org iburst
-
-<span class="token comment"># 修改后</span>
-$ <span class="token function">grep</span> server /etc/chrony.conf
-<span class="token comment"># Use public servers from the pool.ntp.org project.</span>
-server ntp.ntsc.ac.cn iburst
-
-<span class="token comment"># 重启服务使配置文件生效</span>
-systemctl restart chronyd.service
-
-<span class="token comment"># 查看chrony的ntp服务器状态</span>
-chronyc sourcestats -v
-chronyc sources -v
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h3 id="使用chrony同步"><a href="#使用chrony同步" class="headerlink" title="使用chrony同步"></a>使用chrony同步</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装chrony</span><br>yum install chrony -y<br><br><span class="hljs-comment"># 设置开机启动并开启chony并查看运行状态</span><br>systemctl <span class="hljs-built_in">enable</span> chronyd.service<br>systemctl start chronyd.service<br>systemctl status chronyd.service<br><br><span class="hljs-comment"># 当然也可以自定义时间服务器</span><br>vim /etc/chrony.conf<br><br><span class="hljs-comment"># 修改前</span><br>$ grep server /etc/chrony.conf<br><span class="hljs-comment"># Use public servers from the pool.ntp.org project.</span><br>server 0.centos.pool.ntp.org iburst<br>server 1.centos.pool.ntp.org iburst<br>server 2.centos.pool.ntp.org iburst<br>server 3.centos.pool.ntp.org iburst<br><br><span class="hljs-comment"># 修改后</span><br>$ grep server /etc/chrony.conf<br><span class="hljs-comment"># Use public servers from the pool.ntp.org project.</span><br>server ntp.ntsc.ac.cn iburst<br><br><span class="hljs-comment"># 重启服务使配置文件生效</span><br>systemctl restart chronyd.service<br><br><span class="hljs-comment"># 查看chrony的ntp服务器状态</span><br>chronyc sourcestats -v<br>chronyc sources -v<br><br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-7-关闭selinux"><a href="#1-7-关闭selinux" class="headerlink" title="1.7 关闭selinux"></a>1.7 关闭selinux</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用命令直接关闭</span>
-setenforce <span class="token number">0</span>
-
-<span class="token comment"># 也可以直接修改/etc/selinux/config文件</span>
-<span class="token function">sed</span> -i <span class="token string">'s/^SELINUX=enforcing$/SELINUX=disabled/'</span> /etc/selinux/config<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-7-关闭selinux"><a href="#1-7-关闭selinux" class="headerlink" title="1.7 关闭selinux"></a>1.7 关闭selinux</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用命令直接关闭</span><br>setenforce 0<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=disabled/&#x27;</span> /etc/selinux/config<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-8-配置防火墙"><a href="#1-8-配置防火墙" class="headerlink" title="1.8 配置防火墙"></a>1.8 配置防火墙</h2><p>k8s集群之间通信和服务暴露需要使用较多端口，为了方便，直接禁用防火墙</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># centos7使用systemctl禁用默认的firewalld服务</span>
-systemctl disable firewalld.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># centos7使用systemctl禁用默认的firewalld服务</span><br>systemctl <span class="hljs-built_in">disable</span> firewalld.service<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-9-配置netfilter参数"><a href="#1-9-配置netfilter参数" class="headerlink" title="1.9 配置netfilter参数"></a>1.9 配置netfilter参数</h2><p>这里主要是需要配置内核加载<code>br_netfilter</code>和<code>iptables</code>放行<code>ipv6</code>和<code>ipv4</code>的流量，确保集群内的容器能够正常通信。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cat &lt;&lt;EOF | sudo tee &#x2F;etc&#x2F;modules-load.d&#x2F;k8s.conf
-br_netfilter
-EOF
-
-cat &lt;&lt;EOF | sudo tee &#x2F;etc&#x2F;sysctl.d&#x2F;k8s.conf
-net.bridge.bridge-nf-call-ip6tables &#x3D; 1
-net.bridge.bridge-nf-call-iptables &#x3D; 1
-EOF
-sudo sysctl --system<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gauss">cat &lt;&lt;<span class="hljs-built_in">EOF</span> | sudo tee /etc/modules-load.d/k8s.conf<br>br_netfilter<br><span class="hljs-built_in">EOF</span><br><br>cat &lt;&lt;<span class="hljs-built_in">EOF</span> | sudo tee /etc/sysctl.d/k8s.conf<br>net.bridge.bridge-nf-<span class="hljs-keyword">call</span>-ip6tables = <span class="hljs-number">1</span><br>net.bridge.bridge-nf-<span class="hljs-keyword">call</span>-iptables = <span class="hljs-number">1</span><br><span class="hljs-built_in">EOF</span><br>sudo sysctl --<span class="hljs-keyword">system</span><br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-10-关闭IPV6（不建议）"><a href="#1-10-关闭IPV6（不建议）" class="headerlink" title="1.10 关闭IPV6（不建议）"></a>1.10 关闭IPV6（不建议）</h2><p>和之前部署其他的CNI不一样，cilium很多服务监听默认情况下都是双栈的（使用cilium-cli操作的时候），因此建议开启系统的IPV6网络支持（即使没有可用的IPV6路由也可以）</p>
 <p>当然没有ipv6网络也是可以的，只是在使用cilium-cli的一些开启port-forward命令时会报错而已。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接在内核中添加ipv6禁用参数</span>
-grubby --update-kernel<span class="token operator">=</span>ALL --args<span class="token operator">=</span>ipv6.disable<span class="token operator">=</span><span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接在内核中添加ipv6禁用参数</span><br>grubby --update-kernel=ALL --args=ipv6.disable=1<br></code></pre></td></tr></table></figure>
 
 <h2 id="1-11-配置IPVS（建议）"><a href="#1-11-配置IPVS（建议）" class="headerlink" title="1.11 配置IPVS（建议）"></a>1.11 配置IPVS（建议）</h2><p>IPVS是专门设计用来应对负载均衡场景的组件，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md#run-kube-proxy-in-ipvs-mode">kube-proxy 中的 IPVS 实现</a>通过减少对 iptables 的使用来增加可扩展性。在 iptables 输入链中不使用 PREROUTING，而是创建一个假的接口，叫做 kube-ipvs0，当k8s集群中的负载均衡配置变多的时候，IPVS能实现比iptables更高效的转发性能。</p>
 <blockquote>
@@ -454,46 +363,7 @@ grubby --update-kernel<span class="token operator">=</span>ALL --args<span class
 <p>注意在4.19之后的内核版本中使用<code>nf_conntrack</code>模块来替换了原有的<code>nf_conntrack_ipv4</code>模块</p>
 <p>(<strong>Notes</strong>: use <code>nf_conntrack</code> instead of <code>nf_conntrack_ipv4</code> for Linux kernel 4.19 and later)</p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在使用ipvs模式之前确保安装了ipset和ipvsadm</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> ipset ipvsadm -y
-
-<span class="token comment"># 手动加载ipvs相关模块</span>
-modprobe -- ip_vs
-modprobe -- ip_vs_rr
-modprobe -- ip_vs_wrr
-modprobe -- ip_vs_sh
-modprobe -- nf_conntrack
-
-<span class="token comment"># 配置开机自动加载ipvs相关模块</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/modules-load.d/ipvs.conf</span>
-ip_vs
-ip_vs_rr
-ip_vs_wrr
-ip_vs_sh
-nf_conntrack
-EOF</span>
-
-<span class="token function">sudo</span> sysctl --system
-<span class="token comment"># 最好重启一遍系统确定是否生效</span>
-
-$ lsmod <span class="token operator">|</span> <span class="token function">grep</span> -e ip_vs -e nf_conntrack
-nf_conntrack_netlink    <span class="token number">49152</span>  <span class="token number">0</span>
-nfnetlink              <span class="token number">20480</span>  <span class="token number">2</span> nf_conntrack_netlink
-ip_vs_sh               <span class="token number">16384</span>  <span class="token number">0</span>
-ip_vs_wrr              <span class="token number">16384</span>  <span class="token number">0</span>
-ip_vs_rr               <span class="token number">16384</span>  <span class="token number">0</span>
-ip_vs                 <span class="token number">159744</span>  <span class="token number">6</span> ip_vs_rr,ip_vs_sh,ip_vs_wrr
-nf_conntrack          <span class="token number">159744</span>  <span class="token number">5</span> xt_conntrack,nf_nat,nf_conntrack_netlink,xt_MASQUERADE,ip_vs
-nf_defrag_ipv4         <span class="token number">16384</span>  <span class="token number">1</span> nf_conntrack
-nf_defrag_ipv6         <span class="token number">24576</span>  <span class="token number">2</span> nf_conntrack,ip_vs
-libcrc32c              <span class="token number">16384</span>  <span class="token number">4</span> nf_conntrack,nf_nat,xfs,ip_vs
-$ <span class="token function">cut</span> -f1 -d <span class="token string">" "</span>  /proc/modules <span class="token operator">|</span> <span class="token function">grep</span> -e ip_vs -e nf_conntrack
-nf_conntrack_netlink
-ip_vs_sh
-ip_vs_wrr
-ip_vs_rr
-ip_vs
-nf_conntrack<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在使用ipvs模式之前确保安装了ipset和ipvsadm</span><br>sudo yum install ipset ipvsadm -y<br><br><span class="hljs-comment"># 手动加载ipvs相关模块</span><br>modprobe -- ip_vs<br>modprobe -- ip_vs_rr<br>modprobe -- ip_vs_wrr<br>modprobe -- ip_vs_sh<br>modprobe -- nf_conntrack<br><br><span class="hljs-comment"># 配置开机自动加载ipvs相关模块</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/modules-load.d/ipvs.conf</span><br><span class="hljs-string">ip_vs</span><br><span class="hljs-string">ip_vs_rr</span><br><span class="hljs-string">ip_vs_wrr</span><br><span class="hljs-string">ip_vs_sh</span><br><span class="hljs-string">nf_conntrack</span><br><span class="hljs-string">EOF</span><br><br>sudo sysctl --system<br><span class="hljs-comment"># 最好重启一遍系统确定是否生效</span><br><br>$ lsmod | grep -e ip_vs -e nf_conntrack<br>nf_conntrack_netlink    49152  0<br>nfnetlink              20480  2 nf_conntrack_netlink<br>ip_vs_sh               16384  0<br>ip_vs_wrr              16384  0<br>ip_vs_rr               16384  0<br>ip_vs                 159744  6 ip_vs_rr,ip_vs_sh,ip_vs_wrr<br>nf_conntrack          159744  5 xt_conntrack,nf_nat,nf_conntrack_netlink,xt_MASQUERADE,ip_vs<br>nf_defrag_ipv4         16384  1 nf_conntrack<br>nf_defrag_ipv6         24576  2 nf_conntrack,ip_vs<br>libcrc32c              16384  4 nf_conntrack,nf_nat,xfs,ip_vs<br>$ cut -f1 -d <span class="hljs-string">&quot; &quot;</span>  /proc/modules | grep -e ip_vs -e nf_conntrack<br>nf_conntrack_netlink<br>ip_vs_sh<br>ip_vs_wrr<br>ip_vs_rr<br>ip_vs<br>nf_conntrack<br></code></pre></td></tr></table></figure>
 
 <h2 id="1-12-配置Linux内核（cilium必选）"><a href="#1-12-配置Linux内核（cilium必选）" class="headerlink" title="1.12 配置Linux内核（cilium必选）"></a>1.12 配置Linux内核（cilium必选）</h2><p>cilium和其他的cni组件最大的不同在于其底层使用了ebpf技术，而该技术对于Linux的系统内核版本有较高的要求，完成的要求可以查看官网的<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/latest/operations/system_requirements/">详细链接</a>，这里我们着重看内核版本、内核参数这两个部分。</p>
 <h3 id="Linux内核版本"><a href="#Linux内核版本" class="headerlink" title="Linux内核版本"></a>Linux内核版本</h3><p>默认情况下我们可以参考cilium官方给出的一个系统要求总结。因为我们是在k8s集群中部署（使用容器），因此只需要关注Linux内核版本和etcd版本即可。根据前面部署的经验我们可以知道1.23.6版本的k8s默认使用的etcd版本是<code>3.5.+</code>，因此重点就来到了Linux内核版本这里。</p>
@@ -597,41 +467,7 @@ nf_conntrack<span aria-hidden="true" class="line-numbers-rows"><span></span><spa
 </tr>
 </tbody></table>
 <p>可以看到如果需要满足上面所有需求的话，需要内核版本高于5.10，本着学习测试研究作死的精神，反正都升级了，干脆就升级到新一些的版本吧。这里我们可以直接<a href="https://tinychen.com/20190612-centos-update-kernel/">使用elrepo源来升级内核</a>到较新的内核版本。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看elrepo源中支持的内核版本</span>
-$ yum --disablerepo<span class="token operator">=</span><span class="token string">"*"</span> --enablerepo<span class="token operator">=</span><span class="token string">"elrepo-kernel"</span> list available
-Loaded plugins: fastestmirror
-Loading mirror speeds from cached hostfile
-Available Packages
-elrepo-release.noarch                                                                   <span class="token number">7.0</span>-5.el7.elrepo                                                           elrepo-kernel
-kernel-lt.x86_64                                                                        <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-lt-devel.x86_64                                                                  <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-lt-doc.noarch                                                                    <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-lt-headers.x86_64                                                                <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-lt-tools.x86_64                                                                  <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-lt-tools-libs.x86_64                                                             <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-lt-tools-libs-devel.x86_64                                                       <span class="token number">5.4</span>.192-1.el7.elrepo                                                       elrepo-kernel
-kernel-ml.x86_64                                                                        <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-kernel-ml-devel.x86_64                                                                  <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-kernel-ml-doc.noarch                                                                    <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-kernel-ml-headers.x86_64                                                                <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-kernel-ml-tools.x86_64                                                                  <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-kernel-ml-tools-libs.x86_64                                                             <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-kernel-ml-tools-libs-devel.x86_64                                                       <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-perf.x86_64                                                                             <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-python-perf.x86_64                                                                      <span class="token number">5.17</span>.6-1.el7.elrepo                                                        elrepo-kernel
-
-<span class="token comment"># 看起来ml版本的内核比较满足我们的需求,直接使用yum进行安装</span>
-<span class="token function">sudo</span> yum --enablerepo<span class="token operator">=</span>elrepo-kernel <span class="token function">install</span> kernel-ml -y
-<span class="token comment"># 使用grubby工具查看系统中已经安装的内核版本信息</span>
-<span class="token function">sudo</span> grubby --info<span class="token operator">=</span>ALL
-<span class="token comment"># 设置新安装的5.17.6版本内核为默认内核版本，此处的index=0要和上面查看的内核版本信息一致</span>
-<span class="token function">sudo</span> grubby --set-default-index<span class="token operator">=</span><span class="token number">0</span>
-<span class="token comment"># 查看默认内核是否修改成功</span>
-<span class="token function">sudo</span> grubby --default-kernel
-<span class="token comment"># 重启系统切换到新内核</span>
-init <span class="token number">6</span>
-<span class="token comment"># 重启后检查内核版本是否为新的5.17.6</span>
-<span class="token function">uname</span> -a<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看elrepo源中支持的内核版本</span><br>$ yum --disablerepo=<span class="hljs-string">&quot;*&quot;</span> --enablerepo=<span class="hljs-string">&quot;elrepo-kernel&quot;</span> list available<br>Loaded plugins: fastestmirror<br>Loading mirror speeds from cached hostfile<br>Available Packages<br>elrepo-release.noarch                                                                   7.0-5.el7.elrepo                                                           elrepo-kernel<br>kernel-lt.x86_64                                                                        5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-lt-devel.x86_64                                                                  5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-lt-doc.noarch                                                                    5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-lt-headers.x86_64                                                                5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-lt-tools.x86_64                                                                  5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-lt-tools-libs.x86_64                                                             5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-lt-tools-libs-devel.x86_64                                                       5.4.192-1.el7.elrepo                                                       elrepo-kernel<br>kernel-ml.x86_64                                                                        5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>kernel-ml-devel.x86_64                                                                  5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>kernel-ml-doc.noarch                                                                    5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>kernel-ml-headers.x86_64                                                                5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>kernel-ml-tools.x86_64                                                                  5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>kernel-ml-tools-libs.x86_64                                                             5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>kernel-ml-tools-libs-devel.x86_64                                                       5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>perf.x86_64                                                                             5.17.6-1.el7.elrepo                                                        elrepo-kernel<br>python-perf.x86_64                                                                      5.17.6-1.el7.elrepo                                                        elrepo-kernel<br><br><span class="hljs-comment"># 看起来ml版本的内核比较满足我们的需求,直接使用yum进行安装</span><br>sudo yum --enablerepo=elrepo-kernel install kernel-ml -y<br><span class="hljs-comment"># 使用grubby工具查看系统中已经安装的内核版本信息</span><br>sudo grubby --info=ALL<br><span class="hljs-comment"># 设置新安装的5.17.6版本内核为默认内核版本，此处的index=0要和上面查看的内核版本信息一致</span><br>sudo grubby --set-default-index=0<br><span class="hljs-comment"># 查看默认内核是否修改成功</span><br>sudo grubby --default-kernel<br><span class="hljs-comment"># 重启系统切换到新内核</span><br>init 6<br><span class="hljs-comment"># 重启后检查内核版本是否为新的5.17.6</span><br>uname -a<br></code></pre></td></tr></table></figure>
 
 <h3 id="Linux内核参数"><a href="#Linux内核参数" class="headerlink" title="Linux内核参数"></a>Linux内核参数</h3><p>首先我们查看自己当前内核版本的参数，基本上可以分为<code>y</code>、<code>n</code>、<code>m</code>三个选项</p>
 <ul>
@@ -639,8 +475,7 @@ init <span class="token number">6</span>
 <li>n：no，Leave entirely out of the kernel. 表示该功能未被编译进内核中，不启用</li>
 <li>m：module，Build as a module, to be loaded if needed. 表示该功能被编译为模块，按需启用</li>
 </ul>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 查看当前使用的内核版本的编译参数
-cat &#x2F;boot&#x2F;config-$(uname -r)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># 查看当前使用的内核版本的编译参数</span><br>cat <span class="hljs-regexp">/boot/</span>config-$(uname -r)<br></code></pre></td></tr></table></figure>
 
 <p>cilium官方对各项功能所需要开启的<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/latest/operations/system_requirements/#linux-kernel">内核参数列举</a>如下：</p>
 <blockquote>
@@ -648,59 +483,21 @@ cat &#x2F;boot&#x2F;config-$(uname -r)<span aria-hidden="true" class="line-numbe
 <p>为了正确启用 eBPF 功能，必须启用以下内核配置选项。这通常因内核版本情况而异。任何一个选项都可以构建为模块或静态链接，两个选择都是有效的。</p>
 </blockquote>
 <p>我们暂时只看最基本的<code>Base Requirements</code></p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">CONFIG_BPF&#x3D;y
-CONFIG_BPF_SYSCALL&#x3D;y
-CONFIG_NET_CLS_BPF&#x3D;y
-CONFIG_BPF_JIT&#x3D;y
-CONFIG_NET_CLS_ACT&#x3D;y
-CONFIG_NET_SCH_INGRESS&#x3D;y
-CONFIG_CRYPTO_SHA1&#x3D;y
-CONFIG_CRYPTO_USER_API_HASH&#x3D;y
-CONFIG_CGROUPS&#x3D;y
-CONFIG_CGROUP_BPF&#x3D;y<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">CONFIG_BPF</span>=y<br><span class="hljs-attr">CONFIG_BPF_SYSCALL</span>=y<br><span class="hljs-attr">CONFIG_NET_CLS_BPF</span>=y<br><span class="hljs-attr">CONFIG_BPF_JIT</span>=y<br><span class="hljs-attr">CONFIG_NET_CLS_ACT</span>=y<br><span class="hljs-attr">CONFIG_NET_SCH_INGRESS</span>=y<br><span class="hljs-attr">CONFIG_CRYPTO_SHA1</span>=y<br><span class="hljs-attr">CONFIG_CRYPTO_USER_API_HASH</span>=y<br><span class="hljs-attr">CONFIG_CGROUPS</span>=y<br><span class="hljs-attr">CONFIG_CGROUP_BPF</span>=y<br></code></pre></td></tr></table></figure>
 
 <p>对比我们使用的<code>5.17.6-1.el7.elrepo.x86_64</code>内核可以发现有两个模块是为m</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">egrep</span> <span class="token string">"^CONFIG_BPF=|^CONFIG_BPF_SYSCALL=|^CONFIG_NET_CLS_BPF=|^CONFIG_BPF_JIT=|^CONFIG_NET_CLS_ACT=|^CONFIG_NET_SCH_INGRESS=|^CONFIG_CRYPTO_SHA1=|^CONFIG_CRYPTO_USER_API_HASH=|^CONFIG_CGROUPS=|^CONFIG_CGROUP_BPF="</span> /boot/config-5.17.6-1.el7.elrepo.x86_64
-<span class="token assign-left variable">CONFIG_BPF</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_BPF_SYSCALL</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_BPF_JIT</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_CGROUPS</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_CGROUP_BPF</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_NET_SCH_INGRESS</span><span class="token operator">=</span>m
-<span class="token assign-left variable">CONFIG_NET_CLS_BPF</span><span class="token operator">=</span>m
-<span class="token assign-left variable">CONFIG_NET_CLS_ACT</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_CRYPTO_SHA1</span><span class="token operator">=</span>y
-<span class="token assign-left variable">CONFIG_CRYPTO_USER_API_HASH</span><span class="token operator">=</span>y<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ egrep <span class="hljs-string">&quot;^CONFIG_BPF=|^CONFIG_BPF_SYSCALL=|^CONFIG_NET_CLS_BPF=|^CONFIG_BPF_JIT=|^CONFIG_NET_CLS_ACT=|^CONFIG_NET_SCH_INGRESS=|^CONFIG_CRYPTO_SHA1=|^CONFIG_CRYPTO_USER_API_HASH=|^CONFIG_CGROUPS=|^CONFIG_CGROUP_BPF=&quot;</span> /boot/config-5.17.6-1.el7.elrepo.x86_64<br>CONFIG_BPF=y<br>CONFIG_BPF_SYSCALL=y<br>CONFIG_BPF_JIT=y<br>CONFIG_CGROUPS=y<br>CONFIG_CGROUP_BPF=y<br>CONFIG_NET_SCH_INGRESS=m<br>CONFIG_NET_CLS_BPF=m<br>CONFIG_NET_CLS_ACT=y<br>CONFIG_CRYPTO_SHA1=y<br>CONFIG_CRYPTO_USER_API_HASH=y<br></code></pre></td></tr></table></figure>
 
 <p>缺少的这两个模块我们可以在<code>/usr/lib/modules/$(uname -r)</code>目录下面找到它们：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ realpath ./kernel/net/sched/sch_ingress.ko
-/usr/lib/modules/5.17.6-1.el7.elrepo.x86_64/kernel/net/sched/sch_ingress.ko
-$ realpath ./kernel/net/sched/cls_bpf.ko
-/usr/lib/modules/5.17.6-1.el7.elrepo.x86_64/kernel/net/sched/cls_bpf.ko<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ realpath ./kernel/net/<span class="hljs-built_in">sched</span>/sch_ingress.ko<br>/usr/lib/modules/5.17.6-1.el7.elrepo.x86_64/kernel/net/<span class="hljs-built_in">sched</span>/sch_ingress.ko<br>$ realpath ./kernel/net/<span class="hljs-built_in">sched</span>/cls_bpf.ko<br>/usr/lib/modules/5.17.6-1.el7.elrepo.x86_64/kernel/net/<span class="hljs-built_in">sched</span>/cls_bpf.ko<br></code></pre></td></tr></table></figure>
 
 <p>确认相关内核模块存在我们直接加载内核即可：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接使用modprobe命令加载</span>
-$ modprobe cls_bpf
-$ modprobe sch_ingress
-$ lsmod <span class="token operator">|</span> <span class="token function">egrep</span> <span class="token string">"cls_bpf|sch_ingress"</span>
-sch_ingress            <span class="token number">16384</span>  <span class="token number">0</span>
-cls_bpf                <span class="token number">24576</span>  <span class="token number">0</span>
-
-<span class="token comment"># 配置开机自动加载cilium所需相关模块</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/modules-load.d/cilium-base-requirements.conf</span>
-cls_bpf
-sch_ingress
-EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接使用modprobe命令加载</span><br>$ modprobe cls_bpf<br>$ modprobe sch_ingress<br>$ lsmod | egrep <span class="hljs-string">&quot;cls_bpf|sch_ingress&quot;</span><br>sch_ingress            16384  0<br>cls_bpf                24576  0<br><br><span class="hljs-comment"># 配置开机自动加载cilium所需相关模块</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/modules-load.d/cilium-base-requirements.conf</span><br><span class="hljs-string">cls_bpf</span><br><span class="hljs-string">sch_ingress</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 <p>其他cilium高级功能所需要的内核功能也类似，这里不做赘述。</p>
 <h1 id="2、安装container-runtime"><a href="#2、安装container-runtime" class="headerlink" title="2、安装container runtime"></a>2、安装container runtime</h1><h2 id="2-1-安装docker"><a href="#2-1-安装docker" class="headerlink" title="2.1 安装docker"></a>2.1 安装docker</h2><p>详细的官方文档可以参考<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">这里</a>，由于在刚发布的1.24版本中移除了<code>docker-shim</code>，因此安装的<code>版本≥1.24</code>的时候需要注意<code>容器运行时</code>的选择。这里我们安装的版本低于1.24，因此我们继续使用docker。</p>
 <p>docker的具体安装可以参考我之前写的<a href="https://tinychen.com/20190912-centos-install-docker/">这篇文章</a>，这里不做赘述。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装必要的依赖组件并且导入docker官方提供的yum源</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y yum-utils device-mapper-persistent-data lvm2
-<span class="token function">sudo</span> yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
-
-<span class="token comment"># 我们直接安装最新版本的docker</span>
-yum <span class="token function">install</span> docker-ce docker-ce-cli containerd.io<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装必要的依赖组件并且导入docker官方提供的yum源</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo<br><br><span class="hljs-comment"># 我们直接安装最新版本的docker</span><br>yum install docker-ce docker-ce-cli containerd.io<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-2-配置cgroup-drivers"><a href="#2-2-配置cgroup-drivers" class="headerlink" title="2.2 配置cgroup drivers"></a>2.2 配置cgroup drivers</h2><p>CentOS7使用的是<code>systemd</code>来初始化系统并管理进程，初始化进程会生成并使用一个 root 控制组 (<code>cgroup</code>), 并充当 <code>cgroup</code> 管理器。 <code>Systemd</code> 与 <code>cgroup</code> 集成紧密，并将为每个 <code>systemd</code> 单元分配一个 <code>cgroup</code>。 我们也可以配置<code>容器运行时</code>和 <code>kubelet</code> 使用 <code>cgroupfs</code>。 连同 <code>systemd</code> 一起使用 <code>cgroupfs</code> 意味着将有两个不同的 <code>cgroup 管理器</code>。而当一个系统中同时存在cgroupfs和systemd两者时，容易变得不稳定，因此最好更改设置，令容器运行时和 kubelet 使用 <code>systemd</code> 作为 <code>cgroup</code> 驱动，以此使系统更为稳定。 对于 Docker, 需要设置 <code>native.cgroupdriver=systemd</code> 参数。</p>
 <blockquote>
@@ -709,77 +506,17 @@ yum <span class="token function">install</span> docker-ce docker-ce-cli containe
 <p>参考配置说明文档</p>
 <p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/#docker">https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/#docker</a></p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mkdir</span> /etc/docker
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/docker/daemon.json</span>
-&#123;
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": &#123;
-    "max-size": "100m"
-  &#125;,
-  "storage-driver": "overlay2"
-&#125;
-EOF</span>
-
-<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> docker
-<span class="token function">sudo</span> systemctl daemon-reload
-<span class="token function">sudo</span> systemctl restart docker
-
-
-<span class="token comment"># 最后检查一下Cgroup Driver是否为systemd</span>
-$ docker info <span class="token operator">|</span> <span class="token function">grep</span> systemd
- Cgroup Driver: systemd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">sudo mkdir /etc/docker<br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/docker/daemon.json</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>sudo systemctl <span class="hljs-built_in">enable</span> docker<br>sudo systemctl daemon-reload<br>sudo systemctl restart docker<br><br><br><span class="hljs-comment"># 最后检查一下Cgroup Driver是否为systemd</span><br>$ docker info | grep systemd<br> Cgroup Driver: systemd<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-3-关于kubelet的cgroup-driver"><a href="#2-3-关于kubelet的cgroup-driver" class="headerlink" title="2.3 关于kubelet的cgroup driver"></a>2.3 关于kubelet的cgroup driver</h2><p>k8s官方有<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/">详细的文档</a>介绍了如何设置kubelet的<code>cgroup driver</code>，需要特别注意的是，在1.22版本开始，如果没有手动设置kubelet的cgroup driver，那么默认会设置为systemd</p>
 <blockquote>
 <p><strong>Note:</strong> In v1.22, if the user is not setting the <code>cgroupDriver</code> field under <code>KubeletConfiguration</code>, <code>kubeadm</code> will default it to <code>systemd</code>.</p>
 </blockquote>
 <p>一个比较简单的指定kubelet的<code>cgroup driver</code>的方法就是在<code>kubeadm-config.yaml</code>加入<code>cgroupDriver</code>字段</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment"># kubeadm-config.yaml</span>
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> ClusterConfiguration
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeadm.k8s.io/v1beta3
-<span class="token key atrule">kubernetesVersion</span><span class="token punctuation">:</span> v1.21.0
-<span class="token punctuation">---</span>
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> KubeletConfiguration
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubelet.config.k8s.io/v1beta1
-<span class="token key atrule">cgroupDriver</span><span class="token punctuation">:</span> systemd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># kubeadm-config.yaml</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-string">v1.21.0</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeletConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubelet.config.k8s.io/v1beta1</span><br><span class="hljs-attr">cgroupDriver:</span> <span class="hljs-string">systemd</span><br></code></pre></td></tr></table></figure>
 
 <p>我们可以直接查看configmaps来查看初始化之后集群的kubeadm-config配置。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ kubectl describe configmaps kubeadm-config -n kube-system
-Name:         kubeadm-config
-Namespace:    kube-system
-Labels:       &lt;none&gt;
-Annotations:  &lt;none&gt;
-
-Data
-&#x3D;&#x3D;&#x3D;&#x3D;
-ClusterConfiguration:
-----
-apiServer:
-  extraArgs:
-    authorization-mode: Node,RBAC
-  timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io&#x2F;v1beta3
-certificatesDir: &#x2F;etc&#x2F;kubernetes&#x2F;pki
-clusterName: kubernetes
-controllerManager: &#123;&#125;
-dns: &#123;&#125;
-etcd:
-  local:
-    dataDir: &#x2F;var&#x2F;lib&#x2F;etcd
-imageRepository: registry.aliyuncs.com&#x2F;google_containers
-kind: ClusterConfiguration
-kubernetesVersion: v1.23.6
-networking:
-  dnsDomain: cali-cluster.tclocal
-  serviceSubnet: 10.88.0.0&#x2F;18
-scheduler: &#123;&#125;
-
-
-BinaryData
-&#x3D;&#x3D;&#x3D;&#x3D;
-
-Events:  &lt;none&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">$ kubectl describe configmaps kubeadm-config -n kube-system<br>Name:         kubeadm-config<br>Namespace:    kube-system<br>Labels:       &lt;none&gt;<br>Annotations:  &lt;none&gt;<br><br><span class="hljs-section">Data</span><br><span class="hljs-section">====</span><br><span class="hljs-section">ClusterConfiguration:</span><br><span class="hljs-section">----</span><br>apiServer:<br><span class="hljs-code">  extraArgs:</span><br><span class="hljs-code">    authorization-mode: Node,RBAC</span><br><span class="hljs-code">  timeoutForControlPlane: 4m0s</span><br>apiVersion: kubeadm.k8s.io/v1beta3<br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br>controllerManager: &#123;&#125;<br>dns: &#123;&#125;<br>etcd:<br><span class="hljs-code">  local:</span><br><span class="hljs-code">    dataDir: /var/lib/etcd</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.23.6<br>networking:<br><span class="hljs-code">  dnsDomain: cali-cluster.tclocal</span><br><span class="hljs-code">  serviceSubnet: 10.88.0.0/18</span><br>scheduler: &#123;&#125;<br><br><br><span class="hljs-section">BinaryData</span><br><span class="hljs-section">====</span><br><br>Events:  &lt;none&gt;<br></code></pre></td></tr></table></figure>
 
 <p>当然因为我们需要安装的版本高于1.22.0并且使用的就是systemd，因此可以不用再重复配置。</p>
 <h1 id="3、安装kube三件套"><a href="#3、安装kube三件套" class="headerlink" title="3、安装kube三件套"></a>3、安装kube三件套</h1><blockquote>
@@ -799,64 +536,10 @@ Events:  &lt;none&gt;<span aria-hidden="true" class="line-numbers-rows"><span></
 <li><code>kubectl</code>并不是集群中的每个节点都需要安装，也并不是一定要安装在集群中的节点，可以单独安装在自己本地的机器环境上面，然后配合<code>kubeconfig</code>文件即可使用<code>kubectl</code>命令来远程管理对应的k8s集群；</li>
 </ul>
 <p>CentOS7的安装比较简单，我们直接使用官方提供的<code>yum</code>源即可。需要注意的是这里需要设置<code>selinux</code>的状态，但是前面我们已经关闭了selinux，因此这里略过这步。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接导入谷歌官方的yum源</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/yum.repos.d/kubernetes.repo</span>
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\<span class="token variable">$basearch</span>
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-exclude=kubelet kubeadm kubectl
-EOF</span>
-
-<span class="token comment"># 当然如果连不上谷歌的源，可以考虑使用国内的阿里镜像源</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">></span> /etc/yum.repos.d/kubernetes.repo</span>
-[kubernetes]
-name=Kubernetes
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-EOF</span>
-
-
-<span class="token comment"># 接下来直接安装三件套即可</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y kubelet kubeadm kubectl --disableexcludes<span class="token operator">=</span>kubernetes
-
-<span class="token comment"># 如果网络环境不好出现gpgcheck验证失败导致无法正常读取yum源，可以考虑关闭该yum源的repo_gpgcheck</span>
-<span class="token function">sed</span> -i <span class="token string">'s/repo_gpgcheck=1/repo_gpgcheck=0/g'</span> /etc/yum.repos.d/kubernetes.repo
-<span class="token comment"># 或者在安装的时候禁用gpgcheck</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y kubelet kubeadm kubectl --nogpgcheck --disableexcludes<span class="token operator">=</span>kubernetes
-
-
-
-<span class="token comment"># 如果想要安装特定版本，可以使用这个命令查看相关版本的信息</span>
-<span class="token function">sudo</span> yum list --nogpgcheck kubelet kubeadm kubectl --showduplicates --disableexcludes<span class="token operator">=</span>kubernetes
-<span class="token comment"># 这里我们为了保留使用docker-shim，因此我们按照1.24.0版本的前一个版本1.23.6</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y kubelet-1.23.6-0 kubeadm-1.23.6-0 kubectl-1.23.6-0 --nogpgcheck --disableexcludes<span class="token operator">=</span>kubernetes
-
-<span class="token comment"># 安装完成后配置开机自启kubelet</span>
-<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> --now kubelet<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接导入谷歌官方的yum源</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/yum.repos.d/kubernetes.repo</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">exclude=kubelet kubeadm kubectl</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-comment"># 当然如果连不上谷歌的源，可以考虑使用国内的阿里镜像源</span><br>cat &lt;&lt;<span class="hljs-string">EOF &gt; /etc/yum.repos.d/kubernetes.repo</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">EOF</span><br><br><br><span class="hljs-comment"># 接下来直接安装三件套即可</span><br>sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><br><span class="hljs-comment"># 如果网络环境不好出现gpgcheck验证失败导致无法正常读取yum源，可以考虑关闭该yum源的repo_gpgcheck</span><br>sed -i <span class="hljs-string">&#x27;s/repo_gpgcheck=1/repo_gpgcheck=0/g&#x27;</span> /etc/yum.repos.d/kubernetes.repo<br><span class="hljs-comment"># 或者在安装的时候禁用gpgcheck</span><br>sudo yum install -y kubelet kubeadm kubectl --nogpgcheck --disableexcludes=kubernetes<br><br><br><br><span class="hljs-comment"># 如果想要安装特定版本，可以使用这个命令查看相关版本的信息</span><br>sudo yum list --nogpgcheck kubelet kubeadm kubectl --showduplicates --disableexcludes=kubernetes<br><span class="hljs-comment"># 这里我们为了保留使用docker-shim，因此我们按照1.24.0版本的前一个版本1.23.6</span><br>sudo yum install -y kubelet-1.23.6-0 kubeadm-1.23.6-0 kubectl-1.23.6-0 --nogpgcheck --disableexcludes=kubernetes<br><br><span class="hljs-comment"># 安装完成后配置开机自启kubelet</span><br>sudo systemctl <span class="hljs-built_in">enable</span> --now kubelet<br></code></pre></td></tr></table></figure>
 
 <h1 id="4、初始化集群"><a href="#4、初始化集群" class="headerlink" title="4、初始化集群"></a>4、初始化集群</h1><h2 id="4-1-编写配置文件"><a href="#4-1-编写配置文件" class="headerlink" title="4.1 编写配置文件"></a>4.1 编写配置文件</h2><p>在集群中所有节点都执行完上面的三点操作之后，我们就可以开始创建k8s集群了。因为我们这次不涉及高可用部署，因此初始化的时候直接在我们的目标master节点上面操作即可。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 我们先使用kubeadm命令查看一下主要的几个镜像版本</span>
-<span class="token comment"># 因为我们此前指定安装了旧的1.23.6版本，这里的apiserver镜像版本也会随之回滚</span>
-$ kubeadm config images list
-I0509 <span class="token number">12</span>:06:03.036544    <span class="token number">3593</span> version.go:255<span class="token punctuation">]</span> remote version is much newer: v1.24.0<span class="token punctuation">;</span> falling back to: stable-1.23
-k8s.gcr.io/kube-apiserver:v1.23.6
-k8s.gcr.io/kube-controller-manager:v1.23.6
-k8s.gcr.io/kube-scheduler:v1.23.6
-k8s.gcr.io/kube-proxy:v1.23.6
-k8s.gcr.io/pause:3.6
-k8s.gcr.io/etcd:3.5.1-0
-k8s.gcr.io/coredns/coredns:v1.8.6
-
-<span class="token comment"># 为了方便编辑和管理，我们还是把初始化参数导出成配置文件</span>
-$ kubeadm config print init-defaults <span class="token operator">></span> kubeadm-cilium.conf
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 我们先使用kubeadm命令查看一下主要的几个镜像版本</span><br><span class="hljs-comment"># 因为我们此前指定安装了旧的1.23.6版本，这里的apiserver镜像版本也会随之回滚</span><br>$ kubeadm config images list<br>I0509 12:06:03.036544    3593 version.go:255] remote version is much newer: v1.24.0; falling back to: stable-1.23<br>k8s.gcr.io/kube-apiserver:v1.23.6<br>k8s.gcr.io/kube-controller-manager:v1.23.6<br>k8s.gcr.io/kube-scheduler:v1.23.6<br>k8s.gcr.io/kube-proxy:v1.23.6<br>k8s.gcr.io/pause:3.6<br>k8s.gcr.io/etcd:3.5.1-0<br>k8s.gcr.io/coredns/coredns:v1.8.6<br><br><span class="hljs-comment"># 为了方便编辑和管理，我们还是把初始化参数导出成配置文件</span><br>$ kubeadm config <span class="hljs-built_in">print</span> init-defaults &gt; kubeadm-cilium.conf<br><br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>考虑到大多数情况下国内的网络无法使用谷歌的k8s.gcr.io镜像源，我们可以直接在配置文件中修改<code>imageRepository</code>参数为阿里的镜像源</li>
@@ -866,474 +549,56 @@ $ kubeadm config print init-defaults <span class="token operator">></span> kubea
 <li><code>nodeRegistration</code>里面的<code>name</code>参数修改为对应master节点的<code>hostname</code></li>
 <li>新增配置块使用ipvs，具体可以参考<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md#cluster-created-by-kubeadm">官方文档</a></li>
 </ul>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeadm.k8s.io/v1beta3
-<span class="token key atrule">bootstrapTokens</span><span class="token punctuation">:</span>
-<span class="token punctuation">-</span> <span class="token key atrule">groups</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> system<span class="token punctuation">:</span>bootstrappers<span class="token punctuation">:</span>kubeadm<span class="token punctuation">:</span>default<span class="token punctuation">-</span>node<span class="token punctuation">-</span>token
-  <span class="token key atrule">token</span><span class="token punctuation">:</span> abcdef.0123456789abcdef
-  <span class="token key atrule">ttl</span><span class="token punctuation">:</span> 24h0m0s
-  <span class="token key atrule">usages</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> signing
-  <span class="token punctuation">-</span> authentication
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> InitConfiguration
-<span class="token key atrule">localAPIEndpoint</span><span class="token punctuation">:</span>
-  <span class="token key atrule">advertiseAddress</span><span class="token punctuation">:</span> 10.31.188.1
-  <span class="token key atrule">bindPort</span><span class="token punctuation">:</span> <span class="token number">6443</span>
-<span class="token key atrule">nodeRegistration</span><span class="token punctuation">:</span>
-  <span class="token key atrule">criSocket</span><span class="token punctuation">:</span> /var/run/dockershim.sock
-  <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> IfNotPresent
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> tiny<span class="token punctuation">-</span>cilium<span class="token punctuation">-</span>master<span class="token punctuation">-</span>188<span class="token punctuation">-</span>1.k8s.tcinternal
-  <span class="token key atrule">taints</span><span class="token punctuation">:</span> <span class="token null important">null</span>
-<span class="token punctuation">---</span>
-<span class="token key atrule">apiServer</span><span class="token punctuation">:</span>
-  <span class="token key atrule">timeoutForControlPlane</span><span class="token punctuation">:</span> 4m0s
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeadm.k8s.io/v1beta3
-<span class="token key atrule">certificatesDir</span><span class="token punctuation">:</span> /etc/kubernetes/pki
-<span class="token key atrule">clusterName</span><span class="token punctuation">:</span> kubernetes
-<span class="token key atrule">controllerManager</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-<span class="token key atrule">dns</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-<span class="token key atrule">etcd</span><span class="token punctuation">:</span>
-  <span class="token key atrule">local</span><span class="token punctuation">:</span>
-    <span class="token key atrule">dataDir</span><span class="token punctuation">:</span> /var/lib/etcd
-<span class="token key atrule">imageRepository</span><span class="token punctuation">:</span> registry.aliyuncs.com/google_containers
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> ClusterConfiguration
-<span class="token key atrule">kubernetesVersion</span><span class="token punctuation">:</span> 1.23.6
-<span class="token key atrule">networking</span><span class="token punctuation">:</span>
-  <span class="token key atrule">dnsDomain</span><span class="token punctuation">:</span> cili<span class="token punctuation">-</span>cluster.tclocal
-  <span class="token key atrule">serviceSubnet</span><span class="token punctuation">:</span> 10.188.0.0/18
-  <span class="token key atrule">podSubnet</span><span class="token punctuation">:</span> 10.188.64.0/18
-<span class="token key atrule">scheduler</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-<span class="token punctuation">---</span>
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeproxy.config.k8s.io/v1alpha1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> KubeProxyConfiguration
-<span class="token key atrule">mode</span><span class="token punctuation">:</span> ipvs<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">bootstrapTokens:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">groups:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">system:bootstrappers:kubeadm:default-node-token</span><br>  <span class="hljs-attr">token:</span> <span class="hljs-string">abcdef.0123456789abcdef</span><br>  <span class="hljs-attr">ttl:</span> <span class="hljs-string">24h0m0s</span><br>  <span class="hljs-attr">usages:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">signing</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">authentication</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">InitConfiguration</span><br><span class="hljs-attr">localAPIEndpoint:</span><br>  <span class="hljs-attr">advertiseAddress:</span> <span class="hljs-number">10.31</span><span class="hljs-number">.188</span><span class="hljs-number">.1</span><br>  <span class="hljs-attr">bindPort:</span> <span class="hljs-number">6443</span><br><span class="hljs-attr">nodeRegistration:</span><br>  <span class="hljs-attr">criSocket:</span> <span class="hljs-string">/var/run/dockershim.sock</span><br>  <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">tiny-cilium-master-188-1.k8s.tcinternal</span><br>  <span class="hljs-attr">taints:</span> <span class="hljs-literal">null</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiServer:</span><br>  <span class="hljs-attr">timeoutForControlPlane:</span> <span class="hljs-string">4m0s</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">certificatesDir:</span> <span class="hljs-string">/etc/kubernetes/pki</span><br><span class="hljs-attr">clusterName:</span> <span class="hljs-string">kubernetes</span><br><span class="hljs-attr">controllerManager:</span> &#123;&#125;<br><span class="hljs-attr">dns:</span> &#123;&#125;<br><span class="hljs-attr">etcd:</span><br>  <span class="hljs-attr">local:</span><br>    <span class="hljs-attr">dataDir:</span> <span class="hljs-string">/var/lib/etcd</span><br><span class="hljs-attr">imageRepository:</span> <span class="hljs-string">registry.aliyuncs.com/google_containers</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-number">1.23</span><span class="hljs-number">.6</span><br><span class="hljs-attr">networking:</span><br>  <span class="hljs-attr">dnsDomain:</span> <span class="hljs-string">cili-cluster.tclocal</span><br>  <span class="hljs-attr">serviceSubnet:</span> <span class="hljs-number">10.188</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/18</span><br>  <span class="hljs-attr">podSubnet:</span> <span class="hljs-number">10.188</span><span class="hljs-number">.64</span><span class="hljs-number">.0</span><span class="hljs-string">/18</span><br><span class="hljs-attr">scheduler:</span> &#123;&#125;<br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeproxy.config.k8s.io/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeProxyConfiguration</span><br><span class="hljs-attr">mode:</span> <span class="hljs-string">ipvs</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="4-2-初始化集群"><a href="#4-2-初始化集群" class="headerlink" title="4.2 初始化集群"></a>4.2 初始化集群</h2><p>此时我们再查看对应的配置文件中的镜像版本，就会发现已经变成了对应阿里云镜像源的版本</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看一下对应的镜像版本，确定配置文件是否生效</span>
-$ kubeadm config images list --config kubeadm-cilium.conf
-registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6
-registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6
-registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6
-registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6
-registry.aliyuncs.com/google_containers/pause:3.6
-registry.aliyuncs.com/google_containers/etcd:3.5.1-0
-registry.aliyuncs.com/google_containers/coredns:v1.8.6
-
-<span class="token comment"># 确认没问题之后我们直接拉取镜像</span>
-$ kubeadm config images pull --config kubeadm-cilium.conf
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/pause:3.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/etcd:3.5.1-0
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/coredns:v1.8.6
-
-<span class="token comment"># 初始化</span>
-$ kubeadm init --config kubeadm-cilium.conf
-<span class="token punctuation">[</span>init<span class="token punctuation">]</span> Using Kubernetes version: v1.23.6
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Running pre-flight checks
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Pulling images required <span class="token keyword">for</span> setting up a Kubernetes cluster
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> This might take a minute or two, depending on the speed of your internet connection
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> You can also perform this action <span class="token keyword">in</span> beforehand using <span class="token string">'kubeadm config images pull'</span>
-<span class="token punctuation">..</span>.此处略去一堆输出<span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看一下对应的镜像版本，确定配置文件是否生效</span><br>$ kubeadm config images list --config kubeadm-cilium.conf<br>registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6<br>registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6<br>registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6<br>registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6<br>registry.aliyuncs.com/google_containers/pause:3.6<br>registry.aliyuncs.com/google_containers/etcd:3.5.1-0<br>registry.aliyuncs.com/google_containers/coredns:v1.8.6<br><br><span class="hljs-comment"># 确认没问题之后我们直接拉取镜像</span><br>$ kubeadm config images pull --config kubeadm-cilium.conf<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/pause:3.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/etcd:3.5.1-0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/coredns:v1.8.6<br><br><span class="hljs-comment"># 初始化</span><br>$ kubeadm init --config kubeadm-cilium.conf<br>[init] Using Kubernetes version: v1.23.6<br>[preflight] Running pre-flight checks<br>[preflight] Pulling images required <span class="hljs-keyword">for</span> setting up a Kubernetes cluster<br>[preflight] This might take a minute or two, depending on the speed of your internet connection<br>[preflight] You can also perform this action <span class="hljs-keyword">in</span> beforehand using <span class="hljs-string">&#x27;kubeadm config images pull&#x27;</span><br>...此处略去一堆输出...<br></code></pre></td></tr></table></figure>
 <p>当我们看到下面这个输出结果的时候，我们的集群就算是初始化成功了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Your Kubernetes control-plane has initialized successfully<span class="token operator">!</span>
-
-To start using your cluster, you need to run the following as a regular user:
-
-  <span class="token function">mkdir</span> -p <span class="token environment constant">$HOME</span>/.kube
-  <span class="token function">sudo</span> <span class="token function">cp</span> -i /etc/kubernetes/admin.conf <span class="token environment constant">$HOME</span>/.kube/config
-  <span class="token function">sudo</span> <span class="token function">chown</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -u<span class="token variable">)</span></span><span class="token builtin class-name">:</span><span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -g<span class="token variable">)</span></span> <span class="token environment constant">$HOME</span>/.kube/config
-
-Alternatively, <span class="token keyword">if</span> you are the root user, you can run:
-
-  <span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span>/etc/kubernetes/admin.conf
-
-You should now deploy a pod network to the cluster.
-Run <span class="token string">"kubectl apply -f [podnetwork].yaml"</span> with one of the options listed at:
-  https://kubernetes.io/docs/concepts/cluster-administration/addons/
-
-Then you can <span class="token function">join</span> any number of worker nodes by running the following on each as root:
-
-kubeadm <span class="token function">join</span> <span class="token number">10.31</span>.188.1:6443 --token abcdef.0123456789abcdef <span class="token punctuation">\</span>
-        --discovery-token-ca-cert-hash sha256:fbe33f0dbda199b487a78948a4c693660d742d0dfc270bad2963a035b4971ade<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">Your Kubernetes control-plane has initialized successfully!<br><br>To start using your cluster, you need to run the following as a regular user:<br><br>  mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>  sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>  sudo chown $(id -u):$(id -g) <span class="hljs-variable">$HOME</span>/.kube/config<br><br>Alternatively, <span class="hljs-keyword">if</span> you are the root user, you can run:<br><br>  <span class="hljs-built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf<br><br>You should now deploy a pod network to the cluster.<br>Run <span class="hljs-string">&quot;kubectl apply -f [podnetwork].yaml&quot;</span> with one of the options listed at:<br>  https://kubernetes.io/docs/concepts/cluster-administration/addons/<br><br>Then you can join any number of worker nodes by running the following on each as root:<br><br>kubeadm join 10.31.188.1:6443 --token abcdef.0123456789abcdef \<br>        --discovery-token-ca-cert-hash sha256:fbe33f0dbda199b487a78948a4c693660d742d0dfc270bad2963a035b4971ade<br></code></pre></td></tr></table></figure>
 
 <h2 id="4-3-配置kubeconfig"><a href="#4-3-配置kubeconfig" class="headerlink" title="4.3 配置kubeconfig"></a>4.3 配置kubeconfig</h2><p>刚初始化成功之后，我们还没办法马上查看k8s集群信息，需要配置kubeconfig相关参数才能正常使用kubectl连接apiserver读取集群信息。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 对于非root用户，可以这样操作</span>
-<span class="token function">mkdir</span> -p <span class="token environment constant">$HOME</span>/.kube
-<span class="token function">sudo</span> <span class="token function">cp</span> -i /etc/kubernetes/admin.conf <span class="token environment constant">$HOME</span>/.kube/config
-<span class="token function">sudo</span> <span class="token function">chown</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -u<span class="token variable">)</span></span><span class="token builtin class-name">:</span><span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -g<span class="token variable">)</span></span> <span class="token environment constant">$HOME</span>/.kube/config
-
-<span class="token comment"># 如果是root用户，可以直接导入环境变量</span>
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span>/etc/kubernetes/admin.conf
-
-<span class="token comment"># 添加kubectl的自动补全功能</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"source &lt;(kubectl completion bash)"</span> <span class="token operator">>></span> ~/.bashrc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 对于非root用户，可以这样操作</span><br>mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g) <span class="hljs-variable">$HOME</span>/.kube/config<br><br><span class="hljs-comment"># 如果是root用户，可以直接导入环境变量</span><br><span class="hljs-built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf<br><br><span class="hljs-comment"># 添加kubectl的自动补全功能</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>前面我们提到过<code>kubectl</code>不一定要安装在集群内，实际上只要是任何一台能连接到<code>apiserver</code>的机器上面都可以安装<code>kubectl</code>并且根据步骤配置<code>kubeconfig</code>，就可以使用<code>kubectl</code>命令行来管理对应的k8s集群。</p>
 </blockquote>
 <p>配置完成后，我们再执行相关命令就可以查看集群的信息了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubectl cluster-info
-Kubernetes control plane is running at https://10.31.188.1:6443
-CoreDNS is running at https://10.31.188.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use <span class="token string">'kubectl cluster-info dump'</span><span class="token builtin class-name">.</span>
-
-
-$ kubectl get nodes -o wide
-NAME                                      STATUS     ROLES                  AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION               CONTAINER-RUNTIME
-tiny-cilium-master-188-1.k8s.tcinternal   NotReady   control-plane,master   84s   v1.23.6   <span class="token number">10.31</span>.188.1   <span class="token operator">&lt;</span>none<span class="token operator">></span>        CentOS Linux <span class="token number">7</span> <span class="token punctuation">(</span>Core<span class="token punctuation">)</span>   <span class="token number">5.17</span>.6-1.el7.elrepo.x86_64   docker://20.10.14
-
-$ kubectl get pods -A -o wide
-NAMESPACE     NAME                                                              READY   STATUS    RESTARTS   AGE   IP            NODE                                      NOMINATED NODE   READINESS GATES
-kube-system   coredns-6d8c4cb4d-285cl                                           <span class="token number">0</span>/1     Pending   <span class="token number">0</span>          78s   <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token operator">&lt;</span>none<span class="token operator">></span>                                    <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   coredns-6d8c4cb4d-6zntv                                           <span class="token number">0</span>/1     Pending   <span class="token number">0</span>          78s   <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token operator">&lt;</span>none<span class="token operator">></span>                                    <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   etcd-tiny-cilium-master-188-1.k8s.tcinternal                      <span class="token number">1</span>/1     Running   <span class="token number">0</span>          90s   <span class="token number">10.31</span>.188.1   tiny-cilium-master-188-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-apiserver-tiny-cilium-master-188-1.k8s.tcinternal            <span class="token number">1</span>/1     Running   <span class="token number">0</span>          92s   <span class="token number">10.31</span>.188.1   tiny-cilium-master-188-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-controller-manager-tiny-cilium-master-188-1.k8s.tcinternal   <span class="token number">1</span>/1     Running   <span class="token number">0</span>          90s   <span class="token number">10.31</span>.188.1   tiny-cilium-master-188-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-proxy-m7q5n                                                  <span class="token number">1</span>/1     Running   <span class="token number">0</span>          78s   <span class="token number">10.31</span>.188.1   tiny-cilium-master-188-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-scheduler-tiny-cilium-master-188-1.k8s.tcinternal            <span class="token number">1</span>/1     Running   <span class="token number">0</span>          91s   <span class="token number">10.31</span>.188.1   tiny-cilium-master-188-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubectl cluster-info<br>Kubernetes control plane is running at https://10.31.188.1:6443<br>CoreDNS is running at https://10.31.188.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy<br><br>To further debug and diagnose cluster problems, use <span class="hljs-string">&#x27;kubectl cluster-info dump&#x27;</span>.<br><br><br>$ kubectl get nodes -o wide<br>NAME                                      STATUS     ROLES                  AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION               CONTAINER-RUNTIME<br>tiny-cilium-master-188-1.k8s.tcinternal   NotReady   control-plane,master   84s   v1.23.6   10.31.188.1   &lt;none&gt;        CentOS Linux 7 (Core)   5.17.6-1.el7.elrepo.x86_64   docker://20.10.14<br><br>$ kubectl get pods -A -o wide<br>NAMESPACE     NAME                                                              READY   STATUS    RESTARTS   AGE   IP            NODE                                      NOMINATED NODE   READINESS GATES<br>kube-system   coredns-6d8c4cb4d-285cl                                           0/1     Pending   0          78s   &lt;none&gt;        &lt;none&gt;                                    &lt;none&gt;           &lt;none&gt;<br>kube-system   coredns-6d8c4cb4d-6zntv                                           0/1     Pending   0          78s   &lt;none&gt;        &lt;none&gt;                                    &lt;none&gt;           &lt;none&gt;<br>kube-system   etcd-tiny-cilium-master-188-1.k8s.tcinternal                      1/1     Running   0          90s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-apiserver-tiny-cilium-master-188-1.k8s.tcinternal            1/1     Running   0          92s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-controller-manager-tiny-cilium-master-188-1.k8s.tcinternal   1/1     Running   0          90s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-m7q5n                                                  1/1     Running   0          78s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-scheduler-tiny-cilium-master-188-1.k8s.tcinternal            1/1     Running   0          91s   10.31.188.1   tiny-cilium-master-188-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br></code></pre></td></tr></table></figure>
 
 <h2 id="4-4-添加worker节点"><a href="#4-4-添加worker节点" class="headerlink" title="4.4 添加worker节点"></a>4.4 添加worker节点</h2><p>这时候我们还需要继续添加剩下的两个节点作为worker节点运行负载，直接在剩下的节点上面运行集群初始化成功时输出的命令就可以成功加入集群。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubeadm <span class="token function">join</span> <span class="token number">10.31</span>.188.1:6443 --token abcdef.0123456789abcdef <span class="token punctuation">\</span>
-<span class="token operator">></span>         --discovery-token-ca-cert-hash sha256:fbe33f0dbda199b487a78948a4c693660d742d0dfc270bad2963a035b4971ade
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Running pre-flight checks
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Reading configuration from the cluster<span class="token punctuation">..</span>.
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> FYI: You can <span class="token function">look</span> at this config <span class="token function">file</span> with <span class="token string">'kubectl -n kube-system get cm kubeadm-config -o yaml'</span>
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Writing kubelet configuration to <span class="token function">file</span> <span class="token string">"/var/lib/kubelet/config.yaml"</span>
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Writing kubelet environment <span class="token function">file</span> with flags to <span class="token function">file</span> <span class="token string">"/var/lib/kubelet/kubeadm-flags.env"</span>
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Starting the kubelet
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Waiting <span class="token keyword">for</span> the kubelet to perform the TLS Bootstrap<span class="token punctuation">..</span>.
-
-This node has joined the cluster:
-* Certificate signing request was sent to apiserver and a response was received.
-* The Kubelet was informed of the new secure connection details.
-
-Run <span class="token string">'kubectl get nodes'</span> on the control-plane to see this node <span class="token function">join</span> the cluster.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubeadm join 10.31.188.1:6443 --token abcdef.0123456789abcdef \<br>&gt;         --discovery-token-ca-cert-hash sha256:fbe33f0dbda199b487a78948a4c693660d742d0dfc270bad2963a035b4971ade<br>[preflight] Running pre-flight checks<br>[preflight] Reading configuration from the cluster...<br>[preflight] FYI: You can look at this config file with <span class="hljs-string">&#x27;kubectl -n kube-system get cm kubeadm-config -o yaml&#x27;</span><br>[kubelet-start] Writing kubelet configuration to file <span class="hljs-string">&quot;/var/lib/kubelet/config.yaml&quot;</span><br>[kubelet-start] Writing kubelet environment file with flags to file <span class="hljs-string">&quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span><br>[kubelet-start] Starting the kubelet<br>[kubelet-start] Waiting <span class="hljs-keyword">for</span> the kubelet to perform the TLS Bootstrap...<br><br>This node has joined the cluster:<br>* Certificate signing request was sent to apiserver and a response was received.<br>* The Kubelet was informed of the new secure connection details.<br><br>Run <span class="hljs-string">&#x27;kubectl get nodes&#x27;</span> on the control-plane to see this node join the cluster.<br></code></pre></td></tr></table></figure>
 
 <p>如果不小心没保存初始化成功的输出信息也没有关系，我们可以使用kubectl工具查看或者生成token</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看现有的token列表</span>
-$ kubeadm token list
-TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA <span class="token environment constant">GROUPS</span>
-abcdef.0123456789abcdef   23h         <span class="token number">2022</span>-05-10T05:46:11Z   authentication,signing   <span class="token operator">&lt;</span>none<span class="token operator">></span>                                                     system:bootstrappers:kubeadm:default-node-token
-
-<span class="token comment"># 如果token已经失效，那就再创建一个新的token</span>
-$ kubeadm token create
-xd468t.co8ye3su70bojo2k
-$ kubeadm token list
-TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA <span class="token environment constant">GROUPS</span>
-abcdef.0123456789abcdef   23h         <span class="token number">2022</span>-05-10T05:46:11Z   authentication,signing   <span class="token operator">&lt;</span>none<span class="token operator">></span>                                                     system:bootstrappers:kubeadm:default-node-token
-xd468t.co8ye3su70bojo2k   23h         <span class="token number">2022</span>-05-10T05:58:40Z   authentication,signing   <span class="token operator">&lt;</span>none<span class="token operator">></span>                                                     system:bootstrappers:kubeadm:default-node-token
-
-<span class="token comment"># 如果找不到--discovery-token-ca-cert-hash参数，则可以在master节点上使用openssl工具来获取</span>
-$ openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt <span class="token operator">|</span> openssl rsa -pubin -outform der <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null <span class="token operator">|</span> openssl dgst -sha256 -hex <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/^.* //'</span>
-0d68339d3e5a045dc093470321f8f6334223e97f360542477c4f480bda34d72a<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看现有的token列表</span><br>$ kubeadm token list<br>TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS<br>abcdef.0123456789abcdef   23h         2022-05-10T05:46:11Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br><br><span class="hljs-comment"># 如果token已经失效，那就再创建一个新的token</span><br>$ kubeadm token create<br>xd468t.co8ye3su70bojo2k<br>$ kubeadm token list<br>TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS<br>abcdef.0123456789abcdef   23h         2022-05-10T05:46:11Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br>xd468t.co8ye3su70bojo2k   23h         2022-05-10T05:58:40Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br><br><span class="hljs-comment"># 如果找不到--discovery-token-ca-cert-hash参数，则可以在master节点上使用openssl工具来获取</span><br>$ openssl x509 -pubkey -<span class="hljs-keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed <span class="hljs-string">&#x27;s/^.* //&#x27;</span><br>0d68339d3e5a045dc093470321f8f6334223e97f360542477c4f480bda34d72a<br></code></pre></td></tr></table></figure>
 
 
 
 <p>添加完成之后我们再查看集群的节点可以发现这时候已经多了两个node，但是此时节点的状态还是<code>NotReady</code>，接下来就需要部署CNI了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubectl get nodes
-NAME                                       STATUS     ROLES                  AGE     VERSION
-tiny-cilium-master-188-1.k8s.tcinternal    NotReady   control-plane,master   2m47s   v1.23.6
-tiny-cilium-worker-188-11.k8s.tcinternal   NotReady   <span class="token operator">&lt;</span>none<span class="token operator">></span>                 41s     v1.23.6
-tiny-cilium-worker-188-12.k8s.tcinternal   NotReady   <span class="token operator">&lt;</span>none<span class="token operator">></span>                 30s     v1.23.6<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubectl get nodes<br>NAME                                       STATUS     ROLES                  AGE     VERSION<br>tiny-cilium-master-188-1.k8s.tcinternal    NotReady   control-plane,master   2m47s   v1.23.6<br>tiny-cilium-worker-188-11.k8s.tcinternal   NotReady   &lt;none&gt;                 41s     v1.23.6<br>tiny-cilium-worker-188-12.k8s.tcinternal   NotReady   &lt;none&gt;                 30s     v1.23.6<br></code></pre></td></tr></table></figure>
 
 <h1 id="5、安装CNI"><a href="#5、安装CNI" class="headerlink" title="5、安装CNI"></a>5、安装CNI</h1><h2 id="5-1-安装cilium"><a href="#5-1-安装cilium" class="headerlink" title="5.1 安装cilium"></a>5.1 安装cilium</h2><p>快速安装的教程可以参考<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/latest/gettingstarted/k8s-install-default/">官网文档</a>，基本的安装思路就是先下载cilium官方的cli工具，然后使用cli工具进行安装。</p>
 <p>这种安装方式的优势就是简单快捷，缺点就是缺少自定义参数配置的功能，只能使用官方原先设置的默认参数，比较适合快速初始化搭建可用环境用来学习和测试。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cilium的cli工具是一个二进制的可执行文件</span>
-$ <span class="token function">curl</span> -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz<span class="token punctuation">&#123;</span>,.sha256sum<span class="token punctuation">&#125;</span>
-$ sha256sum --check cilium-linux-amd64.tar.gz.sha256sum
-cilium-linux-amd64.tar.gz: OK
-$ <span class="token function">sudo</span> <span class="token function">tar</span> xzvfC cilium-linux-amd64.tar.gz /usr/local/bin
-cilium
-
-<span class="token comment"># 使用该命令即可完成cilium的安装</span>
-$ cilium <span class="token function">install</span>
-ℹ️  using Cilium version <span class="token string">"v1.11.3"</span>
-🔮 Auto-detected cluster name: kubernetes
-🔮 Auto-detected IPAM mode: cluster-pool
-ℹ️  helm template --namespace kube-system cilium cilium/cilium --version <span class="token number">1.11</span>.3 --set cluster.id<span class="token operator">=</span><span class="token number">0</span>,cluster.name<span class="token operator">=</span>kubernetes,encryption.nodeEncryption<span class="token operator">=</span>false,ipam.mode<span class="token operator">=</span>cluster-pool,kubeProxyReplacement<span class="token operator">=</span>disabled,operator.replicas<span class="token operator">=</span><span class="token number">1</span>,serviceAccounts.cilium.name<span class="token operator">=</span>cilium,serviceAccounts.operator.name<span class="token operator">=</span>cilium-operator
-ℹ️  Storing helm values <span class="token function">file</span> <span class="token keyword">in</span> kube-system/cilium-cli-helm-values Secret
-🔑 Created CA <span class="token keyword">in</span> secret cilium-ca
-🔑 Generating certificates <span class="token keyword">for</span> Hubble<span class="token punctuation">..</span>.
-🚀 Creating Service accounts<span class="token punctuation">..</span>.
-🚀 Creating Cluster roles<span class="token punctuation">..</span>.
-🚀 Creating ConfigMap <span class="token keyword">for</span> Cilium version <span class="token number">1.11</span>.3<span class="token punctuation">..</span>.
-🚀 Creating Agent DaemonSet<span class="token punctuation">..</span>.
-<span class="token assign-left variable">level</span><span class="token operator">=</span>warning <span class="token assign-left variable">msg</span><span class="token operator">=</span><span class="token string">"spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[1].matchExpressions[0].key: beta.kubernetes.io/os is deprecated since v1.14; use <span class="token entity" title="\&quot;">\"</span>kubernetes.io/os<span class="token entity" title="\&quot;">\"</span> instead"</span> <span class="token assign-left variable">subsys</span><span class="token operator">=</span>klog
-<span class="token assign-left variable">level</span><span class="token operator">=</span>warning <span class="token assign-left variable">msg</span><span class="token operator">=</span><span class="token string">"spec.template.metadata.annotations[scheduler.alpha.kubernetes.io/critical-pod]: non-functional in v1.16+; use the <span class="token entity" title="\&quot;">\"</span>priorityClassName<span class="token entity" title="\&quot;">\"</span> field instead"</span> <span class="token assign-left variable">subsys</span><span class="token operator">=</span>klog
-🚀 Creating Operator Deployment<span class="token punctuation">..</span>.
-⌛ Waiting <span class="token keyword">for</span> Cilium to be installed and ready<span class="token punctuation">..</span>.
-✅ Cilium was successfully installed<span class="token operator">!</span> Run <span class="token string">'cilium status'</span> to view installation health
-
-<span class="token comment"># 查看cilium的状态</span>
-$ cilium status
-    /¯¯<span class="token punctuation">\</span>
- /¯¯<span class="token punctuation">\</span>__/¯¯<span class="token punctuation">\</span>    Cilium:         OK
- <span class="token punctuation">\</span>__/¯¯<span class="token punctuation">\</span>__/    Operator:       OK
- /¯¯<span class="token punctuation">\</span>__/¯¯<span class="token punctuation">\</span>    Hubble:         disabled
- <span class="token punctuation">\</span>__/¯¯<span class="token punctuation">\</span>__/    ClusterMesh:    disabled
-    <span class="token punctuation">\</span>__/
-
-DaemonSet         cilium             Desired: <span class="token number">3</span>, Ready: <span class="token number">3</span>/3, Available: <span class="token number">3</span>/3
-Deployment        cilium-operator    Desired: <span class="token number">1</span>, Ready: <span class="token number">1</span>/1, Available: <span class="token number">1</span>/1
-Containers:       cilium-operator    Running: <span class="token number">1</span>
-                  cilium             Running: <span class="token number">3</span>
-Cluster Pods:     <span class="token number">2</span>/2 managed by Cilium
-Image versions    cilium             quay.io/cilium/cilium:v1.11.3@sha256:cb6aac121e348abd61a692c435a90a6e2ad3f25baa9915346be7b333de8a767f: <span class="token number">3</span>
-                  cilium-operator    quay.io/cilium/operator-generic:v1.11.3@sha256:5b81db7a32cb7e2d00bb3cf332277ec2b3be239d9e94a8d979915f4e6648c787: <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># cilium的cli工具是一个二进制的可执行文件</span><br>$ curl -L --remote-name-all https://github.com/cilium/cilium-cli/releases/latest/download/cilium-linux-amd64.tar.gz&#123;,.sha256sum&#125;<br>$ sha256sum --check cilium-linux-amd64.tar.gz.sha256sum<br>cilium-linux-amd64.tar.gz: OK<br>$ sudo tar xzvfC cilium-linux-amd64.tar.gz /usr/<span class="hljs-built_in">local</span>/bin<br>cilium<br><br><span class="hljs-comment"># 使用该命令即可完成cilium的安装</span><br>$ cilium install<br>ℹ️  using Cilium version <span class="hljs-string">&quot;v1.11.3&quot;</span><br>🔮 Auto-detected cluster name: kubernetes<br>🔮 Auto-detected IPAM mode: cluster-pool<br>ℹ️  helm template --namespace kube-system cilium cilium/cilium --version 1.11.3 --<span class="hljs-built_in">set</span> cluster.id=0,cluster.name=kubernetes,encryption.nodeEncryption=<span class="hljs-literal">false</span>,ipam.mode=cluster-pool,kubeProxyReplacement=disabled,operator.replicas=1,serviceAccounts.cilium.name=cilium,serviceAccounts.operator.name=cilium-operator<br>ℹ️  Storing helm values file <span class="hljs-keyword">in</span> kube-system/cilium-cli-helm-values Secret<br>🔑 Created CA <span class="hljs-keyword">in</span> secret cilium-ca<br>🔑 Generating certificates <span class="hljs-keyword">for</span> Hubble...<br>🚀 Creating Service accounts...<br>🚀 Creating Cluster roles...<br>🚀 Creating ConfigMap <span class="hljs-keyword">for</span> Cilium version 1.11.3...<br>🚀 Creating Agent DaemonSet...<br>level=warning msg=<span class="hljs-string">&quot;spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[1].matchExpressions[0].key: beta.kubernetes.io/os is deprecated since v1.14; use \&quot;kubernetes.io/os\&quot; instead&quot;</span> subsys=klog<br>level=warning msg=<span class="hljs-string">&quot;spec.template.metadata.annotations[scheduler.alpha.kubernetes.io/critical-pod]: non-functional in v1.16+; use the \&quot;priorityClassName\&quot; field instead&quot;</span> subsys=klog<br>🚀 Creating Operator Deployment...<br>⌛ Waiting <span class="hljs-keyword">for</span> Cilium to be installed and ready...<br>✅ Cilium was successfully installed! Run <span class="hljs-string">&#x27;cilium status&#x27;</span> to view installation health<br><br><span class="hljs-comment"># 查看cilium的状态</span><br>$ cilium status<br>    /¯¯\<br> /¯¯\__/¯¯\    Cilium:         OK<br> \__/¯¯\__/    Operator:       OK<br> /¯¯\__/¯¯\    Hubble:         disabled<br> \__/¯¯\__/    ClusterMesh:    disabled<br>    \__/<br><br>DaemonSet         cilium             Desired: 3, Ready: 3/3, Available: 3/3<br>Deployment        cilium-operator    Desired: 1, Ready: 1/1, Available: 1/1<br>Containers:       cilium-operator    Running: 1<br>                  cilium             Running: 3<br>Cluster Pods:     2/2 managed by Cilium<br>Image versions    cilium             quay.io/cilium/cilium:v1.11.3@sha256:cb6aac121e348abd61a692c435a90a6e2ad3f25baa9915346be7b333de8a767f: 3<br>                  cilium-operator    quay.io/cilium/operator-generic:v1.11.3@sha256:5b81db7a32cb7e2d00bb3cf332277ec2b3be239d9e94a8d979915f4e6648c787: 1<br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="5-2-配置hubble"><a href="#5-2-配置hubble" class="headerlink" title="5.2 配置hubble"></a>5.2 配置hubble</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 我们先使用cilium-cli工具在k8s集群中部署hubble，只需要下面一条命令即可</span>
-$ cilium hubble <span class="token builtin class-name">enable</span>
-🔑 Found CA <span class="token keyword">in</span> secret cilium-ca
-ℹ️  helm template --namespace kube-system cilium cilium/cilium --version <span class="token number">1.11</span>.3 --set cluster.id<span class="token operator">=</span><span class="token number">0</span>,cluster.name<span class="token operator">=</span>kubernetes,encryption.nodeEncryption<span class="token operator">=</span>false,hubble.enabled<span class="token operator">=</span>true,hubble.relay.enabled<span class="token operator">=</span>true,hubble.tls.ca.cert<span class="token operator">=</span>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNGRENDQWJxZ0F3SUJBZ0lVSDRQcit1UU0xSXZtdWQvVlV3YWlycGllSEZBd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGakFVQmdOVkJBZ1REVk5oYmlCR2NtRnVZMmx6WTI4eEN6QUpCZ05WQkFjVApBa05CTVE4d0RRWURWUVFLRXdaRGFXeHBkVzB4RHpBTkJnTlZCQXNUQmtOcGJHbDFiVEVTTUJBR0ExVUVBeE1KClEybHNhWFZ0SUVOQk1CNFhEVEl5TURVd09UQTVNREF3TUZvWERUSTNNRFV3T0RBNU1EQXdNRm93YURFTE1Ba0cKQTFVRUJoTUNWVk14RmpBVUJnTlZCQWdURFZOaGJpQkdjbUZ1WTJselkyOHhDekFKQmdOVkJBY1RBa05CTVE4dwpEUVlEVlFRS0V3WkRhV3hwZFcweER6QU5CZ05WQkFzVEJrTnBiR2wxYlRFU01CQUdBMVVFQXhNSlEybHNhWFZ0CklFTkJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUU3Z21EQ05WOERseEIxS3VYYzhEdndCeUoKWUxuSENZNjVDWUhBb3ZBY3FUM3drcitLVVNwelcyVjN0QW9IaFdZV0UyQ2lUNjNIOXZLV1ZRY3pHeXp1T0tOQwpNRUF3RGdZRFZSMFBBUUgvQkFRREFnRUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdIUVlEVlIwT0JCWUVGQmMrClNDb3F1Y0JBc09sdDBWaEVCbkwyYjEyNE1Bb0dDQ3FHU000OUJBTUNBMGdBTUVVQ0lRRDJsNWVqaDVLVTkySysKSHJJUXIweUwrL05pZ3NSUHRBblA5T3lDcHExbFJBSWdYeGY5a2t5N2xYU0pOYmpkREFjbnBrNlJFTFp2eEkzbQpKaG9JRkRlbER0dz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo<span class="token operator">=</span>,hubble.tls.ca.key<span class="token operator">=</span><span class="token punctuation">[</span>--- REDACTED WHEN PRINTING TO TERMINAL <span class="token punctuation">(</span>USE --redact-helm-certificate-keys<span class="token operator">=</span>false TO PRINT<span class="token punctuation">)</span> ---<span class="token punctuation">]</span>,ipam.mode<span class="token operator">=</span>cluster-pool,kubeProxyReplacement<span class="token operator">=</span>disabled,operator.replicas<span class="token operator">=</span><span class="token number">1</span>,serviceAccounts.cilium.name<span class="token operator">=</span>cilium,serviceAccounts.operator.name<span class="token operator">=</span>cilium-operator
-✨ Patching ConfigMap cilium-config to <span class="token builtin class-name">enable</span> Hubble<span class="token punctuation">..</span>.
-🚀 Creating ConfigMap <span class="token keyword">for</span> Cilium version <span class="token number">1.11</span>.3<span class="token punctuation">..</span>.
-♻️  Restarted Cilium pods
-⌛ Waiting <span class="token keyword">for</span> Cilium to become ready before deploying other Hubble component<span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">..</span>.
-✨ Generating certificates<span class="token punctuation">..</span>.
-🔑 Generating certificates <span class="token keyword">for</span> Relay<span class="token punctuation">..</span>.
-✨ Deploying Relay<span class="token punctuation">..</span>.
-⌛ Waiting <span class="token keyword">for</span> Hubble to be installed<span class="token punctuation">..</span>.
-ℹ️  Storing helm values <span class="token function">file</span> <span class="token keyword">in</span> kube-system/cilium-cli-helm-values Secret
-✅ Hubble was successfully enabled<span class="token operator">!</span>
-
-
-<span class="token comment"># 安装hubble-cli工具，安装逻辑和cilium-cli的逻辑相似</span>
-$ <span class="token builtin class-name">export</span> <span class="token assign-left variable">HUBBLE_VERSION</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">curl</span> -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt<span class="token variable">)</span></span>
-$ <span class="token function">curl</span> -L --remote-name-all https://github.com/cilium/hubble/releases/download/<span class="token variable">$HUBBLE_VERSION</span>/hubble-linux-amd64.tar.gz<span class="token punctuation">&#123;</span>,.sha256sum<span class="token punctuation">&#125;</span>
-$ sha256sum --check hubble-linux-amd64.tar.gz.sha256sum
-hubble-linux-amd64.tar.gz: OK
-$ <span class="token function">sudo</span> <span class="token function">tar</span> xzvfC hubble-linux-amd64.tar.gz /usr/local/bin
-hubble
-
-<span class="token comment"># 首先我们要开启hubble的api，使用cilium-cli开启转发</span>
-$ cilium hubble port-forward<span class="token operator">&amp;</span>
-<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token number">15512</span>
-$ kubectl get svc -n kube-system
-NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT<span class="token punctuation">(</span>S<span class="token punctuation">)</span>                  AGE
-hubble-relay   ClusterIP   <span class="token number">10.188</span>.55.197   <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">80</span>/TCP                   16h
-hubble-ui      ClusterIP   <span class="token number">10.188</span>.17.78    <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">80</span>/TCP                   16h
-kube-dns       ClusterIP   <span class="token number">10.188</span>.0.10     <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">53</span>/UDP,53/TCP,9153/TCP   17h
-$ <span class="token function">netstat</span> -ntulp <span class="token operator">|</span> <span class="token function">grep</span> <span class="token number">4245</span>
-tcp        <span class="token number">0</span>      <span class="token number">0</span> <span class="token number">0.0</span>.0.0:4245            <span class="token number">0.0</span>.0.0:*               LISTEN      <span class="token number">15527</span>/kubectl
-tcp6       <span class="token number">0</span>      <span class="token number">0</span> :::4245                 :::*                    LISTEN      <span class="token number">15527</span>/kubectl
-
-<span class="token comment"># 实际上执行的操作等同于下面这个命令</span>
-<span class="token comment"># kubectl port-forward -n kube-system svc/hubble-relay --address 0.0.0.0 --address :: 4245:80</span>
-
-
-<span class="token comment"># 测试和hubble-api的连通性</span>
-$ hubble status
-Healthcheck <span class="token punctuation">(</span>via localhost:4245<span class="token punctuation">)</span>: Ok
-Current/Max Flows: <span class="token number">12,285</span>/12,285 <span class="token punctuation">(</span><span class="token number">100.00</span>%<span class="token punctuation">)</span>
-Flows/s: <span class="token number">28.58</span>
-Connected Nodes: <span class="token number">3</span>/3
-
-<span class="token comment"># 使用hubble命令查看数据的转发情况</span>
-$ hubble observe
-Handling connection <span class="token keyword">for</span> <span class="token number">4245</span>
-May  <span class="token number">9</span> 09:33:25.861: <span class="token number">10.0</span>.1.47:44484 -<span class="token operator">></span> cilium-test/echo-same-node-5767b7b99d-xhzpb:8080 to-endpoint FORWARDED <span class="token punctuation">(</span>TCP Flags: ACK, PSH<span class="token punctuation">)</span>
-May  <span class="token number">9</span> 09:33:25.863: <span class="token number">10.0</span>.1.47:44484 <span class="token operator">&lt;</span>- cilium-test/echo-same-node-5767b7b99d-xhzpb:8080 to-stack FORWARDED <span class="token punctuation">(</span>TCP Flags: ACK, PSH<span class="token punctuation">)</span>
-May  <span class="token number">9</span> 09:33:25.864: <span class="token number">10.0</span>.1.47:44484 -<span class="token operator">></span> cilium-test/echo-same-node-5767b7b99d-xhzpb:8080 to-endpoint FORWARDED <span class="token punctuation">(</span>TCP Flags: ACK, FIN<span class="token punctuation">)</span>
-<span class="token punctuation">..</span>.此处略去一堆输出<span class="token punctuation">..</span>.
-
-<span class="token comment"># 开启hubble ui组件</span>
-$ cilium hubble <span class="token builtin class-name">enable</span> --ui
-🔑 Found CA <span class="token keyword">in</span> secret cilium-ca
-ℹ️  helm template --namespace kube-system cilium cilium/cilium --version <span class="token number">1.11</span>.3 --set cluster.id<span class="token operator">=</span><span class="token number">0</span>,cluster.name<span class="token operator">=</span>kubernetes,encryption.nodeEncryption<span class="token operator">=</span>false,hubble.enabled<span class="token operator">=</span>true,hubble.relay.enabled<span class="token operator">=</span>true,hubble.tls.ca.cert<span class="token operator">=</span>LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNGRENDQWJxZ0F3SUJBZ0lVSDRQcit1UU0xSXZtdWQvVlV3YWlycGllSEZBd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGakFVQmdOVkJBZ1REVk5oYmlCR2NtRnVZMmx6WTI4eEN6QUpCZ05WQkFjVApBa05CTVE4d0RRWURWUVFLRXdaRGFXeHBkVzB4RHpBTkJnTlZCQXNUQmtOcGJHbDFiVEVTTUJBR0ExVUVBeE1KClEybHNhWFZ0SUVOQk1CNFhEVEl5TURVd09UQTVNREF3TUZvWERUSTNNRFV3T0RBNU1EQXdNRm93YURFTE1Ba0cKQTFVRUJoTUNWVk14RmpBVUJnTlZCQWdURFZOaGJpQkdjbUZ1WTJselkyOHhDekFKQmdOVkJBY1RBa05CTVE4dwpEUVlEVlFRS0V3WkRhV3hwZFcweER6QU5CZ05WQkFzVEJrTnBiR2wxYlRFU01CQUdBMVVFQXhNSlEybHNhWFZ0CklFTkJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUU3Z21EQ05WOERseEIxS3VYYzhEdndCeUoKWUxuSENZNjVDWUhBb3ZBY3FUM3drcitLVVNwelcyVjN0QW9IaFdZV0UyQ2lUNjNIOXZLV1ZRY3pHeXp1T0tOQwpNRUF3RGdZRFZSMFBBUUgvQkFRREFnRUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdIUVlEVlIwT0JCWUVGQmMrClNDb3F1Y0JBc09sdDBWaEVCbkwyYjEyNE1Bb0dDQ3FHU000OUJBTUNBMGdBTUVVQ0lRRDJsNWVqaDVLVTkySysKSHJJUXIweUwrL05pZ3NSUHRBblA5T3lDcHExbFJBSWdYeGY5a2t5N2xYU0pOYmpkREFjbnBrNlJFTFp2eEkzbQpKaG9JRkRlbER0dz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo<span class="token operator">=</span>,hubble.tls.ca.key<span class="token operator">=</span><span class="token punctuation">[</span>--- REDACTED WHEN PRINTING TO TERMINAL <span class="token punctuation">(</span>USE --redact-helm-certificate-keys<span class="token operator">=</span>false TO PRINT<span class="token punctuation">)</span> ---<span class="token punctuation">]</span>,hubble.ui.enabled<span class="token operator">=</span>true,hubble.ui.securityContext.enabled<span class="token operator">=</span>false,ipam.mode<span class="token operator">=</span>cluster-pool,kubeProxyReplacement<span class="token operator">=</span>disabled,operator.replicas<span class="token operator">=</span><span class="token number">1</span>,serviceAccounts.cilium.name<span class="token operator">=</span>cilium,serviceAccounts.operator.name<span class="token operator">=</span>cilium-operator
-✨ Patching ConfigMap cilium-config to <span class="token builtin class-name">enable</span> Hubble<span class="token punctuation">..</span>.
-🚀 Creating ConfigMap <span class="token keyword">for</span> Cilium version <span class="token number">1.11</span>.3<span class="token punctuation">..</span>.
-♻️  Restarted Cilium pods
-⌛ Waiting <span class="token keyword">for</span> Cilium to become ready before deploying other Hubble component<span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">..</span>.
-✅ Relay is already deployed
-✨ Deploying Hubble UI and Hubble UI Backend<span class="token punctuation">..</span>.
-⌛ Waiting <span class="token keyword">for</span> Hubble to be installed<span class="token punctuation">..</span>.
-ℹ️  Storing helm values <span class="token function">file</span> <span class="token keyword">in</span> kube-system/cilium-cli-helm-values Secret
-✅ Hubble was successfully enabled<span class="token operator">!</span>
-
-<span class="token comment"># 实际上这时候我们再查看k8s集群的状态可以看到部署了一个名为hubble-ui的deployment</span>
-$ kubectl get deployment -n kube-system <span class="token operator">|</span> <span class="token function">grep</span> hubble
-hubble-relay      <span class="token number">1</span>/1     <span class="token number">1</span>            <span class="token number">1</span>           17h
-hubble-ui         <span class="token number">1</span>/1     <span class="token number">1</span>            <span class="token number">1</span>           17h
-$ kubectl get svc -n kube-system <span class="token operator">|</span> <span class="token function">grep</span> hubble
-hubble-relay   ClusterIP   <span class="token number">10.188</span>.55.197   <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">80</span>/TCP                   17h
-hubble-ui      ClusterIP   <span class="token number">10.188</span>.17.78    <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">80</span>/TCP                   17h
-
-<span class="token comment"># 将hubble-ui这个服务的80端口暴露到宿主机上面的12000端口上面</span>
-$ cilium hubble ui<span class="token operator">&amp;</span>
-<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token number">5809</span>
-ℹ️  Opening <span class="token string">"http://localhost:12000"</span> <span class="token keyword">in</span> your browser<span class="token punctuation">..</span>.
-<span class="token comment"># 实际上执行的操作等同于下面这个命令</span>
-<span class="token comment"># kubectl port-forward -n kube-system svc/hubble-ui --address 0.0.0.0 --address :: 12000:80</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="5-2-配置hubble"><a href="#5-2-配置hubble" class="headerlink" title="5.2 配置hubble"></a>5.2 配置hubble</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 我们先使用cilium-cli工具在k8s集群中部署hubble，只需要下面一条命令即可</span><br>$ cilium hubble <span class="hljs-built_in">enable</span><br>🔑 Found CA <span class="hljs-keyword">in</span> secret cilium-ca<br>ℹ️  helm template --namespace kube-system cilium cilium/cilium --version 1.11.3 --<span class="hljs-built_in">set</span> cluster.id=0,cluster.name=kubernetes,encryption.nodeEncryption=<span class="hljs-literal">false</span>,hubble.enabled=<span class="hljs-literal">true</span>,hubble.relay.enabled=<span class="hljs-literal">true</span>,hubble.tls.ca.cert=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNGRENDQWJxZ0F3SUJBZ0lVSDRQcit1UU0xSXZtdWQvVlV3YWlycGllSEZBd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGakFVQmdOVkJBZ1REVk5oYmlCR2NtRnVZMmx6WTI4eEN6QUpCZ05WQkFjVApBa05CTVE4d0RRWURWUVFLRXdaRGFXeHBkVzB4RHpBTkJnTlZCQXNUQmtOcGJHbDFiVEVTTUJBR0ExVUVBeE1KClEybHNhWFZ0SUVOQk1CNFhEVEl5TURVd09UQTVNREF3TUZvWERUSTNNRFV3T0RBNU1EQXdNRm93YURFTE1Ba0cKQTFVRUJoTUNWVk14RmpBVUJnTlZCQWdURFZOaGJpQkdjbUZ1WTJselkyOHhDekFKQmdOVkJBY1RBa05CTVE4dwpEUVlEVlFRS0V3WkRhV3hwZFcweER6QU5CZ05WQkFzVEJrTnBiR2wxYlRFU01CQUdBMVVFQXhNSlEybHNhWFZ0CklFTkJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUU3Z21EQ05WOERseEIxS3VYYzhEdndCeUoKWUxuSENZNjVDWUhBb3ZBY3FUM3drcitLVVNwelcyVjN0QW9IaFdZV0UyQ2lUNjNIOXZLV1ZRY3pHeXp1T0tOQwpNRUF3RGdZRFZSMFBBUUgvQkFRREFnRUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdIUVlEVlIwT0JCWUVGQmMrClNDb3F1Y0JBc09sdDBWaEVCbkwyYjEyNE1Bb0dDQ3FHU000OUJBTUNBMGdBTUVVQ0lRRDJsNWVqaDVLVTkySysKSHJJUXIweUwrL05pZ3NSUHRBblA5T3lDcHExbFJBSWdYeGY5a2t5N2xYU0pOYmpkREFjbnBrNlJFTFp2eEkzbQpKaG9JRkRlbER0dz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=,hubble.tls.ca.key=[--- REDACTED WHEN PRINTING TO TERMINAL (USE --redact-helm-certificate-keys=<span class="hljs-literal">false</span> TO PRINT) ---],ipam.mode=cluster-pool,kubeProxyReplacement=disabled,operator.replicas=1,serviceAccounts.cilium.name=cilium,serviceAccounts.operator.name=cilium-operator<br>✨ Patching ConfigMap cilium-config to <span class="hljs-built_in">enable</span> Hubble...<br>🚀 Creating ConfigMap <span class="hljs-keyword">for</span> Cilium version 1.11.3...<br>♻️  Restarted Cilium pods<br>⌛ Waiting <span class="hljs-keyword">for</span> Cilium to become ready before deploying other Hubble component(s)...<br>✨ Generating certificates...<br>🔑 Generating certificates <span class="hljs-keyword">for</span> Relay...<br>✨ Deploying Relay...<br>⌛ Waiting <span class="hljs-keyword">for</span> Hubble to be installed...<br>ℹ️  Storing helm values file <span class="hljs-keyword">in</span> kube-system/cilium-cli-helm-values Secret<br>✅ Hubble was successfully enabled!<br><br><br><span class="hljs-comment"># 安装hubble-cli工具，安装逻辑和cilium-cli的逻辑相似</span><br>$ <span class="hljs-built_in">export</span> HUBBLE_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/hubble/master/stable.txt)<br>$ curl -L --remote-name-all https://github.com/cilium/hubble/releases/download/<span class="hljs-variable">$HUBBLE_VERSION</span>/hubble-linux-amd64.tar.gz&#123;,.sha256sum&#125;<br>$ sha256sum --check hubble-linux-amd64.tar.gz.sha256sum<br>hubble-linux-amd64.tar.gz: OK<br>$ sudo tar xzvfC hubble-linux-amd64.tar.gz /usr/<span class="hljs-built_in">local</span>/bin<br>hubble<br><br><span class="hljs-comment"># 首先我们要开启hubble的api，使用cilium-cli开启转发</span><br>$ cilium hubble port-forward&amp;<br>[1] 15512<br>$ kubectl get svc -n kube-system<br>NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE<br>hubble-relay   ClusterIP   10.188.55.197   &lt;none&gt;        80/TCP                   16h<br>hubble-ui      ClusterIP   10.188.17.78    &lt;none&gt;        80/TCP                   16h<br>kube-dns       ClusterIP   10.188.0.10     &lt;none&gt;        53/UDP,53/TCP,9153/TCP   17h<br>$ netstat -ntulp | grep 4245<br>tcp        0      0 0.0.0.0:4245            0.0.0.0:*               LISTEN      15527/kubectl<br>tcp6       0      0 :::4245                 :::*                    LISTEN      15527/kubectl<br><br><span class="hljs-comment"># 实际上执行的操作等同于下面这个命令</span><br><span class="hljs-comment"># kubectl port-forward -n kube-system svc/hubble-relay --address 0.0.0.0 --address :: 4245:80</span><br><br><br><span class="hljs-comment"># 测试和hubble-api的连通性</span><br>$ hubble status<br>Healthcheck (via localhost:4245): Ok<br>Current/Max Flows: 12,285/12,285 (100.00%)<br>Flows/s: 28.58<br>Connected Nodes: 3/3<br><br><span class="hljs-comment"># 使用hubble命令查看数据的转发情况</span><br>$ hubble observe<br>Handling connection <span class="hljs-keyword">for</span> 4245<br>May  9 09:33:25.861: 10.0.1.47:44484 -&gt; cilium-test/echo-same-node-5767b7b99d-xhzpb:8080 to-endpoint FORWARDED (TCP Flags: ACK, PSH)<br>May  9 09:33:25.863: 10.0.1.47:44484 &lt;- cilium-test/echo-same-node-5767b7b99d-xhzpb:8080 to-stack FORWARDED (TCP Flags: ACK, PSH)<br>May  9 09:33:25.864: 10.0.1.47:44484 -&gt; cilium-test/echo-same-node-5767b7b99d-xhzpb:8080 to-endpoint FORWARDED (TCP Flags: ACK, FIN)<br>...此处略去一堆输出...<br><br><span class="hljs-comment"># 开启hubble ui组件</span><br>$ cilium hubble <span class="hljs-built_in">enable</span> --ui<br>🔑 Found CA <span class="hljs-keyword">in</span> secret cilium-ca<br>ℹ️  helm template --namespace kube-system cilium cilium/cilium --version 1.11.3 --<span class="hljs-built_in">set</span> cluster.id=0,cluster.name=kubernetes,encryption.nodeEncryption=<span class="hljs-literal">false</span>,hubble.enabled=<span class="hljs-literal">true</span>,hubble.relay.enabled=<span class="hljs-literal">true</span>,hubble.tls.ca.cert=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNGRENDQWJxZ0F3SUJBZ0lVSDRQcit1UU0xSXZtdWQvVlV3YWlycGllSEZBd0NnWUlLb1pJemowRUF3SXcKYURFTE1Ba0dBMVVFQmhNQ1ZWTXhGakFVQmdOVkJBZ1REVk5oYmlCR2NtRnVZMmx6WTI4eEN6QUpCZ05WQkFjVApBa05CTVE4d0RRWURWUVFLRXdaRGFXeHBkVzB4RHpBTkJnTlZCQXNUQmtOcGJHbDFiVEVTTUJBR0ExVUVBeE1KClEybHNhWFZ0SUVOQk1CNFhEVEl5TURVd09UQTVNREF3TUZvWERUSTNNRFV3T0RBNU1EQXdNRm93YURFTE1Ba0cKQTFVRUJoTUNWVk14RmpBVUJnTlZCQWdURFZOaGJpQkdjbUZ1WTJselkyOHhDekFKQmdOVkJBY1RBa05CTVE4dwpEUVlEVlFRS0V3WkRhV3hwZFcweER6QU5CZ05WQkFzVEJrTnBiR2wxYlRFU01CQUdBMVVFQXhNSlEybHNhWFZ0CklFTkJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUU3Z21EQ05WOERseEIxS3VYYzhEdndCeUoKWUxuSENZNjVDWUhBb3ZBY3FUM3drcitLVVNwelcyVjN0QW9IaFdZV0UyQ2lUNjNIOXZLV1ZRY3pHeXp1T0tOQwpNRUF3RGdZRFZSMFBBUUgvQkFRREFnRUdNQThHQTFVZEV3RUIvd1FGTUFNQkFmOHdIUVlEVlIwT0JCWUVGQmMrClNDb3F1Y0JBc09sdDBWaEVCbkwyYjEyNE1Bb0dDQ3FHU000OUJBTUNBMGdBTUVVQ0lRRDJsNWVqaDVLVTkySysKSHJJUXIweUwrL05pZ3NSUHRBblA5T3lDcHExbFJBSWdYeGY5a2t5N2xYU0pOYmpkREFjbnBrNlJFTFp2eEkzbQpKaG9JRkRlbER0dz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=,hubble.tls.ca.key=[--- REDACTED WHEN PRINTING TO TERMINAL (USE --redact-helm-certificate-keys=<span class="hljs-literal">false</span> TO PRINT) ---],hubble.ui.enabled=<span class="hljs-literal">true</span>,hubble.ui.securityContext.enabled=<span class="hljs-literal">false</span>,ipam.mode=cluster-pool,kubeProxyReplacement=disabled,operator.replicas=1,serviceAccounts.cilium.name=cilium,serviceAccounts.operator.name=cilium-operator<br>✨ Patching ConfigMap cilium-config to <span class="hljs-built_in">enable</span> Hubble...<br>🚀 Creating ConfigMap <span class="hljs-keyword">for</span> Cilium version 1.11.3...<br>♻️  Restarted Cilium pods<br>⌛ Waiting <span class="hljs-keyword">for</span> Cilium to become ready before deploying other Hubble component(s)...<br>✅ Relay is already deployed<br>✨ Deploying Hubble UI and Hubble UI Backend...<br>⌛ Waiting <span class="hljs-keyword">for</span> Hubble to be installed...<br>ℹ️  Storing helm values file <span class="hljs-keyword">in</span> kube-system/cilium-cli-helm-values Secret<br>✅ Hubble was successfully enabled!<br><br><span class="hljs-comment"># 实际上这时候我们再查看k8s集群的状态可以看到部署了一个名为hubble-ui的deployment</span><br>$ kubectl get deployment -n kube-system | grep hubble<br>hubble-relay      1/1     1            1           17h<br>hubble-ui         1/1     1            1           17h<br>$ kubectl get svc -n kube-system | grep hubble<br>hubble-relay   ClusterIP   10.188.55.197   &lt;none&gt;        80/TCP                   17h<br>hubble-ui      ClusterIP   10.188.17.78    &lt;none&gt;        80/TCP                   17h<br><br><span class="hljs-comment"># 将hubble-ui这个服务的80端口暴露到宿主机上面的12000端口上面</span><br>$ cilium hubble ui&amp;<br>[2] 5809<br>ℹ️  Opening <span class="hljs-string">&quot;http://localhost:12000&quot;</span> <span class="hljs-keyword">in</span> your browser...<br><span class="hljs-comment"># 实际上执行的操作等同于下面这个命令</span><br><span class="hljs-comment"># kubectl port-forward -n kube-system svc/hubble-ui --address 0.0.0.0 --address :: 12000:80</span><br></code></pre></td></tr></table></figure>
 
 <p>访问k8s宿主机节点的IP+端口就可以看到hubble-ui的界面了</p>
 <p><img src="https://resource.tinychen.com/202205091755694.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后所有的相关服务都部署完成之后，我们再检查一下整个cilium的状态</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ cilium status
-    &#x2F;¯¯\
- &#x2F;¯¯\__&#x2F;¯¯\    Cilium:         OK
- \__&#x2F;¯¯\__&#x2F;    Operator:       OK
- &#x2F;¯¯\__&#x2F;¯¯\    Hubble:         OK
- \__&#x2F;¯¯\__&#x2F;    ClusterMesh:    disabled
-    \__&#x2F;
-
-Deployment        cilium-operator    Desired: 1, Ready: 1&#x2F;1, Available: 1&#x2F;1
-Deployment        hubble-relay       Desired: 1, Ready: 1&#x2F;1, Available: 1&#x2F;1
-Deployment        hubble-ui          Desired: 1, Ready: 1&#x2F;1, Available: 1&#x2F;1
-DaemonSet         cilium             Desired: 3, Ready: 3&#x2F;3, Available: 3&#x2F;3
-Containers:       cilium             Running: 3
-                  cilium-operator    Running: 1
-                  hubble-relay       Running: 1
-                  hubble-ui          Running: 1
-Cluster Pods:     8&#x2F;8 managed by Cilium
-Image versions    cilium             quay.io&#x2F;cilium&#x2F;cilium:v1.11.3@sha256:cb6aac121e348abd61a692c435a90a6e2ad3f25baa9915346be7b333de8a767f: 3
-                  cilium-operator    quay.io&#x2F;cilium&#x2F;operator-generic:v1.11.3@sha256:5b81db7a32cb7e2d00bb3cf332277ec2b3be239d9e94a8d979915f4e6648c787: 1
-                  hubble-relay       quay.io&#x2F;cilium&#x2F;hubble-relay:v1.11.3@sha256:7256ec111259a79b4f0e0f80ba4256ea23bd472e1fc3f0865975c2ed113ccb97: 1
-                  hubble-ui          quay.io&#x2F;cilium&#x2F;hubble-ui:v0.8.5@sha256:4eaca1ec1741043cfba6066a165b3bf251590cf4ac66371c4f63fbed2224ebb4: 1
-                  hubble-ui          quay.io&#x2F;cilium&#x2F;hubble-ui-backend:v0.8.5@sha256:2bce50cf6c32719d072706f7ceccad654bfa907b2745a496da99610776fe31ed: 1
-                  hubble-ui          docker.io&#x2F;envoyproxy&#x2F;envoy:v1.18.4@sha256:e5c2bb2870d0e59ce917a5100311813b4ede96ce4eb0c6bfa879e3fbe3e83935: 1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ cilium status<br>    /¯¯\<br> <span class="hljs-regexp">/¯¯\__/</span>¯¯\    Cilium:         OK<br> \__<span class="hljs-regexp">/¯¯\__/</span>    Operator:       OK<br> <span class="hljs-regexp">/¯¯\__/</span>¯¯\    Hubble:         OK<br> \__<span class="hljs-regexp">/¯¯\__/</span>    ClusterMesh:    disabled<br>    \__/<br><br>Deployment        cilium-operator    Desired: <span class="hljs-number">1</span>, Ready: <span class="hljs-number">1</span><span class="hljs-regexp">/1, Available: 1/</span><span class="hljs-number">1</span><br>Deployment        hubble-relay       Desired: <span class="hljs-number">1</span>, Ready: <span class="hljs-number">1</span><span class="hljs-regexp">/1, Available: 1/</span><span class="hljs-number">1</span><br>Deployment        hubble-ui          Desired: <span class="hljs-number">1</span>, Ready: <span class="hljs-number">1</span><span class="hljs-regexp">/1, Available: 1/</span><span class="hljs-number">1</span><br>DaemonSet         cilium             Desired: <span class="hljs-number">3</span>, Ready: <span class="hljs-number">3</span><span class="hljs-regexp">/3, Available: 3/</span><span class="hljs-number">3</span><br>Containers:       cilium             Running: <span class="hljs-number">3</span><br>                  cilium-operator    Running: <span class="hljs-number">1</span><br>                  hubble-relay       Running: <span class="hljs-number">1</span><br>                  hubble-ui          Running: <span class="hljs-number">1</span><br>Cluster Pods:     <span class="hljs-number">8</span>/<span class="hljs-number">8</span> managed by Cilium<br>Image versions    cilium             quay.io<span class="hljs-regexp">/cilium/</span>cilium:v1.<span class="hljs-number">11.3</span>@sha256:cb6aac121e348abd61a692c435a90a6e2ad3f25baa9915346be7b333de8a767f: <span class="hljs-number">3</span><br>                  cilium-operator    quay.io<span class="hljs-regexp">/cilium/</span>operator-generic:v1.<span class="hljs-number">11.3</span>@sha256:<span class="hljs-number">5</span>b81db7a32cb7e2d00bb3cf332277ec2b3be239d9e94a8d979915f4e6648c787: <span class="hljs-number">1</span><br>                  hubble-relay       quay.io<span class="hljs-regexp">/cilium/</span>hubble-relay:v1.<span class="hljs-number">11.3</span>@sha256:<span class="hljs-number">7256</span>ec111259a79b4f0e0f80ba4256ea23bd472e1fc3f0865975c2ed113ccb97: <span class="hljs-number">1</span><br>                  hubble-ui          quay.io<span class="hljs-regexp">/cilium/</span>hubble-ui:v0.<span class="hljs-number">8.5</span>@sha256:<span class="hljs-number">4</span>eaca1ec1741043cfba6066a165b3bf251590cf4ac66371c4f63fbed2224ebb4: <span class="hljs-number">1</span><br>                  hubble-ui          quay.io<span class="hljs-regexp">/cilium/</span>hubble-ui-backend:v0.<span class="hljs-number">8.5</span>@sha256:<span class="hljs-number">2</span>bce50cf6c32719d072706f7ceccad654bfa907b2745a496da99610776fe31ed: <span class="hljs-number">1</span><br>                  hubble-ui          docker.io<span class="hljs-regexp">/envoyproxy/</span>envoy:v1.<span class="hljs-number">18.4</span>@sha256:e5c2bb2870d0e59ce917a5100311813b4ede96ce4eb0c6bfa879e3fbe3e83935: <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="6、部署测试用例"><a href="#6、部署测试用例" class="headerlink" title="6、部署测试用例"></a>6、部署测试用例</h1><p>集群部署完成之后我们在k8s集群中部署一个nginx测试一下是否能够正常工作。首先我们创建一个名为<code>nginx-quic</code>的命名空间（<code>namespace</code>），然后在这个命名空间内创建一个名为<code>nginx-quic-deployment</code>的<code>deployment</code>用来部署pod，最后再创建一个<code>service</code>用来暴露服务，这里我们先使用<code>nodeport</code>的方式暴露端口方便测试。</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml">$ cat nginx<span class="token punctuation">-</span>quic.yaml
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Namespace
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-
-<span class="token punctuation">---</span>
-
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic<span class="token punctuation">-</span>deployment
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span>
-      <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">4</span>
-  <span class="token key atrule">template</span><span class="token punctuation">:</span>
-    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
-        <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
-      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-        <span class="token key atrule">image</span><span class="token punctuation">:</span> tinychen777/nginx<span class="token punctuation">-</span>quic<span class="token punctuation">:</span>latest
-        <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> IfNotPresent
-        <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
-
-<span class="token punctuation">---</span>
-
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic<span class="token punctuation">-</span>service
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">externalTrafficPolicy</span><span class="token punctuation">:</span> Cluster
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-    <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">8080</span> <span class="token comment"># match for service access port</span>
-    <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># match for pod access port</span>
-    <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30088</span> <span class="token comment"># match for external access port</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">$</span> <span class="hljs-string">cat</span> <span class="hljs-string">nginx-quic.yaml</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Namespace</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic-deployment</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">4</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">tinychen777/nginx-quic:latest</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">80</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">externalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span> <span class="hljs-comment"># match for service access port</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for pod access port</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">30088</span> <span class="hljs-comment"># match for external access port</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br></code></pre></td></tr></table></figure>
 
 <p>部署完成后我们直接查看状态</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接部署</span>
-$ kubectl apply -f nginx-quic.yaml
-namespace/nginx-quic created
-deployment.apps/nginx-quic-deployment created
-service/nginx-quic-service created
-
-<span class="token comment"># 查看deployment的运行状态</span>
-$ kubectl get deployment -o wide -n nginx-quic
-NAME                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                          SELECTOR
-nginx-quic-deployment   <span class="token number">4</span>/4     <span class="token number">4</span>            <span class="token number">4</span>           17h   nginx-quic   tinychen777/nginx-quic:latest   <span class="token assign-left variable">app</span><span class="token operator">=</span>nginx-quic
-
-<span class="token comment"># 查看service的运行状态</span>
-$ kubectl get <span class="token function">service</span> -o wide -n nginx-quic
-NAME                 TYPE       CLUSTER-IP     EXTERNAL-IP   PORT<span class="token punctuation">(</span>S<span class="token punctuation">)</span>          AGE   SELECTOR
-nginx-quic-service   NodePort   <span class="token number">10.188</span>.0.200   <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">8080</span>:30088/TCP   17h   <span class="token assign-left variable">app</span><span class="token operator">=</span>nginx-quic
-
-<span class="token comment"># 查看pod的运行状态</span>
-$ kubectl get pods -o wide -n nginx-quic
-NAME                                     READY   STATUS    RESTARTS      AGE   IP           NODE                                       NOMINATED NODE   READINESS GATES
-nginx-quic-deployment-696d959797-26dzh   <span class="token number">1</span>/1     Running   <span class="token number">1</span> <span class="token punctuation">(</span>17h ago<span class="token punctuation">)</span>   17h   <span class="token number">10.0</span>.2.58    tiny-cilium-worker-188-12.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-nginx-quic-deployment-696d959797-kw6bn   <span class="token number">1</span>/1     Running   <span class="token number">1</span> <span class="token punctuation">(</span>17h ago<span class="token punctuation">)</span>   17h   <span class="token number">10.0</span>.2.207   tiny-cilium-worker-188-12.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-nginx-quic-deployment-696d959797-mdw99   <span class="token number">1</span>/1     Running   <span class="token number">1</span> <span class="token punctuation">(</span>17h ago<span class="token punctuation">)</span>   17h   <span class="token number">10.0</span>.1.247   tiny-cilium-worker-188-11.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-nginx-quic-deployment-696d959797-x42zn   <span class="token number">1</span>/1     Running   <span class="token number">1</span> <span class="token punctuation">(</span>17h ago<span class="token punctuation">)</span>   17h   <span class="token number">10.0</span>.1.60    tiny-cilium-worker-188-11.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-
-<span class="token comment"># 查看IPVS规则</span>
-$ ipvsadm -ln
-IP Virtual Server version <span class="token number">1.2</span>.1 <span class="token punctuation">(</span>size<span class="token operator">=</span><span class="token number">4096</span><span class="token punctuation">)</span>
-Prot LocalAddress:Port Scheduler Flags
-  -<span class="token operator">></span> RemoteAddress:Port           Forward Weight ActiveConn InActConn
-TCP  <span class="token number">172.17</span>.0.1:30088 rr
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.60:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.247:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.58:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.207:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-TCP  <span class="token number">10.0</span>.0.226:30088 rr
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.60:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.247:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.58:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.207:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-TCP  <span class="token number">10.31</span>.188.1:30088 rr
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.60:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.247:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.58:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.207:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-TCP  <span class="token number">10.188</span>.0.200:8080 rr
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.60:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.1.247:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.58:80                 Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.0</span>.2.207:80                Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接部署</span><br>$ kubectl apply -f nginx-quic.yaml<br>namespace/nginx-quic created<br>deployment.apps/nginx-quic-deployment created<br>service/nginx-quic-service created<br><br><span class="hljs-comment"># 查看deployment的运行状态</span><br>$ kubectl get deployment -o wide -n nginx-quic<br>NAME                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                          SELECTOR<br>nginx-quic-deployment   4/4     4            4           17h   nginx-quic   tinychen777/nginx-quic:latest   app=nginx-quic<br><br><span class="hljs-comment"># 查看service的运行状态</span><br>$ kubectl get service -o wide -n nginx-quic<br>NAME                 TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE   SELECTOR<br>nginx-quic-service   NodePort   10.188.0.200   &lt;none&gt;        8080:30088/TCP   17h   app=nginx-quic<br><br><span class="hljs-comment"># 查看pod的运行状态</span><br>$ kubectl get pods -o wide -n nginx-quic<br>NAME                                     READY   STATUS    RESTARTS      AGE   IP           NODE                                       NOMINATED NODE   READINESS GATES<br>nginx-quic-deployment-696d959797-26dzh   1/1     Running   1 (17h ago)   17h   10.0.2.58    tiny-cilium-worker-188-12.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment-696d959797-kw6bn   1/1     Running   1 (17h ago)   17h   10.0.2.207   tiny-cilium-worker-188-12.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment-696d959797-mdw99   1/1     Running   1 (17h ago)   17h   10.0.1.247   tiny-cilium-worker-188-11.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment-696d959797-x42zn   1/1     Running   1 (17h ago)   17h   10.0.1.60    tiny-cilium-worker-188-11.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br><br><span class="hljs-comment"># 查看IPVS规则</span><br>$ ipvsadm -ln<br>IP Virtual Server version 1.2.1 (size=4096)<br>Prot LocalAddress:Port Scheduler Flags<br>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn<br>TCP  172.17.0.1:30088 rr<br>  -&gt; 10.0.1.60:80                 Masq    1      0          0<br>  -&gt; 10.0.1.247:80                Masq    1      0          0<br>  -&gt; 10.0.2.58:80                 Masq    1      0          0<br>  -&gt; 10.0.2.207:80                Masq    1      0          0<br>TCP  10.0.0.226:30088 rr<br>  -&gt; 10.0.1.60:80                 Masq    1      0          0<br>  -&gt; 10.0.1.247:80                Masq    1      0          0<br>  -&gt; 10.0.2.58:80                 Masq    1      0          0<br>  -&gt; 10.0.2.207:80                Masq    1      0          0<br>TCP  10.31.188.1:30088 rr<br>  -&gt; 10.0.1.60:80                 Masq    1      0          0<br>  -&gt; 10.0.1.247:80                Masq    1      0          0<br>  -&gt; 10.0.2.58:80                 Masq    1      0          0<br>  -&gt; 10.0.2.207:80                Masq    1      0          0<br>TCP  10.188.0.200:8080 rr<br>  -&gt; 10.0.1.60:80                 Masq    1      0          0<br>  -&gt; 10.0.1.247:80                Masq    1      0          0<br>  -&gt; 10.0.2.58:80                 Masq    1      0          0<br>  -&gt; 10.0.2.207:80                Masq    1      0          0<br></code></pre></td></tr></table></figure>
 
 <p>最后我们进行测试，这个nginx-quic的镜像默认情况下会返回在nginx容器中获得的用户请求的IP和端口</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先我们在集群内进行测试</span>
-<span class="token comment"># 直接访问pod</span>
-$ <span class="token function">curl</span> <span class="token number">10.0</span>.2.58:80
-<span class="token number">10.0</span>.0.226:52312
-<span class="token comment"># 直接访问service的ClusterIP，这时请求会被转发到pod中</span>
-$ <span class="token function">curl</span> <span class="token number">10.188</span>.0.200:8080
-<span class="token number">10.0</span>.0.226:36228
-<span class="token comment"># 直接访问nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span>
-<span class="token comment"># 此时实际返回的IP要取决于被转发到的后端pod是否在当前的k8s节点上</span>
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.1:30088
-<span class="token number">10.0</span>.0.226:38034
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.11:30088
-<span class="token number">10.31</span>.188.11:24371
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.12:30088
-<span class="token number">10.31</span>.188.12:56919
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.12:30088
-<span class="token number">10.0</span>.2.151:49222
-
-<span class="token comment"># 接着我们在集群外进行测试</span>
-<span class="token comment"># 直接访问三个节点的nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span>
-<span class="token comment"># 此时实际返回的IP要取决于被转发到的后端pod是否在当前的k8s节点上</span>
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.11:30088
-<span class="token number">10.0</span>.1.47:6318
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.11:30088
-<span class="token number">10.31</span>.188.11:63944
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.12:30088
-<span class="token number">10.31</span>.188.12:53882
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.12:30088
-<span class="token number">10.0</span>.2.151:6366
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.12:30088
-<span class="token number">10.0</span>.2.151:6368
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.188.12:30088
-<span class="token number">10.31</span>.188.12:48174<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们在集群内进行测试</span><br><span class="hljs-comment"># 直接访问pod</span><br>$ curl 10.0.2.58:80<br>10.0.0.226:52312<br><span class="hljs-comment"># 直接访问service的ClusterIP，这时请求会被转发到pod中</span><br>$ curl 10.188.0.200:8080<br>10.0.0.226:36228<br><span class="hljs-comment"># 直接访问nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span><br><span class="hljs-comment"># 此时实际返回的IP要取决于被转发到的后端pod是否在当前的k8s节点上</span><br>$ curl 10.31.188.1:30088<br>10.0.0.226:38034<br>$ curl 10.31.188.11:30088<br>10.31.188.11:24371<br>$ curl 10.31.188.12:30088<br>10.31.188.12:56919<br>$ curl 10.31.188.12:30088<br>10.0.2.151:49222<br><br><span class="hljs-comment"># 接着我们在集群外进行测试</span><br><span class="hljs-comment"># 直接访问三个节点的nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span><br><span class="hljs-comment"># 此时实际返回的IP要取决于被转发到的后端pod是否在当前的k8s节点上</span><br>$ curl 10.31.188.11:30088<br>10.0.1.47:6318<br>$ curl 10.31.188.11:30088<br>10.31.188.11:63944<br>$ curl 10.31.188.12:30088<br>10.31.188.12:53882<br>$ curl 10.31.188.12:30088<br>10.0.2.151:6366<br>$ curl 10.31.188.12:30088<br>10.0.2.151:6368<br>$ curl 10.31.188.12:30088<br>10.31.188.12:48174<br></code></pre></td></tr></table></figure>
 
 
               
@@ -1632,8 +897,6 @@ $ <span class="token function">curl</span> <span class="token number">10.31</spa
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

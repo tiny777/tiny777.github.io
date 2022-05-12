@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          10k words
+          9.5k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          84 mins
+          79 mins
         
       </span>
     
@@ -298,15 +296,10 @@
 <p>个人简单的理解就是OpenResty=nginx+lua+第三方库，事实上nginx本身也可以通过编译的方式添加lua的支持，同时nginx也可以通过编译的方式添加第三方库的支持，OpenResty则是直接将其全部打包在一起。且不讨论OpenResty作为全能型web服务器是否能够满足所有的业务需求，就其突出的动态处理能力就能给我们的系统架构带来很大的灵活性和额外的多样化处理能力。</p>
 <h1 id="2、yum安装"><a href="#2、yum安装" class="headerlink" title="2、yum安装"></a>2、yum安装</h1><h2 id="2-1-配置yum源"><a href="#2-1-配置yum源" class="headerlink" title="2.1 配置yum源"></a>2.1 配置yum源</h2><p>openresty官网有提供各种主流Linux发行版的<a target="_blank" rel="noopener" href="https://openresty.org/en/linux-packages.html">预编译包</a>，如果没有特殊需求，一般可以直接使用官方提供的安装包进行安装。</p>
 <p>下面我们以<code>centos</code>为例进行示范：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># add the yum repo:
-wget https:&#x2F;&#x2F;openresty.org&#x2F;package&#x2F;centos&#x2F;openresty.repo
-sudo mv openresty.repo &#x2F;etc&#x2F;yum.repos.d&#x2F;
-
-# update the yum index:
-sudo yum check-update<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># add the yum repo:</span><br>wget https:<span class="hljs-regexp">//</span>openresty.org<span class="hljs-regexp">/package/</span>centos/openresty.repo<br>sudo mv openresty.repo <span class="hljs-regexp">/etc/yum</span>.repos.d/<br><br><span class="hljs-comment"># update the yum index:</span><br>sudo yum check-update<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-2-rpm包介绍"><a href="#2-2-rpm包介绍" class="headerlink" title="2.2 rpm包介绍"></a>2.2 rpm包介绍</h2><p>openresty的yum源中除了openresty本身之外，还有一些其他的工具包和依赖包，我们可以这样查看所有可用的rpm包，对于这些rpm包的详细内容解说可以查看官网的<a target="_blank" rel="noopener" href="https://openresty.org/en/rpm-packages.html">文档</a>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo yum --disablerepo&#x3D;&quot;*&quot; --enablerepo&#x3D;&quot;openresty&quot; list available<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">sudo yum <span class="hljs-params">--disablerepo=</span><span class="hljs-string">&quot;*&quot;</span> <span class="hljs-params">--enablerepo=</span><span class="hljs-string">&quot;openresty&quot;</span> list available<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210317112817.png" srcset="/img/loading.gif" lazyload></p>
 <p>下面简单介绍几个重点的rpm包。</p>
@@ -320,18 +313,10 @@ sudo yum check-update<span aria-hidden="true" class="line-numbers-rows"><span></
 <h3 id="2-2-2-openresty-resty"><a href="#2-2-2-openresty-resty" class="headerlink" title="2.2.2 openresty-resty"></a>2.2.2 openresty-resty</h3><p>这个包里面有 <code>resty</code> 命令行程序，这个工具包主要依赖于 <a target="_blank" rel="noopener" href="https://github.com/openresty/resty-cli">resty-cli</a> 这个项目，这个包依赖标准 的<code>perl</code> 包以及上面提到的 <code>openresty</code> 包才能正常工作。默认情况下它是指向<code>/usr/bin/resty</code>目录的一个环境变量，并且源文件在<code>/usr/local/openresty/bin/resty</code></p>
 <p><img src="https://resource.tinychen.com/20210317112832.png" srcset="/img/loading.gif" lazyload></p>
 <p>个人认为这个工具包的主要作用就是方便我们进行一些简单的命令调试</p>
-<div class="code-wrapper"><pre class="line-numbers language-console" data-language="console"><code class="language-console">$ resty -e &#39;ngx.say(&quot;hello&quot;)&#39;
-hello<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs console"><span class="hljs-meta">$</span><span class="bash"> resty -e <span class="hljs-string">&#x27;ngx.say(&quot;hello&quot;)&#x27;</span></span><br>hello<br></code></pre></td></tr></table></figure>
 
 <h3 id="2-2-3-openresty-doc"><a href="#2-2-3-openresty-doc" class="headerlink" title="2.2.3 openresty-doc"></a>2.2.3 openresty-doc</h3><p>顾名思义这个rpm包最重要的功能就是提供文档查询，一般来说需要注意使用UTF-8编码的Terminal即可。和man命令有些类似，如果我们想要查询openresty中某个模块的相关文档，只需要使用<code>restydoc</code>命令即可。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 我们可以直接输入对应的模块命查看对应的文档
-restydoc ngx_lua
-restydoc ngx_lua_upstream
-restydoc ngx_http_v2_module
-restydoc luajit
-# 也可以加入-s参数查看某条指令或某个部分的文档
-restydoc -s content_by_lua
-restydoc -s proxy_pass<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs vala"><span class="hljs-meta"># 我们可以直接输入对应的模块命查看对应的文档</span><br>restydoc ngx_lua<br>restydoc ngx_lua_upstream<br>restydoc ngx_http_v2_module<br>restydoc luajit<br><span class="hljs-meta"># 也可以加入-s参数查看某条指令或某个部分的文档</span><br>restydoc -s content_by_lua<br>restydoc -s proxy_pass<br></code></pre></td></tr></table></figure>
 
 <h3 id="2-2-4-openresty-openssl"><a href="#2-2-4-openresty-openssl" class="headerlink" title="2.2.4 openresty-openssl"></a>2.2.4 openresty-openssl</h3><p>这是openresty官方维护的 OpenSSL 库。为了节省开销，这个版本禁用了在构建中对于多线程的支持。此外，这个版本最重要的是OpenResty官方加入了他们自己的一些补丁包来支持一些openssl的最新特性，同时也做了一些优化使得比较旧的系统也能够支持最新版本的openssl。<strong>同理，不仅是openssl，openresty自己维护的pcre和zlib库也是有这种的目的。</strong></p>
 <blockquote>
@@ -339,192 +324,59 @@ restydoc -s proxy_pass<span aria-hidden="true" class="line-numbers-rows"><span><
 </blockquote>
 <h3 id="2-2-5-其他"><a href="#2-2-5-其他" class="headerlink" title="2.2.5 其他"></a>2.2.5 其他</h3><p>更多详细的包介绍可以查看官方的英文文档，介绍的比较全面，一般来说就是主要的几个工具软件如openresty、openssl、pcre、zlib等等的主要生产版本、debug版本、asan版本、valgrind版本等，这里不做赘述。</p>
 <h2 id="2-3-rpm包安装openresty"><a href="#2-3-rpm包安装openresty" class="headerlink" title="2.3 rpm包安装openresty"></a>2.3 rpm包安装openresty</h2><p>虽然上面介绍了很多个openresty相关的包，但是实际上安装的时候只需要安装openresty，其他的依赖关系会由yum自动处理。注意openresty-doc、openresty-resty等是可选安装的包。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># add the yum repo:
-wget https:&#x2F;&#x2F;openresty.org&#x2F;package&#x2F;centos&#x2F;openresty.repo
-sudo mv openresty.repo &#x2F;etc&#x2F;yum.repos.d&#x2F;
-
-# update the yum index:
-sudo yum check-update
-
-# use yum to install
-yum install openresty<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs smali"><span class="hljs-comment"># add the yum repo:</span><br>wget https://openresty.org/package/centos/openresty.repo<br>sudo mv openresty.repo /etc/yum.repos.d/<br><br><span class="hljs-comment"># update the yum index:</span><br>sudo yum<span class="hljs-built_in"> check-update</span><br><span class="hljs-built_in"></span><br><span class="hljs-comment"># use yum to install</span><br>yum install openresty<br></code></pre></td></tr></table></figure>
 
 <p>安装完成之后会在默认的目录路径<code>/usr/local/openresty/nginx</code>下面生成对应的配置文件目录，我们将其和yum安装的nginx和编译安装的nginx对比可以发现几乎是一致的。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用yum安装的nginx</span>
-$ <span class="token builtin class-name">pwd</span>
-/etc/nginx
-$ <span class="token function">ls</span>
-conf.d  fastcgi_params  koi-utf  koi-win  mime.types  modules  nginx.conf  scgi_params  uwsgi_params  win-utf
-
-<span class="token comment"># 源码编译安装的nginx</span>
-$ <span class="token builtin class-name">pwd</span>
-/home/nginx
-$ <span class="token function">ls</span>
-client_body_temp  conf  fastcgi_temp  html  logs  sbin  scgi_temp  uwsgi_temp
-
-<span class="token comment"># 使用yum安装的openresty目录下的nginx</span>
-$ <span class="token builtin class-name">pwd</span>
-/usr/local/openresty/nginx
-$ <span class="token function">ls</span>
-client_body_temp  conf  fastcgi_temp  html  logs  proxy_temp  sbin  scgi_temp  uwsgi_temp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装的nginx</span><br>$ <span class="hljs-built_in">pwd</span><br>/etc/nginx<br>$ ls<br>conf.d  fastcgi_params  koi-utf  koi-win  mime.types  modules  nginx.conf  scgi_params  uwsgi_params  win-utf<br><br><span class="hljs-comment"># 源码编译安装的nginx</span><br>$ <span class="hljs-built_in">pwd</span><br>/home/nginx<br>$ ls<br>client_body_temp  conf  fastcgi_temp  html  logs  sbin  scgi_temp  uwsgi_temp<br><br><span class="hljs-comment"># 使用yum安装的openresty目录下的nginx</span><br>$ <span class="hljs-built_in">pwd</span><br>/usr/<span class="hljs-built_in">local</span>/openresty/nginx<br>$ ls<br>client_body_temp  conf  fastcgi_temp  html  logs  proxy_temp  sbin  scgi_temp  uwsgi_temp<br></code></pre></td></tr></table></figure>
 
 <p>我们简单写一个nginx.conf配置文件用来测试即可，文件使用默认路径的<code>/usr/local/openresty/nginx/conf/nginx.conf</code>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ openresty -T
-nginx: the configuration <span class="token function">file</span> /usr/local/openresty/nginx/conf/nginx.conf syntax is ok
-nginx: configuration <span class="token function">file</span> /usr/local/openresty/nginx/conf/nginx.conf <span class="token builtin class-name">test</span> is successful
-<span class="token comment"># configuration file /usr/local/openresty/nginx/conf/nginx.conf:</span>
-user root<span class="token punctuation">;</span>
-worker_processes  <span class="token number">1</span><span class="token punctuation">;</span>
-
-error_log logs/error.log<span class="token punctuation">;</span>
-
-pid logs/nginx.pid<span class="token punctuation">;</span>
-
-events <span class="token punctuation">&#123;</span>
-    worker_connections <span class="token number">1024</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-
-http <span class="token punctuation">&#123;</span>
-
-    log_format main
-    <span class="token string">'<span class="token variable">$remote_addr</span> | [<span class="token variable">$time_local</span>] | <span class="token variable">$status</span> | <span class="token variable">$scheme</span> | '</span>
-    <span class="token string">'<span class="token variable">$server_name</span> | request= <span class="token variable">$request</span> | request_uri= <span class="token variable">$request_uri</span> | http_referer= <span class="token variable">$http_referer</span> | '</span>
-    <span class="token string">'UA= <span class="token variable">$http_user_agent</span> | <span class="token variable">$request_time</span> | <span class="token variable">$ssl_protocol</span> | <span class="token variable">$ssl_cipher</span> | '</span>
-    <span class="token string">'remote_port= <span class="token variable">$remote_port</span> | <span class="token variable">$request_id</span>'</span><span class="token punctuation">;</span>
-
-    access_log logs/access.log main<span class="token punctuation">;</span>
-
-    server <span class="token punctuation">&#123;</span>
-        listen <span class="token number">8080</span><span class="token punctuation">;</span>
-        location / <span class="token punctuation">&#123;</span>
-            default_type text/html<span class="token punctuation">;</span>
-            content_by_lua_block <span class="token punctuation">&#123;</span>
-                ngx.say<span class="token punctuation">(</span><span class="token string">"&lt;p>hello, world&lt;/p>"</span><span class="token punctuation">)</span>
-            <span class="token punctuation">&#125;</span>
-        <span class="token punctuation">&#125;</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ openresty -T<br>nginx: the configuration file /usr/<span class="hljs-built_in">local</span>/openresty/nginx/conf/nginx.conf syntax is ok<br>nginx: configuration file /usr/<span class="hljs-built_in">local</span>/openresty/nginx/conf/nginx.conf <span class="hljs-built_in">test</span> is successful<br><span class="hljs-comment"># configuration file /usr/local/openresty/nginx/conf/nginx.conf:</span><br>user root;<br>worker_processes  1;<br><br>error_log logs/error.log;<br><br>pid logs/nginx.pid;<br><br>events &#123;<br>    worker_connections 1024;<br>&#125;<br><br>http &#123;<br><br>    log_format main<br>    <span class="hljs-string">&#x27;$remote_addr | [$time_local] | $status | $scheme | &#x27;</span><br>    <span class="hljs-string">&#x27;$server_name | request= $request | request_uri= $request_uri | http_referer= $http_referer | &#x27;</span><br>    <span class="hljs-string">&#x27;UA= $http_user_agent | $request_time | $ssl_protocol | $ssl_cipher | &#x27;</span><br>    <span class="hljs-string">&#x27;remote_port= $remote_port | $request_id&#x27;</span>;<br><br>    access_log logs/access.log main;<br><br>    server &#123;<br>        listen 8080;<br>        location / &#123;<br>            default_type text/html;<br>            content_by_lua_block &#123;<br>                ngx.say(<span class="hljs-string">&quot;&lt;p&gt;hello, world&lt;/p&gt;&quot;</span>)<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>分别使用curl和浏览器测试均正常</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ curl 10.224.192.144:8080
-&lt;p&gt;hello, world&lt;&#x2F;p&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs xml">$ curl 10.224.192.144:8080<br><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>hello, world<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/202112101707230.png" srcset="/img/loading.gif" lazyload></p>
 <p>日志中也能看到对应的操作</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ tail -f ..&#x2F;logs&#x2F;access.log
-10.224.192.144 | [12&#x2F;Mar&#x2F;2021:14:42:25 +0800] | 200 | http |  | request&#x3D; GET &#x2F; HTTP&#x2F;1.1 | request_uri&#x3D; &#x2F; | http_referer&#x3D; - | UA&#x3D; curl&#x2F;7.29.0 | 0.000 | - | - | remote_port&#x3D; 34626 | 602882ad9b5cf910bea2f6d13ce4bf5e
-10.228.18.249 | [12&#x2F;Mar&#x2F;2021:14:42:51 +0800] | 200 | http |  | request&#x3D; GET &#x2F; HTTP&#x2F;1.1 | request_uri&#x3D; &#x2F; | http_referer&#x3D; - | UA&#x3D; Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;88.0.4324.190 Safari&#x2F;537.36 | 0.000 | - | - | remote_port&#x3D; 7148 | 5a91256294bf307ed62f48a06905dbc0
-10.228.18.249 | [12&#x2F;Mar&#x2F;2021:14:42:51 +0800] | 200 | http |  | request&#x3D; GET &#x2F;favicon.ico HTTP&#x2F;1.1 | request_uri&#x3D; &#x2F;favicon.ico | http_referer&#x3D; http:&#x2F;&#x2F;10.224.192.144:8080&#x2F; | UA&#x3D; Mozilla&#x2F;5.0 (Windows NT 10.0; Win64; x64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;88.0.4324.190 Safari&#x2F;537.36 | 0.000 | - | - | remote_port&#x3D; 7148 | 372e7402db9f396950dae48b66a7e1ce<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">$ tail -f ../logs/access.log<br>10.224.192.144 |<span class="hljs-string"> [12/Mar/2021:14:42:25 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> http </span>|<span class="hljs-string">  </span>|<span class="hljs-string"> request= GET / HTTP/1.1 </span>|<span class="hljs-string"> request_uri= / </span>|<span class="hljs-string"> http_referer= - </span>|<span class="hljs-string"> UA= curl/7.29.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> remote_port= 34626 </span>|<span class="hljs-string"> 602882ad9b5cf910bea2f6d13ce4bf5e</span><br><span class="hljs-string">10.228.18.249 </span>|<span class="hljs-string"> [12/Mar/2021:14:42:51 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> http </span>|<span class="hljs-string">  </span>|<span class="hljs-string"> request= GET / HTTP/1.1 </span>|<span class="hljs-string"> request_uri= / </span>|<span class="hljs-string"> http_referer= - </span>|<span class="hljs-string"> UA= Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> remote_port= 7148 </span>|<span class="hljs-string"> 5a91256294bf307ed62f48a06905dbc0</span><br><span class="hljs-string">10.228.18.249 </span>|<span class="hljs-string"> [12/Mar/2021:14:42:51 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> http </span>|<span class="hljs-string">  </span>|<span class="hljs-string"> request= GET /favicon.ico HTTP/1.1 </span>|<span class="hljs-string"> request_uri= /favicon.ico </span>|<span class="hljs-string"> http_referer= http://10.224.192.144:8080/ </span>|<span class="hljs-string"> UA= Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> remote_port= 7148 </span>|<span class="hljs-string"> 372e7402db9f396950dae48b66a7e1ce</span><br></code></pre></td></tr></table></figure>
 
 <p>再查看端口监听和服务进程都正常</p>
 <p><img src="https://resource.tinychen.com/20210317112842.png" srcset="/img/loading.gif" lazyload></p>
 <p>那么就可以基本判定这次的安装是顺利安装成功了。</p>
 <h1 id="3、源码编译安装"><a href="#3、源码编译安装" class="headerlink" title="3、源码编译安装"></a>3、源码编译安装</h1><p>如果需要进行定制化，那么从源码开始进行编译安装就是我们的不二之选。首先我们去<a target="_blank" rel="noopener" href="https://openresty.org/en/download.html">官网</a>下载最新版本的openresty源码包并解压。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cd &#x2F;home
-wget https:&#x2F;&#x2F;openresty.org&#x2F;download&#x2F;openresty-1.19.3.1.tar.gz
-tar -zxvf openresty-1.19.3.1.tar.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">cd /home<br>wget https:<span class="hljs-regexp">//</span>openresty.org<span class="hljs-regexp">/download/</span>openresty-<span class="hljs-number">1.19</span>.<span class="hljs-number">3.1</span>.tar.gz<br>tar -zxvf openresty-<span class="hljs-number">1.19</span>.<span class="hljs-number">3.1</span>.tar.gz<br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="3-1-编译环境"><a href="#3-1-编译环境" class="headerlink" title="3.1 编译环境"></a>3.1 编译环境</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ lsb_release -a
-LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch
-Distributor ID: CentOS
-Description:    CentOS Linux release 7.9.2009 (Core)
-Release:        7.9.2009
-Codename:       Core<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="3-1-编译环境"><a href="#3-1-编译环境" class="headerlink" title="3.1 编译环境"></a>3.1 编译环境</h2><figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs subunit">$ lsb_release -a<br>LSB Version:    :core<span class="hljs-string">-4</span>.1-amd64:core<span class="hljs-string">-4</span>.1-noarch:cxx<span class="hljs-string">-4</span>.1-amd64:cxx<span class="hljs-string">-4</span>.1-noarch:desktop<span class="hljs-string">-4</span>.1-amd64:desktop<span class="hljs-string">-4</span>.1-noarch:languages<span class="hljs-string">-4</span>.1-amd64:languages<span class="hljs-string">-4</span>.1-noarch:printing<span class="hljs-string">-4</span>.1-amd64:printing<span class="hljs-string">-4</span>.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br></code></pre></td></tr></table></figure>
 
 <p>同时我们还需要准备编译使用的工具如编译器等，对于CentOS7，我们可以简单的安装整个开发工具包<code>Development Tools</code>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">yum grouplist
-yum groupinstall <span class="token string">"Development Tools"</span> -y<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum grouplist<br>yum groupinstall <span class="hljs-string">&quot;Development Tools&quot;</span> -y<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="3-2-准备openssl、pcre和zlib"><a href="#3-2-准备openssl、pcre和zlib" class="headerlink" title="3.2 准备openssl、pcre和zlib"></a>3.2 准备openssl、pcre和zlib</h2><p>和nginx一样，我们手动下载准备最新版本的openssl、pcre和zlib，注意这三个库<strong>只需要下载解压，并不需要提前进行安装</strong>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 下载</span>
-<span class="token function">wget</span> https://www.openssl.org/source/openssl-1.1.1j.tar.gz
-<span class="token function">wget</span> https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz
-<span class="token function">wget</span> https://zlib.net/zlib-1.2.11.tar.gz
-<span class="token comment"># 解压</span>
-<span class="token function">tar</span> -zxvf openssl-1.1.1j.tar.gz
-<span class="token function">tar</span> -zxvf pcre-8.44.tar.gz
-<span class="token function">tar</span> -zxvf zlib-1.2.11.tar.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 下载</span><br>wget https://www.openssl.org/<span class="hljs-built_in">source</span>/openssl-1.1.1j.tar.gz<br>wget https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz<br>wget https://zlib.net/zlib-1.2.11.tar.gz<br><span class="hljs-comment"># 解压</span><br>tar -zxvf openssl-1.1.1j.tar.gz<br>tar -zxvf pcre-8.44.tar.gz<br>tar -zxvf zlib-1.2.11.tar.gz<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="3-3-编译安装"><a href="#3-3-编译安装" class="headerlink" title="3.3 编译安装"></a>3.3 编译安装</h2><p>和nginx的编译安装一样，我们可以自定义编译安装的模块，这里可以查看openresty模块的<a target="_blank" rel="noopener" href="https://openresty.org/en/components.html">官方说明</a>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cd &#x2F;home&#x2F;openresty-1.19.3.1&#x2F;
-.&#x2F;configure --prefix&#x3D;&#x2F;home&#x2F;openresty --with-openssl&#x3D;&#x2F;home&#x2F;openssl-1.1.1j --with-pcre&#x3D;&#x2F;home&#x2F;pcre-8.44 --with-zlib&#x3D;&#x2F;home&#x2F;zlib-1.2.11 --with-http_realip_module --with-http_stub_status_module --with-debug --with-http_ssl_module --with-http_v2_module <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs javascript">cd /home/openresty-<span class="hljs-number">1.19</span><span class="hljs-number">.3</span><span class="hljs-number">.1</span>/<br>./configure --prefix=<span class="hljs-regexp">/home/</span>openresty --<span class="hljs-keyword">with</span>-openssl=<span class="hljs-regexp">/home/</span>openssl-<span class="hljs-number">1.1</span>.1j --<span class="hljs-keyword">with</span>-pcre=<span class="hljs-regexp">/home/</span>pcre-<span class="hljs-number">8.44</span> --<span class="hljs-keyword">with</span>-zlib=<span class="hljs-regexp">/home/</span>zlib-<span class="hljs-number">1.2</span><span class="hljs-number">.11</span> --<span class="hljs-keyword">with</span>-http_realip_module --<span class="hljs-keyword">with</span>-http_stub_status_module --<span class="hljs-keyword">with</span>-debug --<span class="hljs-keyword">with</span>-http_ssl_module --<span class="hljs-keyword">with</span>-http_v2_module <br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210317112847.png" srcset="/img/loading.gif" lazyload></p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">gmake -j8
-gmake install<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">gmake</span> -j<span class="hljs-number">8</span><br><span class="hljs-attribute">gmake</span> install<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210317112852.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后在安装完成的时候我们可以看到会把编译的openresty目录下的<code>/home/openresty/nginx/sbin/nginx</code>软链接到<code>/home/openresty/bin/openresty</code>，逻辑和yum安装的openresty一样</p>
 <p>如果想要方便全局操作，可以创建一个软链接。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ln -s &#x2F;home&#x2F;openresty&#x2F;bin&#x2F;openresty &#x2F;usr&#x2F;local&#x2F;bin&#x2F;openresty<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">ln -s <span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/bin/</span>openresty <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/</span>openresty<br></code></pre></td></tr></table></figure>
 
 <p>当然要是觉得这样子的目录不好操作，我们也可以在编译的时候多加一些参数，将常用的目录都手动指定，操作起来就和nginx几乎没有差别了，下面简单列举一个例子：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">.&#x2F;configure \
---prefix&#x3D;&#x2F;home&#x2F;openresty \
---sbin-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;bin&#x2F;nginx \
---conf-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;conf&#x2F;nginx.conf \
---http-log-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;logs&#x2F;access.log \
---error-log-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;logs&#x2F;error.log \
---pid-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;logs&#x2F;nginx.pid \
---lock-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;logs&#x2F;nginx.lock \
---http-client-body-temp-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;client_body_temp&#x2F; \
---http-proxy-temp-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;proxy_temp&#x2F; \
---http-fastcgi-temp-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;fastcgi_temp&#x2F; \
---http-uwsgi-temp-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;uwsgi_temp&#x2F; \
---http-scgi-temp-path&#x3D;&#x2F;home&#x2F;openresty&#x2F;scgi_temp&#x2F; \
---with-openssl&#x3D;&#x2F;home&#x2F;openssl-1.1.1k \
---with-pcre&#x3D;&#x2F;home&#x2F;pcre-8.44 \
---with-zlib&#x3D;&#x2F;home&#x2F;zlib-1.2.11 \
---with-http_realip_module \
---with-http_stub_status_module \
---with-debug \
---with-http_ssl_module \
---with-http_v2_module \
---build&#x3D;tinychen-build \
---dry-run<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs awk">./configure \<br>--prefix=<span class="hljs-regexp">/home/</span>openresty \<br>--sbin-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/bin/</span>nginx \<br>--conf-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/conf/</span>nginx.conf \<br>--http-log-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/logs/</span>access.log \<br>--error-log-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/logs/</span>error.log \<br>--pid-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/logs/</span>nginx.pid \<br>--lock-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/logs/</span>nginx.lock \<br>--http-client-body-temp-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/client_body_temp/</span> \<br>--http-proxy-temp-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/proxy_temp/</span> \<br>--http-fastcgi-temp-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/fastcgi_temp/</span> \<br>--http-uwsgi-temp-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/uwsgi_temp/</span> \<br>--http-scgi-temp-path=<span class="hljs-regexp">/home/</span>openresty<span class="hljs-regexp">/scgi_temp/</span> \<br>--with-openssl=<span class="hljs-regexp">/home/</span>openssl-<span class="hljs-number">1.1</span>.<span class="hljs-number">1</span>k \<br>--with-pcre=<span class="hljs-regexp">/home/</span>pcre-<span class="hljs-number">8.44</span> \<br>--with-zlib=<span class="hljs-regexp">/home/</span>zlib-<span class="hljs-number">1.2</span>.<span class="hljs-number">11</span> \<br>--with-http_realip_module \<br>--with-http_stub_status_module \<br>--with-debug \<br>--with-http_ssl_module \<br>--with-http_v2_module \<br>--build=tinychen-build \<br>--dry-run<br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="4、OpenResty操作"><a href="#4、OpenResty操作" class="headerlink" title="4、OpenResty操作"></a>4、OpenResty操作</h1><p><strong>openresty的操作指令和nginx是完全一致的</strong>。具体如下：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ nginx -h
-nginx version: nginx&#x2F;1.19.8
-Usage: nginx [-?hvVtTq] [-s signal] [-p prefix]
-             [-e filename] [-c filename] [-g directives]
-
-Options:
-  -?,-h         : this help
-  -v            : show version and exit
-  -V            : show version and configure options then exit
-  -t            : test configuration and exit
-  -T            : test configuration, dump it and exit
-  -q            : suppress non-error messages during configuration testing
-  -s signal     : send signal to a master process: stop, quit, reopen, reload
-  -p prefix     : set prefix path (default: &#x2F;etc&#x2F;nginx&#x2F;)
-  -e filename   : set error log file (default: &#x2F;var&#x2F;log&#x2F;nginx&#x2F;error.log)
-  -c filename   : set configuration file (default: &#x2F;etc&#x2F;nginx&#x2F;nginx.conf)
-  -g directives : set global directives out of configuration file
-
-$ openresty -h
-nginx version: openresty&#x2F;1.19.3.1
-Usage: nginx [-?hvVtTq] [-s signal] [-c filename] [-p prefix] [-g directives]
-
-Options:
-  -?,-h         : this help
-  -v            : show version and exit
-  -V            : show version and configure options then exit
-  -t            : test configuration and exit
-  -T            : test configuration, dump it and exit
-  -q            : suppress non-error messages during configuration testing
-  -s signal     : send signal to a master process: stop, quit, reopen, reload
-  -p prefix     : set prefix path (default: &#x2F;usr&#x2F;local&#x2F;openresty&#x2F;nginx&#x2F;)
-  -c filename   : set configuration file (default: conf&#x2F;nginx.conf)
-  -g directives : set global directives out of configuration file<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ nginx -h<br>nginx version: nginx/<span class="hljs-number">1.19</span>.<span class="hljs-number">8</span><br>Usage: nginx [-?hvVtTq] [-s signal] [-p prefix]<br>             [-e filename] [-c filename] [-g directives]<br><br>Options:<br>  -?,-h         : this help<br>  -v            : show version and <span class="hljs-keyword">exit</span><br>  -V            : show version and configure options then <span class="hljs-keyword">exit</span><br>  -t            : test configuration and <span class="hljs-keyword">exit</span><br>  -T            : test configuration, dump it and <span class="hljs-keyword">exit</span><br>  -q            : suppress non-error messages during configuration testing<br>  -s signal     : send signal to a master process: stop, quit, reopen, reload<br>  -p prefix     : set prefix path (default: <span class="hljs-regexp">/etc/</span>nginx/)<br>  -e filename   : set error log file (default: <span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/nginx/</span>error.log)<br>  -c filename   : set configuration file (default: <span class="hljs-regexp">/etc/</span>nginx/nginx.conf)<br>  -g directives : set global directives out of configuration file<br><br>$ openresty -h<br>nginx version: openresty/<span class="hljs-number">1.19</span>.<span class="hljs-number">3.1</span><br>Usage: nginx [-?hvVtTq] [-s signal] [-c filename] [-p prefix] [-g directives]<br><br>Options:<br>  -?,-h         : this help<br>  -v            : show version and <span class="hljs-keyword">exit</span><br>  -V            : show version and configure options then <span class="hljs-keyword">exit</span><br>  -t            : test configuration and <span class="hljs-keyword">exit</span><br>  -T            : test configuration, dump it and <span class="hljs-keyword">exit</span><br>  -q            : suppress non-error messages during configuration testing<br>  -s signal     : send signal to a master process: stop, quit, reopen, reload<br>  -p prefix     : set prefix path (default: <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/openresty/</span>nginx/)<br>  -c filename   : set configuration file (default: conf/nginx.conf)<br>  -g directives : set global directives out of configuration file<br></code></pre></td></tr></table></figure>
 
 <ul>
 <li><code>-h</code> 打印帮助菜单</li>
@@ -831,8 +683,6 @@ Options:
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

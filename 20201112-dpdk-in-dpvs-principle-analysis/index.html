@@ -47,8 +47,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -301,18 +299,7 @@
 <h1 id="1、From-NIC-drivers"><a href="#1、From-NIC-drivers" class="headerlink" title="1、From NIC drivers"></a>1、From NIC drivers</h1><h2 id="PMD-（Poll-Mode-Driver）"><a href="#PMD-（Poll-Mode-Driver）" class="headerlink" title="PMD （Poll Mode Driver）"></a>PMD （Poll Mode Driver）</h2><p><img src="https://resource.tinychen.com/20201112135143.png" srcset="/img/loading.gif" lazyload></p>
 <p>使用top命令查看系统资源占用，我们会发现在dpvs中对网卡收发队列进行了一一绑定的CPU核心占用率会一直维持在100%，并且是用户态的100%占用，并且无论是否有流量在所属的dpdk网卡上经过，都会一直维持在100%的状态。这是dpdk的一个特性，称之为**<a target="_blank" rel="noopener" href="http://doc.dpdk.org/guides/prog_guide/poll_mode_drv.html">PMD（Poll Mode Driver）</a>**。前面在安装dpdk的时候，我们需要使用dpdk给对应的网卡来安装特定的网卡驱动，比如我们这里用于测试使用的82599网卡使用的是UIO驱动，这些都是属于PMD驱动。目前DPDK支持1G、10G、40G以及半虚拟化的virtio网卡的PMD驱动。</p>
 <p>对于运行着dpdk的机器，我们查看内核模块和对应的dpdk网卡驱动，可以发现uio模块和PMD驱动的踪迹，其中04:00.1是dpdk的网卡，而04:00.0则是普通状态下的网卡</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># lsmod | grep uio
-igb_uio                13414  1
-uio                    19338  3 igb_uio
-
-04:00.0 Ethernet controller [0200]: Intel Corporation 82599ES 10-Gigabit SFI&#x2F;SFP+ Network Connection [8086:10fb] (rev 01)
-        Subsystem: Intel Corporation Ethernet Server Adapter X520-2 [8086:000c]
-        Kernel driver in use: ixgbe
-        Kernel modules: ixgbe
-04:00.1 Ethernet controller [0200]: Intel Corporation 82599ES 10-Gigabit SFI&#x2F;SFP+ Network Connection [8086:10fb] (rev 01)
-        Subsystem: Intel Corporation Ethernet Server Adapter X520-2 [8086:000c]
-        Kernel driver in use: igb_uio
-        Kernel modules: ixgbe<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># lsmod | grep uio</span><br><span class="hljs-string">igb_uio</span>                <span class="hljs-number">13414</span>  <span class="hljs-number">1</span><br><span class="hljs-string">uio</span>                    <span class="hljs-number">19338</span>  <span class="hljs-number">3</span> <span class="hljs-string">igb_uio</span><br><br><span class="hljs-number">04</span><span class="hljs-string">:00.0</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">ixgbe</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br><span class="hljs-number">04</span><span class="hljs-string">:00.1</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">igb_uio</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br></code></pre></td></tr></table></figure>
 
 <p>PMD驱动包含了各种API，并且提供了在用户态运行的BSD驱动，用于配置网卡和网卡的收发队列。此外，PWD驱动最大的优势就是无需任何中断操作就可以直接访问网卡队列中的RX/TX描述符（除了网卡的链接状态变化），借助这个优势，就可以绕过内核和同样运行在用户态的应用程序快速地进行数据传输。我们可以通过下图来对比传统的应用程序和网卡通信的方式以及使用PMD驱动后和网卡通信的方式。</p>
 <p><img src="https://resource.tinychen.com/20201112135138.jpeg" srcset="/img/loading.gif" lazyload></p>
@@ -355,13 +342,7 @@ uio                    19338  3 igb_uio
 <li><p>NUMA node表示这块PCIe网卡插在的插槽是哪一颗CPU对应的PCIe总线</p>
 </li>
 </ul>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">04:00.1 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI&#x2F;SFP+ Network Connection (rev 01)
-        Subsystem: Intel Corporation Ethernet Server Adapter X520-2
-        NUMA node: 0
-                LnkCap: Port #0, Speed 5GT&#x2F;s, Width x8, ASPM L0s, Exit Latency L0s &lt;1us, L1 &lt;8us
-                        ClockPM- Surprise- LLActRep- BwNot- ASPMOptComp-
-        Kernel driver in use: igb_uio
-        Kernel modules: ixgbe<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">04</span>:<span class="hljs-number">00</span>.<span class="hljs-number">1</span> Ethernet controller: Intel Corporation <span class="hljs-number">82599</span>ES <span class="hljs-number">10</span>-Gigabit SFI/SFP+ Network Connection (rev <span class="hljs-number">01</span>)<br>        <span class="hljs-attribute">Subsystem</span>: Intel Corporation Ethernet Server Adapter X<span class="hljs-number">520</span>-<span class="hljs-number">2</span><br>        <span class="hljs-attribute">NUMA</span> node: <span class="hljs-number">0</span><br>                <span class="hljs-attribute">LnkCap</span>: Port #<span class="hljs-number">0</span>, Speed <span class="hljs-number">5</span>GT/s, Width x<span class="hljs-number">8</span>, ASPM L<span class="hljs-number">0</span>s, Exit Latency L<span class="hljs-number">0</span>s &lt;<span class="hljs-number">1</span>us, L<span class="hljs-number">1</span> &lt;<span class="hljs-number">8</span>us<br>                        <span class="hljs-attribute">ClockPM</span>- Surprise- LLActRep- BwNot- ASPMOptComp-<br>        <span class="hljs-attribute">Kernel</span> driver in use: igb_uio<br>        <span class="hljs-attribute">Kernel</span> modules: ixgbe<br></code></pre></td></tr></table></figure>
 
 <p>RSS（Receive Side Scaling）功能的实现其实和网卡以及CPU都有关系，但是这里放到CPU的部分来分析，主要是需要前面提及的技术作为支撑。关于RSS的一些说明我们可以参考Linux内核的<a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/networking/scaling.txt">官网文档</a>，此外微软的官方文档也有不错的图文解释。</p>
 <blockquote>
@@ -371,13 +352,7 @@ uio                    19338  3 igb_uio
 <p>基于这些特性，DPVS可以在配置中设定worker进程、CPU核心和网卡收发队列的一一绑定，最好的情况下就是全部都是在一颗物理CPU上，这样带来的性能提升最明显。</p>
 <p>这是DPVS宣传的<code>NUMA Awareness</code>和<code>RX steering&amp;CPU</code>的技术原理。</p>
 <h1 id="3、From-memory"><a href="#3、From-memory" class="headerlink" title="3、From memory"></a>3、From memory</h1><h2 id="Huge-page大页内存"><a href="#Huge-page大页内存" class="headerlink" title="Huge page大页内存"></a>Huge page大页内存</h2><p>DPDK广泛使用了大页内存（2M或者1G）机制（对于DPVS来说，主要使用的是2MB的大页内存），以Linux系统为例，1G的大页一般不能在系统加载后动态分配，所以一般会在内核加载的时候设置好需要用到的大页。例如，增加内核启动参数<code>default_hugepagesz=1G hugepagesz=1G hugepages=8</code>来配置好8个1G的大页。在Linux系统上，可以通过命令<code>cat /proc/meminfo</code>来查看系统加载后的内存状况和大页内存的分配状况。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># cat &#x2F;proc&#x2F;meminfo | grep Huge
-AnonHugePages:    243712 kB
-HugePages_Total:   16384
-HugePages_Free:        0
-HugePages_Rsvd:        0
-HugePages_Surp:        0
-Hugepagesize:       2048 kB<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># cat /proc/meminfo | grep Huge</span><br><span class="hljs-attr">AnonHugePages:</span>    <span class="hljs-number">243712</span> <span class="hljs-string">kB</span><br><span class="hljs-attr">HugePages_Total:</span>   <span class="hljs-number">16384</span><br><span class="hljs-attr">HugePages_Free:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">HugePages_Rsvd:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">HugePages_Surp:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">Hugepagesize:</span>       <span class="hljs-number">2048 </span><span class="hljs-string">kB</span><br></code></pre></td></tr></table></figure>
 
 <p>注意上面的<code>AnonHugePages</code>和我们这里要讲的<code>Hugepages</code>不是一类东西，建议忽略。同时<code>Hugepages</code>不会备注大小，上面的<code>Hugepagesize</code>表明使用的是2MB的大页内存，而<code>HugePages_Total</code>表明有<code>16384</code>个这么大的大页内存，所以这里一共是32GB的大页内存。</p>
 <p>在继续后面的内容之前我们需要了解一下TLB是什么。</p>
@@ -688,8 +663,6 @@ Hugepagesize:       2048 kB<span aria-hidden="true" class="line-numbers-rows"><s
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

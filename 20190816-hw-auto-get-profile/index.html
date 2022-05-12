@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -289,17 +287,7 @@
 <span id="more"></span>
 
 <h1 id="0、概述"><a href="#0、概述" class="headerlink" title="0、概述"></a>0、概述</h1><p>这个脚本需要实现的功能很简单，就是自动ssh登录到网络设备上，查询相应的白名单，然后将结果导出成excel表格，具体的操作命令如下，对应的设备是华为的AC6605。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">操作步骤
-
-# 执行命令system-view，进入系统视图。
-system-view
-
-# 执行命令wlan，进入WLAN视图。
-wlan
-
-# 查看特定白名单内的信息
-display sta-whitelist-profile name profilename
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs vim">操作步骤<br><br># 执行命令<span class="hljs-built_in">system</span>-<span class="hljs-keyword">view</span>，进入系统视图。<br><span class="hljs-built_in">system</span>-<span class="hljs-keyword">view</span><br><br># 执行命令wlan，进入WLAN视图。<br>wlan<br><br># 查看特定白名单内的信息<br><span class="hljs-keyword">display</span> <span class="hljs-keyword">sta</span>-whitelist-<span class="hljs-keyword">profile</span> name profilename<br><br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>由于这里使用的是<code>netmiko</code>库，所以除了华为的网络设备，思科的设备也能支持，只需要在代码文件中稍作修改即可。</li>
@@ -319,40 +307,23 @@ display sta-whitelist-profile name profilename
 <p><img src="https://resource.tinychen.com/blog/20190816/TxJqKjGMH9CU.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们拖入一个设备，我这里使用的是华为的AC6605。</p>
 <p>给它配置一个IP地址然后测试一下。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[AC6605]vlan batch 10
-Info: This operation may take a few seconds. Please wait for a moment...done.
-[AC6605]int Vlanif 10
-[AC6605-Vlanif10]ip address 192.168.59.2 24
-[AC6605-Vlanif10]q
-[AC6605]int GigabitEthernet 0&#x2F;0&#x2F;1
-[AC6605-GigabitEthernet0&#x2F;0&#x2F;1]port link-type access 
-[AC6605-GigabitEthernet0&#x2F;0&#x2F;1]port default vlan 10<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs stylus"><span class="hljs-selector-attr">[AC6605]</span>vlan batch <span class="hljs-number">10</span><br>Info: This operation may take <span class="hljs-selector-tag">a</span> few seconds. Please wait <span class="hljs-keyword">for</span> <span class="hljs-selector-tag">a</span> moment..<span class="hljs-selector-class">.done</span>.<br><span class="hljs-selector-attr">[AC6605]</span>int Vlanif <span class="hljs-number">10</span><br><span class="hljs-selector-attr">[AC6605-Vlanif10]</span>ip <span class="hljs-selector-tag">address</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">59.2</span> <span class="hljs-number">24</span><br><span class="hljs-selector-attr">[AC6605-Vlanif10]</span><span class="hljs-selector-tag">q</span><br><span class="hljs-selector-attr">[AC6605]</span>int GigabitEthernet <span class="hljs-number">0</span>/<span class="hljs-number">0</span>/<span class="hljs-number">1</span><br><span class="hljs-selector-attr">[AC6605-GigabitEthernet0/0/1]</span>port link-type access <br><span class="hljs-selector-attr">[AC6605-GigabitEthernet0/0/1]</span>port default vlan <span class="hljs-number">10</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190816/g43DkiCQiUkV.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们ping一下真机的网卡，能通就说明桥接成功了。</p>
 <p><img src="https://resource.tinychen.com/blog/20190816/ySXeeAXjIs3a.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、配置SSH服务"><a href="#3、配置SSH服务" class="headerlink" title="3、配置SSH服务"></a>3、配置SSH服务</h1><p>首先进行系统视图，然后创建<code>rsa key</code>，全部选择默认，接着启动<code>stelnet</code>服务。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">system-view 
-rsa local-key-pair create
-stelnet server enable<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs gauss"><span class="hljs-keyword">system</span>-<span class="hljs-built_in">view</span> <br>rsa <span class="hljs-keyword">local</span>-<span class="hljs-built_in">key</span>-pair <span class="hljs-keyword">create</span><br>stelnet server <span class="hljs-keyword">enable</span><br></code></pre></td></tr></table></figure>
 
 <p>接着配置用来远程的终端</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">system-view
-user-interface vty 0 4
-authentication-mode aaa
-protocol inbound ssh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">system</span>-<span class="hljs-keyword">view</span><br><span class="hljs-keyword">user</span>-interface vty <span class="hljs-number">0</span> <span class="hljs-number">4</span><br>authentication-mode aaa<br>protocol inbound ssh<br></code></pre></td></tr></table></figure>
 
 <p>然后创建用户并设置密码。然后启动ssh服务。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">system-view 
-aaa
-local-user tinychen password irreversible-cipher easy1234
-local-user tinychen privilege level 3
-local-user tinychen service-type ssh
-quit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">system</span>-<span class="hljs-keyword">view</span> <br>aaa<br><span class="hljs-keyword">local</span>-<span class="hljs-keyword">user</span> tinychen <span class="hljs-keyword">password</span> irreversible-cipher easy1234<br><span class="hljs-keyword">local</span>-<span class="hljs-keyword">user</span> tinychen privilege <span class="hljs-keyword">level</span> <span class="hljs-number">3</span><br><span class="hljs-keyword">local</span>-<span class="hljs-keyword">user</span> tinychen service-<span class="hljs-keyword">type</span> ssh<br>quit<br></code></pre></td></tr></table></figure>
 
 <p>最后回到系统视图下，设置ssh用户的登录方式为密码登录。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ssh user tinychen authentication-type password<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">ssh <span class="hljs-keyword">user</span> <span class="hljs-title">tinychen</span> authentication-<span class="hljs-keyword">type</span> password<br></code></pre></td></tr></table></figure>
 
 
 
@@ -654,8 +625,6 @@ quit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

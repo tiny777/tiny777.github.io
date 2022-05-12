@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -236,7 +234,7 @@
         
         
         
-          23 mins
+          24 mins
         
       </span>
     
@@ -334,33 +332,31 @@
 <p>我们可以输入<code>curl --help</code>来查看相关的指令帮助。</p>
 <p>下面我们要用到的模拟登录主要是使用curl模拟表单登录。</p>
 <h2 id="2-2-登录过程分析"><a href="#2-2-登录过程分析" class="headerlink" title="2.2 登录过程分析"></a>2.2 登录过程分析</h2><p>从上面的报文分析我们得知，登录的时候http post请求提交了多个选项，但实际上需要登录成功只需要提交登录选项（opr）、账号（userName）和密码（pwd）即可。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">curl</span> -d <span class="token string">"opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码"</span> http://a.stu.edu.cn/ac_portal/login.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl -d <span class="hljs-string">&quot;opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190610/pTadHYu65Kir.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-3-查询过程分析"><a href="#2-3-查询过程分析" class="headerlink" title="2.3 查询过程分析"></a>2.3 查询过程分析</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">curl</span> -d <span class="token string">"opr=online_check"</span> http://a.stu.edu.cn/ac_portal/login.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="2-3-查询过程分析"><a href="#2-3-查询过程分析" class="headerlink" title="2.3 查询过程分析"></a>2.3 查询过程分析</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl -d <span class="hljs-string">&quot;opr=online_check&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190610/Dmw2TKmGvDah.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20190610/Xhbo9mcqgVUx.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-4-注销过程分析"><a href="#2-4-注销过程分析" class="headerlink" title="2.4 注销过程分析"></a>2.4 注销过程分析</h2><p>在无IPv6地址的情况下，我们注销登录只需要提交一个注销请求（<code>opr=logout</code>）即可。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 因为返回的数据中有中文，可能会产生乱码，所以要使用iconv进行编码转换</span>
-<span class="token function">curl</span> -d <span class="token string">"opr=logout"</span> http://a.stu.edu.cn/ac_portal/login.php <span class="token operator">|</span> <span class="token function">iconv</span> -f utf-8 -t gb2312<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 因为返回的数据中有中文，可能会产生乱码，所以要使用iconv进行编码转换</span><br>curl -d <span class="hljs-string">&quot;opr=logout&quot;</span> http://a.stu.edu.cn/ac_portal/login.php | iconv -f utf-8 -t gb2312<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190610/C10ezIPVSBNV.png" srcset="/img/loading.gif" lazyload></p>
 <p>在有IPv6地址的情况下，我们从上面的报文分析可知，除了注销请求之外，我们还需要提交一个IPv6地址（``Temporary IPv6 Address`），才能够顺利注销。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 因为返回的数据中有中文，可能会产生乱码，所以要使用iconv进行编码转换</span>
-<span class="token function">curl</span> -d <span class="token string">"opr=logout&amp;ipv4or6=你的Temporary IPv6 Address"</span> http://a.stu.edu.cn/ac_portal/login.php <span class="token operator">|</span> <span class="token function">iconv</span> -f utf-8 -t gb2312<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 因为返回的数据中有中文，可能会产生乱码，所以要使用iconv进行编码转换</span><br>curl -d <span class="hljs-string">&quot;opr=logout&amp;ipv4or6=你的Temporary IPv6 Address&quot;</span> http://a.stu.edu.cn/ac_portal/login.php | iconv -f utf-8 -t gb2312<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190610/R6S30DXrTGCQ.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、实现定时登录和爆流量换账号"><a href="#3、实现定时登录和爆流量换账号" class="headerlink" title="3、实现定时登录和爆流量换账号"></a>3、实现定时登录和爆流量换账号</h1><p>首先要说明一下现在的网络状况，在宿舍里面，断网时间是从晚上12点到早上6:30，且每个账号每天有限制使用流量，而在早上6：30之后，如果宿舍接入路由器需要手动登录，这里我们可以通过定时任务来实现自动登录和一个账号流量用完之后切换到另一个账号。</p>
-<h2 id="3-1-定时登录"><a href="#3-1-定时登录" class="headerlink" title="3.1 定时登录"></a>3.1 定时登录</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">curl</span> -d <span class="token string">"opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码"</span> http://a.stu.edu.cn/ac_portal/login.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="3-1-定时登录"><a href="#3-1-定时登录" class="headerlink" title="3.1 定时登录"></a>3.1 定时登录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl -d <span class="hljs-string">&quot;opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></td></tr></table></figure>
 
 <p>在linux中（树莓派或NAS）设置定时任务，6:32分执行该任务。</p>
 <h2 id="3-2-爆流量换账号"><a href="#3-2-爆流量换账号" class="headerlink" title="3.2 爆流量换账号"></a>3.2 爆流量换账号</h2><p>由于通过校园网登录界面查询是否爆流量会有延迟（大概5分钟），所以我们需要使用ping命令来实时检测。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ping</span> baidu.com <span class="token operator">||</span> <span class="token function">curl</span> -d <span class="token string">"opr=logout"</span> http://a.stu.edu.cn/ac_portal/login.php <span class="token operator">&amp;&amp;</span> <span class="token function">curl</span> -d <span class="token string">"opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码"</span> http://a.stu.edu.cn/ac_portal/login.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ping baidu.com || curl -d <span class="hljs-string">&quot;opr=logout&quot;</span> http://a.stu.edu.cn/ac_portal/login.php &amp;&amp; curl -d <span class="hljs-string">&quot;opr=pwdLogin&amp;userName=你的账号&amp;pwd=你的密码&quot;</span> http://a.stu.edu.cn/ac_portal/login.php<br></code></pre></td></tr></table></figure>
 
 <p>使用linux中的crontab工具，设置该任务执行时间为每分钟执行一次，执行时间为7:00到23:59。</p>
 <p><img src="https://resource.tinychen.com/blog/20190610/gc4gnOB2UOQq.png" srcset="/img/loading.gif" lazyload></p>
@@ -659,8 +655,6 @@
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

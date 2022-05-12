@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -225,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          3.1k words
+          3.3k words
         
       </span>
     
@@ -236,7 +234,7 @@
         
         
         
-          26 mins
+          28 mins
         
       </span>
     
@@ -292,23 +290,11 @@
 <h1 id="0、前言"><a href="#0、前言" class="headerlink" title="0、前言"></a>0、前言</h1><p>关于apache和nginx的对比有很多，小七就不在这里赘述了，之前大一搭建博客的时候还没有接触过nginx就用了apache，后来考RHCE的时候也学习配置的是apache，最近开始学习nginx，考虑到对于小七自己的静态博客和渣渣服务器性能来说，nginx应该更合适一些，因此这里就把web服务器换成了nginx。</p>
 <h1 id="1、备份快照"><a href="#1、备份快照" class="headerlink" title="1、备份快照"></a>1、备份快照</h1><p>在阿里云的官网控制台里面创建快照备份。如果不小心翻车了，还能用快照恢复。</p>
 <p><img src="https://resource.tinychen.com/blog/20190829/zSXLRVHpyovS.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="2、停用apache服务"><a href="#2、停用apache服务" class="headerlink" title="2、停用apache服务"></a>2、停用apache服务</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ systemctl stop httpd.service 
-$ systemctl disable httpd.service 
-Removed symlink /etc/systemd/system/multi-user.target.wants/httpd.service.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<h1 id="2、停用apache服务"><a href="#2、停用apache服务" class="headerlink" title="2、停用apache服务"></a>2、停用apache服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ systemctl stop httpd.service <br>$ systemctl <span class="hljs-built_in">disable</span> httpd.service <br>Removed symlink /etc/systemd/system/multi-user.target.wants/httpd.service.<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190829/AnLNm50hcuQi.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="3、安装nginx"><a href="#3、安装nginx" class="headerlink" title="3、安装nginx"></a>3、安装nginx</h1><h2 id="3-1-导入yum源"><a href="#3-1-导入yum源" class="headerlink" title="3.1 导入yum源"></a>3.1 导入yum源</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">>></span> /etc/yum.repo.d/nginx.repo <span class="token operator">&lt;&lt;</span> <span class="token string">EOF
-[nginx] 
-name=nginx repo 
-baseurl=http://nginx.org/packages/mainline/centos/7/x86_64/
-gpgcheck=0 
-enabled=1 
-EOF</span>
-
-yum clean all
-yum repolist
-yum <span class="token function">install</span> nginx -y<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h1 id="3、安装nginx"><a href="#3、安装nginx" class="headerlink" title="3、安装nginx"></a>3、安装nginx</h1><h2 id="3-1-导入yum源"><a href="#3-1-导入yum源" class="headerlink" title="3.1 导入yum源"></a>3.1 导入yum源</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat &gt;&gt; /etc/yum.repo.d/nginx.repo &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[nginx] </span><br><span class="hljs-string">name=nginx repo </span><br><span class="hljs-string">baseurl=http://nginx.org/packages/mainline/centos/7/x86_64/</span><br><span class="hljs-string">gpgcheck=0 </span><br><span class="hljs-string">enabled=1 </span><br><span class="hljs-string">EOF</span><br><br>yum clean all<br>yum repolist<br>yum install nginx -y<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190829/KPKuzP1YKqDo.png" srcset="/img/loading.gif" lazyload></p>
@@ -317,9 +303,7 @@ yum <span class="token function">install</span> nginx -y<span aria-hidden="true"
 <p>想要安装最新版的同学可以前往官网下载源码进行编译安装。</p>
 <p>官网地址：<a target="_blank" rel="noopener" href="http://nginx.org/en/download.html">http://nginx.org/en/download.html</a></p>
 </blockquote>
-<h2 id="3-2-启用nginx服务并设置开机启动"><a href="#3-2-启用nginx服务并设置开机启动" class="headerlink" title="3.2 启用nginx服务并设置开机启动"></a>3.2 启用nginx服务并设置开机启动</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ systemctl enable nginx.service 
-Created symlink from &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;multi-user.target.wants&#x2F;nginx.service to &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;nginx.service.
-$ systemctl start nginx.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="3-2-启用nginx服务并设置开机启动"><a href="#3-2-启用nginx服务并设置开机启动" class="headerlink" title="3.2 启用nginx服务并设置开机启动"></a>3.2 启用nginx服务并设置开机启动</h2><figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs gradle">$ systemctl enable nginx.service <br>Created symlink <span class="hljs-keyword">from</span> <span class="hljs-regexp">/etc/</span>systemd<span class="hljs-regexp">/system/mu</span>lti-user.target.wants<span class="hljs-regexp">/nginx.service to /u</span>sr<span class="hljs-regexp">/lib/</span>systemd<span class="hljs-regexp">/system/</span>nginx.service.<br>$ systemctl start nginx.service<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190829/5FFk81nESijB.png" srcset="/img/loading.gif" lazyload></p>
@@ -328,17 +312,7 @@ $ systemctl start nginx.service<span aria-hidden="true" class="line-numbers-rows
 <blockquote>
 <p>这里有可能会出现<code>Failed to read PID from file /run/nginx.pid</code>的错误</p>
 <p>原因是<code>nginx</code>还没有完全启动，<code>systemd</code>就去读取该进程的PID导致无法读取报错，解决方法是让<code>systemd</code>晚一点读取。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> /etc/systemd/system/nginx.service.d
-
-<span class="token function">cat</span> <span class="token operator">>></span> /etc/systemd/system/nginx.service.d/override.conf <span class="token operator">&lt;&lt;</span> <span class="token string">EOF
-[Service]
-ExecStartPost=/bin/sleep 0.1
-EOF</span>
-
-<span class="token comment"># 重启服务再次查看</span>
-systemctl daemon-reload
-systemctl restart nginx.service
-systemctl status nginx.service <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">mkdir /etc/systemd/system/nginx.service.d<br><br>cat &gt;&gt; /etc/systemd/system/nginx.service.d/override.conf &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[Service]</span><br><span class="hljs-string">ExecStartPost=/bin/sleep 0.1</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-comment"># 重启服务再次查看</span><br>systemctl daemon-reload<br>systemctl restart nginx.service<br>systemctl status nginx.service <br></code></pre></td></tr></table></figure>
 </blockquote>
 <h1 id="4、配置nginx"><a href="#4、配置nginx" class="headerlink" title="4、配置nginx"></a>4、配置nginx</h1><p>由于小七安装的版本里面的配置文件默认并没有nginx的web的相关配置，所以我们一次把<code>http</code>、<code>https</code>和<code>http</code>自动跳转<code>https</code>配好。</p>
 <h2 id="4-1-查看版本"><a href="#4-1-查看版本" class="headerlink" title="4.1 查看版本"></a>4.1 查看版本</h2><p><img src="https://resource.tinychen.com/blog/20190829/IFjsD5ibg8XI.png" srcset="/img/loading.gif" lazyload></p>
@@ -350,85 +324,7 @@ systemctl status nginx.service <span aria-hidden="true" class="line-numbers-rows
 <p><img src="https://resource.tinychen.com/blog/20190829/XpbISE5RvAyB.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="4-3-编辑配置文件："><a href="#4-3-编辑配置文件：" class="headerlink" title="4.3 编辑配置文件："></a>4.3 编辑配置文件：</h2><p>这里小七直接放出整个配置文件给大家参考：</p>
 <p>默认的配置文件位于<code>/etc/nginx/nginx.conf</code></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 执行进程操作的用户，默认nginx</span>
-user  nginx<span class="token punctuation">;</span>
-<span class="token comment"># 这里的数字最好设置成和自己服务的核心数一样</span>
-worker_processes  <span class="token number">1</span><span class="token punctuation">;</span>
-
-error_log  /var/log/nginx/error.log warn<span class="token punctuation">;</span>
-pid        /var/run/nginx.pid<span class="token punctuation">;</span>
-
-
-events <span class="token punctuation">&#123;</span>
-    worker_connections  <span class="token number">1024</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-
-
-http <span class="token punctuation">&#123;</span>
-    include       /etc/nginx/mime.types<span class="token punctuation">;</span>
-    default_type  application/octet-stream<span class="token punctuation">;</span>
-
-    log_format  main  <span class="token string">'<span class="token variable">$remote_addr</span> - <span class="token variable">$remote_user</span> [<span class="token variable">$time_local</span>] "<span class="token variable">$request</span>" '</span>
-                      <span class="token string">'<span class="token variable">$status</span> <span class="token variable">$body_bytes_sent</span> "<span class="token variable">$http_referer</span>" '</span>
-                      <span class="token string">'"<span class="token variable">$http_user_agent</span>" "<span class="token variable">$http_x_forwarded_for</span>"'</span><span class="token punctuation">;</span>
-
-    access_log  /var/log/nginx/access.log  main<span class="token punctuation">;</span>
-
-    sendfile        on<span class="token punctuation">;</span>
-    <span class="token comment">#tcp_nopush     on;</span>
-
-    keepalive_timeout  <span class="token number">65</span><span class="token punctuation">;</span>
-
-    <span class="token comment">#gzip  on;</span>
-
-    include /etc/nginx/conf.d/*.conf<span class="token punctuation">;</span>
-
-<span class="token comment"># Settings for a TLS enabled server.</span>
-<span class="token comment"># 这里我们把80和443端口一起配置</span>
-    server <span class="token punctuation">&#123;</span>
-		listen       <span class="token number">80</span> default_server<span class="token punctuation">;</span>
-        listen       <span class="token number">443</span> ssl<span class="token punctuation">;</span>
-        listen       <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:443 ssl<span class="token punctuation">;</span>
-        <span class="token comment"># 这里填写自己的域名</span>
-        server_name  tiny777.com www.tiny777.com<span class="token punctuation">;</span>
-        <span class="token comment"># 判断端口，如果是http的80端口就跳转到https的443端口</span>
-		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$server_port</span> <span class="token operator">=</span> <span class="token number">80</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-			<span class="token comment">#return 301 https://$server_name$request_uri;</span>
-			<span class="token builtin class-name">return</span> <span class="token number">301</span> https://<span class="token variable">$host</span><span class="token variable">$request_uri</span><span class="token punctuation">;</span>
-		<span class="token punctuation">&#125;</span>
-		<span class="token comment"># 这里是对应的html文件的目录</span>
-        root         /etc/nginx/html<span class="token punctuation">;</span>
-		index index.html index.htm<span class="token punctuation">;</span>
-		
-		<span class="token comment"># 这里是https证书的密钥和证书存放位置</span>
-        ssl_certificate <span class="token string">"/etc/pki/CA/certs/tiny777.com.pem"</span><span class="token punctuation">;</span>
-        ssl_certificate_key <span class="token string">"/etc/pki/CA/certs/tiny777.com.key"</span><span class="token punctuation">;</span>
-        
-        ssl_session_cache shared:SSL:1m<span class="token punctuation">;</span>
-        ssl_session_timeout  10m<span class="token punctuation">;</span>
-        <span class="token comment"># 这里是支持的加密方式</span>
-        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:<span class="token operator">!</span>NULL:<span class="token operator">!</span>aNULL:<span class="token operator">!</span>MD5:<span class="token operator">!</span>ADH:<span class="token operator">!</span>RC4<span class="token punctuation">;</span>
-        ssl_prefer_server_ciphers on<span class="token punctuation">;</span>
-
-        <span class="token comment"># Load configuration files for the default server block.</span>
-        include /etc/nginx/default.d/*.conf<span class="token punctuation">;</span>
-
-        location / <span class="token punctuation">&#123;</span>
-			root	/etc/nginx/html<span class="token punctuation">;</span>
-			index index.html index.htm<span class="token punctuation">;</span>
-        <span class="token punctuation">&#125;</span>
-
-        error_page <span class="token number">404</span> /404.html<span class="token punctuation">;</span>
-            location <span class="token operator">=</span> /40x.html <span class="token punctuation">&#123;</span>
-        <span class="token punctuation">&#125;</span>
-
-        error_page <span class="token number">500</span> <span class="token number">502</span> <span class="token number">503</span> <span class="token number">504</span> /50x.html<span class="token punctuation">;</span>
-            location <span class="token operator">=</span> /50x.html <span class="token punctuation">&#123;</span>
-        <span class="token punctuation">&#125;</span>
-    <span class="token punctuation">&#125;</span>
-
-<span class="token punctuation">&#125;</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 执行进程操作的用户，默认nginx</span><br>user  nginx;<br><span class="hljs-comment"># 这里的数字最好设置成和自己服务的核心数一样</span><br>worker_processes  1;<br><br>error_log  /var/<span class="hljs-built_in">log</span>/nginx/error.log warn;<br>pid        /var/run/nginx.pid;<br><br><br>events &#123;<br>    worker_connections  1024;<br>&#125;<br><br><br>http &#123;<br>    include       /etc/nginx/mime.types;<br>    default_type  application/octet-stream;<br><br>    log_format  main  <span class="hljs-string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;<br><br>    access_log  /var/<span class="hljs-built_in">log</span>/nginx/access.log  main;<br><br>    sendfile        on;<br>    <span class="hljs-comment">#tcp_nopush     on;</span><br><br>    keepalive_timeout  65;<br><br>    <span class="hljs-comment">#gzip  on;</span><br><br>    include /etc/nginx/conf.d/*.conf;<br><br><span class="hljs-comment"># Settings for a TLS enabled server.</span><br><span class="hljs-comment"># 这里我们把80和443端口一起配置</span><br>    server &#123;<br>		listen       80 default_server;<br>        listen       443 ssl;<br>        listen       [::]:443 ssl;<br>        <span class="hljs-comment"># 这里填写自己的域名</span><br>        server_name  tiny777.com www.tiny777.com;<br>        <span class="hljs-comment"># 判断端口，如果是http的80端口就跳转到https的443端口</span><br>		<span class="hljs-keyword">if</span> (<span class="hljs-variable">$server_port</span> = 80) &#123;<br>			<span class="hljs-comment">#return 301 https://$server_name$request_uri;</span><br>			<span class="hljs-built_in">return</span> 301 https://$host<span class="hljs-variable">$request_uri</span>;<br>		&#125;<br>		<span class="hljs-comment"># 这里是对应的html文件的目录</span><br>        root         /etc/nginx/html;<br>		index index.html index.htm;<br>		<br>		<span class="hljs-comment"># 这里是https证书的密钥和证书存放位置</span><br>        ssl_certificate <span class="hljs-string">&quot;/etc/pki/CA/certs/tiny777.com.pem&quot;</span>;<br>        ssl_certificate_key <span class="hljs-string">&quot;/etc/pki/CA/certs/tiny777.com.key&quot;</span>;<br>        <br>        ssl_session_cache shared:SSL:1m;<br>        ssl_session_timeout  10m;<br>        <span class="hljs-comment"># 这里是支持的加密方式</span><br>        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;<br>        ssl_prefer_server_ciphers on;<br><br>        <span class="hljs-comment"># Load configuration files for the default server block.</span><br>        include /etc/nginx/default.d/*.conf;<br><br>        location / &#123;<br>			root	/etc/nginx/html;<br>			index index.html index.htm;<br>        &#125;<br><br>        error_page 404 /404.html;<br>            location = /40x.html &#123;<br>        &#125;<br><br>        error_page 500 502 503 504 /50x.html;<br>            location = /50x.html &#123;<br>        &#125;<br>    &#125;<br><br>&#125;<br><br></code></pre></td></tr></table></figure>
 
 
 
@@ -729,8 +625,6 @@ http <span class="token punctuation">&#123;</span>
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

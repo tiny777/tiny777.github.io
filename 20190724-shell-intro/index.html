@@ -44,8 +44,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +221,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.3k words
+          4.4k words
         
       </span>
     
@@ -234,7 +232,7 @@
         
         
         
-          36 mins
+          37 mins
         
       </span>
     
@@ -293,52 +291,16 @@
 <h1 id="2、什么是shell脚本"><a href="#2、什么是shell脚本" class="headerlink" title="2、什么是shell脚本"></a>2、什么是shell脚本</h1><p><strong>当命令或程序语句不在命令行下执行，而是通过一个程序文件来执行时，该程序就被称为Shell脚本。</strong></p>
 <p>如果在Shell脚本里内置了很多条命令、语句及循环控制，然后将这些命令一次性执行完毕，<strong>这种通过文件执行脚本的方式称为非交互的方式</strong>。Shel脚本类似于DOS或windows系统下的批处理程序（扩展名一般为“*.bat”）。用户可以在Shell脚本中敲入一系列的命令及命令语句组合。这些命令、变量和流程控制语句等有机地结合起来，就形成了一个功能强大的Shell脚本。</p>
 <p>比如下面的这个脚本，就是用来清空log日志中的messages文件</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#! /bin/bash</span>
-
-<span class="token builtin class-name">cd</span> /var/log
-
-<span class="token function">cat</span> /dev/null <span class="token operator">></span> messages
-
-<span class="token builtin class-name">echo</span> <span class="token string">"Logs clean up done"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#! /bin/bash</span><br><br><span class="hljs-built_in">cd</span> /var/<span class="hljs-built_in">log</span><br><br>cat /dev/null &gt; messages<br><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Logs clean up done&quot;</span><br></code></pre></td></tr></table></figure>
 
 <p>上面的这个脚本就是最简单的由命令直接堆砌而成的脚本文件，需要注意的是，脚本在执行的时候可能会有权限限制，一般需要使用<code>chmod +x</code>给脚本加执行权限，还可能需要切换到<code>root</code>用户或者使用<code>sudo</code>。</p>
 <p>实际上我们可以看到上面的脚本其实一条命令就能解决</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> /dev/null <span class="token operator">></span> /var/log/messages <span class="token operator">&amp;&amp;</span> <span class="token builtin class-name">echo</span> <span class="token string">"Logs clean up done"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat /dev/null &gt; /var/<span class="hljs-built_in">log</span>/messages &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Logs clean up done&quot;</span><br></code></pre></td></tr></table></figure>
 
 
 
 <p>接下来我们对上面的脚本进行改进，加入执行用户和切换目录的判断以及根据执行结果返回不同的信息。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#! /bin/bash</span>
-<span class="token comment"># A shell script that use to clean the system's logs.</span>
-<span class="token assign-left variable">CLEAN_DIR</span><span class="token operator">=</span>/var/log
-
-<span class="token comment"># $UID=0 means the user must be root</span>
-<span class="token assign-left variable">ROOT_UID</span><span class="token operator">=</span><span class="token number">0</span>
-
-<span class="token comment"># This script need the root to execute</span>
-<span class="token comment"># We have to judge whether the user is root or not</span>
-<span class="token comment"># If not, echo warning and then exit</span>
-<span class="token keyword">if</span> <span class="token punctuation">[</span><span class="token string">"<span class="token environment constant">$UID</span>"</span> -ne <span class="token string">"<span class="token variable">$ROOT_UID</span>"</span><span class="token punctuation">]</span>
-        <span class="token keyword">then</span>
-                <span class="token builtin class-name">echo</span> <span class="token string">" Must be root to execute this script "</span>
-                <span class="token builtin class-name">exit</span> <span class="token number">1</span>
-<span class="token keyword">if</span>
-
-<span class="token comment"># If change directory fail, give the tip and then exit</span>
-<span class="token builtin class-name">cd</span> <span class="token variable">$CLEAN_DIR</span> <span class="token operator">||</span> <span class="token punctuation">&#123;</span>
-        <span class="token builtin class-name">echo</span> <span class="token string">"Cannot change to necessary directory"</span>
-        <span class="token builtin class-name">exit</span> <span class="token number">1</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token comment"># Begin to clean the log </span>
-<span class="token comment"># Echo the tips whether it success or not</span>
-<span class="token function">cat</span> /dev/null <span class="token operator">></span> messages <span class="token operator">&amp;&amp;</span> <span class="token punctuation">&#123;</span>
-        <span class="token builtin class-name">echo</span> <span class="token string">"Logs cleaned up"</span>
-        <span class="token builtin class-name">exit</span> <span class="token number">0</span>
-<span class="token comment"># eixt 0 means success and exit 1 means fail</span>
-<span class="token punctuation">&#125;</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"Logs cleaned up fail"</span>
-<span class="token builtin class-name">exit</span> <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#! /bin/bash</span><br><span class="hljs-comment"># A shell script that use to clean the system&#x27;s logs.</span><br>CLEAN_DIR=/var/<span class="hljs-built_in">log</span><br><br><span class="hljs-comment"># $UID=0 means the user must be root</span><br>ROOT_UID=0<br><br><span class="hljs-comment"># This script need the root to execute</span><br><span class="hljs-comment"># We have to judge whether the user is root or not</span><br><span class="hljs-comment"># If not, echo warning and then exit</span><br><span class="hljs-keyword">if</span> [<span class="hljs-string">&quot;<span class="hljs-variable">$UID</span>&quot;</span> -ne <span class="hljs-string">&quot;<span class="hljs-variable">$ROOT_UID</span>&quot;</span>]<br>        <span class="hljs-keyword">then</span><br>                <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot; Must be root to execute this script &quot;</span><br>                <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">if</span><br><br><span class="hljs-comment"># If change directory fail, give the tip and then exit</span><br><span class="hljs-built_in">cd</span> <span class="hljs-variable">$CLEAN_DIR</span> || &#123;<br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Cannot change to necessary directory&quot;</span><br>        <span class="hljs-built_in">exit</span> 1<br>&#125;<br><br><span class="hljs-comment"># Begin to clean the log </span><br><span class="hljs-comment"># Echo the tips whether it success or not</span><br>cat /dev/null &gt; messages &amp;&amp; &#123;<br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Logs cleaned up&quot;</span><br>        <span class="hljs-built_in">exit</span> 0<br><span class="hljs-comment"># eixt 0 means success and exit 1 means fail</span><br>&#125;<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Logs cleaned up fail&quot;</span><br><span class="hljs-built_in">exit</span> 1<br></code></pre></td></tr></table></figure>
 
 
 
@@ -682,8 +644,6 @@
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

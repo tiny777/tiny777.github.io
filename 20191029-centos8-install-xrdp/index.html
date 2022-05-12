@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          7.6k words
+          4.3k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          64 mins
+          36 mins
         
       </span>
     
@@ -289,159 +287,14 @@
 <span id="more"></span>
 
 <p>这里我们使用的是<code>epel</code>源来进行安装，需要注意的是要在防火墙中放行端口，<code>xrdp</code>使用的是和<code>windows</code>自带的<code>mstsc</code>远程一样的默认<code>3389</code>端口，如果使用<code>vnc</code>进行远程，则还需要额外添加<code>5900</code>到<code>5905</code>端口。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 安装epel源并安装xrdp和vnc
-yum install epel-release -y
-yum install xrdp -y
-yum install tigervnc-server -y
-
-# 启动xrdp并设置开机启动
-systemctl start xrdp.service
-systemctl enable xrdp.service
-
-# 在防火墙中放行vnc和xrdp
-firewall-cmd --permanent --add-service&#x3D;vnc-server 
-firewall-cmd --permanent --add-port&#x3D;3389&#x2F;tcp
-firewall-cmd --permanent --add-port&#x3D;3389&#x2F;udp
-firewall-cmd --reload
-firewall-cmd --list-all<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-comment"># 安装epel源并安装xrdp和vnc</span><br>yum install epel-release -y<br>yum install xrdp -y<br>yum install tigervnc-server -y<br><br><span class="hljs-comment"># 启动xrdp并设置开机启动</span><br>systemctl start xrdp.service<br>systemctl enable xrdp.service<br><br><span class="hljs-comment"># 在防火墙中放行vnc和xrdp</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-service=vnc-server</span> <br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=3389/tcp</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=3389/udp</span><br>firewall-cmd <span class="hljs-params">--reload</span><br>firewall-cmd <span class="hljs-params">--list-all</span><br></code></pre></td></tr></table></figure>
 
 <p>以下是安装实录。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ yum install xrdp
-上次元数据过期检查：0:00:04 前，执行于 Thu 31 Oct 2019 04:15:46 AM CST。
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">$ yum install xrdp<br>上次元数据过期检查：0:00:04 前，执行于 Thu 31 Oct 2019 04:15:46 AM CST。<br><br><span class="hljs-section">依赖关系解决。</span><br><span class="hljs-section">================================================================================================================</span><br><br><span class="hljs-section"> 软件包                       架构                   版本                            仓库                  大小</span><br><span class="hljs-section">================================================================================================================</span><br><br>Installing:<br><span class="hljs-code"> xrdp                         x86_64                 1:0.9.11-5.el8                  epel                 441 k</span><br>安装弱的依赖:<br><span class="hljs-code"> xrdp-selinux                 x86_64                 1:0.9.11-5.el8                  epel                  21 k</span><br><br><span class="hljs-section">事务概要</span><br><span class="hljs-section">================================================================================================================</span><br><br>安装  2 软件包<br><br>总下载：461 k<br>安装大小：2.2 M<br>确定吗？[y/N]： y<br>下载软件包：<br>(1/2): xrdp-selinux-0.9.11-5.el8.x86_64.rpm                                      13 kB/s |  21 kB     00:01    <br><br><span class="hljs-section">(2/2): xrdp-0.9.11-5.el8.x86_64.rpm                                             205 kB/s | 441 kB     00:02    </span><br><span class="hljs-section">----------------------------------------------------------------------------------------------------------------</span><br><br>总计                                                                             62 kB/s | 461 kB     00:07     <br>运行事务检查<br>事务检查成功。<br>运行事务测试<br>事务测试成功。<br>运行事务<br><span class="hljs-code">  准备中      :                                                                                             1/1 </span><br><span class="hljs-code">  Installing  : xrdp-selinux-1:0.9.11-5.el8.x86_64                                                          1/2 </span><br><span class="hljs-code">  运行脚本    : xrdp-selinux-1:0.9.11-5.el8.x86_64                                                          1/2 </span><br><span class="hljs-code">  Installing  : xrdp-1:0.9.11-5.el8.x86_64                                                                  2/2 </span><br><span class="hljs-code">  运行脚本    : xrdp-1:0.9.11-5.el8.x86_64                                                                  2/2 </span><br><span class="hljs-code">  验证        : xrdp-1:0.9.11-5.el8.x86_64                                                                  1/2 </span><br><span class="hljs-code">  验证        : xrdp-selinux-1:0.9.11-5.el8.x86_64                                                          2/2 </span><br><br>已安装:<br><span class="hljs-code">  xrdp-1:0.9.11-5.el8.x86_64                         xrdp-selinux-1:0.9.11-5.el8.x86_64                        </span><br><br>完毕！<br><br><br><br>$ yum install tigervnc-server<br>上次元数据过期检查：0:01:41 前，执行于 Thu 31 Oct 2019 04:15:46 AM CST。<br><br><span class="hljs-section">依赖关系解决。</span><br><span class="hljs-section">================================================================================================================</span><br><br><span class="hljs-section"> 软件包                         架构                  版本                       仓库                      大小</span><br><span class="hljs-section">================================================================================================================</span><br><br>Installing:<br><span class="hljs-code"> tigervnc-server                x86_64                1.9.0-9.el8                AppStream                252 k</span><br><br><span class="hljs-section">事务概要</span><br><span class="hljs-section">================================================================================================================</span><br><br>安装  1 软件包<br><br>总下载：252 k<br>安装大小：688 k<br>确定吗？[y/N]： y<br>下载软件包：<br><br><span class="hljs-section">tigervnc-server-1.9.0-9.el8.x86_64.rpm                                          186 kB/s | 252 kB     00:01    </span><br><span class="hljs-section">----------------------------------------------------------------------------------------------------------------</span><br><br>总计                                                                            186 kB/s | 252 kB     00:01     <br>运行事务检查<br>事务检查成功。<br>运行事务测试<br>事务测试成功。<br>运行事务<br><span class="hljs-code">  准备中      :                                                                                             1/1 </span><br><span class="hljs-code">  Installing  : tigervnc-server-1.9.0-9.el8.x86_64                                                          1/1 </span><br><span class="hljs-code">  运行脚本    : tigervnc-server-1.9.0-9.el8.x86_64                                                          1/1 </span><br><span class="hljs-code">  验证        : tigervnc-server-1.9.0-9.el8.x86_64                                                          1/1 </span><br><br>已安装:<br><span class="hljs-code">  tigervnc-server-1.9.0-9.el8.x86_64                                                                            </span><br><br>完毕！<br></code></pre></td></tr></table></figure>
 
-依赖关系解决。
-&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ systemctl start xrdp.service <br>$ systemctl enable xrdp.service <br>Created symlink <span class="hljs-regexp">/etc/</span>systemd<span class="hljs-regexp">/system/mu</span>lti-user.target.wants<span class="hljs-regexp">/xrdp.service → /u</span>sr<span class="hljs-regexp">/lib/</span>systemd<span class="hljs-regexp">/system/</span>xrdp.service.<br>$ systemctl status xrdp.service <br>● xrdp.service - xrdp daemon<br>   Loaded: loaded (<span class="hljs-regexp">/usr/</span>lib<span class="hljs-regexp">/systemd/</span>system/xrdp.service; enabled; vendor preset: disabled)<br>   Active: active (running)<br> since Thu <span class="hljs-number">2019</span>-<span class="hljs-number">10</span>-<span class="hljs-number">31</span> <span class="hljs-number">04</span>:<span class="hljs-number">18</span>:<span class="hljs-number">31</span> CST; <span class="hljs-number">22</span>s ago<br>     Docs: man:xrdp(<span class="hljs-number">8</span>)<br>           man:xrdp.ini(<span class="hljs-number">5</span>)<br> Main PID: <span class="hljs-number">23889</span> (xrdp)<br>    Tasks: <span class="hljs-number">1</span> (limit: <span class="hljs-number">42597</span>)<br>   Memory: <span class="hljs-number">1016.0</span>K<br>   CGroup: <span class="hljs-regexp">/system.slice/</span>xrdp.service<br>           └─<span class="hljs-number">23889</span> <span class="hljs-regexp">/usr/</span>sbin/xrdp --nodaemon<br><br>Oct <span class="hljs-number">31</span> <span class="hljs-number">04</span>:<span class="hljs-number">18</span>:<span class="hljs-number">31</span> tiny-studio systemd[<span class="hljs-number">1</span>]: Started xrdp daemon.<br>Oct <span class="hljs-number">31</span> <span class="hljs-number">04</span>:<span class="hljs-number">18</span>:<span class="hljs-number">31</span> tiny-studio xrdp[<span class="hljs-number">23889</span>]: (<span class="hljs-number">23889</span>)(<span class="hljs-number">139917736187328</span>)[INFO ] starting xrdp with pid <span class="hljs-number">23889</span><br>Oct <span class="hljs-number">31</span> <span class="hljs-number">04</span>:<span class="hljs-number">18</span>:<span class="hljs-number">31</span> tiny-studio xrdp[<span class="hljs-number">23889</span>]: (<span class="hljs-number">23889</span>)(<span class="hljs-number">139917736187328</span>)[INFO ] address [<span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>] port [<span class="hljs-number">3389</span>] mode <span class="hljs-number">1</span><br>Oct <span class="hljs-number">31</span> <span class="hljs-number">04</span>:<span class="hljs-number">18</span>:<span class="hljs-number">31</span> tiny-studio xrdp[<span class="hljs-number">23889</span>]: (<span class="hljs-number">23889</span>)(<span class="hljs-number">139917736187328</span>)[INFO ] listening to port <span class="hljs-number">3389</span> on <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span><br>Oct <span class="hljs-number">31</span> <span class="hljs-number">04</span>:<span class="hljs-number">18</span>:<span class="hljs-number">31</span> tiny-studio xrdp[<span class="hljs-number">23889</span>]: (<span class="hljs-number">23889</span>)(<span class="hljs-number">139917736187328</span>)[INFO ] xrdp_listen_pp done<br><br><br></code></pre></td></tr></table></figure>
 
- 软件包                       架构                   版本                            仓库                  大小
-&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
-
-Installing:
- xrdp                         x86_64                 1:0.9.11-5.el8                  epel                 441 k
-安装弱的依赖:
- xrdp-selinux                 x86_64                 1:0.9.11-5.el8                  epel                  21 k
-
-事务概要
-&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
-
-安装  2 软件包
-
-总下载：461 k
-安装大小：2.2 M
-确定吗？[y&#x2F;N]： y
-下载软件包：
-(1&#x2F;2): xrdp-selinux-0.9.11-5.el8.x86_64.rpm                                      13 kB&#x2F;s |  21 kB     00:01    
-
-(2&#x2F;2): xrdp-0.9.11-5.el8.x86_64.rpm                                             205 kB&#x2F;s | 441 kB     00:02    
-----------------------------------------------------------------------------------------------------------------
-
-总计                                                                             62 kB&#x2F;s | 461 kB     00:07     
-运行事务检查
-事务检查成功。
-运行事务测试
-事务测试成功。
-运行事务
-  准备中      :                                                                                             1&#x2F;1 
-  Installing  : xrdp-selinux-1:0.9.11-5.el8.x86_64                                                          1&#x2F;2 
-  运行脚本    : xrdp-selinux-1:0.9.11-5.el8.x86_64                                                          1&#x2F;2 
-  Installing  : xrdp-1:0.9.11-5.el8.x86_64                                                                  2&#x2F;2 
-  运行脚本    : xrdp-1:0.9.11-5.el8.x86_64                                                                  2&#x2F;2 
-  验证        : xrdp-1:0.9.11-5.el8.x86_64                                                                  1&#x2F;2 
-  验证        : xrdp-selinux-1:0.9.11-5.el8.x86_64                                                          2&#x2F;2 
-
-已安装:
-  xrdp-1:0.9.11-5.el8.x86_64                         xrdp-selinux-1:0.9.11-5.el8.x86_64                        
-
-完毕！
-
-
-
-$ yum install tigervnc-server
-上次元数据过期检查：0:01:41 前，执行于 Thu 31 Oct 2019 04:15:46 AM CST。
-
-依赖关系解决。
-&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
-
- 软件包                         架构                  版本                       仓库                      大小
-&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
-
-Installing:
- tigervnc-server                x86_64                1.9.0-9.el8                AppStream                252 k
-
-事务概要
-&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
-
-安装  1 软件包
-
-总下载：252 k
-安装大小：688 k
-确定吗？[y&#x2F;N]： y
-下载软件包：
-
-tigervnc-server-1.9.0-9.el8.x86_64.rpm                                          186 kB&#x2F;s | 252 kB     00:01    
-----------------------------------------------------------------------------------------------------------------
-
-总计                                                                            186 kB&#x2F;s | 252 kB     00:01     
-运行事务检查
-事务检查成功。
-运行事务测试
-事务测试成功。
-运行事务
-  准备中      :                                                                                             1&#x2F;1 
-  Installing  : tigervnc-server-1.9.0-9.el8.x86_64                                                          1&#x2F;1 
-  运行脚本    : tigervnc-server-1.9.0-9.el8.x86_64                                                          1&#x2F;1 
-  验证        : tigervnc-server-1.9.0-9.el8.x86_64                                                          1&#x2F;1 
-
-已安装:
-  tigervnc-server-1.9.0-9.el8.x86_64                                                                            
-
-完毕！<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ systemctl start xrdp.service 
-$ systemctl enable xrdp.service 
-Created symlink &#x2F;etc&#x2F;systemd&#x2F;system&#x2F;multi-user.target.wants&#x2F;xrdp.service → &#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;xrdp.service.
-$ systemctl status xrdp.service 
-● xrdp.service - xrdp daemon
-   Loaded: loaded (&#x2F;usr&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;xrdp.service; enabled; vendor preset: disabled)
-   Active: active (running)
- since Thu 2019-10-31 04:18:31 CST; 22s ago
-     Docs: man:xrdp(8)
-           man:xrdp.ini(5)
- Main PID: 23889 (xrdp)
-    Tasks: 1 (limit: 42597)
-   Memory: 1016.0K
-   CGroup: &#x2F;system.slice&#x2F;xrdp.service
-           └─23889 &#x2F;usr&#x2F;sbin&#x2F;xrdp --nodaemon
-
-Oct 31 04:18:31 tiny-studio systemd[1]: Started xrdp daemon.
-Oct 31 04:18:31 tiny-studio xrdp[23889]: (23889)(139917736187328)[INFO ] starting xrdp with pid 23889
-Oct 31 04:18:31 tiny-studio xrdp[23889]: (23889)(139917736187328)[INFO ] address [0.0.0.0] port [3389] mode 1
-Oct 31 04:18:31 tiny-studio xrdp[23889]: (23889)(139917736187328)[INFO ] listening to port 3389 on 0.0.0.0
-Oct 31 04:18:31 tiny-studio xrdp[23889]: (23889)(139917736187328)[INFO ] xrdp_listen_pp done
-
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ firewall-cmd --permanent --add-service&#x3D;vnc-server 
-success
-$ firewall-cmd --permanent --add-port&#x3D;3389&#x2F;tcp
-success
-$ firewall-cmd --permanent --add-port&#x3D;3389&#x2F;udp
-success
-$ firewall-cmd --reload 
-success
-$ firewall-cmd --list-all
-public (active)
-  target: default
-  icmp-block-inversion: no
-  interfaces: ens82f0
-  sources: 
-  services: cockpit dhcpv6-client ssh vnc-server
-  ports: 3389&#x2F;tcp 3389&#x2F;udp
-  protocols: 
-  masquerade: no
-  forward-ports: 
-  source-ports: 
-  icmp-blocks: 
-  rich rules: <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs subunit">$ firewall-cmd --permanent --add-service=vnc-server <br><span class="hljs-keyword">success</span><br><span class="hljs-keyword"></span>$ firewall-cmd --permanent --add-port=3389/tcp<br><span class="hljs-keyword">success</span><br><span class="hljs-keyword"></span>$ firewall-cmd --permanent --add-port=3389/udp<br><span class="hljs-keyword">success</span><br><span class="hljs-keyword"></span>$ firewall-cmd --reload <br><span class="hljs-keyword">success</span><br><span class="hljs-keyword"></span>$ firewall-cmd --list-all<br>public (active)<br>  target: default<br>  icmp-block-inversion: no<br>  interfaces: ens82f0<br>  sources: <br>  services: cockpit dhcpv6-client ssh vnc-server<br>  ports: 3389/tcp 3389/udp<br>  protocols: <br>  masquerade: no<br>  forward-ports: <br>  source-ports: <br>  icmp-blocks: <br>  rich rules: <br></code></pre></td></tr></table></figure>
 
 <p>需要注意的是在登录使用的时候，直接使用windows自带的mstsc输入ip地址进行远程，然后就会进入到xrdp的界面，接着再输入账号密码登录，退出的时候要先在linux中注销用户，直接退出的话用户还是没有注销，没注销的桌面用户再用别的电脑是不能登录的。</p>
 <p><img src="https://resource.tinychen.com/blog/20191109/0wYJg5qoffXA.png" srcset="/img/loading.gif" lazyload></p>
@@ -740,8 +593,6 @@ public (active)
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

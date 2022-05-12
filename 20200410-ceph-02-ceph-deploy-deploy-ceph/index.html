@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          6.5k words
+          6.1k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          54 mins
+          51 mins
         
       </span>
     
@@ -288,43 +286,22 @@
               <p>使用ceph-deploy部署ceph集群并配置ceph-dashboard。</p>
 <span id="more"></span>
 
-<h1 id="1、准备工作"><a href="#1、准备工作" class="headerlink" title="1、准备工作"></a>1、准备工作</h1><h2 id="1-1-关闭selinux（所有节点）"><a href="#1-1-关闭selinux（所有节点）" class="headerlink" title="1.1 关闭selinux（所有节点）"></a>1.1 关闭selinux（所有节点）</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">setenforce <span class="token number">0</span>
-<span class="token function">sed</span> -i <span class="token string">'s/^SELINUX=enforcing$/SELINUX=disabled/'</span> /etc/selinux/config
-
-<span class="token comment"># 也可以直接修改/etc/selinux/config文件</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h1 id="1、准备工作"><a href="#1、准备工作" class="headerlink" title="1、准备工作"></a>1、准备工作</h1><h2 id="1-1-关闭selinux（所有节点）"><a href="#1-1-关闭selinux（所有节点）" class="headerlink" title="1.1 关闭selinux（所有节点）"></a>1.1 关闭selinux（所有节点）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">setenforce 0<br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=disabled/&#x27;</span> /etc/selinux/config<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="1-2-配置ntp时间同步（所有节点）"><a href="#1-2-配置ntp时间同步（所有节点）" class="headerlink" title="1.2 配置ntp时间同步（所有节点）"></a>1.2 配置ntp时间同步（所有节点）</h2><p>具体的操作可以参考<a href="https://tinychen.com/20191026-NTP-servers/">之前的文章</a>。</p>
-<h2 id="1-3-安装epel源"><a href="#1-3-安装epel源" class="headerlink" title="1.3 安装epel源"></a>1.3 安装epel源</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo yum install -y https:&#x2F;&#x2F;dl.fedoraproject.org&#x2F;pub&#x2F;epel&#x2F;epel-release-latest-7.noarch.rpm<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="1-3-安装epel源"><a href="#1-3-安装epel源" class="headerlink" title="1.3 安装epel源"></a>1.3 安装epel源</h2><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo yum install -y https:<span class="hljs-regexp">//</span>dl.fedoraproject.org<span class="hljs-regexp">/pub/</span>epel/epel-release-latest-<span class="hljs-number">7</span>.noarch.rpm<br></code></pre></td></tr></table></figure>
 
-<h2 id="1-4-导入repo仓库"><a href="#1-4-导入repo仓库" class="headerlink" title="1.4 导入repo仓库"></a>1.4 导入repo仓库</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cat &lt;&lt; EOM &gt; &#x2F;etc&#x2F;yum.repos.d&#x2F;ceph.repo
-[ceph-noarch]
-name&#x3D;Ceph noarch packages
-baseurl&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;rpm-&#123;ceph-stable-release&#125;&#x2F;el7&#x2F;noarch
-enabled&#x3D;1
-gpgcheck&#x3D;1
-type&#x3D;rpm-md
-gpgkey&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;keys&#x2F;release.asc
-EOM<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-4-导入repo仓库"><a href="#1-4-导入repo仓库" class="headerlink" title="1.4 导入repo仓库"></a>1.4 导入repo仓库</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs routeros">cat &lt;&lt; EOM &gt; /etc/yum.repos.d/ceph.repo<br>[ceph-noarch]<br><span class="hljs-attribute">name</span>=Ceph noarch packages<br><span class="hljs-attribute">baseurl</span>=https://download.ceph.com/rpm-&#123;ceph-stable-release&#125;/el7/noarch<br><span class="hljs-attribute">enabled</span>=1<br><span class="hljs-attribute">gpgcheck</span>=1<br><span class="hljs-attribute">type</span>=rpm-md<br><span class="hljs-attribute">gpgkey</span>=https://download.ceph.com/keys/release.asc<br>EOM<br></code></pre></td></tr></table></figure>
 
 <p>注意这里的{ceph-stable-release}要换成对应的版本号，如我这里就是：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cat &lt;&lt; EOM &gt; &#x2F;etc&#x2F;yum.repos.d&#x2F;ceph.repo
-[ceph-noarch]
-name&#x3D;Ceph noarch packages
-baseurl&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;rpm-octopus&#x2F;el7&#x2F;noarch
-enabled&#x3D;1
-gpgcheck&#x3D;1
-type&#x3D;rpm-md
-gpgkey&#x3D;https:&#x2F;&#x2F;download.ceph.com&#x2F;keys&#x2F;release.asc
-EOM<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs routeros">cat &lt;&lt; EOM &gt; /etc/yum.repos.d/ceph.repo<br>[ceph-noarch]<br><span class="hljs-attribute">name</span>=Ceph noarch packages<br><span class="hljs-attribute">baseurl</span>=https://download.ceph.com/rpm-octopus/el7/noarch<br><span class="hljs-attribute">enabled</span>=1<br><span class="hljs-attribute">gpgcheck</span>=1<br><span class="hljs-attribute">type</span>=rpm-md<br><span class="hljs-attribute">gpgkey</span>=https://download.ceph.com/keys/release.asc<br>EOM<br></code></pre></td></tr></table></figure>
 
 <p>然后更新yum repo</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum clean all
-yum repolist<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ada">yum clean <span class="hljs-keyword">all</span><br>yum repolist<br></code></pre></td></tr></table></figure>
 
-<h2 id="1-5-安装python工具"><a href="#1-5-安装python工具" class="headerlink" title="1.5 安装python工具"></a>1.5 安装python工具</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo yum install python-setuptools<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="1-5-安装python工具"><a href="#1-5-安装python工具" class="headerlink" title="1.5 安装python工具"></a>1.5 安装python工具</h2><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">sudo yum <span class="hljs-keyword">install</span> python-setuptools<br></code></pre></td></tr></table></figure>
 
-<h2 id="1-6-安装ceph-deploy"><a href="#1-6-安装ceph-deploy" class="headerlink" title="1.6 安装ceph-deploy"></a>1.6 安装ceph-deploy</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo yum update
-sudo yum install ceph-deploy<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<h2 id="1-6-安装ceph-deploy"><a href="#1-6-安装ceph-deploy" class="headerlink" title="1.6 安装ceph-deploy"></a>1.6 安装ceph-deploy</h2><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmake">sudo yum update<br>sudo yum <span class="hljs-keyword">install</span> ceph-deploy<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200410214907.png" srcset="/img/loading.gif" lazyload></p>
@@ -338,104 +315,41 @@ sudo yum install ceph-deploy<span aria-hidden="true" class="line-numbers-rows"><
 <li>该用户需要在ceph集群中的所有机器之间免密ssh登录</li>
 </ul>
 <p>创建新用户</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo useradd -d &#x2F;home&#x2F;&#123;username&#125; -m &#123;username&#125;
-sudo passwd &#123;username&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs dts">sudo useradd -d <span class="hljs-meta-keyword">/home/</span>&#123;username&#125; -<span class="hljs-class">m </span>&#123;username&#125;<br>sudo <span class="hljs-class">passwd </span>&#123;username&#125;<br></code></pre></td></tr></table></figure>
 
 <p>配置sudo权限并设置免密</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">echo &quot;&#123;username&#125; ALL &#x3D; (root) NOPASSWD:ALL&quot; | sudo tee &#x2F;etc&#x2F;sudoers.d&#x2F;&#123;username&#125;
-sudo chmod 0440 &#x2F;etc&#x2F;sudoers.d&#x2F;&#123;username&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">echo <span class="hljs-string">&quot;&#123;username&#125; ALL = (root) NOPASSWD:ALL&quot;</span> | sudo tee <span class="hljs-regexp">/etc/</span>sudoers.d/&#123;username&#125;<br>sudo chmod <span class="hljs-number">0440</span> <span class="hljs-regexp">/etc/</span>sudoers.d/&#123;username&#125;<br></code></pre></td></tr></table></figure>
 
 <p>如果我们的节点已经设置了ssh免密登录，可以直接把免密登录用户的ssh文件夹复制到新建的用户目录下，这里以root用户为例。{username}请替换成需要新建的用户名。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo cp -R &#x2F;root&#x2F;.ssh&#x2F; &#x2F;home&#x2F;&#123;username&#125;&#x2F;
-sudo chown &#123;username&#125;:&#123;username&#125; &#x2F;home&#x2F;&#123;username&#125;&#x2F;.ssh&#x2F; -R<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo cp -R <span class="hljs-regexp">/root/</span>.ssh<span class="hljs-regexp">/ /</span>home<span class="hljs-regexp">/&#123;username&#125;/</span><br>sudo chown &#123;username&#125;:&#123;username&#125; <span class="hljs-regexp">/home/</span>&#123;username&#125;<span class="hljs-regexp">/.ssh/</span> -R<br></code></pre></td></tr></table></figure>
 
 <p>编辑deploy节点的ssh文件</p>
 <p>我们可以通过编辑deploy节点的ssh配置文件来指定登录到ceph其他节点的用户：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Host node1
-   Hostname node1
-   User &#123;username&#125;
-Host node2
-   Hostname node2
-   User &#123;username&#125;
-Host node3
-   Hostname node3
-   User &#123;username&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight puppet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs puppet">Host node1<br>   Hostname node1<br>   <span class="hljs-keyword">User</span> &#123;username&#125;<br><span class="hljs-keyword">Host</span> <span class="hljs-keyword">node2</span><br>   <span class="hljs-keyword">Hostname</span> <span class="hljs-keyword">node2</span><br>   <span class="hljs-keyword">User</span> &#123;username&#125;<br><span class="hljs-keyword">Host</span> <span class="hljs-keyword">node3</span><br>   <span class="hljs-keyword">Hostname</span> <span class="hljs-keyword">node3</span><br>   <span class="hljs-keyword">User</span> &#123;username&#125;<br></code></pre></td></tr></table></figure>
 
 <p>在我这里替换成</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Host ceph71
-   Hostname ceph71
-   User cephDeploy
-Host ceph72
-   Hostname ceph72
-   User cephDeploy
-Host ceph73
-   Hostname ceph73
-   User cephDeploy<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">Host ceph71<br>   Hostname ceph71<br>   <span class="hljs-keyword">User</span> <span class="hljs-title">cephDeploy</span><br>Host ceph72<br>   Hostname ceph72<br>   <span class="hljs-keyword">User</span> <span class="hljs-title">cephDeploy</span><br>Host ceph73<br>   Hostname ceph73<br>   <span class="hljs-keyword">User</span> <span class="hljs-title">cephDeploy</span><br></code></pre></td></tr></table></figure>
 
-<h2 id="1-8-防火墙中放行端口"><a href="#1-8-防火墙中放行端口" class="headerlink" title="1.8 防火墙中放行端口"></a>1.8 防火墙中放行端口</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo firewall-cmd --zone&#x3D;public --add-service&#x3D;ceph-mon --permanent
-# on monitors
-
-sudo firewall-cmd --zone&#x3D;public --add-service&#x3D;ceph --permanent
-# on OSDs and MDSs
-
-sudo firewall-cmd --reload<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-8-防火墙中放行端口"><a href="#1-8-防火墙中放行端口" class="headerlink" title="1.8 防火墙中放行端口"></a>1.8 防火墙中放行端口</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs routeros">sudo firewall-cmd <span class="hljs-attribute">--zone</span>=public <span class="hljs-attribute">--add-service</span>=ceph-mon --permanent<br><span class="hljs-comment"># on monitors</span><br><br>sudo firewall-cmd <span class="hljs-attribute">--zone</span>=public <span class="hljs-attribute">--add-service</span>=ceph --permanent<br><span class="hljs-comment"># on OSDs and MDSs</span><br><br>sudo firewall-cmd --reload<br></code></pre></td></tr></table></figure>
 
 <p>也可以直接关闭或禁用防火墙</p>
-<h2 id="1-9-安装yum插件"><a href="#1-9-安装yum插件" class="headerlink" title="1.9 安装yum插件"></a>1.9 安装yum插件</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo yum install yum-plugin-priorities<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="1-9-安装yum插件"><a href="#1-9-安装yum插件" class="headerlink" title="1.9 安装yum插件"></a>1.9 安装yum插件</h2><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">sudo yum <span class="hljs-keyword">install</span> yum-plugin-priorities<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>Ensure that your package manager has priority/preferences packages installed and enabled. On CentOS, you may need to install EPEL. On RHEL, you may need to enable optional repositories.</p>
 </blockquote>
-<h1 id="2、部署ceph"><a href="#2、部署ceph" class="headerlink" title="2、部署ceph"></a>2、部署ceph</h1><h2 id="2-1-创建部署目录"><a href="#2-1-创建部署目录" class="headerlink" title="2.1 创建部署目录"></a>2.1 创建部署目录</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ mkdir my-cluster
-$ cd my-cluster
-$ pwd
-&#x2F;home&#x2F;cephDeploy&#x2F;my-cluster<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h1 id="2、部署ceph"><a href="#2、部署ceph" class="headerlink" title="2、部署ceph"></a>2、部署ceph</h1><h2 id="2-1-创建部署目录"><a href="#2-1-创建部署目录" class="headerlink" title="2.1 创建部署目录"></a>2.1 创建部署目录</h2><figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stata">$ <span class="hljs-keyword">mkdir</span> my-<span class="hljs-keyword">cluster</span><br>$ <span class="hljs-keyword">cd</span> my-<span class="hljs-keyword">cluster</span><br>$ <span class="hljs-keyword">pwd</span><br>/home/cephDeploy/my-<span class="hljs-keyword">cluster</span><br></code></pre></td></tr></table></figure>
 
 <p>由于部署过程中会生成许多文件，这里我们专门创建一个目录用于存放。</p>
-<h2 id="2-2-初始化mon节点"><a href="#2-2-初始化mon节点" class="headerlink" title="2.2 初始化mon节点"></a>2.2 初始化mon节点</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ ceph-deploy new ceph71
-[ceph_deploy.conf][DEBUG ] found configuration file at: &#x2F;home&#x2F;cephDeploy&#x2F;.cephdeploy.conf
-[ceph_deploy.cli][INFO  ] Invoked (2.0.1): &#x2F;usr&#x2F;bin&#x2F;ceph-deploy new ceph71
-[ceph_deploy.cli][INFO  ] ceph-deploy options:
-[ceph_deploy.cli][INFO  ]  username                      : None
-[ceph_deploy.cli][INFO  ]  func                          : &lt;function new at 0x7f7f15a43e60&gt;
-[ceph_deploy.cli][INFO  ]  verbose                       : False
-[ceph_deploy.cli][INFO  ]  overwrite_conf                : False
-[ceph_deploy.cli][INFO  ]  quiet                         : False
-[ceph_deploy.cli][INFO  ]  cd_conf                       : &lt;ceph_deploy.conf.cephdeploy.Conf instance at 0x7f7f151ba950&gt;
-[ceph_deploy.cli][INFO  ]  cluster                       : ceph
-[ceph_deploy.cli][INFO  ]  ssh_copykey                   : True
-[ceph_deploy.cli][INFO  ]  mon                           : [&#39;ceph71&#39;]
-[ceph_deploy.cli][INFO  ]  public_network                : None
-[ceph_deploy.cli][INFO  ]  ceph_conf                     : None
-[ceph_deploy.cli][INFO  ]  cluster_network               : None
-[ceph_deploy.cli][INFO  ]  default_release               : False
-[ceph_deploy.cli][INFO  ]  fsid                          : None
-[ceph_deploy.new][DEBUG ] Creating new cluster named ceph
-[ceph_deploy.new][INFO  ] making sure passwordless SSH succeeds
-[ceph71][DEBUG ] connection detected need for sudo
-[ceph71][DEBUG ] connected to host: ceph71 
-[ceph71][DEBUG ] detect platform information from remote host
-[ceph71][DEBUG ] detect machine type
-[ceph71][DEBUG ] find the location of an executable
-[ceph71][INFO  ] Running command: sudo &#x2F;usr&#x2F;sbin&#x2F;ip link show
-[ceph71][INFO  ] Running command: sudo &#x2F;usr&#x2F;sbin&#x2F;ip addr show
-[ceph71][DEBUG ] IP addresses found: [u&#39;240e:f8:a903:2455:5054:ff:fe99:871&#39;, u&#39;192.168.122.71&#39;, u&#39;192.168.100.71&#39;]
-[ceph_deploy.new][DEBUG ] Resolving host ceph71
-[ceph_deploy.new][DEBUG ] Monitor ceph71 at 192.168.122.71
-[ceph_deploy.new][DEBUG ] Monitor initial members are [&#39;ceph71&#39;]
-[ceph_deploy.new][DEBUG ] Monitor addrs are [&#39;192.168.122.71&#39;]
-[ceph_deploy.new][DEBUG ] Creating a random mon key...
-[ceph_deploy.new][DEBUG ] Writing monitor keyring to ceph.mon.keyring...
-[ceph_deploy.new][DEBUG ] Writing initial config to ceph.conf...
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="2-2-初始化mon节点"><a href="#2-2-初始化mon节点" class="headerlink" title="2.2 初始化mon节点"></a>2.2 初始化mon节点</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ ceph-deploy new ceph71<br>[ceph_deploy.conf][<span class="hljs-builtin-name">DEBUG</span> ] found configuration file at: /home/cephDeploy/.cephdeploy.conf<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ] Invoked (2.0.1): /usr/bin/ceph-deploy new ceph71<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ] ceph-deploy options:<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  username                      : None<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  func                          : &lt;function new at 0x7f7f15a43e60&gt;<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  verbose                       : <span class="hljs-literal">False</span><br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  overwrite_conf                : <span class="hljs-literal">False</span><br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  quiet                         : <span class="hljs-literal">False</span><br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  cd_conf                       : &lt;ceph_deploy.conf.cephdeploy.Conf<span class="hljs-built_in"> instance </span>at 0x7f7f151ba950&gt;<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  cluster                       : ceph<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  ssh_copykey                   : <span class="hljs-literal">True</span><br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  mon                           : [<span class="hljs-string">&#x27;ceph71&#x27;</span>]<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  public_network                : None<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  ceph_conf                     : None<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  cluster_network               : None<br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  default_release               : <span class="hljs-literal">False</span><br>[ceph_deploy.cli][<span class="hljs-builtin-name">INFO</span>  ]  fsid                          : None<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Creating new cluster named ceph<br>[ceph_deploy.new][<span class="hljs-builtin-name">INFO</span>  ] making sure passwordless SSH succeeds<br>[ceph71][<span class="hljs-builtin-name">DEBUG</span> ]<span class="hljs-built_in"> connection </span>detected need <span class="hljs-keyword">for</span> sudo<br>[ceph71][<span class="hljs-builtin-name">DEBUG</span> ] connected <span class="hljs-keyword">to</span> host: ceph71 <br>[ceph71][<span class="hljs-builtin-name">DEBUG</span> ] detect platform information <span class="hljs-keyword">from</span> remote host<br>[ceph71][<span class="hljs-builtin-name">DEBUG</span> ] detect machine<span class="hljs-built_in"> type</span><br><span class="hljs-built_in"></span>[ceph71][<span class="hljs-builtin-name">DEBUG</span> ] <span class="hljs-builtin-name">find</span> the location of an executable<br>[ceph71][<span class="hljs-builtin-name">INFO</span>  ] Running command: sudo /usr/sbin<span class="hljs-built_in">/ip </span>link show<br>[ceph71][<span class="hljs-builtin-name">INFO</span>  ] Running command: sudo /usr/sbin<span class="hljs-built_in">/ip </span>addr show<br>[ceph71][<span class="hljs-builtin-name">DEBUG</span> ]<span class="hljs-built_in"> IP </span>addresses found: [u<span class="hljs-string">&#x27;240e:f8:a903:2455:5054:ff:fe99:871&#x27;</span>, u<span class="hljs-string">&#x27;192.168.122.71&#x27;</span>, u<span class="hljs-string">&#x27;192.168.100.71&#x27;</span>]<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Resolving host ceph71<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Monitor ceph71 at 192.168.122.71<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Monitor initial members are [<span class="hljs-string">&#x27;ceph71&#x27;</span>]<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Monitor addrs are [<span class="hljs-string">&#x27;192.168.122.71&#x27;</span>]<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Creating a random mon key<span class="hljs-built_in">..</span>.<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Writing monitor keyring <span class="hljs-keyword">to</span> ceph.mon.keyring<span class="hljs-built_in">..</span>.<br>[ceph_deploy.new][<span class="hljs-builtin-name">DEBUG</span> ] Writing initial<span class="hljs-built_in"> config </span><span class="hljs-keyword">to</span> ceph.conf<span class="hljs-built_in">..</span>.<br><br></code></pre></td></tr></table></figure>
 
 <h2 id="2-3-指定网卡"><a href="#2-3-指定网卡" class="headerlink" title="2.3 指定网卡"></a>2.3 指定网卡</h2><p>由于我们这里的虚拟机每台都有两个网卡，因此我们需要指定ceph集群用于通信的网卡所在的网段</p>
 <p><img src="https://resource.tinychen.com/20200410224047.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-4-安装ceph"><a href="#2-4-安装ceph" class="headerlink" title="2.4 安装ceph"></a>2.4 安装ceph</h2><p>在所有的节点上都安装ceph</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph-deploy install ceph71 ceph72 ceph73<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ceph</span>-deploy install ceph<span class="hljs-number">71</span> ceph<span class="hljs-number">72</span> ceph<span class="hljs-number">73</span><br></code></pre></td></tr></table></figure>
 
 <p>初始化mon</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph-deploy mon create-initial<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">ceph<span class="hljs-operator">-</span>deploy mon <span class="hljs-keyword">create</span><span class="hljs-operator">-</span><span class="hljs-keyword">initial</span><br></code></pre></td></tr></table></figure>
 
 <p>顺利执行后会在当前目录下生成一系列相关的密钥文件</p>
 <p><img src="https://resource.tinychen.com/20200410230047.png" srcset="/img/loading.gif" lazyload></p>
@@ -443,50 +357,38 @@ $ pwd
 <blockquote>
 <p>Use <code>ceph-deploy</code> to copy the configuration file and admin key to your admin node and your Ceph Nodes so that you can use the <code>ceph</code> CLI without having to specify the monitor address and <code>ceph.client.admin.keyring</code> each time you execute a command.</p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph-deploy admin ceph71 ceph72 ceph73<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ceph</span>-deploy admin ceph<span class="hljs-number">71</span> ceph<span class="hljs-number">72</span> ceph<span class="hljs-number">73</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200410230904.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-5-部署manager"><a href="#2-5-部署manager" class="headerlink" title="2.5 部署manager"></a>2.5 部署manager</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph-deploy mgr create ceph71<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="2-5-部署manager"><a href="#2-5-部署manager" class="headerlink" title="2.5 部署manager"></a>2.5 部署manager</h2><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ceph</span>-deploy mgr create ceph<span class="hljs-number">71</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200410231120.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-6-添加OSD"><a href="#2-6-添加OSD" class="headerlink" title="2.6 添加OSD"></a>2.6 添加OSD</h2><p>这里我们添加三个节点上面的共计6个硬盘到ceph集群中作为osd</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph-deploy osd create --data &#x2F;dev&#x2F;vdb ceph71
-ceph-deploy osd create --data &#x2F;dev&#x2F;vdb ceph72
-ceph-deploy osd create --data &#x2F;dev&#x2F;vdb ceph73
-ceph-deploy osd create --data &#x2F;dev&#x2F;vdc ceph71
-ceph-deploy osd create --data &#x2F;dev&#x2F;vdc ceph72
-ceph-deploy osd create --data &#x2F;dev&#x2F;vdc ceph73<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs awk">ceph-deploy osd create --data <span class="hljs-regexp">/dev/</span>vdb ceph71<br>ceph-deploy osd create --data <span class="hljs-regexp">/dev/</span>vdb ceph72<br>ceph-deploy osd create --data <span class="hljs-regexp">/dev/</span>vdb ceph73<br>ceph-deploy osd create --data <span class="hljs-regexp">/dev/</span>vdc ceph71<br>ceph-deploy osd create --data <span class="hljs-regexp">/dev/</span>vdc ceph72<br>ceph-deploy osd create --data <span class="hljs-regexp">/dev/</span>vdc ceph73<br></code></pre></td></tr></table></figure>
 
-<h2 id="2-7-检测结果"><a href="#2-7-检测结果" class="headerlink" title="2.7 检测结果"></a>2.7 检测结果</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看ceph集群状态</span>
-<span class="token function">sudo</span> ceph health
-<span class="token function">sudo</span> ceph -s<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="2-7-检测结果"><a href="#2-7-检测结果" class="headerlink" title="2.7 检测结果"></a>2.7 检测结果</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看ceph集群状态</span><br>sudo ceph health<br>sudo ceph -s<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200410232126.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/20200410233919.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、配置dashboard"><a href="#3、配置dashboard" class="headerlink" title="3、配置dashboard"></a>3、配置dashboard</h1><p>详细的官网部署文档链接：<a target="_blank" rel="noopener" href="https://docs.ceph.com/docs/master/mgr/dashboard/">https://docs.ceph.com/docs/master/mgr/dashboard/</a></p>
-<h2 id="3-1-启用dashboard"><a href="#3-1-启用dashboard" class="headerlink" title="3.1 启用dashboard"></a>3.1 启用dashboard</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph mgr module enable dashboard<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="3-1-启用dashboard"><a href="#3-1-启用dashboard" class="headerlink" title="3.1 启用dashboard"></a>3.1 启用dashboard</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">ceph mgr module <span class="hljs-builtin-name">enable</span> dashboard<br></code></pre></td></tr></table></figure>
 
-<h2 id="3-2-禁用ssl加密"><a href="#3-2-禁用ssl加密" class="headerlink" title="3.2 禁用ssl加密"></a>3.2 禁用ssl加密</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph config set mgr mgr&#x2F;dashboard&#x2F;ssl false<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="3-2-禁用ssl加密"><a href="#3-2-禁用ssl加密" class="headerlink" title="3.2 禁用ssl加密"></a>3.2 禁用ssl加密</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/ssl <span class="hljs-literal">false</span><br></code></pre></td></tr></table></figure>
 
-<h2 id="3-3-重启ceph-dashboard"><a href="#3-3-重启ceph-dashboard" class="headerlink" title="3.3 重启ceph-dashboard"></a>3.3 重启ceph-dashboard</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph mgr module disable dashboard
-ceph mgr module enable dashboard<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<h2 id="3-3-重启ceph-dashboard"><a href="#3-3-重启ceph-dashboard" class="headerlink" title="3.3 重启ceph-dashboard"></a>3.3 重启ceph-dashboard</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs routeros">ceph mgr module <span class="hljs-builtin-name">disable</span> dashboard<br>ceph mgr module <span class="hljs-builtin-name">enable</span> dashboard<br></code></pre></td></tr></table></figure>
 
-<h2 id="3-4-配置IP和端口"><a href="#3-4-配置IP和端口" class="headerlink" title="3.4 配置IP和端口"></a>3.4 配置IP和端口</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ ceph config set mgr mgr&#x2F;dashboard&#x2F;$name&#x2F;server_addr $IP
-$ ceph config set mgr mgr&#x2F;dashboard&#x2F;$name&#x2F;server_port $PORT
-$ ceph config set mgr mgr&#x2F;dashboard&#x2F;$name&#x2F;ssl_server_port $PORT<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="3-4-配置IP和端口"><a href="#3-4-配置IP和端口" class="headerlink" title="3.4 配置IP和端口"></a>3.4 配置IP和端口</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/<span class="hljs-variable">$name</span>/server_addr <span class="hljs-variable">$IP</span><br>$ ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/<span class="hljs-variable">$name</span>/server_port <span class="hljs-variable">$PORT</span><br>$ ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/<span class="hljs-variable">$name</span>/ssl_server_port <span class="hljs-variable">$PORT</span><br></code></pre></td></tr></table></figure>
 
 <p>到我这里是</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;server_addr 192.168.100.71
-ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;server_port 8080
-ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;ssl_server_port 8443<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros">ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/ceph71/server_addr 192.168.100.71<br>ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/ceph71/server_port 8080<br>ceph<span class="hljs-built_in"> config </span><span class="hljs-builtin-name">set</span> mgr mgr/dashboard/ceph71/ssl_server_port 8443<br></code></pre></td></tr></table></figure>
 
-<h2 id="3-5-创建dashboard用户"><a href="#3-5-创建dashboard用户" class="headerlink" title="3.5 创建dashboard用户"></a>3.5 创建dashboard用户</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ceph dashboard ac-user-create &lt;username&gt; &lt;password&gt; administrator<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="3-5-创建dashboard用户"><a href="#3-5-创建dashboard用户" class="headerlink" title="3.5 创建dashboard用户"></a>3.5 创建dashboard用户</h2><figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql">ceph dashboard ac-<span class="hljs-keyword">user</span>-<span class="hljs-keyword">create</span> &lt;username&gt; &lt;<span class="hljs-keyword">password</span>&gt; administrator<br></code></pre></td></tr></table></figure>
 
 <p>到我这里是</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[root@ceph71 my-cluster]# ceph dashboard set-login-credentials tinychen tinychen<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl">[root@ceph71 <span class="hljs-keyword">my</span>-cluster]<span class="hljs-comment"># ceph dashboard set-login-credentials tinychen tinychen</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200411001630.png" srcset="/img/loading.gif" lazyload></p>
@@ -787,8 +689,6 @@ ceph config set mgr mgr&#x2F;dashboard&#x2F;ceph71&#x2F;ssl_server_port 8443<spa
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

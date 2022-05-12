@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.5k words
+          2.7k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          21 mins
+          23 mins
         
       </span>
     
@@ -297,107 +295,15 @@
 <p>除了上面的两个指令之外的任何操作都有可能导致不可预测的效果甚至可能是SIGSEGV错误（可能出现内存错误导致程序异常终止）。</p>
 <p>需要注意的是：<code>if</code>指令的执行结果是一致的，也就是说相同的两个请求操作，不可能会出现一个成功但是另一个失败的情况。这就意味着只要经过足够合适的测试以及我们对相应操作的足够了解，<code>if</code>指令是<em>“可以”</em>被使用的。这个建议对于其他的指令也是同样适用的。</p>
 <p>很多情况下我们是没办法避免使用if指令的，例如当我们需要判断某个变量是否等于某个值或者包含某个字段的时候，就会需要用到if指令：</p>
-<div class="code-wrapper"><pre class="line-numbers language-nginx" data-language="nginx"><code class="language-nginx"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$request_method</span> <span class="token operator">=</span> POST <span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-  <span class="token keyword">return</span> <span class="token number">405</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$args</span> <span class="token operator">~</span> post<span class="token operator">=</span><span class="token number">140</span><span class="token punctuation">)</span><span class="token punctuation">&#123;</span>
-  <span class="token keyword">rewrite</span> <span class="token operator">^</span> <span class="token keyword">http</span><span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>example<span class="token punctuation">.</span>com<span class="token operator">/</span> permanent<span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">if</span> ($request_method = POST ) &#123;<br>  <span class="hljs-attribute">return</span> <span class="hljs-number">405</span>;<br>&#125;<br><span class="hljs-attribute">if</span> ($args <span class="hljs-regexp">~ post=140)</span>&#123;<br>  <span class="hljs-attribute">rewrite</span><span class="hljs-regexp"> ^</span> http://example.com/ <span class="hljs-literal">permanent</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h1 id="2、替代方案"><a href="#2、替代方案" class="headerlink" title="2、替代方案"></a>2、替代方案</h1><p>我们可以使用 <a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_core_module.html#try_files">try_files</a> 指令、“return …”指令或者“rewrite … last”指令用来替代if指令。在某些条件允许的情况下，也可以把<code>if</code>指令移动到<code>server</code>块的层级，此时的if指令是可以安全使用的，因为这里只有其他的rewrite模块指令能被使用（原因下文会解释）。</p>
 <p>当然对于一些需要使用<code>if</code>指令来判断返回<code>4xx</code>和<code>5xx</code>之类的异常代码响应页面或者是操作也可以尝试使用<code>return</code>指令搭配<code>error_page</code>指令来保证安全，例如下面的这个例子：</p>
-<div class="code-wrapper"><pre class="line-numbers language-nginx" data-language="nginx"><code class="language-nginx"><span class="token keyword">location</span> <span class="token operator">/</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">error_page</span> <span class="token number">418</span> <span class="token operator">=</span> @other<span class="token punctuation">;</span>
-    <span class="token keyword">recursive_error_pages</span> on<span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$something</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token keyword">return</span> <span class="token number">418</span><span class="token punctuation">;</span>
-    <span class="token punctuation">&#125;</span>
-
-    <span class="token comment"># some configuration</span>
-    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token keyword">location</span> @other <span class="token punctuation">&#123;</span>
-    <span class="token comment"># some other configuration</span>
-    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> / &#123;<br>    <span class="hljs-attribute">error_page</span> <span class="hljs-number">418</span> = @other;<br>    <span class="hljs-attribute">recursive_error_pages</span> <span class="hljs-literal">on</span>;<br><br>    <span class="hljs-attribute">if</span> ($something) &#123;<br>        <span class="hljs-attribute">return</span> <span class="hljs-number">418</span>;<br>    &#125;<br><br>    <span class="hljs-comment"># some configuration</span><br>    ...<br>&#125;<br><br><span class="hljs-attribute">location</span> @other &#123;<br>    <span class="hljs-comment"># some other configuration</span><br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>此外，在某些情况下使用一些嵌入的脚本模块（如lua，<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_perl_module.html">embedded perl</a>, 或者是其他的<a target="_blank" rel="noopener" href="https://www.nginx.com/resources/wiki/modules/">ngx第三方模块</a>）来完成一些较负责的逻辑操作和判断也不失为一个好主意。</p>
 <h1 id="3、已知错误"><a href="#3、已知错误" class="headerlink" title="3、已知错误"></a>3、已知错误</h1><p>下面列举了一些if指令不按照预期工作的的情况，请注意不要在生产环境上配置这些指令。</p>
-<div class="code-wrapper"><pre class="line-numbers language-nginx" data-language="nginx"><code class="language-nginx"><span class="token comment"># Here is collection of unexpectedly buggy configurations to show that</span>
-<span class="token comment"># if inside location is evil.</span>
-
-<span class="token comment"># only second header will be present in response</span>
-<span class="token comment"># not really bug, just how it works</span>
-
-<span class="token keyword">location</span> <span class="token operator">/</span>only<span class="token operator">-</span>one<span class="token operator">-</span><span class="token keyword">if</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">set</span> <span class="token variable">$true</span> <span class="token number">1</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token keyword">add_header</span> X<span class="token operator">-</span>First <span class="token number">1</span><span class="token punctuation">;</span>
-    <span class="token punctuation">&#125;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token keyword">add_header</span> X<span class="token operator">-</span>Second <span class="token number">2</span><span class="token punctuation">;</span>
-    <span class="token punctuation">&#125;</span>
-
-    <span class="token keyword">return</span> <span class="token number">204</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token comment"># request will be sent to backend without uri changed</span>
-<span class="token comment"># to '/' due to if</span>
-
-<span class="token keyword">location</span> <span class="token operator">/</span><span class="token keyword">proxy</span><span class="token operator">-</span>pass<span class="token operator">-</span>uri <span class="token punctuation">&#123;</span>
-    <span class="token keyword">proxy_pass</span> <span class="token keyword">http</span><span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span><span class="token number">127.0</span><span class="token number">.0</span><span class="token number">.1</span><span class="token punctuation">:</span><span class="token number">8080</span><span class="token operator">/</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">set</span> <span class="token variable">$true</span> <span class="token number">1</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token comment"># nothing</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token comment"># try_files wont work due to if</span>
-
-<span class="token keyword">location</span> <span class="token operator">/</span><span class="token keyword">if</span><span class="token operator">-</span>try<span class="token operator">-</span>files <span class="token punctuation">&#123;</span>
-     <span class="token keyword">try_files</span>  <span class="token operator">/</span>file  @fallback<span class="token punctuation">;</span>
-
-     <span class="token keyword">set</span> <span class="token variable">$true</span> <span class="token number">1</span><span class="token punctuation">;</span>
-
-     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-         <span class="token comment"># nothing</span>
-     <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token comment"># nginx will SIGSEGV</span>
-
-<span class="token keyword">location</span> <span class="token operator">/</span>crash <span class="token punctuation">&#123;</span>
-
-    <span class="token keyword">set</span> <span class="token variable">$true</span> <span class="token number">1</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token comment"># fastcgi_pass here</span>
-        <span class="token keyword">fastcgi_pass</span>  <span class="token number">127.0</span><span class="token number">.0</span><span class="token number">.1</span><span class="token punctuation">:</span><span class="token number">9000</span><span class="token punctuation">;</span>
-    <span class="token punctuation">&#125;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token comment"># no handler here</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span>
-
-<span class="token comment"># alias with captures isn't correcly inherited into implicit nested</span>
-<span class="token comment"># location created by if</span>
-
-<span class="token keyword">location</span> <span class="token operator">~</span><span class="token operator">*</span> <span class="token operator">^</span><span class="token operator">/</span><span class="token keyword">if</span><span class="token operator">-</span>and<span class="token operator">-</span><span class="token keyword">alias</span><span class="token operator">/</span><span class="token punctuation">(</span><span class="token operator">?</span><span class="token operator">&lt;</span>file<span class="token operator">></span><span class="token punctuation">.</span><span class="token operator">*</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-    <span class="token keyword">alias</span> <span class="token operator">/</span>tmp<span class="token operator">/</span><span class="token variable">$file</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">set</span> <span class="token variable">$true</span> <span class="token number">1</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-        <span class="token comment"># nothing</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-comment"># Here is collection of unexpectedly buggy configurations to show that</span><br><span class="hljs-comment"># if inside location is evil.</span><br><br><span class="hljs-comment"># only second header will be present in response</span><br><span class="hljs-comment"># not really bug, just how it works</span><br><br><span class="hljs-attribute">location</span> /only-one-if &#123;<br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-attribute">add_header</span> X-First <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-attribute">add_header</span> X-Second <span class="hljs-number">2</span>;<br>    &#125;<br><br>    <span class="hljs-attribute">return</span> <span class="hljs-number">204</span>;<br>&#125;<br><br><span class="hljs-comment"># request will be sent to backend without uri changed</span><br><span class="hljs-comment"># to &#x27;/&#x27; due to if</span><br><br><span class="hljs-attribute">location</span> /proxy-pass-uri &#123;<br>    <span class="hljs-attribute">proxy_pass</span> http://127.0.0.1:8080/;<br><br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># nothing</span><br>    &#125;<br>&#125;<br><br><span class="hljs-comment"># try_files wont work due to if</span><br><br><span class="hljs-attribute">location</span> /if-try-files &#123;<br>     <span class="hljs-attribute">try_files</span>  /file  @fallback;<br><br>     <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>     <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>         <span class="hljs-comment"># nothing</span><br>     &#125;<br>&#125;<br><br><span class="hljs-comment"># nginx will SIGSEGV</span><br><br><span class="hljs-attribute">location</span> /crash &#123;<br><br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># fastcgi_pass here</span><br>        <span class="hljs-attribute">fastcgi_pass</span>  <span class="hljs-number">127.0.0.1:9000</span>;<br>    &#125;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># no handler here</span><br>    &#125;<br>&#125;<br><br><span class="hljs-comment"># alias with captures isn&#x27;t correcly inherited into implicit nested</span><br><span class="hljs-comment"># location created by if</span><br><br><span class="hljs-attribute">location</span> <span class="hljs-regexp">~* ^/if-and-alias/(?&lt;file&gt;.*)</span> &#123;<br>    <span class="hljs-attribute">alias</span> /tmp/$file;<br><br>    <span class="hljs-attribute">set</span> $<span class="hljs-literal">true</span> <span class="hljs-number">1</span>;<br><br>    <span class="hljs-attribute">if</span> ($<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-comment"># nothing</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>如果发现了上面没有列出出来的情况，可以邮件到<a target="_blank" rel="noopener" href="https://mailman.nginx.org/mailman/listinfo/nginx-devel">NGINX development mailing list</a>.</p>
 <h1 id="4、原因分析"><a href="#4、原因分析" class="headerlink" title="4、原因分析"></a>4、原因分析</h1><p><code>if</code>指令本质上其实是<code>rewrite</code>模块的一部分，<code>rewrite</code>模块本身设计就是用来“命令式”地执行操作<strong>（这就是前面说的为什么if里面搭配return和rewrite指令会100%安全的原因）</strong>。另一方面。nginx的配置通常来说是声明式的，但是出于某些原因，用户需要在if中添加某些非重写(non-rewrite)的指令（例如使用if判断http_origin之类的参数然后添加header），就有可能出现我们前面说的不正常工作的情况，尽管大部分情况下是能够正常工作的……</p>
@@ -701,8 +607,6 @@
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

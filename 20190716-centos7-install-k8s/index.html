@@ -47,8 +47,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -226,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          8.9k words
+          9.2k words
         
       </span>
     
@@ -237,7 +235,7 @@
         
         
         
-          75 mins
+          77 mins
         
       </span>
     
@@ -314,45 +312,26 @@
 <h2 id="1-2-安装docker-ce"><a href="#1-2-安装docker-ce" class="headerlink" title="1.2 安装docker-ce"></a>1.2 安装docker-ce</h2><p>centos版本的decker-ce官方安装指导：</p>
 <p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a></p>
 <p>这里我们主要是通过yum的方式来安装，如果出现无法连接docker官网的情况，建议检查一下网络，或者使用rpm的方式进行安装。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 导入官网提供的repo</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y yum-utils device-mapper-persistent-data lvm2
-<span class="token function">sudo</span> yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-
-<span class="token comment"># 安装docker及其相关组件</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> docker-ce docker-ce-cli containerd.io
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 导入官网提供的repo</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo<br><br><span class="hljs-comment"># 安装docker及其相关组件</span><br>sudo yum install docker-ce docker-ce-cli containerd.io<br><br></code></pre></td></tr></table></figure>
 
 
 
 <p>注意这里我们需要校对一下密钥，确保和官网提供的无误。</p>
 <p><img src="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20190712/Je1FaoVF0MN5.png" srcset="/img/loading.gif" lazyload></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动docker</span>
-<span class="token function">sudo</span> systemctl start docker
-
-<span class="token comment"># 跑个helloworld看看</span>
-<span class="token function">sudo</span> docker run hello-world
-
-<span class="token comment"># 最后我们还要设置一下开机启动</span>
-<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> docker<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 启动docker</span><br>sudo systemctl start docker<br><br><span class="hljs-comment"># 跑个helloworld看看</span><br>sudo docker run hello-world<br><br><span class="hljs-comment"># 最后我们还要设置一下开机启动</span><br>sudo systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190712/R2uWM3SndVT0.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、准备工作"><a href="#2、准备工作" class="headerlink" title="2、准备工作"></a>2、准备工作</h1><h2 id="2-1-修改host文件-所有机器"><a href="#2-1-修改host文件-所有机器" class="headerlink" title="2.1 修改host文件(所有机器)"></a>2.1 修改host文件(所有机器)</h2><p>为了保证通信方便，<strong>每台主机</strong>上的<code>/etc/hosts</code>文件都需要进行修改，添加节点的<code>IP地址</code>和<code>hostname</code></p>
 <p><img src="https://resource.tinychen.com/blog/20190712/hJQG4vsWGvdv.png" srcset="/img/loading.gif" lazyload></p>
 <p><strong>同时最好把每台主机的hostname也修改成和上面的host文件一样。</strong></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 可以直接编辑文件</span>
-<span class="token function">vim</span> /etc/hostname
-
-<span class="token comment"># 或者使用命令</span>
-hostnamectl set-hostname<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 可以直接编辑文件</span><br>vim /etc/hostname<br><br><span class="hljs-comment"># 或者使用命令</span><br>hostnamectl set-hostname<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="2-2-关闭防火墙-所有机器"><a href="#2-2-关闭防火墙-所有机器" class="headerlink" title="2.2 关闭防火墙(所有机器)"></a>2.2 关闭防火墙(所有机器)</h2><p>因为k8s涉及的端口非常多，我们先把防火墙关了，如果安装了iptable也先关掉。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 关闭centos7自带的firewall防火墙</span>
-systemctl disable firewalld.service 
-systemctl stop firewalld.service <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 关闭centos7自带的firewall防火墙</span><br>systemctl <span class="hljs-built_in">disable</span> firewalld.service <br>systemctl stop firewalld.service <br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190712/XK1VTkSOoj8S.png" srcset="/img/loading.gif" lazyload></p>
@@ -437,20 +416,11 @@ systemctl stop firewalld.service <span aria-hidden="true" class="line-numbers-ro
 <p>如果对安全性有要求，不放心关闭防火墙的话，最好还是修改一下防火墙的配置，放行这些端口。</p>
 </blockquote>
 <h2 id="2-3-同步时间-所有机器"><a href="#2-3-同步时间-所有机器" class="headerlink" title="2.3 同步时间(所有机器)"></a>2.3 同步时间(所有机器)</h2><p>这里我们使用ntpdate来进行时间同步</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用yum安装ntpdate工具</span>
-yum <span class="token function">install</span> ntpdate -y
-
-<span class="token comment"># 使用阿里云的源同步时间</span>
-ntpdate ntp1.aliyun.com
-
-<span class="token comment"># 最后查看一下时间</span>
-hwclock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-comment"># 使用阿里云的源同步时间</span><br>ntpdate ntp1.aliyun.com<br><br><span class="hljs-comment"># 最后查看一下时间</span><br>hwclock<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>我们也可以在<code>/etc/cron.hourly/</code>下面直接新建一个文件，将<code>ntpdate ntp1.aliyun.com</code>这条命令写进去，这样cron就会每小时执行一次这个同步时间操作。<a href="https://tinychen.com/20190710-rhel7-cron/">关于cron可以点击这里了解。</a></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">>></span>/etc/cron.hourly/synctime <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-ntpdate ntp1.aliyun.com
-EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">ntpdate ntp1.aliyun.com</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 
 </blockquote>
@@ -458,10 +428,7 @@ EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span>
 <blockquote>
 <p>通过命令 <code>setenforce 0</code> 和 <code>sed ...</code> 可以将 SELinux 设置为 permissive 模式(将其禁用)。 只有执行这一操作之后，容器才能访问宿主的文件系统，进而能够正常使用 Pod 网络。您必须这么做，直到 kubelet 做出升级支持 SELinux 为止。</p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">setenforce <span class="token number">0</span>
-<span class="token function">sed</span> -i <span class="token string">'s/^SELINUX=enforcing$/SELINUX=permissive/'</span> /etc/selinux/config
-
-<span class="token comment"># 也可以直接修改/etc/selinux/config文件</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">setenforce 0<br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>关于SELinux的简单介绍，可以<a href="https://tinychen.com/20190707-rhel7-selinux/">点击这里</a>查看之前的博客。</p>
@@ -474,141 +441,28 @@ EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span>
 </ul>
 <p>kubeadm <strong>不能</strong> 帮我们安装或管理 <code>kubelet</code> 或 <code>kubectl</code> ，所以我们需要保证他们满足通过 kubeadm 安装的 Kubernetes 控制层对版本的要求。然而控制层与 kubelet 间的 <em>小版本号</em> 不一致无伤大雅，不过请记住 kubelet 的版本不可以超过 API server 的版本。<strong>例如 1.8.0 的 API server 可以适配 1.7.0 的 kubelet，反之就不行了。</strong></p>
 <h2 id="3-2-添加yum仓库-所有机器"><a href="#3-2-添加yum仓库-所有机器" class="headerlink" title="3.2 添加yum仓库(所有机器)"></a>3.2 添加yum仓库(所有机器)</h2><p>由于众所周知的原因，k8s官网提供的yum源并不能在国内正常使用，好在我们还可以使用阿里的镜像源。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建一个yum源</span>
-<span class="token function">vim</span> /etc/yum.repos.d/kubernetes.repo
-
-<span class="token comment"># 添加下列内容到repo中</span>
-<span class="token punctuation">[</span>kubernetes<span class="token punctuation">]</span>
-<span class="token assign-left variable">name</span><span class="token operator">=</span>Kubernetes
-<span class="token assign-left variable">baseurl</span><span class="token operator">=</span>https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-<span class="token assign-left variable">enabled</span><span class="token operator">=</span><span class="token number">1</span>
-<span class="token assign-left variable">gpgcheck</span><span class="token operator">=</span><span class="token number">1</span>
-<span class="token assign-left variable">repo_gpgcheck</span><span class="token operator">=</span><span class="token number">1</span>
-<span class="token assign-left variable">gpgkey</span><span class="token operator">=</span>https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-<span class="token assign-left variable">exclude</span><span class="token operator">=</span>kube*<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个yum源</span><br>vim /etc/yum.repos.d/kubernetes.repo<br><br><span class="hljs-comment"># 添加下列内容到repo中</span><br>[kubernetes]<br>name=Kubernetes<br>baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/<br>enabled=1<br>gpgcheck=1<br>repo_gpgcheck=1<br>gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg<br>exclude=kube*<br></code></pre></td></tr></table></figure>
 
 <p>使用yum安装kubeadm, kubelet 和 kubectl</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">yum clean all
-yum repolist
-
-yum <span class="token function">install</span> -y kubelet kubeadm kubectl --disableexcludes<span class="token operator">=</span>kubernetes
-<span class="token comment"># 启动kubelet并设置开机启动</span>
-systemctl <span class="token builtin class-name">enable</span> kubelet <span class="token operator">&amp;&amp;</span> systemctl start kubelet<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum clean all<br>yum repolist<br><br>yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><span class="hljs-comment"># 启动kubelet并设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet<br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="3-3-修改cgroup相关配置-所有机器"><a href="#3-3-修改cgroup相关配置-所有机器" class="headerlink" title="3.3 修改cgroup相关配置(所有机器)"></a>3.3 修改cgroup相关配置(所有机器)</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment">## Create /etc/docker directory.</span>
-<span class="token function">mkdir</span> /etc/docker
+<h2 id="3-3-修改cgroup相关配置-所有机器"><a href="#3-3-修改cgroup相关配置-所有机器" class="headerlink" title="3.3 修改cgroup相关配置(所有机器)"></a>3.3 修改cgroup相关配置(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br>mkdir /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br>cat &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>mkdir -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></td></tr></table></figure>
 
-<span class="token comment"># Setup daemon.</span>
-<span class="token function">cat</span> <span class="token operator">></span> /etc/docker/daemon.json <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-&#123;
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": &#123;
-    "max-size": "100m"
-  &#125;,
-  "storage-driver": "overlay2",
-  "storage-opts": [
-    "overlay2.override_kernel_check=true"
-  ]
-&#125;
-EOF</span>
-
-<span class="token function">mkdir</span> -p /etc/systemd/system/docker.service.d
-
-<span class="token comment"># Restart Docker</span>
-systemctl daemon-reload
-systemctl restart docker<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<h2 id="3-4-编辑环境变量-所有机器"><a href="#3-4-编辑环境变量-所有机器" class="headerlink" title="3.4 编辑环境变量(所有机器)"></a>3.4 编辑环境变量(所有机器)</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">vim</span> /etc/sysctl.conf
-<span class="token comment"># 添加两行</span>
-net.bridge.bridge-nf-call-ip6tables <span class="token operator">=</span> <span class="token number">1</span>
-net.bridge.bridge-nf-call-iptables <span class="token operator">=</span> <span class="token number">1</span>
-
-sysctl -p
-systemctl daemon-reload
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="3-4-编辑环境变量-所有机器"><a href="#3-4-编辑环境变量-所有机器" class="headerlink" title="3.4 编辑环境变量(所有机器)"></a>3.4 编辑环境变量(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /etc/sysctl.conf<br><span class="hljs-comment"># 添加两行</span><br>net.bridge.bridge-nf-call-ip6tables = 1<br>net.bridge.bridge-nf-call-iptables = 1<br><br>sysctl -p<br>systemctl daemon-reload<br><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/RjGz0wYLLfz8.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="3-5-关闭swap分区-所有机器"><a href="#3-5-关闭swap分区-所有机器" class="headerlink" title="3.5 关闭swap分区(所有机器)"></a>3.5 关闭swap分区(所有机器)</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">swapoff -a
-
-<span class="token function">vim</span> /etc/fstab
-<span class="token comment"># 注释掉swap分区启动挂载的那一行</span>
-
-<span class="token comment"># 重启机器</span>
-<span class="token function">reboot</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="3-5-关闭swap分区-所有机器"><a href="#3-5-关闭swap分区-所有机器" class="headerlink" title="3.5 关闭swap分区(所有机器)"></a>3.5 关闭swap分区(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">swapoff -a<br><br>vim /etc/fstab<br><span class="hljs-comment"># 注释掉swap分区启动挂载的那一行</span><br><br><span class="hljs-comment"># 重启机器</span><br>reboot<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="3-6-拉取镜像"><a href="#3-6-拉取镜像" class="headerlink" title="3.6 拉取镜像"></a>3.6 拉取镜像</h2><p>我们可以使用<code>kubeadm config images pull</code>看看需要拉取哪些镜像版本，然后根据错误提示来对下面的版本进行修改。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span>
-docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0
-
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span>
-docker pull mirrorgooglecontainers/kube-proxy:v1.15.0
-
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span>
-docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0
-
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span>
-docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0
-
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span>
-docker pull mirrorgooglecontainers/etcd:3.3.10
-
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span>
-docker pull mirrorgooglecontainers/pause:3.1
-
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span>
-docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1
-
-<span class="token comment"># https://hub.docker.com/r/coredns/coredns/tags</span>
-docker pull coredns/coredns:1.3.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash"><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br></code></pre></td></tr></table></figure>
 
 <p>由于国内不能访问k8s官网，所以我们需要先使用docker拉取镜像，然后使用tag对其更改名称。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 拉取docker上的镜像到本地</span>
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span>
-docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span>
-docker pull mirrorgooglecontainers/kube-proxy:v1.15.0
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span>
-docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span>
-docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span>
-docker pull mirrorgooglecontainers/etcd:3.3.10
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span>
-docker pull mirrorgooglecontainers/pause:3.1
-<span class="token comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span>
-docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1
-<span class="token comment"># https://hub.docker.com/r/coredns/coredns/tags</span>
-docker pull coredns/coredns:1.3.1
-
-
-<span class="token comment"># 使用tag对其改名，方便kubeadm直接拉取使用</span>
-docker tag mirrorgooglecontainers/kube-apiserver:v1.15.0 k8s.gcr.io/kube-apiserver:v1.15.0
-docker tag mirrorgooglecontainers/kube-proxy:v1.15.0 k8s.gcr.io/kube-proxy:v1.15.0
-docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.0 k8s.gcr.io/kube-controller-manager:v1.15.0
-docker tag mirrorgooglecontainers/kube-scheduler:v1.15.0 k8s.gcr.io/kube-scheduler:v1.15.0
-docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10
-docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1
-docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1
-docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1
-
-
-<span class="token comment"># 删除掉多余的images</span>
-docker rmi mirrorgooglecontainers/kube-apiserver:v1.15.0
-docker rmi mirrorgooglecontainers/kube-proxy:v1.15.0
-docker rmi mirrorgooglecontainers/kube-controller-manager:v1.15.0
-docker rmi mirrorgooglecontainers/kube-scheduler:v1.15.0
-docker rmi mirrorgooglecontainers/etcd:3.3.10
-docker rmi mirrorgooglecontainers/pause:3.1
-docker rmi mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1
-docker rmi coredns/coredns:1.3.1
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 拉取docker上的镜像到本地</span><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br><br><br><span class="hljs-comment"># 使用tag对其改名，方便kubeadm直接拉取使用</span><br>docker tag mirrorgooglecontainers/kube-apiserver:v1.15.0 k8s.gcr.io/kube-apiserver:v1.15.0<br>docker tag mirrorgooglecontainers/kube-proxy:v1.15.0 k8s.gcr.io/kube-proxy:v1.15.0<br>docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.0 k8s.gcr.io/kube-controller-manager:v1.15.0<br>docker tag mirrorgooglecontainers/kube-scheduler:v1.15.0 k8s.gcr.io/kube-scheduler:v1.15.0<br>docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10<br>docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1<br>docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1<br>docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1<br><br><br><span class="hljs-comment"># 删除掉多余的images</span><br>docker rmi mirrorgooglecontainers/kube-apiserver:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-proxy:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-controller-manager:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-scheduler:v1.15.0<br>docker rmi mirrorgooglecontainers/etcd:3.3.10<br>docker rmi mirrorgooglecontainers/pause:3.1<br>docker rmi mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br>docker rmi coredns/coredns:1.3.1<br><br></code></pre></td></tr></table></figure>
 
 <p>最后效果如下</p>
 <p><img src="https://resource.tinychen.com/blog/20190715/UFeKeu1f2ExI.png" srcset="/img/loading.gif" lazyload></p>
@@ -620,7 +474,7 @@ docker rmi coredns/coredns:1.3.1
 <li><p><code>--pod-network-cidr</code> 指定Pod网络的范围。Kubernetes支持多种网络方案，而且不同网络方案对–pod-network-cidr有自己的要求，这里设置为10.244.0.0/16是因为我们将使用flannel网络方案，必须设置成这个CIDR</p>
 </li>
 </ul>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">kubeadm init --kubernetes-version<span class="token operator">=</span>v1.15.0 --apiserver-advertise-address <span class="token number">192.168</span>.100.50 --pod-network-cidr<span class="token operator">=</span><span class="token number">10.244</span>.0.0/16 --service-cidr<span class="token operator">=</span><span class="token number">10.96</span>.0.0/12<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">kubeadm init --kubernetes-version=v1.15.0 --apiserver-advertise-address 192.168.100.50 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/SUFO45fFoCFu.png" srcset="/img/loading.gif" lazyload></p>
@@ -628,41 +482,29 @@ docker rmi coredns/coredns:1.3.1
 <h2 id="3-8在master上配置kubectl"><a href="#3-8在master上配置kubectl" class="headerlink" title="3.8在master上配置kubectl"></a>3.8在master上配置kubectl</h2><p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> -p <span class="token environment constant">$HOME</span>/.kube
-<span class="token function">sudo</span> <span class="token function">cp</span> -i /etc/kubernetes/admin.conf <span class="token environment constant">$HOME</span>/.kube/config
-<span class="token function">sudo</span> <span class="token function">chown</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -u<span class="token variable">)</span></span><span class="token builtin class-name">:</span><span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -g<span class="token variable">)</span></span>
- <span class="token environment constant">$HOME</span>/.kube/config
-<span class="token comment"># 多加一个kubectl的自动补全动能方便我们使用</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"source &lt;(kubectl completion bash)"</span> <span class="token operator">>></span> ~/.bashrc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 多加一个kubectl的自动补全动能方便我们使用</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></td></tr></table></figure>
 
 
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/I8fH62Yw0lGO.png" srcset="/img/loading.gif" lazyload></p>
 <p>到这里我们检查一下是否安装顺利</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 获取集群状态</span>
-kubectl get cs
-<span class="token comment"># 获取集群节点信息</span>
-kubectl get nodes<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 获取集群状态</span><br>kubectl get cs<br><span class="hljs-comment"># 获取集群节点信息</span><br>kubectl get nodes<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/aKGUvuJIU440.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="4、安装flannel网络-Master"><a href="#4、安装flannel网络-Master" class="headerlink" title="4、安装flannel网络(Master)"></a>4、安装flannel网络(Master)</h1><p>安装flannel</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">wget https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;coreos&#x2F;flannel&#x2F;master&#x2F;Documentation&#x2F;kube-flannel.yml -O kube-flannel.yml
-kubectl apply -f kube-flannel.yml<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/coreos/</span>flannel<span class="hljs-regexp">/master/</span>Documentation/kube-flannel.yml -O kube-flannel.yml<br>kubectl apply -f kube-flannel.yml<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/txGwdrFwgVbw.png" srcset="/img/loading.gif" lazyload></p>
 <p>到这里master节点上面的操作就算是完成了</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看pod运行情况</span>
-kubectl get pods -n kube-system
-<span class="token comment"># 查看并验证节点信息是否成功</span>
-kubectl get nodes<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看pod运行情况</span><br>kubectl get pods -n kube-system<br><span class="hljs-comment"># 查看并验证节点信息是否成功</span><br>kubectl get nodes<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/sC3ASl1YgTcS.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="5、添加node"><a href="#5、添加node" class="headerlink" title="5、添加node"></a>5、添加node</h1><p>在node节点上使用root用户运行下列命令将node节点加入到集群中，下面的密钥就是刚刚前面生成的密钥，而这个<code>192.168.100.50:6443</code>就是master节点的IP地址和对应端口。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubeadm join --token 3pyvba.siol4xy1rvf2om8k --discovery-token-ca-cert-hash sha256:c61cdd8b8ad5d34faece61867e76d539dbc243c1f206eacbab163895777c099e 192.168.100.50:6443<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">kubeadm</span> join --token <span class="hljs-number">3</span>pyvba.siol<span class="hljs-number">4</span>xy<span class="hljs-number">1</span>rvf<span class="hljs-number">2</span>om<span class="hljs-number">8</span>k --discovery-token-ca-cert-hash sha<span class="hljs-number">256</span>:c<span class="hljs-number">61</span>cdd<span class="hljs-number">8</span>b<span class="hljs-number">8</span>ad<span class="hljs-number">5</span>d<span class="hljs-number">34</span>faece<span class="hljs-number">61867</span>e<span class="hljs-number">76</span>d<span class="hljs-number">539</span>dbc<span class="hljs-number">243</span>c<span class="hljs-number">1</span>f<span class="hljs-number">206</span>eacbab<span class="hljs-number">163895777</span>c<span class="hljs-number">099</span>e <span class="hljs-number">192.168.100.50:6443</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/ANXz4UKJdrPP.png" srcset="/img/loading.gif" lazyload></p>
@@ -673,7 +515,7 @@ kubectl get nodes<span aria-hidden="true" class="line-numbers-rows"><span></span
 <p><strong>如果node节点上没有顺利出现running的话，很有可能是因为镜像被墙了无法顺利拉取镜像，这时我们需要按照步骤3.6中的操作来手动拉取镜像。</strong></p>
 </blockquote>
 <p>查看pod运行情况的命令</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubectl describe pod &lt;PodName&gt; --namespace&#x3D;&lt;namespace&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">kubectl describe pod &lt;PodName&gt; --<span class="hljs-keyword">namespace</span>=&lt;<span class="hljs-keyword">namespace</span>&gt;<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>输出内容太长了，这里只截取一部分。</p>
@@ -976,8 +818,6 @@ kubectl get nodes<span aria-hidden="true" class="line-numbers-rows"><span></span
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

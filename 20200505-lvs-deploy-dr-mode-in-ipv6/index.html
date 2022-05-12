@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -290,46 +288,24 @@
 <span id="more"></span>
 
 <h1 id="1、LVS-DR-via-IPv4"><a href="#1、LVS-DR-via-IPv4" class="headerlink" title="1、LVS DR via IPv4"></a>1、LVS DR via IPv4</h1><p>首先这里我们使用三台主机配置lvs集群，对应的系统和内核版本如下</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[root@lvs81 ~]# lsb_release -a
-LSB Version:    :base-4.0-amd64:base-4.0-noarch:core-4.0-amd64:core-4.0-noarch:graphics-4.0-amd64:graphics-4.0-noarch:printing-4.0-amd64:printing-4.0-noarch
-Distributor ID: CentOS
-Description:    CentOS release 6.10 (Final)
-Release:        6.10
-Codename:       Final
-[root@lvs81 ~]# uname -r
-2.6.32-754.28.1.el6.x86_64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@lvs81 ~]# lsb_release -a<br>LSB Version:    :base<span class="hljs-string">-4</span>.0-amd64:base<span class="hljs-string">-4</span>.0-noarch:core<span class="hljs-string">-4</span>.0-amd64:core<span class="hljs-string">-4</span>.0-noarch:graphics<span class="hljs-string">-4</span>.0-amd64:graphics<span class="hljs-string">-4</span>.0-noarch:printing<span class="hljs-string">-4</span>.0-amd64:printing<span class="hljs-string">-4</span>.0-noarch<br>Distributor ID: CentOS<br>Description:    CentOS release 6.10 (Final)<br>Release:        6.10<br>Codename:       Final<br>[root@lvs81 ~]# uname -r<br>2.6.32<span class="hljs-string">-754</span>.28.1.el6.x86_64<br></code></pre></td></tr></table></figure>
 
 <p>对应的IP地址如下</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">192.168.100.80  lvsipv4
-192.168.100.81  lvs81
-192.168.100.82  lvs82
-192.168.100.83  lvs83
-
-240e:c331:dead:beef::3c80 lvsipv6
-240e:c331:dead:beef::3c81 lvs81
-240e:c331:dead:beef::3c82 lvs82
-240e:c331:dead:beef::3c83 lvs83<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">80</span>  lvsipv<span class="hljs-number">4</span><br><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">81</span>  lvs<span class="hljs-number">81</span><br><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">82</span>  lvs<span class="hljs-number">82</span><br><span class="hljs-attribute">192</span>.<span class="hljs-number">168</span>.<span class="hljs-number">100</span>.<span class="hljs-number">83</span>  lvs<span class="hljs-number">83</span><br><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">80</span> lvsipv<span class="hljs-number">6</span><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">81</span> lvs<span class="hljs-number">81</span><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">82</span> lvs<span class="hljs-number">82</span><br><span class="hljs-attribute">240e</span>:c<span class="hljs-number">331</span>:dead:beef::<span class="hljs-number">3</span>c<span class="hljs-number">83</span> lvs<span class="hljs-number">83</span><br></code></pre></td></tr></table></figure>
 
 <p><strong>其中lvs81对应为LB，lvs82和lvs83为RS，RS上部署nginx分别监听本机对应ipv4和ipv6地址的80端口用于测试。</strong></p>
 <h2 id="1-1-LB配置"><a href="#1-1-LB配置" class="headerlink" title="1.1 LB配置"></a>1.1 LB配置</h2><p>此处略去ipvs模块的加载和ipvsadm的安装。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ifconfig</span> eth1:1 <span class="token number">192.168</span>.100.80 broadcast <span class="token number">192.168</span>.100.81 netmask <span class="token number">255.255</span>.255.255 up
-ipvsadm -A -t <span class="token number">192.168</span>.100.80:80 -s rr 
-ipvsadm -a -t <span class="token number">192.168</span>.100.80:80 -r <span class="token number">192.168</span>.100.82 -g
-ipvsadm -a -t <span class="token number">192.168</span>.100.80:80 -r <span class="token number">192.168</span>.100.83 -g   <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig eth1:1 192.168.100.80 broadcast 192.168.100.81 netmask 255.255.255.255 up<br>ipvsadm -A -t 192.168.100.80:80 -s rr <br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.82 -g<br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.83 -g   <br></code></pre></td></tr></table></figure>
 
 <p>修改ip_vs模块对应的哈希表的大小</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">'options ip_vs conn_tab_bits=20'</span> <span class="token operator">></span>/etc/modprobe.d/ipvs.conf<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;options ip_vs conn_tab_bits=20&#x27;</span> &gt;/etc/modprobe.d/ipvs.conf<br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-2-RS配置"><a href="#1-2-RS配置" class="headerlink" title="1.2 RS配置"></a>1.2 RS配置</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ifconfig</span> lo:1 <span class="token number">192.168</span>.100.80 broadcast <span class="token number">192.168</span>.100.80 netmask <span class="token number">255.255</span>.255.255 up<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="1-2-RS配置"><a href="#1-2-RS配置" class="headerlink" title="1.2 RS配置"></a>1.2 RS配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig lo:1 192.168.100.80 broadcast 192.168.100.80 netmask 255.255.255.255 up<br></code></pre></td></tr></table></figure>
 
 <p>同时需要修改内核参数，修改ARP请求对应的响应限制</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[root@lvs82 ~]# cat &#x2F;etc&#x2F;sysctl.conf | grep arp
-net.ipv4.conf.all.arp_ignore&#x3D;1
-net.ipv4.conf.lo.arp_ignore&#x3D;1
-net.ipv4.conf.all.arp_announce&#x3D;2
-net.ipv4.conf.lo.arp_announce&#x3D;2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs vim">$ <span class="hljs-keyword">cat</span> /etc/sysctl.<span class="hljs-keyword">conf</span> | <span class="hljs-keyword">grep</span> arp<br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_announce=<span class="hljs-number">2</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_announce=<span class="hljs-number">2</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="1-3-测试"><a href="#1-3-测试" class="headerlink" title="1.3 测试"></a>1.3 测试</h2><p><img src="https://resource.tinychen.com/20200427142152.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/20200427142220.png" srcset="/img/loading.gif" lazyload></p>
@@ -408,13 +384,10 @@ net.ipv4.conf.lo.arp_announce&#x3D;2<span aria-hidden="true" class="line-numbers
 <p>IPv6模式下还使用了elrepo库中的lt版本的4.4.219-1内核进行测试，两者结果一致。均可直接正常工作。</p>
 </blockquote>
 <h2 id="3-1-LB配置"><a href="#3-1-LB配置" class="headerlink" title="3.1 LB配置"></a>3.1 LB配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ifconfig</span> eth2 inet6 <span class="token function">add</span> 240e:c331:dead:beef::3c80/128
-ipvsadm -A -t <span class="token punctuation">[</span>240e:c331:dead:beef::3c80<span class="token punctuation">]</span>:80 -s rr
-ipvsadm -a -t <span class="token punctuation">[</span>240e:c331:dead:beef::3c80<span class="token punctuation">]</span>:80 -r <span class="token punctuation">[</span>240e:c331:dead:beef::3c82<span class="token punctuation">]</span>:80 -g
-ipvsadm -a -t <span class="token punctuation">[</span>240e:c331:dead:beef::3c80<span class="token punctuation">]</span>:80 -r <span class="token punctuation">[</span>240e:c331:dead:beef::3c83<span class="token punctuation">]</span>:80 -g<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig eth2 inet6 add 240e:c331:dead:beef::3c80/128<br>ipvsadm -A -t [240e:c331:dead:beef::3c80]:80 -s rr<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c82]:80 -g<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c83]:80 -g<br></code></pre></td></tr></table></figure>
 
 <h2 id="3-2-RS配置"><a href="#3-2-RS配置" class="headerlink" title="3.2 RS配置"></a>3.2 RS配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ifconfig</span> lo inet6 <span class="token function">add</span> 240e:c331:dead:beef::3c80/128<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig lo inet6 add 240e:c331:dead:beef::3c80/128<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200427143253.png" srcset="/img/loading.gif" lazyload></p>
@@ -719,8 +692,6 @@ ipvsadm -a -t <span class="token punctuation">[</span>240e:c331:dead:beef::3c80<
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

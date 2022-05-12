@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          3.9k words
+          4k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          33 mins
+          34 mins
         
       </span>
     
@@ -294,98 +292,33 @@
 <p>Prometheus的基本原理是通过 HTTP周期性抓取被监控组件的状态，任意组件只要提供对应的 HTTP 接口并且符合 Prometheus 定义的数据格式，就可以接入Prometheus监控。此外，使用Grafana 的Prometheus的数据可视化程度非常高，告警规则也十分多样，还支持传统服务器监控以及云原生监控，可以称为是监控系统中的“瑞士军刀”。</p>
 <p><img src="https://resource.tinychen.com/20210106101153.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="1、部署prometheus"><a href="#1、部署prometheus" class="headerlink" title="1、部署prometheus"></a>1、部署prometheus</h1><p>我们去<a target="_blank" rel="noopener" href="https://prometheus.io/download/">官网</a>选择合适的二进制版本进行下载并解压</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz
-<span class="token function">tar</span> -zxvf prometheus-2.23.0.linux-amd64.tar.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz<br>tar -zxvf prometheus-2.23.0.linux-amd64.tar.gz<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210105113202.png" srcset="/img/loading.gif" lazyload></p>
 <p>为了方便管理，我们需要创建一个单独的<code>prometheus</code>用户来运行<code>prometheus</code>，同时要保证安全，创建的用户只用来运行<code>prometheus</code>而不能使用<code>shell</code>登录。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">groupadd</span> prometheus
-<span class="token function">useradd</span> -g prometheus -s /sbin/nologin prometheus
-<span class="token function">chown</span> -R prometheus.prometheus /home/prometheus<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">groupadd prometheus<br>useradd -g prometheus -s /sbin/nologin prometheus<br>chown -R prometheus.prometheus /home/prometheus<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210105113159.png" srcset="/img/loading.gif" lazyload></p>
 <p>为了方便管理，我们可以配置使用<code>systemd</code>对进程进行管理</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">vim</span> /usr/lib/systemd/system/prometheus.service
-
-<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>Prometheus
-<span class="token assign-left variable">Documentation</span><span class="token operator">=</span>https://prometheus.io/
-<span class="token assign-left variable">After</span><span class="token operator">=</span>network.target
-
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token comment"># Type设置为notify时，服务会不断重启</span>
-<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
-<span class="token assign-left variable">User</span><span class="token operator">=</span>prometheus
-<span class="token comment"># --storage.tsdb.path是可选项，默认数据目录在运行目录的./dada目录中</span>
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/prometheus/prometheus --config.file<span class="token operator">=</span>/home/prometheus/prometheus.yml --storage.tsdb.path<span class="token operator">=</span>/home/prometheus
-<span class="token assign-left variable">Restart</span><span class="token operator">=</span>on-failure
-
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
-
-
-<span class="token function">chown</span> prometheus.prometheus /usr/lib/systemd/system/prometheus.service
-systemctl daemon-reload
-systemctl <span class="token builtin class-name">enable</span> prometheus.service
-systemctl start prometheus.service
-systemctl status prometheus.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /usr/lib/systemd/system/prometheus.service<br><br>[Unit]<br>Description=Prometheus<br>Documentation=https://prometheus.io/<br>After=network.target<br><br>[Service]<br><span class="hljs-comment"># Type设置为notify时，服务会不断重启</span><br>Type=simple<br>User=prometheus<br><span class="hljs-comment"># --storage.tsdb.path是可选项，默认数据目录在运行目录的./dada目录中</span><br>ExecStart=/home/prometheus/prometheus --config.file=/home/prometheus/prometheus.yml --storage.tsdb.path=/home/prometheus<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br><br><br>chown prometheus.prometheus /usr/lib/systemd/system/prometheus.service<br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> prometheus.service<br>systemctl start prometheus.service<br>systemctl status prometheus.service<br></code></pre></td></tr></table></figure>
 
 <p>如无意外应该已经可以正常运行了，同时访问服务器的<code>9090</code>端口可以查看到简单的UI界面</p>
 <p><img src="https://resource.tinychen.com/20210105141141.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/20210105141138.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、部署node-exporter"><a href="#2、部署node-exporter" class="headerlink" title="2、部署node_exporter"></a>2、部署node_exporter</h1><p>我们去<a target="_blank" rel="noopener" href="https://prometheus.io/download/">官网</a>选择合适的二进制版本进行下载并解压</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz
-<span class="token function">tar</span> -zxvf node_exporter-1.0.1.linux-amd64.tar.gz
-<span class="token function">mv</span> node_exporter-1.0.1.linux-amd64 node_exporter
-<span class="token function">chown</span> -R prometheus.prometheus /home/node_exporter<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz<br>tar -zxvf node_exporter-1.0.1.linux-amd64.tar.gz<br>mv node_exporter-1.0.1.linux-amd64 node_exporter<br>chown -R prometheus.prometheus /home/node_exporter<br></code></pre></td></tr></table></figure>
 
 <p>同样的我们使用<code>systemd</code>进行管理</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">vim</span> /usr/lib/systemd/system/node_exporter.service
-
-<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>Prometheus-node_exporter
-<span class="token assign-left variable">Documentation</span><span class="token operator">=</span>https://prometheus.io/
-<span class="token assign-left variable">After</span><span class="token operator">=</span>network.target
-<span class="token comment"># 注意下面这两项参数是CentOS8的systemd才支持的</span>
-<span class="token assign-left variable">StartLimitBurst</span><span class="token operator">=</span><span class="token number">1</span>
-<span class="token assign-left variable">StartLimitIntervalSec</span><span class="token operator">=</span>15s
-
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
-<span class="token assign-left variable">User</span><span class="token operator">=</span>prometheus
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/node_exporter/node_exporter
-<span class="token assign-left variable">Restart</span><span class="token operator">=</span>on-failure
-
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
-
-<span class="token function">chown</span> prometheus.prometheus /usr/lib/systemd/system/node_exporter.service
-systemctl daemon-reload
-systemctl <span class="token builtin class-name">enable</span> node_exporter.service
-systemctl start node_exporter.service
-systemctl status node_exporter.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /usr/lib/systemd/system/node_exporter.service<br><br>[Unit]<br>Description=Prometheus-node_exporter<br>Documentation=https://prometheus.io/<br>After=network.target<br><span class="hljs-comment"># 注意下面这两项参数是CentOS8的systemd才支持的</span><br>StartLimitBurst=1<br>StartLimitIntervalSec=15s<br><br>[Service]<br>Type=simple<br>User=prometheus<br>ExecStart=/home/node_exporter/node_exporter<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br><br>chown prometheus.prometheus /usr/lib/systemd/system/node_exporter.service<br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> node_exporter.service<br>systemctl start node_exporter.service<br>systemctl status node_exporter.service<br></code></pre></td></tr></table></figure>
 
 <p>如果顺利的话，<code>node_exporter</code>应该就正常运行在默认的<code>9100</code>端口了，再查看<code>9090</code>端口的<code>prometheus</code>的web页面种的<code>Status</code>里面的<code>Targets</code>应该就能够看到已经运行起来的监控了。</p>
 <p><img src="https://resource.tinychen.com/20210105143839.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们需要修改<code>Prometheus</code>的配置文件<code>/home/prometheus/prometheus.yml</code>，添加对应的<code>job</code>，使其监听对应IP的<code>9100</code>端口获取信息并重启<code>Prometheus</code>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">scrape_configs</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> <span class="token key atrule">job_name</span><span class="token punctuation">:</span> <span class="token string">'prometheus'</span>
-    <span class="token key atrule">static_configs</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">targets</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'192.168.100.100:9090'</span><span class="token punctuation">]</span>
-
-  <span class="token punctuation">-</span> <span class="token key atrule">job_name</span><span class="token punctuation">:</span> <span class="token string">'tiny-server'</span>
-    <span class="token key atrule">static_configs</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">targets</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'192.168.100.100:9100'</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">scrape_configs:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;prometheus&#x27;</span><br>    <span class="hljs-attr">static_configs:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">targets:</span> [<span class="hljs-string">&#x27;192.168.100.100:9090&#x27;</span>]<br><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;tiny-server&#x27;</span><br>    <span class="hljs-attr">static_configs:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">targets:</span> [<span class="hljs-string">&#x27;192.168.100.100:9100&#x27;</span>]<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210105172732.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、部署grafana"><a href="#3、部署grafana" class="headerlink" title="3、部署grafana"></a>3、部署grafana</h1><p>官网给出了多种版本系统的<a target="_blank" rel="noopener" href="https://grafana.com/grafana/download">安装教程</a>，我们这里使用的是CentOS，可以直接下载对应的RPM包然后直接安装，对应的操作如下</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> https://dl.grafana.com/oss/release/grafana-7.3.6-1.x86_64.rpm
-<span class="token function">sudo</span> yum <span class="token function">install</span> grafana-7.3.6-1.x86_64.rpm
-
-systemctl daemon-reload
-systemctl <span class="token builtin class-name">enable</span> grafana-server.service
-systemctl start grafana-server.service
-systemctl status grafana-server.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://dl.grafana.com/oss/release/grafana-7.3.6-1.x86_64.rpm<br>sudo yum install grafana-7.3.6-1.x86_64.rpm<br><br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> grafana-server.service<br>systemctl start grafana-server.service<br>systemctl status grafana-server.service<br></code></pre></td></tr></table></figure>
 
 <p>对应的配置文件位于<code>/etc/grafana/grafana.ini</code>，如果有需要可以进行更改，然后重启服务。</p>
 <p>默认情况下我们直接访问对应服务器的<code>3000</code>端口，然后使用初始的用户名和密码<code>admin/admin</code>进行登录并且修改初始密码。</p>
@@ -692,8 +625,6 @@ systemctl status grafana-server.service<span aria-hidden="true" class="line-numb
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

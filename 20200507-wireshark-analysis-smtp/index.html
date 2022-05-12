@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -225,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.4k words
+          2.5k words
         
       </span>
     
@@ -336,38 +334,7 @@
 <p><img src="https://resource.tinychen.com/blogphotos/20200507/HrBlY8YAY7JE.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blogphotos/20200507/T5t8Go18UFJ9.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、telnet测试SMTP"><a href="#3、telnet测试SMTP" class="headerlink" title="3、telnet测试SMTP"></a>3、telnet测试SMTP</h1><p>由于SMTP协议十分简单且没有加密，所以我们使用telnet命令连接到邮件服务器也可以执行同样的操作：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用telnet和服务器建立连接</span>
-telnet localhost <span class="token number">25</span>
-<span class="token comment"># 这里根据邮件系统的不同选择EHLO或者是HELO</span>
-HELO TINY-DESKTOP
-EHLO TINY-DESKTOP
-<span class="token comment"># 使用EHLO还可以进行身份验证</span>
-<span class="token comment"># 使用AUTH命令进行身份验证和登录</span>
-<span class="token comment"># 需要注意要将账号密码转码成base64编码的文本才可以成功登录</span>
-AUTH LOGIN
-<span class="token comment"># 转码前的账号test01@coremail.cn</span>
-dGVzdDAxQGNvcmVtYWlsLmNu
-<span class="token comment"># 转码前的密码password01</span>
-<span class="token assign-left variable">cGFzc3dvcmQwMQ</span><span class="token operator">==</span>
-
-<span class="token comment"># 确定发件人</span>
-MAIL FROM: <span class="token operator">&lt;</span>test01@coremail.cn<span class="token operator">></span>
-<span class="token comment"># 确定收件人</span>
-RCPT TO: <span class="token operator">&lt;</span>test02@coremail.cn<span class="token operator">></span>
-<span class="token comment"># 开始传输正文</span>
-DATA
-
-Subject: telnet <span class="token builtin class-name">test</span> mail
-From:<span class="token string">"test01"</span><span class="token operator">&lt;</span>test01@coremail.cn<span class="token operator">></span>
-To:<span class="token string">"test02"</span><span class="token operator">&lt;</span>test02@coremail.cn<span class="token operator">></span>
-
-Hello,
-This is a smtp <span class="token builtin class-name">test</span> via telnet.
-Goodbye.
-
-<span class="token builtin class-name">.</span>
-<span class="token comment"># 结束传输并退出</span>
-QUIT<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用telnet和服务器建立连接</span><br>telnet localhost 25<br><span class="hljs-comment"># 这里根据邮件系统的不同选择EHLO或者是HELO</span><br>HELO TINY-DESKTOP<br>EHLO TINY-DESKTOP<br><span class="hljs-comment"># 使用EHLO还可以进行身份验证</span><br><span class="hljs-comment"># 使用AUTH命令进行身份验证和登录</span><br><span class="hljs-comment"># 需要注意要将账号密码转码成base64编码的文本才可以成功登录</span><br>AUTH LOGIN<br><span class="hljs-comment"># 转码前的账号test01@coremail.cn</span><br>dGVzdDAxQGNvcmVtYWlsLmNu<br><span class="hljs-comment"># 转码前的密码password01</span><br>cGFzc3dvcmQwMQ==<br><br><span class="hljs-comment"># 确定发件人</span><br>MAIL FROM: &lt;test01@coremail.cn&gt;<br><span class="hljs-comment"># 确定收件人</span><br>RCPT TO: &lt;test02@coremail.cn&gt;<br><span class="hljs-comment"># 开始传输正文</span><br>DATA<br><br>Subject: telnet <span class="hljs-built_in">test</span> mail<br>From:<span class="hljs-string">&quot;test01&quot;</span>&lt;test01@coremail.cn&gt;<br>To:<span class="hljs-string">&quot;test02&quot;</span>&lt;test02@coremail.cn&gt;<br><br>Hello,<br>This is a smtp <span class="hljs-built_in">test</span> via telnet.<br>Goodbye.<br><br>.<br><span class="hljs-comment"># 结束传输并退出</span><br>QUIT<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/image-20200508092826669.png" srcset="/img/loading.gif" lazyload></p>
@@ -672,8 +639,6 @@ QUIT<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

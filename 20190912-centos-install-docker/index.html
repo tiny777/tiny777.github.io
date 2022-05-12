@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -225,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          10k words
+          8.2k words
         
       </span>
     
@@ -236,7 +234,7 @@
         
         
         
-          83 mins
+          69 mins
         
       </span>
     
@@ -290,215 +288,39 @@
 <span id="more"></span>
 
 <h1 id="1、卸载已存在版本"><a href="#1、卸载已存在版本" class="headerlink" title="1、卸载已存在版本"></a>1、卸载已存在版本</h1><p>首先我们卸载已经安装的版本</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum remove docker-ce docker-ce-cli containerd.io
-
-yum remove docker \
-                  docker-client \
-                  docker-client-latest \
-                  docker-common \
-                  docker-latest \
-                  docker-latest-logrotate \
-                  docker-logrotate \
-                  docker-engine<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight livescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs livescript">yum remove docker-ce docker-ce-cli containerd.io<br><br>yum remove docker <span class="hljs-string">\</span><br>                  docker-client <span class="hljs-string">\</span><br>                  docker-client-latest <span class="hljs-string">\</span><br>                  docker-common <span class="hljs-string">\</span><br>                  docker-latest <span class="hljs-string">\</span><br>                  docker-latest-logrotate <span class="hljs-string">\</span><br>                  docker-logrotate <span class="hljs-string">\</span><br>                  docker-engine<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190912/AXP894UtJxYY.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、导入yum源"><a href="#2、导入yum源" class="headerlink" title="2、导入yum源"></a>2、导入yum源</h1><p>导入docker官方提供的yum源，如果网络不好使用官网yum源比较慢的同学也可以使用阿里云提供的镜像yum源。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">sudo yum install -y yum-utils device-mapper-persistent-data lvm2
-
-sudo yum-config-manager --add-repo  https:&#x2F;&#x2F;download.docker.com&#x2F;linux&#x2F;centos&#x2F;docker-ce.repo<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br><br>sudo yum-config-manager --add-repo  https:<span class="hljs-regexp">//</span>download.docker.com<span class="hljs-regexp">/linux/</span>centos/docker-ce.repo<br></code></pre></td></tr></table></figure>
 
 <p>大家可以直接复制下面的yum源直接保存到<code>/etc/yum.repo.d/</code>目录下。</p>
 <p>下面的这个是阿里云的镜像源版本：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[docker-ce-stable]
-name&#x3D;Docker CE Stable - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;stable
-enabled&#x3D;1
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-stable-debuginfo]
-name&#x3D;Docker CE Stable - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;stable
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-stable-source]
-name&#x3D;Docker CE Stable - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;stable
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-edge]
-name&#x3D;Docker CE Edge - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;edge
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-edge-debuginfo]
-name&#x3D;Docker CE Edge - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;edge
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-edge-source]
-name&#x3D;Docker CE Edge - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;edge
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-test]
-name&#x3D;Docker CE Test - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;test
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-test-debuginfo]
-name&#x3D;Docker CE Test - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;test
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-test-source]
-name&#x3D;Docker CE Test - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;test
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-nightly]
-name&#x3D;Docker CE Nightly - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;nightly
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-nightly-debuginfo]
-name&#x3D;Docker CE Nightly - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;nightly
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-nightly-source]
-name&#x3D;Docker CE Nightly - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;nightly
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.aliyun.com&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><code class="hljs awk">[docker-ce-stable]<br>name=Docker CE Stable - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>stable<br>enabled=<span class="hljs-number">1</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-stable-debuginfo]<br>name=Docker CE Stable - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>stable<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-stable-source]<br>name=Docker CE Stable - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>stable<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-edge]<br>name=Docker CE Edge - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>edge<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-edge-debuginfo]<br>name=Docker CE Edge - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>edge<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-edge-source]<br>name=Docker CE Edge - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>edge<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-test]<br>name=Docker CE Test - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>test<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-test-debuginfo]<br>name=Docker CE Test - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>test<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-test-source]<br>name=Docker CE Test - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>test<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-nightly]<br>name=Docker CE Nightly - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>nightly<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-nightly-debuginfo]<br>name=Docker CE Nightly - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>nightly<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-nightly-source]<br>name=Docker CE Nightly - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>nightly<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.aliyun.com<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br></code></pre></td></tr></table></figure>
 
 <p>下面的这个是清华的镜像源版本：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[docker-ce-stable]
-name&#x3D;Docker CE Stable - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;stable
-enabled&#x3D;1
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-stable-debuginfo]
-name&#x3D;Docker CE Stable - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;stable
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-stable-source]
-name&#x3D;Docker CE Stable - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;stable
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-edge]
-name&#x3D;Docker CE Edge - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;edge
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-edge-debuginfo]
-name&#x3D;Docker CE Edge - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;edge
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-edge-source]
-name&#x3D;Docker CE Edge - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;edge
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-test]
-name&#x3D;Docker CE Test - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;test
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-test-debuginfo]
-name&#x3D;Docker CE Test - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;test
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-test-source]
-name&#x3D;Docker CE Test - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;test
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-nightly]
-name&#x3D;Docker CE Nightly - $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;$basearch&#x2F;nightly
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-nightly-debuginfo]
-name&#x3D;Docker CE Nightly - Debuginfo $basearch
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;debug-$basearch&#x2F;nightly
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg
-
-[docker-ce-nightly-source]
-name&#x3D;Docker CE Nightly - Sources
-baseurl&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;$releasever&#x2F;source&#x2F;nightly
-enabled&#x3D;0
-gpgcheck&#x3D;1
-gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;linux&#x2F;centos&#x2F;gpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><code class="hljs awk">[docker-ce-stable]<br>name=Docker CE Stable - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>stable<br>enabled=<span class="hljs-number">1</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-stable-debuginfo]<br>name=Docker CE Stable - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>stable<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-stable-source]<br>name=Docker CE Stable - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>stable<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-edge]<br>name=Docker CE Edge - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>edge<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-edge-debuginfo]<br>name=Docker CE Edge - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>edge<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-edge-source]<br>name=Docker CE Edge - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>edge<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-test]<br>name=Docker CE Test - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>test<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-test-debuginfo]<br>name=Docker CE Test - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>test<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-test-source]<br>name=Docker CE Test - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>test<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-nightly]<br>name=Docker CE Nightly - <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/$basearch/</span>nightly<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-nightly-debuginfo]<br>name=Docker CE Nightly - Debuginfo <span class="hljs-variable">$basearch</span><br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/debug-$basearch/</span>nightly<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br><br>[docker-ce-nightly-source]<br>name=Docker CE Nightly - Sources<br>baseurl=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/</span><span class="hljs-variable">$releasever</span><span class="hljs-regexp">/source/</span>nightly<br>enabled=<span class="hljs-number">0</span><br>gpgcheck=<span class="hljs-number">1</span><br>gpgkey=https:<span class="hljs-regexp">//mi</span>rrors.tuna.tsinghua.edu.cn<span class="hljs-regexp">/docker-ce/</span>linux<span class="hljs-regexp">/centos/g</span>pg<br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="3、安装docker"><a href="#3、安装docker" class="headerlink" title="3、安装docker"></a>3、安装docker</h1><p>接着我们从高到低列出yum源中各个版本的docker</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum list docker-ce --showduplicates | sort -r<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">yum <span class="hljs-keyword">list</span> docker-<span class="hljs-keyword">ce</span> --showduplicates | <span class="hljs-keyword">sort</span> -r<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190912/BCmdKz9vYj4L.png" srcset="/img/loading.gif" lazyload></p>
 <p>安装特定版本的命令如下</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install docker-ce-&lt;VERSION_STRING&gt; docker-ce-cli-&lt;VERSION_STRING&gt; containerd.io<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">yum install docker-<span class="hljs-keyword">ce</span>-<span class="hljs-symbol">&lt;VERSION_STRING&gt;</span> docker-<span class="hljs-keyword">ce</span>-cli-<span class="hljs-symbol">&lt;VERSION_STRING&gt;</span> containerd.io<br></code></pre></td></tr></table></figure>
 
 
 
 <p>如果需要安装最新版本的话，我们直接这样：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install docker-ce docker-ce-cli containerd.io<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">yum install docker-<span class="hljs-keyword">ce</span> docker-<span class="hljs-keyword">ce</span>-cli containerd.io<br></code></pre></td></tr></table></figure>
 
 
 
 <p>这里我们安装18.9.0的版本</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install docker-ce-18.09.0-3.el7 docker-ce-cli-18.09.0-3.el7 containerd.io<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">yum</span> install docker-ce-<span class="hljs-number">18</span>.<span class="hljs-number">09</span>.<span class="hljs-number">0</span>-<span class="hljs-number">3</span>.el<span class="hljs-number">7</span> docker-ce-cli-<span class="hljs-number">18</span>.<span class="hljs-number">09</span>.<span class="hljs-number">0</span>-<span class="hljs-number">3</span>.el<span class="hljs-number">7</span> containerd.io<br></code></pre></td></tr></table></figure>
 
 
 
@@ -508,69 +330,21 @@ gpgkey&#x3D;https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;docker-ce&#x2F;l
 <p>这里和官网的说明有一点不一样，这里我们需要加上后面的<code>-3.el7</code>，否则检测不到安装包。</p>
 <p><img src="https://resource.tinychen.com/blog/20190912/tN7YNvDFtuim.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="4、更换cgroup驱动"><a href="#4、更换cgroup驱动" class="headerlink" title="4、更换cgroup驱动"></a>4、更换cgroup驱动</h1><p>k8s推荐docker的cgroup驱动使用systemd，说是会更稳定，所以这里我们还需要修改一下，同时这里更换docker的镜像源为中科大的镜像源。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment">## Create /etc/docker directory.</span>
-<span class="token function">mkdir</span> /etc/docker
-
-<span class="token comment"># Setup daemon.</span>
-<span class="token function">cat</span> <span class="token operator">></span> /etc/docker/daemon.json <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-&#123;
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": &#123;
-    "max-size": "100m"
-  &#125;,
-  "storage-driver": "overlay2",
-  "storage-opts": [
-    "overlay2.override_kernel_check=true"
-  ],
-  "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"]
-&#125;
-EOF</span>
-
-<span class="token function">mkdir</span> -p /etc/systemd/system/docker.service.d
-
-<span class="token comment"># Restart Docker</span>
-systemctl daemon-reload
-systemctl restart docker<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br>mkdir /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br>cat &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ],</span><br><span class="hljs-string">  &quot;registry-mirrors&quot;: [&quot;https://docker.mirrors.ustc.edu.cn&quot;]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>mkdir -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="5、配置普通用户"><a href="#5、配置普通用户" class="headerlink" title="5、配置普通用户"></a>5、配置普通用户</h1><p>默认情况下，普通用户需要使用sudo才能操作docker，我们这里需要进行一些修改。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 切换到普通用户</span>
-<span class="token function">su</span> 普通用户名
-
-<span class="token comment"># 创建docker组</span>
-<span class="token function">sudo</span> <span class="token function">groupadd</span> docker
-
-<span class="token comment"># 将当前用户加入docker用户组</span>
-<span class="token function">sudo</span> gpasswd -a <span class="token variable">$&#123;<span class="token environment constant">USER</span>&#125;</span> docker
-
-<span class="token comment"># 重启docker服务</span>
-<span class="token function">sudo</span> systemctl daemon-reload
-<span class="token function">sudo</span> systemctl restart docker<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 切换到普通用户</span><br>su 普通用户名<br><br><span class="hljs-comment"># 创建docker组</span><br>sudo groupadd docker<br><br><span class="hljs-comment"># 将当前用户加入docker用户组</span><br>sudo gpasswd -a <span class="hljs-variable">$&#123;USER&#125;</span> docker<br><br><span class="hljs-comment"># 重启docker服务</span><br>sudo systemctl daemon-reload<br>sudo systemctl restart docker<br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="6、配置内核参数"><a href="#6、配置内核参数" class="headerlink" title="6、配置内核参数"></a>6、配置内核参数</h1><p>保险起见，我们还需要配置内核参数确保docker的网络正常</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">>></span> /etc/sysctl.conf <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-EOF</span>
-
-sysctl -p
-
-<span class="token function">reboot</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat &gt;&gt; /etc/sysctl.conf &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="hljs-string">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="hljs-string">EOF</span><br><br>sysctl -p<br><br>reboot<br></code></pre></td></tr></table></figure>
 
 
 
-<h1 id="7、测试"><a href="#7、测试" class="headerlink" title="7、测试"></a>7、测试</h1><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 启动docker
-sudo systemctl start docker
-
-# 最后我们还要设置一下开机启动
-sudo systemctl enable docker
-
-# 跑个helloworld看看
-sudo docker run hello-world<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h1 id="7、测试"><a href="#7、测试" class="headerlink" title="7、测试"></a>7、测试</h1><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-comment"># 启动docker</span><br>sudo systemctl start docker<br><br><span class="hljs-comment"># 最后我们还要设置一下开机启动</span><br>sudo systemctl <span class="hljs-builtin-name">enable</span> docker<br><br><span class="hljs-comment"># 跑个helloworld看看</span><br>sudo docker <span class="hljs-builtin-name">run</span> hello-world<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190912/F4Hch4y4HYd0.png" srcset="/img/loading.gif" lazyload></p>
@@ -870,8 +644,6 @@ sudo docker run hello-world<span aria-hidden="true" class="line-numbers-rows"><s
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

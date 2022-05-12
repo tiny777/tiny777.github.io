@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -236,7 +234,7 @@
         
         
         
-          31 mins
+          32 mins
         
       </span>
     
@@ -290,9 +288,7 @@
 <span id="more"></span>
 
 <h1 id="0、背景"><a href="#0、背景" class="headerlink" title="0、背景"></a>0、背景</h1><p><a target="_blank" rel="noopener" href="https://coredns.io/plugins/metrics/">Prometheus插件</a>作为coredns的Plugins，默认情况下是内置在coredns中，如果是自己编译安装的版本，需要注意在编译安装的时候的<code>plugin.cfg</code>文件中添加了<code>prometheus:metrics</code>，这样才能确保编译成功。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先我们检查一下运行的版本</span>
-$ ./coredns -plugins <span class="token operator">|</span> <span class="token function">grep</span> prometheus
-  dns.prometheus<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们检查一下运行的版本</span><br>$ ./coredns -plugins | grep prometheus<br>  dns.prometheus<br></code></pre></td></tr></table></figure>
 
 <h1 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h1><p><em>prometheus</em> 插件主要用于暴露CoreDNS相关的监控数据，除了coredns本身外，其他支持<em>prometheus</em>的插件（如cache插件）在启用的时候也可以通过<em>prometheus</em>插件暴露出相关的监控信息，默认情况下暴露出的监控数据在<code>localhost:9153</code>，路径为<code>/metrics</code>，<strong>配置文件中的每个server块只能使用一次<em>prometheus</em>。</strong>下面是一些coredns自身相关的指标：</p>
 <ul>
@@ -319,22 +315,10 @@ $ ./coredns -plugins <span class="token operator">|</span> <span class="token fu
 </blockquote>
 <h1 id="2、配置"><a href="#2、配置" class="headerlink" title="2、配置"></a>2、配置</h1><p>coredns中想要启用prometheus插件，只需要在对应的zone中加上这一行配置即可，默认监听的是本机127.0.0.1的9153端口，当然也可以根据自己的需要更改监听的网卡和端口。</p>
 <blockquote>
-<h2 id="Syntax"><a href="#Syntax" class="headerlink" title="Syntax"></a>Syntax</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">prometheus [ADDRESS]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h2 id="Syntax"><a href="#Syntax" class="headerlink" title="Syntax"></a>Syntax</h2><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">prometheus</span><span class="hljs-meta"> [ADDRESS]</span><br></code></pre></td></tr></table></figure>
 </blockquote>
 <p>我们直接来看一段配置：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">tinychen.com:53 &#123;
-    forward tinychen.com 47.107.188.168
-    prometheus
-&#125;
-
-google.com:53 &#123;
-    forward google.com 8.8.8.8 9.9.9.9
-    prometheus 192.168.100.100:9253
-&#125;
-
-example.org &#123;
-    file &#x2F;home&#x2F;coredns&#x2F;conf&#x2F;example.org
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs stylus">tinychen<span class="hljs-selector-class">.com</span>:<span class="hljs-number">53</span> &#123;<br>    forward tinychen<span class="hljs-selector-class">.com</span> <span class="hljs-number">47.107</span>.<span class="hljs-number">188.168</span><br>    prometheus<br>&#125;<br><br>google<span class="hljs-selector-class">.com</span>:<span class="hljs-number">53</span> &#123;<br>    forward google<span class="hljs-selector-class">.com</span> <span class="hljs-number">8.8</span>.<span class="hljs-number">8.8</span> <span class="hljs-number">9.9</span>.<span class="hljs-number">9.9</span><br>    prometheus <span class="hljs-number">192.168</span>.<span class="hljs-number">100.100</span>:<span class="hljs-number">9253</span><br>&#125;<br><br>example<span class="hljs-selector-class">.org</span> &#123;<br>    file /home/coredns/conf/example<span class="hljs-selector-class">.org</span><br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>prometheus的生效范围是按照zone来划分的，在上面的这个配置中：</p>
 <ul>
@@ -343,72 +327,10 @@ example.org &#123;
 <li><code>example.org</code> 这个域因为没有添加<code>prometheus</code>指令，所以在任何地址都不会暴露相关的监控信息</li>
 </ul>
 <p>如果有多个zone，每个zone都有相同的基础配置，也可以使用<a target="_blank" rel="noopener" href="https://coredns.io/plugins/import/">import</a>指令，如：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">tinychen.com:53 &#123;
-    forward tinychen.com 47.107.188.168
-    log
-    whoami
-    errors
-    prometheus 192.168.100.100:9253
-    bind 192.168.100.100
-    cache &#123;
-        success 10240 600 60
-        denial 5120 60 5
-    &#125;
-&#125;
-
-google.com:53 &#123;
-    forward google.com 8.8.8.8 9.9.9.9
-    log
-    whoami
-    errors
-    prometheus 192.168.100.100:9253
-    bind 192.168.100.100
-    cache &#123;
-        success 10240 600 60
-        denial 5120 60 5
-    &#125;
-&#125;
-
-example.org &#123;
-    file &#x2F;home&#x2F;coredns&#x2F;conf&#x2F;example.org
-    log
-    whoami
-    errors
-    prometheus 192.168.100.100:9253
-    bind 192.168.100.100
-    cache &#123;
-        success 10240 600 60
-        denial 5120 60 5
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs dns">tinychen.com:<span class="hljs-number">53</span> &#123;<br>    forward tinychen.com <span class="hljs-number">47.107.188.168</span><br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br>google.com:<span class="hljs-number">53</span> &#123;<br>    forward google.com <span class="hljs-number">8.8.8.8</span> <span class="hljs-number">9.9.9.9</span><br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br>example.org &#123;<br>    file /home/coredns/conf/example.org<br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>可以简化成这样：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">(basesnip) &#123;
-    log
-    whoami
-    errors
-    prometheus 192.168.100.100:9253
-    bind 192.168.100.100
-    cache &#123;
-        success 10240 600 60
-        denial 5120 60 5
-    &#125;
-&#125;
-
-tinychen.com:53 &#123;
-    forward tinychen.com 47.107.188.168
-    import basesnip
-&#125;
-
-google.com:53 &#123;
-    forward google.com 8.8.8.8 9.9.9.9
-    import basesnip
-&#125;
-
-example.org &#123;
-    file &#x2F;home&#x2F;coredns&#x2F;conf&#x2F;example.org
-    import basesnip
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs gradle">(basesnip) &#123;<br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168</span>.<span class="hljs-number">100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168</span>.<span class="hljs-number">100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240</span> <span class="hljs-number">600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120</span> <span class="hljs-number">60</span> <span class="hljs-number">5</span><br>    &#125;<br>&#125;<br><br>tinychen.com:<span class="hljs-number">53</span> &#123;<br>    forward tinychen.com <span class="hljs-number">47.107</span>.<span class="hljs-number">188.168</span><br>    <span class="hljs-keyword">import</span> basesnip<br>&#125;<br><br>google.com:<span class="hljs-number">53</span> &#123;<br>    forward google.com <span class="hljs-number">8.8</span>.<span class="hljs-number">8.8</span> <span class="hljs-number">9.9</span>.<span class="hljs-number">9.9</span><br>    <span class="hljs-keyword">import</span> basesnip<br>&#125;<br><br>example.org &#123;<br>    <span class="hljs-keyword">file</span> <span class="hljs-regexp">/home/</span>coredns<span class="hljs-regexp">/conf/</span>example.org<br>    <span class="hljs-keyword">import</span> basesnip<br>&#125;<br></code></pre></td></tr></table></figure>
 
 
 
@@ -712,8 +634,6 @@ example.org &#123;
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

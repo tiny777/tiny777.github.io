@@ -47,8 +47,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -301,10 +299,7 @@
 <h1 id="2、DHCP状态机"><a href="#2、DHCP状态机" class="headerlink" title="2、DHCP状态机"></a>2、DHCP状态机</h1><h2 id="2-0-DHCP状态机"><a href="#2-0-DHCP状态机" class="headerlink" title="2.0 DHCP状态机"></a>2.0 DHCP状态机</h2><p>如下图所示是比较常见的DHCP状态机，下面我们结合Wireshark抓到的数据包来进行分析。</p>
 <p><img src="https://resource.tinychen.com/blog/20190609/dogAUe1Ba8D2.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="2-0-1-如何抓取数据包"><a href="#2-0-1-如何抓取数据包" class="headerlink" title="2.0.1 如何抓取数据包"></a>2.0.1 如何抓取数据包</h3><p>在windows下，使网卡重新发出DHCP请求获取IP地址比较简单的方法就是使用<code>ipconfig</code>命令。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 释放IP地址</span>
-ipconfig -realease
-<span class="token comment"># 重新获取IP地址</span>
-ipconfig -renew<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 释放IP地址</span><br>ipconfig -realease<br><span class="hljs-comment"># 重新获取IP地址</span><br>ipconfig -renew<br></code></pre></td></tr></table></figure>
 
 <p>需要注意的是要确定网卡配置中是使用了DHCP而不是手动指定IP地址。</p>
 <p><img src="https://resource.tinychen.com/blog/20190609/4wSvnifDgxaP.png" srcset="/img/loading.gif" lazyload></p>
@@ -458,8 +453,7 @@ ipconfig -renew<span aria-hidden="true" class="line-numbers-rows"><span></span><
 <p><img src="https://resource.tinychen.com/blog/20190610/BfscX3u634RB.png" srcset="/img/loading.gif" lazyload></p>
 <p>这种IP地址在接了路由器的情况下是很常见的，但是如果是接入的分配10开头的IP地址的网络中出现这种IP地址信息，也是很有可能受到了路由干扰。</p>
 <h3 id="5-2-4-定位干扰源"><a href="#5-2-4-定位干扰源" class="headerlink" title="5.2.4 定位干扰源"></a>5.2.4 定位干扰源</h3><p>定位干扰源最简单的方法就是查询arp缓存表。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在cmd中输入下列命令查询arp缓存</span>
-arp -a<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在cmd中输入下列命令查询arp缓存</span><br>arp -a<br></code></pre></td></tr></table></figure>
 
 <p>再根据IP信息中的默认网关（或者是DHCP服务器等其他异常信息）对应的IP地址找到干扰源的MAC地址，在交换机后台查询该MAC地址对应的交换机端口（往往需要网络管理员协助），即可定位干扰源。</p>
 <h2 id="5-3-路由干扰解决方案"><a href="#5-3-路由干扰解决方案" class="headerlink" title="5.3 路由干扰解决方案"></a>5.3 路由干扰解决方案</h2><h3 id="5-3-1-用户合理配置路由器"><a href="#5-3-1-用户合理配置路由器" class="headerlink" title="5.3.1 用户合理配置路由器"></a>5.3.1 用户合理配置路由器</h3><ol>
@@ -767,8 +761,6 @@ arp -a<span aria-hidden="true" class="line-numbers-rows"><span></span><span></sp
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

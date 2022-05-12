@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          765 words
+          777 words
         
       </span>
     
@@ -289,22 +287,13 @@
 <span id="more"></span>
 
 <p>首先我们使用<code>yum</code>来安装<code>cockpit</code></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> cockpit -y<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install cockpit -y<br></code></pre></td></tr></table></figure>
 
 <p>安装完成之后我们设置开机启动，同时注意需要在防火墙里面设置放行端口，<code>cockpit</code>默认使用的是<code>9090</code>端口，在CentOS8中的<code>firewall</code>里面有<code>cockpit</code>这个<code>service</code>，所以我们不需要自己手动指定端口放行。</p>
 <blockquote>
 <p>需要特别注意的是这里的服务是<code>cockpit.socket</code>而不是<code>cockpit.service</code></p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 设置开机启动</span>
-systemctl <span class="token builtin class-name">enable</span> cockpit.socket
-<span class="token comment"># 开启服务</span>
-systemctl start cockpit.socket
-<span class="token comment"># 在防火墙中永久放行服务</span>
-firewall-cmd --permanent --add-service<span class="token operator">=</span>cockpit
-<span class="token comment"># 重启防火墙</span>
-firewall-cmd --reload
-<span class="token comment"># 查看是否放行成功</span>
-firewall-cmd --list-all<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> cockpit.socket<br><span class="hljs-comment"># 开启服务</span><br>systemctl start cockpit.socket<br><span class="hljs-comment"># 在防火墙中永久放行服务</span><br>firewall-cmd --permanent --add-service=cockpit<br><span class="hljs-comment"># 重启防火墙</span><br>firewall-cmd --reload<br><span class="hljs-comment"># 查看是否放行成功</span><br>firewall-cmd --list-all<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20191109/CjWPtcc0C8Jh.png" srcset="/img/loading.gif" lazyload></p>
@@ -613,8 +602,6 @@ firewall-cmd --list-all<span aria-hidden="true" class="line-numbers-rows"><span>
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

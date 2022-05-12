@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          700 words
+          728 words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          6 mins
+          7 mins
         
       </span>
     
@@ -290,34 +288,30 @@
 
 <p><a target="_blank" rel="noopener" href="https://linux.cn/article-3725-1.html">本文参考链接。</a></p>
 <h1 id="1、Linux上安装google验证器"><a href="#1、Linux上安装google验证器" class="headerlink" title="1、Linux上安装google验证器"></a>1、Linux上安装google验证器</h1><p>首先我们需要启用epel仓库</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> epel-release<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install epel-release<br></code></pre></td></tr></table></figure>
 
 <p>然后我们需要安装相关依赖库</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> pam-devel<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install pam-devel<br></code></pre></td></tr></table></figure>
 
 <p>接着直接安装google验证器</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看版本信息</span>
-yum list google-authenticator
-<span class="token comment"># 直接安装</span>
-yum <span class="token function">install</span> google-authenticator<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看版本信息</span><br>yum list google-authenticator<br><span class="hljs-comment"># 直接安装</span><br>yum install google-authenticator<br></code></pre></td></tr></table></figure>
 
 <p>安装完成之后进行初始化配置，直接运行下面命令开始初始化配置</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">google-authenticator<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">google-authenticator<br></code></pre></td></tr></table></figure>
 
 <p>初始化过程中生成二维码需要通过手机端的<code>google身份验证器</code>这个软件来扫描然后就可以添加到一个30s变化一次的动态密码；</p>
 <p>另外还有一个生成的<code>emergency scratch codes</code>记得自己小心保存起来，这个是当手机丢失的时候用来紧急登录的；</p>
 <p>其他的选项根据自己的需求进行选择，不知道的话就默认选择<code>y</code>即可。</p>
-<h1 id="2、给ssh启用google验证"><a href="#2、给ssh启用google验证" class="headerlink" title="2、给ssh启用google验证"></a>2、给ssh启用google验证</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"auth required pam_google_authenticator.so"</span> <span class="token operator">>></span> /etc/pam.d/sshd <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<h1 id="2、给ssh启用google验证"><a href="#2、给ssh启用google验证" class="headerlink" title="2、给ssh启用google验证"></a>2、给ssh启用google验证</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;auth required pam_google_authenticator.so&quot;</span> &gt;&gt; /etc/pam.d/sshd <br></code></pre></td></tr></table></figure>
 
 <p>修改ssh的配置文件<code>/etc/ssh/sshd_config</code>，将下列参数调整为<code>yes</code></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ChallengeResponseAuthentication <span class="token function">yes</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ChallengeResponseAuthentication yes<br></code></pre></td></tr></table></figure>
 
 <p>最后我们重启ssh服务即可</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">systemctl restart sshd<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">systemctl restart sshd<br></code></pre></td></tr></table></figure>
 
 <h1 id="3、效果"><a href="#3、效果" class="headerlink" title="3、效果"></a>3、效果</h1><p>重启之后需要再次使用密码进行ssh登录的时候就需要先输入前面的谷歌验证码才能再输入密码登录。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Verification code:
-Password:<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">Verification code:</span><br><span class="hljs-attr">Password:</span><br></code></pre></td></tr></table></figure>
 
 
               
@@ -612,8 +606,6 @@ Password:<span aria-hidden="true" class="line-numbers-rows"><span></span><span><
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

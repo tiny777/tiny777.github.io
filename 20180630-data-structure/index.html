@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          7.5k words
+          7.7k words
         
       </span>
     
@@ -235,7 +233,7 @@
         
         
         
-          63 mins
+          65 mins
         
       </span>
     
@@ -413,45 +411,7 @@
 <li><strong>给出稀疏矩阵的节省内存的存贮结构并写出相应的输入、输出算法。</strong></li>
 </ol>
 <p>为了节省存储单元，可只存储非零元素。由于非零元素的分布一般是没有规律的，因此在存储非零元素的同时，还必须存储非零元素所在的行号、列号，才能迅速确定一个非零元素是矩阵中的哪一个元素。其中每一个非零元素所在的行号、列号和值组成一个三元组，并由此三元组惟一确定。</p>
-<div class="code-wrapper"><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">//三元组表</span>
-
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">MAXSIZE</span> <span class="token expression"><span class="token number">100</span> </span><span class="token comment">//非零元个数的最大值</span></span>
-
-<span class="token keyword">typedef</span> <span class="token keyword">struct</span><span class="token punctuation">&#123;</span>
-
-<span class="token keyword">int</span> i<span class="token punctuation">,</span>j<span class="token punctuation">;</span> <span class="token comment">// 行下标,列下标</span>
-
-ElemType e<span class="token punctuation">;</span> <span class="token comment">// 非零元素值</span>
-
-<span class="token punctuation">&#125;</span>Triple<span class="token punctuation">;</span>
-
-<span class="token keyword">typedef</span> <span class="token keyword">struct</span>
-
-<span class="token punctuation">&#123;</span>Triple data<span class="token punctuation">[</span>MAXSIZE<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">//非零元三元组表,data[0]未用</span>
-
-<span class="token keyword">int</span> mu<span class="token punctuation">,</span>nu<span class="token punctuation">,</span> tu<span class="token punctuation">;</span> <span class="token comment">// 矩阵的行数、列数和非零元个数</span>
-
-<span class="token punctuation">&#125;</span>TSMatrix<span class="token punctuation">;</span>
-
-<span class="token comment">//十字链表</span>
-
-<span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">OLNode</span> <span class="token comment">//结点的定义</span>
-
-<span class="token punctuation">&#123;</span><span class="token keyword">int</span> i<span class="token punctuation">,</span>j<span class="token punctuation">;</span> <span class="token comment">// 非零元的行和列下标</span>
-
-ElemType e<span class="token punctuation">;</span> <span class="token comment">// 非零元素值</span>
-
-<span class="token keyword">struct</span> <span class="token class-name">OLNode</span> <span class="token operator">*</span>right<span class="token punctuation">,</span><span class="token operator">*</span>down<span class="token punctuation">;</span> <span class="token comment">// 该非零元所在行表和列表的后继链域</span>
-
-<span class="token punctuation">&#125;</span>OLNode<span class="token punctuation">,</span> <span class="token operator">*</span>OLink<span class="token punctuation">;</span>
-
-<span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token comment">//链表的定义</span>
-
-<span class="token punctuation">&#123;</span> OLink <span class="token operator">*</span>rhead<span class="token punctuation">,</span><span class="token operator">*</span>chead<span class="token punctuation">;</span> <span class="token comment">// 行和列链表头指针向量基址,由CreatSMatrix_OL()分配</span>
-
-<span class="token keyword">int</span> mu<span class="token punctuation">,</span>nu<span class="token punctuation">,</span>tu<span class="token punctuation">;</span> <span class="token comment">// 稀疏矩阵的行、列数和非零元个数</span>
-
-<span class="token punctuation">&#125;</span>CrossList<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//三元组表</span><br><br><span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> MAXSIZE 100 <span class="hljs-comment">//非零元个数的最大值</span></span><br><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span>&#123;</span><br><br><span class="hljs-keyword">int</span> i,j; <span class="hljs-comment">// 行下标,列下标</span><br><br>ElemType e; <span class="hljs-comment">// 非零元素值</span><br><br>&#125;Triple;<br><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span></span><br><span class="hljs-class"></span><br><span class="hljs-class">&#123;</span>Triple data[MAXSIZE+<span class="hljs-number">1</span>]; <span class="hljs-comment">//非零元三元组表,data[0]未用</span><br><br><span class="hljs-keyword">int</span> mu,nu, tu; <span class="hljs-comment">// 矩阵的行数、列数和非零元个数</span><br><br>&#125;TSMatrix;<br><br><span class="hljs-comment">//十字链表</span><br><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">OLNode</span> //结点的定义</span><br><span class="hljs-class"></span><br><span class="hljs-class">&#123;</span><span class="hljs-keyword">int</span> i,j; <span class="hljs-comment">// 非零元的行和列下标</span><br><br>ElemType e; <span class="hljs-comment">// 非零元素值</span><br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">OLNode</span> *<span class="hljs-title">right</span>,*<span class="hljs-title">down</span>;</span> <span class="hljs-comment">// 该非零元所在行表和列表的后继链域</span><br><br>&#125;OLNode, *OLink;<br><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> //链表的定义</span><br><span class="hljs-class"></span><br><span class="hljs-class">&#123;</span> OLink *rhead,*chead; <span class="hljs-comment">// 行和列链表头指针向量基址,由CreatSMatrix_OL()分配</span><br><br><span class="hljs-keyword">int</span> mu,nu,tu; <span class="hljs-comment">// 稀疏矩阵的行、列数和非零元个数</span><br><br>&#125;CrossList;<br></code></pre></td></tr></table></figure>
 
 <p><strong>输入输出算法</strong></p>
 <hr>
@@ -525,19 +485,7 @@ ElemType e<span class="token punctuation">;</span> <span class="token comment">/
 <p><strong>求树中结点的度：</strong>（孩子表示法）求树的度只需要指针移动，度数递增就好</p>
 <p><strong>树的度：</strong>先把每个结点的度数求出来，再把所有结点的度数总和求出来就好啦</p>
 <p><strong>求树的叶子结点的个数：</strong>（下面这个只是求二叉树的）</p>
-<div class="code-wrapper"><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">Leaf_Count</span><span class="token punctuation">(</span>Bitree T<span class="token punctuation">)</span>
-
-<span class="token punctuation">&#123;</span><span class="token operator">*</span><span class="token comment">//求二叉树中叶子结点的数目*</span>
-
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>T<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">//空树没有叶子</span>
-
-<span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>T<span class="token operator">-></span>lchild<span class="token operator">&amp;&amp;</span><span class="token operator">!</span>T<span class="token operator">-></span>rchild<span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">//叶子结点</span>
-
-<span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token function">Leaf_Count</span><span class="token punctuation">(</span>T<span class="token operator">-</span>lchild<span class="token punctuation">)</span><span class="token operator">+</span><span class="token function">Leaf_Count</span><span class="token punctuation">(</span>T<span class="token operator">-</span>rchild<span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token comment">//左子树的叶子数加上右子树的叶子数</span>
-
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">Leaf_Count</span><span class="hljs-params">(Bitree T)</span></span><br><span class="hljs-function"></span><br><span class="hljs-function"></span>&#123;*<span class="hljs-comment">//求二叉树中叶子结点的数目*</span><br><br><span class="hljs-keyword">if</span>(!T) <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; <span class="hljs-comment">//空树没有叶子</span><br><br><span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(!T-&gt;lchild&amp;&amp;!T-&gt;rchild) <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>; <span class="hljs-comment">//叶子结点</span><br><br><span class="hljs-keyword">else</span> <span class="hljs-keyword">return</span> Leaf_Count(T-lchild)+Leaf_Count(T-rchild);<br><br><span class="hljs-comment">//左子树的叶子数加上右子树的叶子数</span><br><br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p><strong>求森林中树的数目：</strong>就是右孩子循环过去，算出右孩子的数目，再加上本身根节点（即右孩子树+1）</p>
 <hr>
@@ -608,87 +556,7 @@ ElemType e<span class="token punctuation">;</span> <span class="token comment">/
 </blockquote>
 <p><strong>迪杰斯特拉(Dijkstra)算法</strong></p>
 <p><strong>按路径长度递增次序产生最短路径，</strong>求从某个源点到其余各顶点的最短路径；</p>
-<div class="code-wrapper"><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">ShortestPath_DIJ</span><span class="token punctuation">(</span> MGraph G<span class="token punctuation">,</span> <span class="token keyword">int</span> v0<span class="token punctuation">,</span> PathMatrix <span class="token operator">&amp;</span>pre<span class="token punctuation">,</span> ShortPathTable <span class="token operator">&amp;</span>D<span class="token punctuation">)</span>
-
-<span class="token punctuation">&#123;</span><span class="token operator">*</span><span class="token comment">// 用Dijkstra 算法求有向网G的v0顶点到其余顶点v的最短路径pre[v]及其带权长度D[v]*</span>
-
-<span class="token comment">// final[v]为TRUE当且仅当v∈S, 即已经求得v0到v的最短路径</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span>v<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>v<span class="token operator">&lt;</span>G<span class="token punctuation">.</span>vexnum<span class="token punctuation">;</span><span class="token operator">++</span>v<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> pre<span class="token punctuation">[</span>v<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
-
-final<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token operator">=</span>FALSE<span class="token punctuation">;</span> D<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token operator">=</span>G<span class="token punctuation">.</span>arcs<span class="token punctuation">[</span>v0<span class="token punctuation">]</span><span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token punctuation">;</span>
-
-<span class="token keyword">if</span> <span class="token punctuation">(</span>D<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token operator">&lt;</span>INFINITY<span class="token punctuation">)</span> pre<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token operator">=</span>V0<span class="token punctuation">;</span>
-
-<span class="token punctuation">&#125;</span> <span class="token comment">//for</span>
-
-D<span class="token punctuation">[</span>v0<span class="token punctuation">]</span><span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> final<span class="token punctuation">[</span>v0<span class="token punctuation">]</span><span class="token operator">=</span>TRUE<span class="token punctuation">;</span> <span class="token comment">//初始化，v0顶点属于S集</span>
-
-<span class="token comment">//开始主循环，每次求得v0到某个v顶点的最短路径，并加v到S集</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span>i<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>i<span class="token operator">&lt;</span>G<span class="token punctuation">.</span>vexnum<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span><span class="token punctuation">&#123;</span> <span class="token comment">// 其余G.vexnum-1个顶点</span>
-
-min<span class="token operator">=</span>INFINITY<span class="token punctuation">;</span> <span class="token comment">// 当前所知离v0顶点的最近距离</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span>w<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span>w<span class="token operator">&lt;</span>G<span class="token punctuation">.</span>vexnum<span class="token punctuation">;</span> <span class="token operator">++</span>w<span class="token punctuation">)</span>
-
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>final<span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token punctuation">)</span>
-
-<span class="token keyword">if</span><span class="token punctuation">(</span>D<span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token operator">&lt;</span>min<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>v<span class="token operator">=</span>w<span class="token punctuation">;</span> min<span class="token operator">=</span>D<span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token punctuation">;</span><span class="token punctuation">&#125;</span> <span class="token comment">//w顶点离v0顶点更近</span>
-
-final<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token operator">=</span>TRUE<span class="token punctuation">;</span> <span class="token comment">//离v0顶点最近的v加入S集</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span>w<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> w<span class="token operator">&lt;</span>G<span class="token punctuation">.</span>vexnum<span class="token punctuation">;</span> <span class="token operator">++</span>w<span class="token punctuation">)</span> <span class="token comment">// 更新当前最短路径及距离</span>
-
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>final<span class="token punctuation">[</span>w<span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span><span class="token punctuation">(</span>min<span class="token operator">+</span>G<span class="token punctuation">.</span>arcs<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token operator">&lt;</span>D<span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token comment">//修改D[w]和pre[w], w∈V-S</span>
-
-D<span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token operator">=</span>min<span class="token operator">+</span>G<span class="token punctuation">.</span>arcs<span class="token punctuation">[</span>v<span class="token punctuation">]</span><span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token punctuation">;</span>
-
-pre<span class="token punctuation">[</span>w<span class="token punctuation">]</span><span class="token operator">=</span>v<span class="token punctuation">;</span>
-
-<span class="token punctuation">&#125;</span> <span class="token comment">//if</span>
-
-<span class="token punctuation">&#125;</span> <span class="token comment">//for</span>
-
-<span class="token punctuation">&#125;</span> <span class="token comment">//ShortestPath_DIJ</span>
-
-弗洛伊德<span class="token punctuation">(</span>Floyd<span class="token punctuation">)</span>算法
-
-逐个顶点试探法，求从某个源点到其余各顶点的最短路径；
-
-<span class="token keyword">void</span> <span class="token function">shortestPath_FLOYD</span><span class="token punctuation">(</span>MGrgph G<span class="token punctuation">,</span> PathMatrix <span class="token operator">&amp;</span>path <span class="token punctuation">,</span>DistancMatrix <span class="token operator">&amp;</span>length<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-
-<span class="token comment">//用Floyd算法求得有向网G中各对顶点v和w之间的最短路径 Path[v][w]及其带权</span>
-
-<span class="token comment">//长度length[v][w]。 path[i][j]是相应路径上顶点 j 的前一顶点的顶点号,</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">)</span> <span class="token comment">//矩阵length与path初始化</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> j<span class="token operator">++</span> <span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-
-length<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> G<span class="token punctuation">.</span>arcs <span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
-
-<span class="token keyword">if</span> <span class="token punctuation">(</span> i <span class="token operator">&lt;</span><span class="token operator">></span> j <span class="token operator">&amp;&amp;</span> length <span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">&lt;</span> INFINITY <span class="token punctuation">)</span> path<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> i<span class="token punctuation">;</span> <span class="token comment">// i 到 j 有路径</span>
-
-<span class="token keyword">else</span> path<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span> <span class="token comment">// i 到 j 无路径</span>
-
-<span class="token punctuation">&#125;</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span> <span class="token keyword">int</span> k <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> k <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> k<span class="token operator">++</span> <span class="token punctuation">)</span> <span class="token comment">//产生length(k)及path(k)</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">)</span>
-
-<span class="token keyword">for</span> <span class="token punctuation">(</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> j<span class="token operator">++</span> <span class="token punctuation">)</span>
-
-<span class="token keyword">if</span> <span class="token punctuation">(</span> length<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">+</span> length<span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">&lt;</span> length<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
-
-length <span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> length <span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">+</span> length <span class="token punctuation">[</span>k<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
-
-path<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> k<span class="token punctuation">;</span>
-
-<span class="token punctuation">&#125;</span> <span class="token comment">//缩短路径长度, 绕过 k 到 j</span>
-
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">ShortestPath_DIJ</span><span class="hljs-params">( MGraph G, <span class="hljs-keyword">int</span> v0, PathMatrix &amp;pre, ShortPathTable &amp;D)</span></span><br><span class="hljs-function"></span><br><span class="hljs-function"></span>&#123;*<span class="hljs-comment">// 用Dijkstra 算法求有向网G的v0顶点到其余顶点v的最短路径pre[v]及其带权长度D[v]*</span><br><br><span class="hljs-comment">// final[v]为TRUE当且仅当v∈S, 即已经求得v0到v的最短路径</span><br><br><span class="hljs-keyword">for</span> (v=<span class="hljs-number">0</span>;v&lt;G.vexnum;++v) &#123; pre[v] = <span class="hljs-number">-1</span>;<br><br><span class="hljs-keyword">final</span>[v]=FALSE; D[v]=G.arcs[v0][v];<br><br><span class="hljs-keyword">if</span> (D[v]&lt;INFINITY) pre[v]=V0;<br><br>&#125; <span class="hljs-comment">//for</span><br><br>D[v0]=<span class="hljs-number">0</span>; <span class="hljs-keyword">final</span>[v0]=TRUE; <span class="hljs-comment">//初始化，v0顶点属于S集</span><br><br><span class="hljs-comment">//开始主循环，每次求得v0到某个v顶点的最短路径，并加v到S集</span><br><br><span class="hljs-keyword">for</span> (i=<span class="hljs-number">1</span>;i&lt;G.vexnum; ++i)&#123; <span class="hljs-comment">// 其余G.vexnum-1个顶点</span><br><br>min=INFINITY; <span class="hljs-comment">// 当前所知离v0顶点的最近距离</span><br><br><span class="hljs-keyword">for</span> (w=<span class="hljs-number">0</span>;w&lt;G.vexnum; ++w)<br><br><span class="hljs-keyword">if</span>(!<span class="hljs-keyword">final</span>[w])<br><br><span class="hljs-keyword">if</span>(D[w]&lt;min) &#123;v=w; min=D[w];&#125; <span class="hljs-comment">//w顶点离v0顶点更近</span><br><br><span class="hljs-keyword">final</span>[v]=TRUE; <span class="hljs-comment">//离v0顶点最近的v加入S集</span><br><br><span class="hljs-keyword">for</span> (w=<span class="hljs-number">0</span>; w&lt;G.vexnum; ++w) <span class="hljs-comment">// 更新当前最短路径及距离</span><br><br><span class="hljs-keyword">if</span>(!<span class="hljs-keyword">final</span>[w] &amp;&amp;(min+G.arcs[v][w]&lt;D[w])) &#123; <span class="hljs-comment">//修改D[w]和pre[w], w∈V-S</span><br><br>D[w]=min+G.arcs[v][w];<br><br>pre[w]=v;<br><br>&#125; <span class="hljs-comment">//if</span><br><br>&#125; <span class="hljs-comment">//for</span><br><br>&#125; <span class="hljs-comment">//ShortestPath_DIJ</span><br><br>弗洛伊德(Floyd)算法<br><br>逐个顶点试探法，求从某个源点到其余各顶点的最短路径；<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">shortestPath_FLOYD</span><span class="hljs-params">(MGrgph G, PathMatrix &amp;path ,DistancMatrix &amp;length)</span> </span>&#123;<br><br><span class="hljs-comment">//用Floyd算法求得有向网G中各对顶点v和w之间的最短路径 Path[v][w]及其带权</span><br><br><span class="hljs-comment">//长度length[v][w]。 path[i][j]是相应路径上顶点 j 的前一顶点的顶点号,</span><br><br><span class="hljs-keyword">for</span> ( <span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++ ) <span class="hljs-comment">//矩阵length与path初始化</span><br><br><span class="hljs-keyword">for</span> ( <span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; n; j++ ) &#123;<br><br>length[i][j] = G.arcs [i][j];<br><br><span class="hljs-keyword">if</span> ( i &lt;&gt; j &amp;&amp; length [i][j] &lt; INFINITY ) path[i][j] = i; <span class="hljs-comment">// i 到 j 有路径</span><br><br><span class="hljs-keyword">else</span> path[i][j] = <span class="hljs-number">-1</span>; <span class="hljs-comment">// i 到 j 无路径</span><br><br>&#125;<br><br><span class="hljs-keyword">for</span> ( <span class="hljs-keyword">int</span> k = <span class="hljs-number">0</span>; k &lt; n; k++ ) <span class="hljs-comment">//产生length(k)及path(k)</span><br><br><span class="hljs-keyword">for</span> ( i = <span class="hljs-number">0</span>; i &lt; n; i++ )<br><br><span class="hljs-keyword">for</span> ( j = <span class="hljs-number">0</span>; j &lt; n; j++ )<br><br><span class="hljs-keyword">if</span> ( length[i][k] + length[k][j] &lt; length[i][j] ) &#123;<br><br>length [i][j] = length [i][k] + length [k][j];<br><br>path[i][j] = k;<br><br>&#125; <span class="hljs-comment">//缩短路径长度, 绕过 k 到 j</span><br><br>&#125;<br></code></pre></td></tr></table></figure>
 
 
 
@@ -1039,8 +907,6 @@ path<span class="token punctuation">[</span>i<span class="token punctuation">]</
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

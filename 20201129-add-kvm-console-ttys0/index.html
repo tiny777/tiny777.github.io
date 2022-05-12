@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          604 words
+          645 words
         
       </span>
     
@@ -290,18 +288,11 @@
 
 <p>一般来说直接创建的虚拟机是没办法在宿主机上直接通过console命令来操作，在使用console命令的时候会卡在下列界面</p>
 <p><img src="https://resource.tinychen.com/20201130101109.png" srcset="/img/loading.gif" lazyload></p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加到securetty中允许登录</span>
-<span class="token function">grep</span> ttyS0 /etc/securetty <span class="token operator">||</span> <span class="token builtin class-name">echo</span> <span class="token string">"ttyS0"</span> <span class="token operator">>></span> /etc/securetty
-<span class="token comment"># 使用grubby在内核参数中添加ttyS0</span>
-grubby --update-kernel<span class="token operator">=</span>ALL --args<span class="token operator">=</span>console<span class="token operator">=</span>ttyS0
-<span class="token comment"># 添加到inittab中实现开机初始化tty</span>
-<span class="token function">grep</span> ttyS0 /etc/inittab <span class="token operator">||</span> <span class="token builtin class-name">echo</span> <span class="token string">"S0:12345:respawn:/sbin/agetty ttyS0 115200"</span> <span class="token operator">>></span> /etc/inittab
-<span class="token comment"># 重启生效</span>
-<span class="token function">reboot</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 添加到securetty中允许登录</span><br>grep ttyS0 /etc/securetty || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;ttyS0&quot;</span> &gt;&gt; /etc/securetty<br><span class="hljs-comment"># 使用grubby在内核参数中添加ttyS0</span><br>grubby --update-kernel=ALL --args=console=ttyS0<br><span class="hljs-comment"># 添加到inittab中实现开机初始化tty</span><br>grep ttyS0 /etc/inittab || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;S0:12345:respawn:/sbin/agetty ttyS0 115200&quot;</span> &gt;&gt; /etc/inittab<br><span class="hljs-comment"># 重启生效</span><br>reboot<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p> <code>/etc/inittab</code>文件中的配置按照以下格式进行书写</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">id：runlevels：action：process<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript"><span class="hljs-built_in">id</span>：runlevels：action：process<br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>id：它是每个登记项的标识符，用于唯一标识每个登记项，不能重复</li>
@@ -605,8 +596,6 @@ grubby --update-kernel<span class="token operator">=</span>ALL --args<span class
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -290,38 +288,13 @@
 <span id="more"></span>
 
 <p>首先是故障详情</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">mount</span> /dev/sda1 
-<span class="token variable">$MFTMirr</span> does not match <span class="token variable">$MFT</span> <span class="token punctuation">(</span>record <span class="token number">3</span><span class="token punctuation">)</span>.
-Failed to <span class="token function">mount</span> <span class="token string">'/dev/sda1'</span><span class="token builtin class-name">:</span> Input/output error
-NTFS is either inconsistent, or there is a hardware fault, or it<span class="token string">'s a
-SoftRAID/FakeRAID hardware. In the first case run chkdsk /f on Windows
-then reboot into Windows twice. The usage of the /f parameter is very
-important! If the device is a SoftRAID/FakeRAID then first activate
-it and mount a different device under the /dev/mapper/ directory, (e.g.
-/dev/mapper/nvidia_eahaabcc1). Please see the '</span>dmraid' documentation
-<span class="token keyword">for</span> <span class="token function">more</span> details.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ sudo mount /dev/sda1 <br><span class="hljs-variable">$MFTMirr</span> does not match <span class="hljs-variable">$MFT</span> (record 3).<br>Failed to mount <span class="hljs-string">&#x27;/dev/sda1&#x27;</span>: Input/output error<br>NTFS is either inconsistent, or there is a hardware fault, or it<span class="hljs-string">&#x27;s a</span><br><span class="hljs-string">SoftRAID/FakeRAID hardware. In the first case run chkdsk /f on Windows</span><br><span class="hljs-string">then reboot into Windows twice. The usage of the /f parameter is very</span><br><span class="hljs-string">important! If the device is a SoftRAID/FakeRAID then first activate</span><br><span class="hljs-string">it and mount a different device under the /dev/mapper/ directory, (e.g.</span><br><span class="hljs-string">/dev/mapper/nvidia_eahaabcc1). Please see the &#x27;</span>dmraid<span class="hljs-string">&#x27; documentation</span><br><span class="hljs-string">for more details.</span><br></code></pre></td></tr></table></figure>
 <p>接着我在<code>askubuntu</code>上面看到了一个<a target="_blank" rel="noopener" href="https://askubuntu.com/questions/727218/cannot-mount-usb-stick-errors-out-with-mftmirr-does-not-match-mft">同样的情况</a>，高赞回答里面说是<code>$MFT</code>文件出现了问题，windows下可以使用<code>chkdsk</code>进行修复，之前写过相关的<a href="https://tinychen.com/170503-chkdsk/">操作教程</a>，这次尝试一下使用Linux下的<code>ntfsfix</code>来修复。</p>
 <p>这里需要事先安装好<code>ntfsprogs</code>这个工具，ubuntu下也可以直接使用<code>apt</code>安装，下面使用的是CentOS7作为示范。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ sudo yum install ntfsprogs
-$ sudo ntfsfix &#x2F;dev&#x2F;sda1
-Mounting volume... $MFTMirr does not match $MFT (record 3).
-FAILED
-Attempting to correct errors... 
-Processing $MFT and $MFTMirr...
-Reading $MFT... OK
-Reading $MFTMirr... OK
-Comparing $MFTMirr to $MFT... FAILED
-Correcting differences in $MFTMirr record 3...OK
-Processing of $MFT and $MFTMirr completed successfully.
-Setting required flags on partition... OK
-Going to empty the journal ($LogFile)... OK
-Checking the alternate boot sector... OK
-NTFS volume version is 3.1.
-NTFS partition &#x2F;dev&#x2F;sda1 was processed successfully.
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs gams"><span class="hljs-symbol">$</span> sudo yum install ntfsprogs<br><span class="hljs-symbol">$</span> sudo ntfsfix /dev/sda1<br><span class="hljs-function"><span class="hljs-title">Mounting</span></span> volume... <span class="hljs-symbol">$</span>MFTMirr does <span class="hljs-keyword">not</span> match <span class="hljs-symbol">$</span>MFT (record <span class="hljs-number">3</span>).<br>FAILED<br><span class="hljs-function"><span class="hljs-title">Attempting</span></span> to correct errors... <br><span class="hljs-function"><span class="hljs-title">Processing</span></span> <span class="hljs-symbol">$</span>MFT <span class="hljs-keyword">and</span> <span class="hljs-symbol">$</span>MFTMirr...<br><span class="hljs-function"><span class="hljs-title">Reading</span></span> <span class="hljs-symbol">$</span>MFT... OK<br><span class="hljs-function"><span class="hljs-title">Reading</span></span> <span class="hljs-symbol">$</span>MFTMirr... OK<br><span class="hljs-function"><span class="hljs-title">Comparing</span></span> <span class="hljs-symbol">$</span>MFTMirr to <span class="hljs-symbol">$</span>MFT... FAILED<br><span class="hljs-function"><span class="hljs-title">Correcting</span></span> differences in <span class="hljs-symbol">$</span>MFTMirr record <span class="hljs-number">3.</span>..OK<br>Processing of <span class="hljs-symbol">$</span>MFT <span class="hljs-keyword">and</span> <span class="hljs-symbol">$</span>MFTMirr completed successfully.<br><span class="hljs-function"><span class="hljs-title">Setting</span></span> required flags on partition... OK<br><span class="hljs-function"><span class="hljs-title">Going</span></span> to empty the journal (<span class="hljs-symbol">$</span>LogFile)... OK<br><span class="hljs-function"><span class="hljs-title">Checking</span></span> the alternate boot sector... OK<br>NTFS volume version is <span class="hljs-number">3.1</span>.<br>NTFS partition /dev/sda1 was processed successfully.<br><br></code></pre></td></tr></table></figure>
 
 <p>修复完成之后我们直接进行挂载，这次没有报错，可以正常读写里面的文件了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">mount</span> /dev/sda1 <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ sudo mount /dev/sda1 <br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>由于这里已经在<code>/etc/fstab</code>文件中制定了挂载的目录和方式，所以直接在命令行里面指定要挂载的设备号就能根据<code>/etc/fstab</code>内的信息进行挂载。</p>
@@ -621,8 +594,6 @@ NTFS partition &#x2F;dev&#x2F;sda1 was processed successfully.
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

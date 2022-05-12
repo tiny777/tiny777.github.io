@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -225,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          6.1k words
+          6.3k words
         
       </span>
     
@@ -236,7 +234,7 @@
         
         
         
-          51 mins
+          53 mins
         
       </span>
     
@@ -292,21 +290,10 @@
 <h1 id="1、编译安装openssl"><a href="#1、编译安装openssl" class="headerlink" title="1、编译安装openssl"></a>1、编译安装openssl</h1><p>考虑到Linux系统中有许多组件都需要使用openssl库，而现在默认使用的openssl库绝大多数都没到达能够支持TLS1.3的openssl1.1.1版本以上，因此个人建议不要直接修改系统已有的默认openssl库而是另外使用一个新目录来编译安装新版本的openssl。</p>
 <p>具体的支持信息可以查看<a target="_blank" rel="noopener" href="https://wiki.openssl.org/index.php/TLS1.3">openssl官网的TLSv1.3部分</a>。</p>
 <p>解压下载的稳定版openssl1.1.1g进行编译安装，注意使用<code>--prefix=</code>指定安装目录</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 下载</span>
-<span class="token function">wget</span> https://www.openssl.org/source/openssl-1.1.1g.tar.gz
-<span class="token comment"># 解压</span>
-<span class="token function">tar</span> -zxvf openssl-1.1.1g.tar.gz
-<span class="token comment"># 配置、编译</span>
-./config  --prefix<span class="token operator">=</span>/home/openssl
-<span class="token function">make</span>
-<span class="token comment"># 检查是否出错</span>
-<span class="token function">make</span> <span class="token builtin class-name">test</span>
-<span class="token comment"># 安装</span>
-<span class="token function">make</span> <span class="token function">install</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 下载</span><br>wget https://www.openssl.org/<span class="hljs-built_in">source</span>/openssl-1.1.1g.tar.gz<br><span class="hljs-comment"># 解压</span><br>tar -zxvf openssl-1.1.1g.tar.gz<br><span class="hljs-comment"># 配置、编译</span><br>./config  --prefix=/home/openssl<br>make<br><span class="hljs-comment"># 检查是否出错</span><br>make <span class="hljs-built_in">test</span><br><span class="hljs-comment"># 安装</span><br>make install<br></code></pre></td></tr></table></figure>
 
 <p>安装完成后检查链接库是否正常，将缺少的文件直接软链接到系统的<code>/usr/lib64</code>目录下</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ln</span> -s /home/openssl/lib/libssl.so.1.1 /usr/lib64/libssl.so.1.1
-<span class="token function">ln</span> -s /home/openssl/lib/libcrypto.so.1.1 /usr/lib64/libcrypto.so.1.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">ln -s /home/openssl/lib/libssl.so.1.1 /usr/lib64/libssl.so.1.1<br>ln -s /home/openssl/lib/libcrypto.so.1.1 /usr/lib64/libcrypto.so.1.1<br></code></pre></td></tr></table></figure>
 
 <p>最后检查系统使用的openssl的版本是否为新版以及系统的库指向是否正确</p>
 <p><img src="https://resource.tinychen.com/image-20200526134022033.png" srcset="/img/loading.gif" lazyload></p>
@@ -316,7 +303,7 @@
 <p>从1.13版本开始支持TLS1.3</p>
 <p><img src="https://resource.tinychen.com/image-20200520093151328.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-2-指定openssl目录进行nginx编译安装"><a href="#2-2-指定openssl目录进行nginx编译安装" class="headerlink" title="2.2 指定openssl目录进行nginx编译安装"></a>2.2 指定openssl目录进行nginx编译安装</h2><p>nginx的编译安装此前已经介绍过了，有需要的同学可以点击<a href="https://tinychen.com/20200317-nginx01-base-conf-static-web/">这里</a>回顾。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">wget</span> http://nginx.org/download/nginx-1.18.0.tar.gz<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget http://nginx.org/download/nginx-1.18.0.tar.gz<br></code></pre></td></tr></table></figure>
 
 <p>这次我们使用的是截止<code>2020年5月19号</code>最新的稳定版本<code>nginx1.18.0</code>，一些注意的事项如下：</p>
 <ul>
@@ -325,123 +312,27 @@
 <li><code>--with-openssl-opt=enable-tls1_3</code>用于开启openssl库的tls1.3支持，但是现在的新版本已经默认开启，无需额外添加这个参数</li>
 </ul>
 <p>剩下的就和常规的编译安装无异，下面是此次编译的参数：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">./configure --prefix<span class="token operator">=</span>/home/nginx <span class="token punctuation">\</span>
---sbin-path<span class="token operator">=</span>/home/nginx/sbin/nginx <span class="token punctuation">\</span>
---with-openssl-opt<span class="token operator">=</span>enable-tls1_3 <span class="token punctuation">\</span>
---with-openssl<span class="token operator">=</span>/home/openssl <span class="token punctuation">\</span>
---conf-path<span class="token operator">=</span>/home/nginx/nginx.conf <span class="token punctuation">\</span>
---error-log-path<span class="token operator">=</span>/home/nginx/logs/error.log <span class="token punctuation">\</span>
---http-log-path<span class="token operator">=</span>/home/nginx/logs/access.log <span class="token punctuation">\</span>
---pid-path<span class="token operator">=</span>/home/nginx/nginx.pid <span class="token punctuation">\</span>
---lock-path<span class="token operator">=</span>/home/nginx/nginx.lock <span class="token punctuation">\</span>
---http-client-body-temp-path<span class="token operator">=</span>/home/nginx/cache/client_temp <span class="token punctuation">\</span>
---http-proxy-temp-path<span class="token operator">=</span>/home/nginx/cache/proxy_temp <span class="token punctuation">\</span>
---http-fastcgi-temp-path<span class="token operator">=</span>/home/nginx/cache/fastcgi_temp <span class="token punctuation">\</span>
---http-uwsgi-temp-path<span class="token operator">=</span>/home/nginx/cache/uwsgi_temp <span class="token punctuation">\</span>
---http-scgi-temp-path<span class="token operator">=</span>/home/nginx/cache/scgi_temp <span class="token punctuation">\</span>
---user<span class="token operator">=</span>nginx <span class="token punctuation">\</span>
---group<span class="token operator">=</span>nginx <span class="token punctuation">\</span>
---with-compat <span class="token punctuation">\</span>
---with-file-aio <span class="token punctuation">\</span>
---with-threads <span class="token punctuation">\</span>
---with-http_addition_module <span class="token punctuation">\</span>
---with-http_auth_request_module <span class="token punctuation">\</span>
---with-http_dav_module <span class="token punctuation">\</span>
---with-http_flv_module <span class="token punctuation">\</span>
---with-http_gunzip_module <span class="token punctuation">\</span>
---with-http_gzip_static_module <span class="token punctuation">\</span>
---with-http_mp4_module <span class="token punctuation">\</span>
---with-http_random_index_module <span class="token punctuation">\</span>
---with-http_realip_module <span class="token punctuation">\</span>
---with-http_secure_link_module <span class="token punctuation">\</span>
---with-http_slice_module <span class="token punctuation">\</span>
---with-http_ssl_module <span class="token punctuation">\</span>
---with-http_stub_status_module <span class="token punctuation">\</span>
---with-http_sub_module <span class="token punctuation">\</span>
---with-http_v2_module <span class="token punctuation">\</span>
---with-stream<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash">./configure --prefix=/home/nginx \<br>--sbin-path=/home/nginx/sbin/nginx \<br>--with-openssl-opt=enable-tls1_3 \<br>--with-openssl=/home/openssl \<br>--conf-path=/home/nginx/nginx.conf \<br>--error-log-path=/home/nginx/logs/error.log \<br>--http-log-path=/home/nginx/logs/access.log \<br>--pid-path=/home/nginx/nginx.pid \<br>--lock-path=/home/nginx/nginx.lock \<br>--http-client-body-temp-path=/home/nginx/cache/client_temp \<br>--http-proxy-temp-path=/home/nginx/cache/proxy_temp \<br>--http-fastcgi-temp-path=/home/nginx/cache/fastcgi_temp \<br>--http-uwsgi-temp-path=/home/nginx/cache/uwsgi_temp \<br>--http-scgi-temp-path=/home/nginx/cache/scgi_temp \<br>--user=nginx \<br>--group=nginx \<br>--with-compat \<br>--with-file-aio \<br>--with-threads \<br>--with-http_addition_module \<br>--with-http_auth_request_module \<br>--with-http_dav_module \<br>--with-http_flv_module \<br>--with-http_gunzip_module \<br>--with-http_gzip_static_module \<br>--with-http_mp4_module \<br>--with-http_random_index_module \<br>--with-http_realip_module \<br>--with-http_secure_link_module \<br>--with-http_slice_module \<br>--with-http_ssl_module \<br>--with-http_stub_status_module \<br>--with-http_sub_module \<br>--with-http_v2_module \<br>--with-stream<br></code></pre></td></tr></table></figure>
 
 <p>编译的时候出现报错：</p>
 <p><img src="https://resource.tinychen.com/image-20200520102345707.png" srcset="/img/loading.gif" lazyload></p>
 <p>修改nginx源码目录中<code>auto/lib/openssl/conf</code>中的openssl路径参数，在40行左右的位置对应四个参数中的<code>.openssl</code>去掉，修改后的内容如下：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">39</span>             <span class="token assign-left variable">CORE_INCS</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$CORE_INCS</span> <span class="token variable">$OPENSSL</span>/include"</span>
-<span class="token number">40</span>             <span class="token assign-left variable">CORE_DEPS</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$CORE_DEPS</span> <span class="token variable">$OPENSSL</span>/include/openssl/ssl.h"</span>
-<span class="token number">41</span>             <span class="token assign-left variable">CORE_LIBS</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$CORE_LIBS</span> <span class="token variable">$OPENSSL</span>/lib/libssl.a"</span>
-<span class="token number">42</span>             <span class="token assign-left variable">CORE_LIBS</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$CORE_LIBS</span> <span class="token variable">$OPENSSL</span>/lib/libcrypto.a"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">39             CORE_INCS=<span class="hljs-string">&quot;<span class="hljs-variable">$CORE_INCS</span> <span class="hljs-variable">$OPENSSL</span>/include&quot;</span><br>40             CORE_DEPS=<span class="hljs-string">&quot;<span class="hljs-variable">$CORE_DEPS</span> <span class="hljs-variable">$OPENSSL</span>/include/openssl/ssl.h&quot;</span><br>41             CORE_LIBS=<span class="hljs-string">&quot;<span class="hljs-variable">$CORE_LIBS</span> <span class="hljs-variable">$OPENSSL</span>/lib/libssl.a&quot;</span><br>42             CORE_LIBS=<span class="hljs-string">&quot;<span class="hljs-variable">$CORE_LIBS</span> <span class="hljs-variable">$OPENSSL</span>/lib/libcrypto.a&quot;</span><br></code></pre></td></tr></table></figure>
 
 <p>然后重新编译安装。</p>
 <p><img src="https://resource.tinychen.com/image-20200526114531995.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-3-nginx配置修改"><a href="#2-3-nginx配置修改" class="headerlink" title="2.3 nginx配置修改"></a>2.3 nginx配置修改</h2><p>安装完成之后将原来的配置文件和html文件全部迁移到新的nginx目录下并进行相应的修改就可以正常的启用nginx了。如果此前的nginx是直接使用yum安装并且使用systemd进行守护进程的控制，我们可以将对应的systemd unit文件中的目录进行修改，一般来说只需要修改相关路径的参数即可：</p>
 <p><img src="https://resource.tinychen.com/image-20200520095720093.png" srcset="/img/loading.gif" lazyload></p>
 <p>首先我们停止服务，然后修改文件，接着重启服务即可：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 停止nginx</span>
-systemctl stop nginx
-<span class="token comment"># 修改配置文件</span>
-<span class="token function">vim</span> /usr/lib/systemd/system/nginx.service
-
-<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
-<span class="token assign-left variable">Description</span><span class="token operator">=</span>nginx - high performance web server
-<span class="token assign-left variable">Documentation</span><span class="token operator">=</span>http://nginx.org/en/docs/
-<span class="token assign-left variable">After</span><span class="token operator">=</span>network-online.target remote-fs.target nss-lookup.target
-<span class="token assign-left variable">Wants</span><span class="token operator">=</span>network-online.target
-
-<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
-<span class="token assign-left variable">Type</span><span class="token operator">=</span>forking
-<span class="token assign-left variable">PIDFile</span><span class="token operator">=</span>/home/nginx/nginx.pid
-<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/nginx/sbin/nginx -c /home/nginx/nginx.conf
-<span class="token assign-left variable">ExecReload</span><span class="token operator">=</span>/bin/kill -s HUP <span class="token variable">$MAINPID</span>
-<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/bin/kill -s <span class="token environment constant">TERM</span> <span class="token variable">$MAINPID</span>
-
-<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
-<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
-
-<span class="token comment"># 重启daemon进程</span>
-systemctl daemon-reload<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 停止nginx</span><br>systemctl stop nginx<br><span class="hljs-comment"># 修改配置文件</span><br>vim /usr/lib/systemd/system/nginx.service<br><br>[Unit]<br>Description=nginx - high performance web server<br>Documentation=http://nginx.org/en/docs/<br>After=network-online.target remote-fs.target nss-lookup.target<br>Wants=network-online.target<br><br>[Service]<br>Type=forking<br>PIDFile=/home/nginx/nginx.pid<br>ExecStart=/home/nginx/sbin/nginx -c /home/nginx/nginx.conf<br>ExecReload=/bin/<span class="hljs-built_in">kill</span> -s HUP <span class="hljs-variable">$MAINPID</span><br>ExecStop=/bin/<span class="hljs-built_in">kill</span> -s TERM <span class="hljs-variable">$MAINPID</span><br><br>[Install]<br>WantedBy=multi-user.target<br><br><span class="hljs-comment"># 重启daemon进程</span><br>systemctl daemon-reload<br></code></pre></td></tr></table></figure>
 
 <p>如果还想使用全局命令nginx的话，可以先把原来的yum安装的移除再将编译安装的新版本指向系统目录</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment">#使用which nginx查看nginx的指向</span>
-$  <span class="token function">which</span> nginx
-/usr/sbin/nginx
-$  <span class="token function">mv</span> /usr/sbin/nginx /usr/sbin/nginx.bak
-$  <span class="token function">ln</span> -s /home/nginx/sbin/nginx /usr/sbin/nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#使用which nginx查看nginx的指向</span><br>$  <span class="hljs-built_in">which</span> nginx<br>/usr/sbin/nginx<br>$  mv /usr/sbin/nginx /usr/sbin/nginx.bak<br>$  ln -s /home/nginx/sbin/nginx /usr/sbin/nginx<br></code></pre></td></tr></table></figure>
 
 <p>最后我们查看nginx版本信息：</p>
 <p><img src="https://resource.tinychen.com/image-20200526135856527.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、配置http2和tls1-3"><a href="#3、配置http2和tls1-3" class="headerlink" title="3、配置http2和tls1.3"></a>3、配置http2和tls1.3</h1><h2 id="3-1-nginx配置"><a href="#3-1-nginx配置" class="headerlink" title="3.1 nginx配置"></a>3.1 nginx配置</h2><p>nginx中开启http2和tls1.3十分简单，这里配置如下：</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">server&#123;
-    listen 80;
-    server_name tinychen.com www.tinychen.com;
-
-    if ($server_port &#x3D; 80)&#123;
-        return 301 https:&#x2F;&#x2F;$host$request_uri;
-    &#125;
-&#125;
-
-server&#123;
-    listen 443 ssl http2 default_server;
-    server_name tinychen.com www.tinychen.com;
-
-    add_header Strict-Transport-Security &quot;max-age&#x3D;63072000; includeSubDomains; preload&quot;;
-
-    ssl_ciphers TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-256-GCM-SHA384:TLS13-AES-128-GCM-SHA256:EECDH+CHACHA20:EECDH+AESGCM:EECDH+AES;
-    #ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_stapling on;
-    ssl_stapling_verify on;
-    ssl_trusted_certificate certs&#x2F;tinychen.com.pem;
-    ssl_prefer_server_ciphers on;
-    ssl_certificate certs&#x2F;tinychen.com.pem;
-    ssl_certificate_key certs&#x2F;tinychen.com.key;
-    ssl_session_cache shared:SSL:1m;
-    ssl_verify_depth 10;
-    ssl_session_timeout 30m;
-
-    location &#x2F; &#123;
-        root html&#x2F;;
-        index index.html index.htm;
-    &#125;
-
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">server</span>&#123;<br>    <span class="hljs-keyword">listen</span> <span class="hljs-number">80</span>;<br>    server_name tinychen.com www.tinychen.com;<br><br>    <span class="hljs-keyword">if</span> ($server_port = <span class="hljs-number">80</span>)&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">301</span> https://$host$<span class="pgsql">request_uri;</span><br><span class="pgsql">    &#125;</span><br><span class="pgsql">&#125;</span><br><span class="pgsql"></span><br><span class="pgsql"><span class="hljs-keyword">server</span>&#123;</span><br><span class="pgsql">    <span class="hljs-keyword">listen</span> <span class="hljs-number">443</span> ssl http2 default_server;</span><br><span class="pgsql">    server_name tinychen.com www.tinychen.com;</span><br><span class="pgsql"></span><br><span class="pgsql">    add_header <span class="hljs-keyword">Strict</span>-Transport-<span class="hljs-keyword">Security</span> &quot;max-age=63072000; includeSubDomains; preload&quot;;</span><br><span class="pgsql"></span><br><span class="pgsql">    ssl_ciphers TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES<span class="hljs-number">-256</span>-GCM-SHA384:TLS13-AES<span class="hljs-number">-128</span>-GCM-SHA256:EECDH+CHACHA20:EECDH+AESGCM:EECDH+AES;</span><br><span class="pgsql">    #ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256;</span><br><span class="pgsql">    ssl_protocols TLSv1<span class="hljs-number">.2</span> TLSv1<span class="hljs-number">.3</span>;</span><br><span class="pgsql">    ssl_stapling <span class="hljs-keyword">on</span>;</span><br><span class="pgsql">    ssl_stapling_verify <span class="hljs-keyword">on</span>;</span><br><span class="pgsql">    ssl_trusted_certificate certs/tinychen.com.pem;</span><br><span class="pgsql">    ssl_prefer_server_ciphers <span class="hljs-keyword">on</span>;</span><br><span class="pgsql">    ssl_certificate certs/tinychen.com.pem;</span><br><span class="pgsql">    ssl_certificate_key certs/tinychen.com.key;</span><br><span class="pgsql">    ssl_session_cache shared:SSL:<span class="hljs-number">1</span>m;</span><br><span class="pgsql">    ssl_verify_depth <span class="hljs-number">10</span>;</span><br><span class="pgsql">    ssl_session_timeout <span class="hljs-number">30</span>m;</span><br><span class="pgsql"></span><br><span class="pgsql">    <span class="hljs-keyword">location</span> / &#123;</span><br><span class="pgsql">        root html/;</span><br><span class="pgsql">        <span class="hljs-keyword">index</span> <span class="hljs-keyword">index</span>.html <span class="hljs-keyword">index</span>.htm;</span><br><span class="pgsql">    &#125;</span><br><span class="pgsql"></span><br><span class="pgsql">&#125;</span><br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>由于http2默认需要使用加密，因此直接在nginx对应的ssl监听端口上加上<code>http2</code>字段即可</li>
@@ -958,8 +849,6 @@ server&#123;
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

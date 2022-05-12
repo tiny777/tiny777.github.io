@@ -45,8 +45,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +222,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.2k words
+          1.3k words
         
       </span>
     
@@ -296,24 +294,17 @@
 </blockquote>
 <h1 id="2、如何修改"><a href="#2、如何修改" class="headerlink" title="2、如何修改"></a>2、如何修改</h1><p>先介绍在Ubuntu下的解决方案。</p>
 <p>首先我们把硬件时间（BIOS时间）将默认的UTC改为CST，然后重启，使得两个系统的时间保持一致。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> timedatectl set-local-rtc <span class="token number">1</span>
-<span class="token comment">#上述代码中的1改为0即可将硬件时间修改为默认的UTC时间</span>
-<span class="token function">sudo</span> <span class="token function">reboot</span>
-<span class="token comment">#重启系统使改动生效</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">sudo timedatectl set-local-rtc 1<br><span class="hljs-comment">#上述代码中的1改为0即可将硬件时间修改为默认的UTC时间</span><br>sudo reboot<br><span class="hljs-comment">#重启系统使改动生效</span><br></code></pre></td></tr></table></figure>
 
 <p>接着我们更新一下系统时间</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">apt-get</span> <span class="token function">install</span> ntpdate
-<span class="token comment">#这里的操作是安装ntpdate工具</span>
-<span class="token function">sudo</span> ntpdate time.windows.com
-<span class="token comment">#使用ntpdate工具从time.windows.com上面同步时间</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">sudo apt-get install ntpdate<br><span class="hljs-comment">#这里的操作是安装ntpdate工具</span><br>sudo ntpdate time.windows.com<br><span class="hljs-comment">#使用ntpdate工具从time.windows.com上面同步时间</span><br></code></pre></td></tr></table></figure>
 
 <p>最后我们将时间更新到硬件上，以保证重启后改动不会被还原</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> hwclock --localtime --systohc
-<span class="token comment">#这里的代码意思是使用hwclock命令将本地时间localtime从sysclock同步到hwclock</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">sudo hwclock --localtime --systohc<br><span class="hljs-comment">#这里的代码意思是使用hwclock命令将本地时间localtime从sysclock同步到hwclock</span><br></code></pre></td></tr></table></figure>
 
 <p><strong>到这里双系统的时间就都正常了。</strong></p>
 <p>或者也可以使用windows下的解决方案，使用管理员权限打开powershell，然后输入下面的命令，接着重启就可以了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">reg <span class="token function">add</span> HKLM<span class="token punctuation">\</span>SYSTEM<span class="token punctuation">\</span>CurrentControlSet<span class="token punctuation">\</span>Control<span class="token punctuation">\</span>TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>原理就是：在注册表项<code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation</code>中添加一个名为<code>RealTimeIsUniversal</code>的值，类型为<code>REG_DWORD</code>，数据为<code>1</code>。此项的作用就是让Windows将硬件时间当作UTC，与Ubuntu的默认设置一致。</p>
@@ -611,8 +602,6 @@
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

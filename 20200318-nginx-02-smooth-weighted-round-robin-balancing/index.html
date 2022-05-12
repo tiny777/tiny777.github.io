@@ -46,8 +46,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -225,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.2k words
+          2.3k words
         
       </span>
     
@@ -290,22 +288,13 @@
 <span id="more"></span>
 
 <p>我们先来看一个简单的负载均衡：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">upstream backend <span class="token punctuation">&#123;</span>    
-    server <span class="token number">10.0</span>.0.1:80<span class="token punctuation">;</span>		<span class="token comment">#服务器a</span>
-    server <span class="token number">10.0</span>.0.2:80<span class="token punctuation">;</span> 	<span class="token comment">#服务器b</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 10.0.0.1:80;		<span class="hljs-comment">#服务器a</span><br>    server 10.0.0.2:80; 	<span class="hljs-comment">#服务器b</span><br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>这是一个简单的负载均衡，将接受到的访问按照默认的均分原则分配给后台的两台服务器，这时候两台server的访问量应该是1：1。如果我们在后面加上权重值，例如</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">upstream backend <span class="token punctuation">&#123;</span>    
-    server <span class="token number">10.0</span>.0.1:80   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">;</span>	<span class="token comment">#服务器a  </span>
-    server <span class="token number">10.0</span>.0.2:80   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">;</span>	<span class="token comment">#服务器b</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 10.0.0.1:80   weight=1;	<span class="hljs-comment">#服务器a  </span><br>    server 10.0.0.2:80   weight=2;	<span class="hljs-comment">#服务器b</span><br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>这时候如果进行访问，我们得到的结果就应该是<code>b a b</code>，如果再进行修改权重</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">upstream backend <span class="token punctuation">&#123;</span>    
-    server <span class="token number">10.0</span>.0.1:80   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">;</span>		<span class="token comment">#服务器a</span>
-    server <span class="token number">10.0</span>.0.2:80   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">10</span><span class="token punctuation">;</span> 	<span class="token comment">#服务器b</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 10.0.0.1:80   weight=5;		<span class="hljs-comment">#服务器a</span><br>    server 10.0.0.2:80   weight=10; 	<span class="hljs-comment">#服务器b</span><br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>虽然两个权重化简之后都是1：2，但是这时候访问策略就有两种选择</p>
 <ul>
@@ -315,20 +304,7 @@
 </li>
 </ul>
 <p>显然第二种访问策略要更加优秀，可以避免一台服务器被连续访问多次而另一台服务器进入空闲状态。在nginx中的upstream模块实现这个操作使用了一个名为<code>smooth weighted round-robin balancing</code>的算法，直译过来就是平滑加权轮询负载均衡算法，大概意思就是实现上面说的第二种操作，下面我们用一个稍微复杂一点的配置来检验一下。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">upstream backend <span class="token punctuation">&#123;</span>    
-    server <span class="token number">127.0</span>.0.1:8080   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">3</span><span class="token punctuation">;</span>    
-    server <span class="token number">127.0</span>.0.1:8081   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">;</span> 
-    server <span class="token number">127.0</span>.0.1:8082   <span class="token assign-left variable">weight</span><span class="token operator">=</span><span class="token number">7</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-
-server <span class="token punctuation">&#123;</span>
-    listen <span class="token number">80</span><span class="token punctuation">;</span>
-    server_name example.com www.example.com<span class="token punctuation">;</span>
-
-    location / <span class="token punctuation">&#123;</span>
-        proxy_pass http://backend<span class="token punctuation">;</span>
-    <span class="token punctuation">&#125;</span>
-<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 127.0.0.1:8080   weight=3;    <br>    server 127.0.0.1:8081   weight=5; <br>    server 127.0.0.1:8082   weight=7;<br>&#125;<br><br>server &#123;<br>    listen 80;<br>    server_name example.com www.example.com;<br><br>    location / &#123;<br>        proxy_pass http://backend;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>这里我们使用nginx监听在本机8080~8081三个端口，然后这三个端口作为本机的80端口的负载均衡后端，接着我们把权重设为比较复杂的<code>3：5：7</code>，然后我们进行实际测试。</p>
 <p><img src="https://resource.tinychen.com/blog/20200318/pwzKS3ftCfn5.png" srcset="/img/loading.gif" lazyload></p>
@@ -699,8 +675,6 @@ server <span class="token punctuation">&#123;</span>
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

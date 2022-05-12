@@ -47,8 +47,6 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
-
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -226,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          32k words
+          33k words
         
       </span>
     
@@ -237,7 +235,7 @@
         
         
         
-          264 mins
+          279 mins
         
       </span>
     
@@ -321,189 +319,59 @@
 </tr>
 </tbody></table>
 <h2 id="1-2-检查mac和product-uuid"><a href="#1-2-检查mac和product-uuid" class="headerlink" title="1.2 检查mac和product_uuid"></a>1.2 检查mac和product_uuid</h2><p>同一个k8s集群内的所有节点需要确保<code>mac</code>地址和<code>product_uuid</code>均唯一，开始集群初始化之前需要检查相关信息</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查mac地址</span>
-<span class="token function">ip</span> <span class="token function">link</span> 
-<span class="token function">ifconfig</span> -a
-
-<span class="token comment"># 检查product_uuid</span>
-<span class="token function">sudo</span> <span class="token function">cat</span> /sys/class/dmi/id/product_uuid<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 检查mac地址</span><br>ip link <br>ifconfig -a<br><br><span class="hljs-comment"># 检查product_uuid</span><br>sudo cat /sys/class/dmi/id/product_uuid<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-3-配置ssh免密登录（可选）"><a href="#1-3-配置ssh免密登录（可选）" class="headerlink" title="1.3 配置ssh免密登录（可选）"></a>1.3 配置ssh免密登录（可选）</h2><p>如果k8s集群的节点有多个网卡，确保每个节点能通过正确的网卡互联访问</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在root用户下面生成一个公用的key，并配置可以使用该key免密登录</span>
-<span class="token function">su</span> root
-ssh-keygen
-<span class="token builtin class-name">cd</span> /root/.ssh/
-<span class="token function">cat</span> id_rsa.pub <span class="token operator">>></span> authorized_keys
-<span class="token function">chmod</span> <span class="token number">600</span> authorized_keys
-
-
-<span class="token function">cat</span> <span class="token operator">>></span> ~/.ssh/config <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-Host tiny-calico-master-88-1.k8s.tcinternal
-    HostName 10.31.88.1
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_rsa
-
-Host tiny-calico-worker-88-11.k8s.tcinternal
-    HostName 10.31.88.11
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_rsa
-
-Host tiny-calico-worker-88-12.k8s.tcinternal
-    HostName 10.31.88.12
-    User root
-    Port 22
-    IdentityFile ~/.ssh/id_rsa
-EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在root用户下面生成一个公用的key，并配置可以使用该key免密登录</span><br>su root<br>ssh-keygen<br><span class="hljs-built_in">cd</span> /root/.ssh/<br>cat id_rsa.pub &gt;&gt; authorized_keys<br>chmod 600 authorized_keys<br><br><br>cat &gt;&gt; ~/.ssh/config &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">Host tiny-calico-master-88-1.k8s.tcinternal</span><br><span class="hljs-string">    HostName 10.31.88.1</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host tiny-calico-worker-88-11.k8s.tcinternal</span><br><span class="hljs-string">    HostName 10.31.88.11</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host tiny-calico-worker-88-12.k8s.tcinternal</span><br><span class="hljs-string">    HostName 10.31.88.12</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-4-修改hosts文件"><a href="#1-4-修改hosts文件" class="headerlink" title="1.4 修改hosts文件"></a>1.4 修改hosts文件</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">>></span> /etc/hosts <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-10.31.88.1  tiny-calico-master-88-1 tiny-calico-master-88-1.k8s.tcinternal
-10.31.88.11 tiny-calico-worker-88-11 tiny-calico-worker-88-11.k8s.tcinternal
-10.31.88.12 tiny-calico-worker-88-12 tiny-calico-worker-88-12.k8s.tcinternal
-EOF</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-4-修改hosts文件"><a href="#1-4-修改hosts文件" class="headerlink" title="1.4 修改hosts文件"></a>1.4 修改hosts文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat &gt;&gt; /etc/hosts &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">10.31.88.1  tiny-calico-master-88-1 tiny-calico-master-88-1.k8s.tcinternal</span><br><span class="hljs-string">10.31.88.11 tiny-calico-worker-88-11 tiny-calico-worker-88-11.k8s.tcinternal</span><br><span class="hljs-string">10.31.88.12 tiny-calico-worker-88-12 tiny-calico-worker-88-12.k8s.tcinternal</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-5-关闭swap内存"><a href="#1-5-关闭swap内存" class="headerlink" title="1.5 关闭swap内存"></a>1.5 关闭swap内存</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用命令直接关闭swap内存</span>
-swapoff -a
-<span class="token comment"># 修改fstab文件禁止开机自动挂载swap分区</span>
-<span class="token function">sed</span> -i <span class="token string">'/swap / s/^\(.*\)$/#<span class="token entity" title="\1">\1</span>/g'</span> /etc/fstab<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-5-关闭swap内存"><a href="#1-5-关闭swap内存" class="headerlink" title="1.5 关闭swap内存"></a>1.5 关闭swap内存</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用命令直接关闭swap内存</span><br>swapoff -a<br><span class="hljs-comment"># 修改fstab文件禁止开机自动挂载swap分区</span><br>sed -i <span class="hljs-string">&#x27;/swap / s/^\(.*\)$/#\1/g&#x27;</span> /etc/fstab<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-6-配置时间同步"><a href="#1-6-配置时间同步" class="headerlink" title="1.6 配置时间同步"></a>1.6 配置时间同步</h2><p>这里可以根据自己的习惯选择ntp或者是chrony同步均可，同步的时间源服务器可以选择阿里云的<code>ntp1.aliyun.com</code>或者是国家时间中心的<code>ntp.ntsc.ac.cn</code>。</p>
-<h3 id="使用ntp同步"><a href="#使用ntp同步" class="headerlink" title="使用ntp同步"></a>使用ntp同步</h3><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 使用yum安装ntpdate工具
-yum install ntpdate -y
+<h3 id="使用ntp同步"><a href="#使用ntp同步" class="headerlink" title="使用ntp同步"></a>使用ntp同步</h3><figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs vala"><span class="hljs-meta"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-meta"># 使用国家时间中心的源同步时间</span><br>ntpdate ntp.ntsc.ac.cn<br><br><span class="hljs-meta"># 最后查看一下时间</span><br>hwclock<br></code></pre></td></tr></table></figure>
 
-# 使用国家时间中心的源同步时间
-ntpdate ntp.ntsc.ac.cn
-
-# 最后查看一下时间
-hwclock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
-
-<h3 id="使用chrony同步"><a href="#使用chrony同步" class="headerlink" title="使用chrony同步"></a>使用chrony同步</h3><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用yum安装chrony</span>
-yum <span class="token function">install</span> chrony -y
-
-<span class="token comment"># 设置开机启动并开启chony并查看运行状态</span>
-systemctl <span class="token builtin class-name">enable</span> chronyd.service
-systemctl start chronyd.service
-systemctl status chronyd.service
-
-<span class="token comment"># 当然也可以自定义时间服务器</span>
-<span class="token function">vim</span> /etc/chrony.conf
-
-<span class="token comment"># 修改前</span>
-$ <span class="token function">grep</span> server /etc/chrony.conf
-<span class="token comment"># Use public servers from the pool.ntp.org project.</span>
-server <span class="token number">0</span>.centos.pool.ntp.org iburst
-server <span class="token number">1</span>.centos.pool.ntp.org iburst
-server <span class="token number">2</span>.centos.pool.ntp.org iburst
-server <span class="token number">3</span>.centos.pool.ntp.org iburst
-
-<span class="token comment"># 修改后</span>
-$ <span class="token function">grep</span> server /etc/chrony.conf
-<span class="token comment"># Use public servers from the pool.ntp.org project.</span>
-server ntp.ntsc.ac.cn iburst
-
-<span class="token comment"># 重启服务使配置文件生效</span>
-systemctl restart chronyd.service
-
-<span class="token comment"># 查看chrony的ntp服务器状态</span>
-chronyc sourcestats -v
-chronyc sources -v
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h3 id="使用chrony同步"><a href="#使用chrony同步" class="headerlink" title="使用chrony同步"></a>使用chrony同步</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装chrony</span><br>yum install chrony -y<br><br><span class="hljs-comment"># 设置开机启动并开启chony并查看运行状态</span><br>systemctl <span class="hljs-built_in">enable</span> chronyd.service<br>systemctl start chronyd.service<br>systemctl status chronyd.service<br><br><span class="hljs-comment"># 当然也可以自定义时间服务器</span><br>vim /etc/chrony.conf<br><br><span class="hljs-comment"># 修改前</span><br>$ grep server /etc/chrony.conf<br><span class="hljs-comment"># Use public servers from the pool.ntp.org project.</span><br>server 0.centos.pool.ntp.org iburst<br>server 1.centos.pool.ntp.org iburst<br>server 2.centos.pool.ntp.org iburst<br>server 3.centos.pool.ntp.org iburst<br><br><span class="hljs-comment"># 修改后</span><br>$ grep server /etc/chrony.conf<br><span class="hljs-comment"># Use public servers from the pool.ntp.org project.</span><br>server ntp.ntsc.ac.cn iburst<br><br><span class="hljs-comment"># 重启服务使配置文件生效</span><br>systemctl restart chronyd.service<br><br><span class="hljs-comment"># 查看chrony的ntp服务器状态</span><br>chronyc sourcestats -v<br>chronyc sources -v<br><br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-7-关闭selinux"><a href="#1-7-关闭selinux" class="headerlink" title="1.7 关闭selinux"></a>1.7 关闭selinux</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用命令直接关闭</span>
-setenforce <span class="token number">0</span>
-
-<span class="token comment"># 也可以直接修改/etc/selinux/config文件</span>
-<span class="token function">sed</span> -i <span class="token string">'s/^SELINUX=enforcing$/SELINUX=disabled/'</span> /etc/selinux/config<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<h2 id="1-7-关闭selinux"><a href="#1-7-关闭selinux" class="headerlink" title="1.7 关闭selinux"></a>1.7 关闭selinux</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用命令直接关闭</span><br>setenforce 0<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=disabled/&#x27;</span> /etc/selinux/config<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-8-配置防火墙"><a href="#1-8-配置防火墙" class="headerlink" title="1.8 配置防火墙"></a>1.8 配置防火墙</h2><p>k8s集群之间通信和服务暴露需要使用较多端口，为了方便，直接禁用防火墙</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># centos7使用systemctl禁用默认的firewalld服务</span>
-systemctl disable firewalld.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># centos7使用systemctl禁用默认的firewalld服务</span><br>systemctl <span class="hljs-built_in">disable</span> firewalld.service<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-9-配置netfilter参数"><a href="#1-9-配置netfilter参数" class="headerlink" title="1.9 配置netfilter参数"></a>1.9 配置netfilter参数</h2><p>这里主要是需要配置内核加载<code>br_netfilter</code>和<code>iptables</code>放行<code>ipv6</code>和<code>ipv4</code>的流量，确保集群内的容器能够正常通信。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cat &lt;&lt;EOF | sudo tee &#x2F;etc&#x2F;modules-load.d&#x2F;k8s.conf
-br_netfilter
-EOF
-
-cat &lt;&lt;EOF | sudo tee &#x2F;etc&#x2F;sysctl.d&#x2F;k8s.conf
-net.bridge.bridge-nf-call-ip6tables &#x3D; 1
-net.bridge.bridge-nf-call-iptables &#x3D; 1
-EOF
-sudo sysctl --system<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight gauss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs gauss">cat &lt;&lt;<span class="hljs-built_in">EOF</span> | sudo tee /etc/modules-load.d/k8s.conf<br>br_netfilter<br><span class="hljs-built_in">EOF</span><br><br>cat &lt;&lt;<span class="hljs-built_in">EOF</span> | sudo tee /etc/sysctl.d/k8s.conf<br>net.bridge.bridge-nf-<span class="hljs-keyword">call</span>-ip6tables = <span class="hljs-number">1</span><br>net.bridge.bridge-nf-<span class="hljs-keyword">call</span>-iptables = <span class="hljs-number">1</span><br><span class="hljs-built_in">EOF</span><br>sudo sysctl --<span class="hljs-keyword">system</span><br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="1-10-关闭IPV6（可选）"><a href="#1-10-关闭IPV6（可选）" class="headerlink" title="1.10 关闭IPV6（可选）"></a>1.10 关闭IPV6（可选）</h2><p>虽然新版本的k8s已经支持双栈网络，但是本次的集群部署过程并不涉及IPv6网络的通信，因此关闭IPv6网络支持</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接在内核中添加ipv6禁用参数</span>
-grubby --update-kernel<span class="token operator">=</span>ALL --args<span class="token operator">=</span>ipv6.disable<span class="token operator">=</span><span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接在内核中添加ipv6禁用参数</span><br>grubby --update-kernel=ALL --args=ipv6.disable=1<br></code></pre></td></tr></table></figure>
 
 <h2 id="1-11-配置IPVS（可选）"><a href="#1-11-配置IPVS（可选）" class="headerlink" title="1.11 配置IPVS（可选）"></a>1.11 配置IPVS（可选）</h2><p>IPVS是专门设计用来应对负载均衡场景的组件，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md#run-kube-proxy-in-ipvs-mode">kube-proxy 中的 IPVS 实现</a>通过减少对 iptables 的使用来增加可扩展性。在 iptables 输入链中不使用 PREROUTING，而是创建一个假的接口，叫做 kube-ipvs0，当k8s集群中的负载均衡配置变多的时候，IPVS能实现比iptables更高效的转发性能。</p>
 <blockquote>
 <p>注意在4.19之后的内核版本中使用<code>nf_conntrack</code>模块来替换了原有的<code>nf_conntrack_ipv4</code>模块</p>
 <p>(<strong>Notes</strong>: use <code>nf_conntrack</code> instead of <code>nf_conntrack_ipv4</code> for Linux kernel 4.19 and later)</p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在使用ipvs模式之前确保安装了ipset和ipvsadm</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> ipset ipvsadm -y
-
-<span class="token comment"># 手动加载ipvs相关模块</span>
-modprobe -- ip_vs
-modprobe -- ip_vs_rr
-modprobe -- ip_vs_wrr
-modprobe -- ip_vs_sh
-modprobe -- nf_conntrack_ipv4
-
-<span class="token comment"># 配置开机自动加载ipvs相关模块</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/modules-load.d/ipvs.conf</span>
-ip_vs
-ip_vs_rr
-ip_vs_wrr
-ip_vs_sh
-nf_conntrack_ipv4
-EOF</span>
-
-<span class="token function">sudo</span> sysctl --system
-<span class="token comment"># 最好重启一遍系统确定是否生效</span>
-
-$ lsmod <span class="token operator">|</span> <span class="token function">grep</span> -e ip_vs -e nf_conntrack_ipv4
-ip_vs_sh               <span class="token number">12688</span>  <span class="token number">0</span>
-ip_vs_wrr              <span class="token number">12697</span>  <span class="token number">0</span>
-ip_vs_rr               <span class="token number">12600</span>  <span class="token number">0</span>
-ip_vs                 <span class="token number">145458</span>  <span class="token number">6</span> ip_vs_rr,ip_vs_sh,ip_vs_wrr
-nf_conntrack_ipv4      <span class="token number">15053</span>  <span class="token number">2</span>
-nf_defrag_ipv4         <span class="token number">12729</span>  <span class="token number">1</span> nf_conntrack_ipv4
-nf_conntrack          <span class="token number">139264</span>  <span class="token number">7</span> ip_vs,nf_nat,nf_nat_ipv4,xt_conntrack,nf_nat_masquerade_ipv4,nf_conntrack_netlink,nf_conntrack_ipv4
-libcrc32c              <span class="token number">12644</span>  <span class="token number">4</span> xfs,ip_vs,nf_nat,nf_conntrack
-$ <span class="token function">cut</span> -f1 -d <span class="token string">" "</span>  /proc/modules <span class="token operator">|</span> <span class="token function">grep</span> -e ip_vs -e nf_conntrack_ipv4
-ip_vs_sh
-ip_vs_wrr
-ip_vs_rr
-ip_vs
-nf_conntrack_ipv4<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在使用ipvs模式之前确保安装了ipset和ipvsadm</span><br>sudo yum install ipset ipvsadm -y<br><br><span class="hljs-comment"># 手动加载ipvs相关模块</span><br>modprobe -- ip_vs<br>modprobe -- ip_vs_rr<br>modprobe -- ip_vs_wrr<br>modprobe -- ip_vs_sh<br>modprobe -- nf_conntrack_ipv4<br><br><span class="hljs-comment"># 配置开机自动加载ipvs相关模块</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/modules-load.d/ipvs.conf</span><br><span class="hljs-string">ip_vs</span><br><span class="hljs-string">ip_vs_rr</span><br><span class="hljs-string">ip_vs_wrr</span><br><span class="hljs-string">ip_vs_sh</span><br><span class="hljs-string">nf_conntrack_ipv4</span><br><span class="hljs-string">EOF</span><br><br>sudo sysctl --system<br><span class="hljs-comment"># 最好重启一遍系统确定是否生效</span><br><br>$ lsmod | grep -e ip_vs -e nf_conntrack_ipv4<br>ip_vs_sh               12688  0<br>ip_vs_wrr              12697  0<br>ip_vs_rr               12600  0<br>ip_vs                 145458  6 ip_vs_rr,ip_vs_sh,ip_vs_wrr<br>nf_conntrack_ipv4      15053  2<br>nf_defrag_ipv4         12729  1 nf_conntrack_ipv4<br>nf_conntrack          139264  7 ip_vs,nf_nat,nf_nat_ipv4,xt_conntrack,nf_nat_masquerade_ipv4,nf_conntrack_netlink,nf_conntrack_ipv4<br>libcrc32c              12644  4 xfs,ip_vs,nf_nat,nf_conntrack<br>$ cut -f1 -d <span class="hljs-string">&quot; &quot;</span>  /proc/modules | grep -e ip_vs -e nf_conntrack_ipv4<br>ip_vs_sh<br>ip_vs_wrr<br>ip_vs_rr<br>ip_vs<br>nf_conntrack_ipv4<br></code></pre></td></tr></table></figure>
 
 
 
 <h1 id="2、安装container-runtime"><a href="#2、安装container-runtime" class="headerlink" title="2、安装container runtime"></a>2、安装container runtime</h1><h2 id="2-1-安装docker"><a href="#2-1-安装docker" class="headerlink" title="2.1 安装docker"></a>2.1 安装docker</h2><p>详细的官方文档可以参考<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">这里</a>，由于在刚发布的1.24版本中移除了<code>docker-shim</code>，因此安装的<code>版本≥1.24</code>的时候需要注意<code>容器运行时</code>的选择。这里我们安装的版本低于1.24，因此我们继续使用docker。</p>
 <p>docker的具体安装可以参考我之前写的<a href="https://tinychen.com/20190912-centos-install-docker/">这篇文章</a>，这里不做赘述。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装必要的依赖组件并且导入docker官方提供的yum源</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y yum-utils device-mapper-persistent-data lvm2
-<span class="token function">sudo</span> yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
-
-<span class="token comment"># 我们直接安装最新版本的docker</span>
-yum <span class="token function">install</span> docker-ce docker-ce-cli containerd.io<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装必要的依赖组件并且导入docker官方提供的yum源</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo<br><br><span class="hljs-comment"># 我们直接安装最新版本的docker</span><br>yum install docker-ce docker-ce-cli containerd.io<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-2-配置cgroup-drivers"><a href="#2-2-配置cgroup-drivers" class="headerlink" title="2.2 配置cgroup drivers"></a>2.2 配置cgroup drivers</h2><p>CentOS7使用的是<code>systemd</code>来初始化系统并管理进程，初始化进程会生成并使用一个 root 控制组 (<code>cgroup</code>), 并充当 <code>cgroup</code> 管理器。 <code>Systemd</code> 与 <code>cgroup</code> 集成紧密，并将为每个 <code>systemd</code> 单元分配一个 <code>cgroup</code>。 我们也可以配置<code>容器运行时</code>和 <code>kubelet</code> 使用 <code>cgroupfs</code>。 连同 <code>systemd</code> 一起使用 <code>cgroupfs</code> 意味着将有两个不同的 <code>cgroup 管理器</code>。而当一个系统中同时存在cgroupfs和systemd两者时，容易变得不稳定，因此最好更改设置，令容器运行时和 kubelet 使用 <code>systemd</code> 作为 <code>cgroup</code> 驱动，以此使系统更为稳定。 对于 Docker, 需要设置 <code>native.cgroupdriver=systemd</code> 参数。</p>
 <blockquote>
@@ -512,77 +380,17 @@ yum <span class="token function">install</span> docker-ce docker-ce-cli containe
 <p>参考配置说明文档</p>
 <p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/#docker">https://kubernetes.io/zh/docs/setup/production-environment/container-runtimes/#docker</a></p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mkdir</span> /etc/docker
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/docker/daemon.json</span>
-&#123;
-  "exec-opts": ["native.cgroupdriver=systemd"],
-  "log-driver": "json-file",
-  "log-opts": &#123;
-    "max-size": "100m"
-  &#125;,
-  "storage-driver": "overlay2"
-&#125;
-EOF</span>
-
-<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> docker
-<span class="token function">sudo</span> systemctl daemon-reload
-<span class="token function">sudo</span> systemctl restart docker
-
-
-<span class="token comment"># 最后检查一下Cgroup Driver是否为systemd</span>
-$ docker info <span class="token operator">|</span> <span class="token function">grep</span> systemd
- Cgroup Driver: systemd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">sudo mkdir /etc/docker<br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/docker/daemon.json</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>sudo systemctl <span class="hljs-built_in">enable</span> docker<br>sudo systemctl daemon-reload<br>sudo systemctl restart docker<br><br><br><span class="hljs-comment"># 最后检查一下Cgroup Driver是否为systemd</span><br>$ docker info | grep systemd<br> Cgroup Driver: systemd<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-3-关于kubelet的cgroup-driver"><a href="#2-3-关于kubelet的cgroup-driver" class="headerlink" title="2.3 关于kubelet的cgroup driver"></a>2.3 关于kubelet的cgroup driver</h2><p>k8s官方有<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/">详细的文档</a>介绍了如何设置kubelet的<code>cgroup driver</code>，需要特别注意的是，在1.22版本开始，如果没有手动设置kubelet的cgroup driver，那么默认会设置为systemd</p>
 <blockquote>
 <p><strong>Note:</strong> In v1.22, if the user is not setting the <code>cgroupDriver</code> field under <code>KubeletConfiguration</code>, <code>kubeadm</code> will default it to <code>systemd</code>.</p>
 </blockquote>
 <p>一个比较简单的指定kubelet的<code>cgroup driver</code>的方法就是在<code>kubeadm-config.yaml</code>加入<code>cgroupDriver</code>字段</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment"># kubeadm-config.yaml</span>
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> ClusterConfiguration
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeadm.k8s.io/v1beta3
-<span class="token key atrule">kubernetesVersion</span><span class="token punctuation">:</span> v1.21.0
-<span class="token punctuation">---</span>
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> KubeletConfiguration
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubelet.config.k8s.io/v1beta1
-<span class="token key atrule">cgroupDriver</span><span class="token punctuation">:</span> systemd<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># kubeadm-config.yaml</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-string">v1.21.0</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeletConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubelet.config.k8s.io/v1beta1</span><br><span class="hljs-attr">cgroupDriver:</span> <span class="hljs-string">systemd</span><br></code></pre></td></tr></table></figure>
 
 <p>我们可以直接查看configmaps来查看初始化之后集群的kubeadm-config配置。</p>
-<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ kubectl describe configmaps kubeadm-config -n kube-system
-Name:         kubeadm-config
-Namespace:    kube-system
-Labels:       &lt;none&gt;
-Annotations:  &lt;none&gt;
-
-Data
-&#x3D;&#x3D;&#x3D;&#x3D;
-ClusterConfiguration:
-----
-apiServer:
-  extraArgs:
-    authorization-mode: Node,RBAC
-  timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io&#x2F;v1beta3
-certificatesDir: &#x2F;etc&#x2F;kubernetes&#x2F;pki
-clusterName: kubernetes
-controllerManager: &#123;&#125;
-dns: &#123;&#125;
-etcd:
-  local:
-    dataDir: &#x2F;var&#x2F;lib&#x2F;etcd
-imageRepository: registry.aliyuncs.com&#x2F;google_containers
-kind: ClusterConfiguration
-kubernetesVersion: v1.23.6
-networking:
-  dnsDomain: cali-cluster.tclocal
-  serviceSubnet: 10.88.0.0&#x2F;18
-scheduler: &#123;&#125;
-
-
-BinaryData
-&#x3D;&#x3D;&#x3D;&#x3D;
-
-Events:  &lt;none&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc">$ kubectl describe configmaps kubeadm-config -n kube-system<br>Name:         kubeadm-config<br>Namespace:    kube-system<br>Labels:       &lt;none&gt;<br>Annotations:  &lt;none&gt;<br><br><span class="hljs-section">Data</span><br><span class="hljs-section">====</span><br><span class="hljs-section">ClusterConfiguration:</span><br><span class="hljs-section">----</span><br>apiServer:<br><span class="hljs-code">  extraArgs:</span><br><span class="hljs-code">    authorization-mode: Node,RBAC</span><br><span class="hljs-code">  timeoutForControlPlane: 4m0s</span><br>apiVersion: kubeadm.k8s.io/v1beta3<br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br>controllerManager: &#123;&#125;<br>dns: &#123;&#125;<br>etcd:<br><span class="hljs-code">  local:</span><br><span class="hljs-code">    dataDir: /var/lib/etcd</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.23.6<br>networking:<br><span class="hljs-code">  dnsDomain: cali-cluster.tclocal</span><br><span class="hljs-code">  serviceSubnet: 10.88.0.0/18</span><br>scheduler: &#123;&#125;<br><br><br><span class="hljs-section">BinaryData</span><br><span class="hljs-section">====</span><br><br>Events:  &lt;none&gt;<br></code></pre></td></tr></table></figure>
 
 <p>当然因为我们需要安装的版本高于1.22.0并且使用的就是systemd，因此可以不用再重复配置。</p>
 <h1 id="3、安装kube三件套"><a href="#3、安装kube三件套" class="headerlink" title="3、安装kube三件套"></a>3、安装kube三件套</h1><blockquote>
@@ -602,64 +410,10 @@ Events:  &lt;none&gt;<span aria-hidden="true" class="line-numbers-rows"><span></
 <li><code>kubectl</code>并不是集群中的每个节点都需要安装，也并不是一定要安装在集群中的节点，可以单独安装在自己本地的机器环境上面，然后配合<code>kubeconfig</code>文件即可使用<code>kubectl</code>命令来远程管理对应的k8s集群；</li>
 </ul>
 <p>CentOS7的安装比较简单，我们直接使用官方提供的<code>yum</code>源即可。需要注意的是这里需要设置<code>selinux</code>的状态，但是前面我们已经关闭了selinux，因此这里略过这步。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接导入谷歌官方的yum源</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /etc/yum.repos.d/kubernetes.repo</span>
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\<span class="token variable">$basearch</span>
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-exclude=kubelet kubeadm kubectl
-EOF</span>
-
-<span class="token comment"># 当然如果连不上谷歌的源，可以考虑使用国内的阿里镜像源</span>
-<span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">></span> /etc/yum.repos.d/kubernetes.repo</span>
-[kubernetes]
-name=Kubernetes
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-EOF</span>
-
-
-<span class="token comment"># 接下来直接安装三件套即可</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y kubelet kubeadm kubectl --disableexcludes<span class="token operator">=</span>kubernetes
-
-<span class="token comment"># 如果网络环境不好出现gpgcheck验证失败导致无法正常读取yum源，可以考虑关闭该yum源的repo_gpgcheck</span>
-<span class="token function">sed</span> -i <span class="token string">'s/repo_gpgcheck=1/repo_gpgcheck=0/g'</span> /etc/yum.repos.d/kubernetes.repo
-<span class="token comment"># 或者在安装的时候禁用gpgcheck</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y kubelet kubeadm kubectl --nogpgcheck --disableexcludes<span class="token operator">=</span>kubernetes
-
-
-
-<span class="token comment"># 如果想要安装特定版本，可以使用这个命令查看相关版本的信息</span>
-<span class="token function">sudo</span> yum list --nogpgcheck kubelet kubeadm kubectl --showduplicates --disableexcludes<span class="token operator">=</span>kubernetes
-<span class="token comment"># 这里我们为了保留使用docker-shim，因此我们按照1.24.0版本的前一个版本1.23.6</span>
-<span class="token function">sudo</span> yum <span class="token function">install</span> -y kubelet-1.23.6-0 kubeadm-1.23.6-0 kubectl-1.23.6-0 --nogpgcheck --disableexcludes<span class="token operator">=</span>kubernetes
-
-<span class="token comment"># 安装完成后配置开机自启kubelet</span>
-<span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> --now kubelet<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接导入谷歌官方的yum源</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/yum.repos.d/kubernetes.repo</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">exclude=kubelet kubeadm kubectl</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-comment"># 当然如果连不上谷歌的源，可以考虑使用国内的阿里镜像源</span><br>cat &lt;&lt;<span class="hljs-string">EOF &gt; /etc/yum.repos.d/kubernetes.repo</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">EOF</span><br><br><br><span class="hljs-comment"># 接下来直接安装三件套即可</span><br>sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><br><span class="hljs-comment"># 如果网络环境不好出现gpgcheck验证失败导致无法正常读取yum源，可以考虑关闭该yum源的repo_gpgcheck</span><br>sed -i <span class="hljs-string">&#x27;s/repo_gpgcheck=1/repo_gpgcheck=0/g&#x27;</span> /etc/yum.repos.d/kubernetes.repo<br><span class="hljs-comment"># 或者在安装的时候禁用gpgcheck</span><br>sudo yum install -y kubelet kubeadm kubectl --nogpgcheck --disableexcludes=kubernetes<br><br><br><br><span class="hljs-comment"># 如果想要安装特定版本，可以使用这个命令查看相关版本的信息</span><br>sudo yum list --nogpgcheck kubelet kubeadm kubectl --showduplicates --disableexcludes=kubernetes<br><span class="hljs-comment"># 这里我们为了保留使用docker-shim，因此我们按照1.24.0版本的前一个版本1.23.6</span><br>sudo yum install -y kubelet-1.23.6-0 kubeadm-1.23.6-0 kubectl-1.23.6-0 --nogpgcheck --disableexcludes=kubernetes<br><br><span class="hljs-comment"># 安装完成后配置开机自启kubelet</span><br>sudo systemctl <span class="hljs-built_in">enable</span> --now kubelet<br></code></pre></td></tr></table></figure>
 
 <h1 id="4、初始化集群"><a href="#4、初始化集群" class="headerlink" title="4、初始化集群"></a>4、初始化集群</h1><h2 id="4-1-编写配置文件"><a href="#4-1-编写配置文件" class="headerlink" title="4.1 编写配置文件"></a>4.1 编写配置文件</h2><p>在集群中所有节点都执行完上面的三点操作之后，我们就可以开始创建k8s集群了。因为我们这次不涉及高可用部署，因此初始化的时候直接在我们的目标master节点上面操作即可。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 我们先使用kubeadm命令查看一下主要的几个镜像版本</span>
-<span class="token comment"># 因为我们此前指定安装了旧的1.23.6版本，这里的apiserver镜像版本也会随之回滚</span>
-$ kubeadm config images list
-I0506 <span class="token number">11</span>:24:17.061315   <span class="token number">16055</span> version.go:255<span class="token punctuation">]</span> remote version is much newer: v1.24.0<span class="token punctuation">;</span> falling back to: stable-1.23
-k8s.gcr.io/kube-apiserver:v1.23.6
-k8s.gcr.io/kube-controller-manager:v1.23.6
-k8s.gcr.io/kube-scheduler:v1.23.6
-k8s.gcr.io/kube-proxy:v1.23.6
-k8s.gcr.io/pause:3.6
-k8s.gcr.io/etcd:3.5.1-0
-k8s.gcr.io/coredns/coredns:v1.8.6
-
-<span class="token comment"># 为了方便编辑和管理，我们还是把初始化参数导出成配置文件</span>
-$ kubeadm config print init-defaults <span class="token operator">></span> kubeadm-calico.conf
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 我们先使用kubeadm命令查看一下主要的几个镜像版本</span><br><span class="hljs-comment"># 因为我们此前指定安装了旧的1.23.6版本，这里的apiserver镜像版本也会随之回滚</span><br>$ kubeadm config images list<br>I0506 11:24:17.061315   16055 version.go:255] remote version is much newer: v1.24.0; falling back to: stable-1.23<br>k8s.gcr.io/kube-apiserver:v1.23.6<br>k8s.gcr.io/kube-controller-manager:v1.23.6<br>k8s.gcr.io/kube-scheduler:v1.23.6<br>k8s.gcr.io/kube-proxy:v1.23.6<br>k8s.gcr.io/pause:3.6<br>k8s.gcr.io/etcd:3.5.1-0<br>k8s.gcr.io/coredns/coredns:v1.8.6<br><br><span class="hljs-comment"># 为了方便编辑和管理，我们还是把初始化参数导出成配置文件</span><br>$ kubeadm config <span class="hljs-built_in">print</span> init-defaults &gt; kubeadm-calico.conf<br><br></code></pre></td></tr></table></figure>
 
 <ul>
 <li>考虑到大多数情况下国内的网络无法使用谷歌的k8s.gcr.io镜像源，我们可以直接在配置文件中修改<code>imageRepository</code>参数为阿里的镜像源</li>
@@ -669,611 +423,82 @@ $ kubeadm config print init-defaults <span class="token operator">></span> kubea
 <li><code>nodeRegistration</code>里面的<code>name</code>参数修改为对应master节点的<code>hostname</code></li>
 <li>新增配置块使用ipvs，具体可以参考<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md#cluster-created-by-kubeadm">官方文档</a></li>
 </ul>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeadm.k8s.io/v1beta3
-<span class="token key atrule">bootstrapTokens</span><span class="token punctuation">:</span>
-<span class="token punctuation">-</span> <span class="token key atrule">groups</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> system<span class="token punctuation">:</span>bootstrappers<span class="token punctuation">:</span>kubeadm<span class="token punctuation">:</span>default<span class="token punctuation">-</span>node<span class="token punctuation">-</span>token
-  <span class="token key atrule">token</span><span class="token punctuation">:</span> abcdef.0123456789abcdef
-  <span class="token key atrule">ttl</span><span class="token punctuation">:</span> 24h0m0s
-  <span class="token key atrule">usages</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> signing
-  <span class="token punctuation">-</span> authentication
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> InitConfiguration
-<span class="token key atrule">localAPIEndpoint</span><span class="token punctuation">:</span>
-  <span class="token key atrule">advertiseAddress</span><span class="token punctuation">:</span> 10.31.88.1
-  <span class="token key atrule">bindPort</span><span class="token punctuation">:</span> <span class="token number">6443</span>
-<span class="token key atrule">nodeRegistration</span><span class="token punctuation">:</span>
-  <span class="token key atrule">criSocket</span><span class="token punctuation">:</span> /var/run/dockershim.sock
-  <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> IfNotPresent
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> tiny<span class="token punctuation">-</span>calico<span class="token punctuation">-</span>master<span class="token punctuation">-</span>88<span class="token punctuation">-</span>1.k8s.tcinternal
-  <span class="token key atrule">taints</span><span class="token punctuation">:</span> <span class="token null important">null</span>
-<span class="token punctuation">---</span>
-<span class="token key atrule">apiServer</span><span class="token punctuation">:</span>
-  <span class="token key atrule">timeoutForControlPlane</span><span class="token punctuation">:</span> 4m0s
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeadm.k8s.io/v1beta3
-<span class="token key atrule">certificatesDir</span><span class="token punctuation">:</span> /etc/kubernetes/pki
-<span class="token key atrule">clusterName</span><span class="token punctuation">:</span> kubernetes
-<span class="token key atrule">controllerManager</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-<span class="token key atrule">dns</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-<span class="token key atrule">etcd</span><span class="token punctuation">:</span>
-  <span class="token key atrule">local</span><span class="token punctuation">:</span>
-    <span class="token key atrule">dataDir</span><span class="token punctuation">:</span> /var/lib/etcd
-<span class="token key atrule">imageRepository</span><span class="token punctuation">:</span> registry.aliyuncs.com/google_containers
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> ClusterConfiguration
-<span class="token key atrule">kubernetesVersion</span><span class="token punctuation">:</span> 1.23.6
-<span class="token key atrule">networking</span><span class="token punctuation">:</span>
-  <span class="token key atrule">dnsDomain</span><span class="token punctuation">:</span> cali<span class="token punctuation">-</span>cluster.tclocal
-  <span class="token key atrule">serviceSubnet</span><span class="token punctuation">:</span> 10.88.0.0/18
-<span class="token key atrule">scheduler</span><span class="token punctuation">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-<span class="token punctuation">---</span>
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> kubeproxy.config.k8s.io/v1alpha1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> KubeProxyConfiguration
-<span class="token key atrule">mode</span><span class="token punctuation">:</span> ipvs<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">bootstrapTokens:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">groups:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">system:bootstrappers:kubeadm:default-node-token</span><br>  <span class="hljs-attr">token:</span> <span class="hljs-string">abcdef.0123456789abcdef</span><br>  <span class="hljs-attr">ttl:</span> <span class="hljs-string">24h0m0s</span><br>  <span class="hljs-attr">usages:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">signing</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">authentication</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">InitConfiguration</span><br><span class="hljs-attr">localAPIEndpoint:</span><br>  <span class="hljs-attr">advertiseAddress:</span> <span class="hljs-number">10.31</span><span class="hljs-number">.88</span><span class="hljs-number">.1</span><br>  <span class="hljs-attr">bindPort:</span> <span class="hljs-number">6443</span><br><span class="hljs-attr">nodeRegistration:</span><br>  <span class="hljs-attr">criSocket:</span> <span class="hljs-string">/var/run/dockershim.sock</span><br>  <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">tiny-calico-master-88-1.k8s.tcinternal</span><br>  <span class="hljs-attr">taints:</span> <span class="hljs-literal">null</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiServer:</span><br>  <span class="hljs-attr">timeoutForControlPlane:</span> <span class="hljs-string">4m0s</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">certificatesDir:</span> <span class="hljs-string">/etc/kubernetes/pki</span><br><span class="hljs-attr">clusterName:</span> <span class="hljs-string">kubernetes</span><br><span class="hljs-attr">controllerManager:</span> &#123;&#125;<br><span class="hljs-attr">dns:</span> &#123;&#125;<br><span class="hljs-attr">etcd:</span><br>  <span class="hljs-attr">local:</span><br>    <span class="hljs-attr">dataDir:</span> <span class="hljs-string">/var/lib/etcd</span><br><span class="hljs-attr">imageRepository:</span> <span class="hljs-string">registry.aliyuncs.com/google_containers</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-number">1.23</span><span class="hljs-number">.6</span><br><span class="hljs-attr">networking:</span><br>  <span class="hljs-attr">dnsDomain:</span> <span class="hljs-string">cali-cluster.tclocal</span><br>  <span class="hljs-attr">serviceSubnet:</span> <span class="hljs-number">10.88</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/18</span><br><span class="hljs-attr">scheduler:</span> &#123;&#125;<br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeproxy.config.k8s.io/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeProxyConfiguration</span><br><span class="hljs-attr">mode:</span> <span class="hljs-string">ipvs</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="4-2-初始化集群"><a href="#4-2-初始化集群" class="headerlink" title="4.2 初始化集群"></a>4.2 初始化集群</h2><p>此时我们再查看对应的配置文件中的镜像版本，就会发现已经变成了对应阿里云镜像源的版本</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看一下对应的镜像版本，确定配置文件是否生效</span>
-$ kubeadm config images list --config kubeadm-calico.conf
-registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6
-registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6
-registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6
-registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6
-registry.aliyuncs.com/google_containers/pause:3.6
-registry.aliyuncs.com/google_containers/etcd:3.5.1-0
-registry.aliyuncs.com/google_containers/coredns:v1.8.6
-
-<span class="token comment"># 确认没问题之后我们直接拉取镜像</span>
-$ kubeadm config images pull --config kubeadm-calico.conf
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/pause:3.6
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/etcd:3.5.1-0
-<span class="token punctuation">[</span>config/images<span class="token punctuation">]</span> Pulled registry.aliyuncs.com/google_containers/coredns:v1.8.6
-
-<span class="token comment"># 初始化</span>
-$ kubeadm init --config kubeadm-calico.conf
-<span class="token punctuation">[</span>init<span class="token punctuation">]</span> Using Kubernetes version: v1.23.6
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Running pre-flight checks
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Pulling images required <span class="token keyword">for</span> setting up a Kubernetes cluster
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> This might take a minute or two, depending on the speed of your internet connection
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> You can also perform this action <span class="token keyword">in</span> beforehand using <span class="token string">'kubeadm config images pull'</span>
-<span class="token punctuation">..</span>.此处略去一堆输出<span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看一下对应的镜像版本，确定配置文件是否生效</span><br>$ kubeadm config images list --config kubeadm-calico.conf<br>registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6<br>registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6<br>registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6<br>registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6<br>registry.aliyuncs.com/google_containers/pause:3.6<br>registry.aliyuncs.com/google_containers/etcd:3.5.1-0<br>registry.aliyuncs.com/google_containers/coredns:v1.8.6<br><br><span class="hljs-comment"># 确认没问题之后我们直接拉取镜像</span><br>$ kubeadm config images pull --config kubeadm-calico.conf<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-apiserver:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-controller-manager:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-scheduler:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-proxy:v1.23.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/pause:3.6<br>[config/images] Pulled registry.aliyuncs.com/google_containers/etcd:3.5.1-0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/coredns:v1.8.6<br><br><span class="hljs-comment"># 初始化</span><br>$ kubeadm init --config kubeadm-calico.conf<br>[init] Using Kubernetes version: v1.23.6<br>[preflight] Running pre-flight checks<br>[preflight] Pulling images required <span class="hljs-keyword">for</span> setting up a Kubernetes cluster<br>[preflight] This might take a minute or two, depending on the speed of your internet connection<br>[preflight] You can also perform this action <span class="hljs-keyword">in</span> beforehand using <span class="hljs-string">&#x27;kubeadm config images pull&#x27;</span><br>...此处略去一堆输出...<br></code></pre></td></tr></table></figure>
 <p>当我们看到下面这个输出结果的时候，我们的集群就算是初始化成功了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Your Kubernetes control-plane has initialized successfully<span class="token operator">!</span>
-
-To start using your cluster, you need to run the following as a regular user:
-
-  <span class="token function">mkdir</span> -p <span class="token environment constant">$HOME</span>/.kube
-  <span class="token function">sudo</span> <span class="token function">cp</span> -i /etc/kubernetes/admin.conf <span class="token environment constant">$HOME</span>/.kube/config
-  <span class="token function">sudo</span> <span class="token function">chown</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -u<span class="token variable">)</span></span><span class="token builtin class-name">:</span><span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -g<span class="token variable">)</span></span> <span class="token environment constant">$HOME</span>/.kube/config
-
-Alternatively, <span class="token keyword">if</span> you are the root user, you can run:
-
-  <span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span>/etc/kubernetes/admin.conf
-
-You should now deploy a pod network to the cluster.
-Run <span class="token string">"kubectl apply -f [podnetwork].yaml"</span> with one of the options listed at:
-  https://kubernetes.io/docs/concepts/cluster-administration/addons/
-
-Then you can <span class="token function">join</span> any number of worker nodes by running the following on each as root:
-
-kubeadm <span class="token function">join</span> <span class="token number">10.31</span>.88.1:6443 --token abcdef.0123456789abcdef <span class="token punctuation">\</span>
-        --discovery-token-ca-cert-hash sha256:a4189d36d164a865be540d48fcd10ff13e2f90ed6e901201b6ea2baf96dae0ae
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs bash">Your Kubernetes control-plane has initialized successfully!<br><br>To start using your cluster, you need to run the following as a regular user:<br><br>  mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>  sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>  sudo chown $(id -u):$(id -g) <span class="hljs-variable">$HOME</span>/.kube/config<br><br>Alternatively, <span class="hljs-keyword">if</span> you are the root user, you can run:<br><br>  <span class="hljs-built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf<br><br>You should now deploy a pod network to the cluster.<br>Run <span class="hljs-string">&quot;kubectl apply -f [podnetwork].yaml&quot;</span> with one of the options listed at:<br>  https://kubernetes.io/docs/concepts/cluster-administration/addons/<br><br>Then you can join any number of worker nodes by running the following on each as root:<br><br>kubeadm join 10.31.88.1:6443 --token abcdef.0123456789abcdef \<br>        --discovery-token-ca-cert-hash sha256:a4189d36d164a865be540d48fcd10ff13e2f90ed6e901201b6ea2baf96dae0ae<br><br></code></pre></td></tr></table></figure>
 
 <h2 id="4-3-配置kubeconfig"><a href="#4-3-配置kubeconfig" class="headerlink" title="4.3 配置kubeconfig"></a>4.3 配置kubeconfig</h2><p>刚初始化成功之后，我们还没办法马上查看k8s集群信息，需要配置kubeconfig相关参数才能正常使用kubectl连接apiserver读取集群信息。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 对于非root用户，可以这样操作</span>
-<span class="token function">mkdir</span> -p <span class="token environment constant">$HOME</span>/.kube
-<span class="token function">sudo</span> <span class="token function">cp</span> -i /etc/kubernetes/admin.conf <span class="token environment constant">$HOME</span>/.kube/config
-<span class="token function">sudo</span> <span class="token function">chown</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -u<span class="token variable">)</span></span><span class="token builtin class-name">:</span><span class="token variable"><span class="token variable">$(</span><span class="token function">id</span> -g<span class="token variable">)</span></span> <span class="token environment constant">$HOME</span>/.kube/config
-
-<span class="token comment"># 如果是root用户，可以直接导入环境变量</span>
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span>/etc/kubernetes/admin.conf
-
-<span class="token comment"># 添加kubectl的自动补全功能</span>
-<span class="token builtin class-name">echo</span> <span class="token string">"source &lt;(kubectl completion bash)"</span> <span class="token operator">>></span> ~/.bashrc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 对于非root用户，可以这样操作</span><br>mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g) <span class="hljs-variable">$HOME</span>/.kube/config<br><br><span class="hljs-comment"># 如果是root用户，可以直接导入环境变量</span><br><span class="hljs-built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf<br><br><span class="hljs-comment"># 添加kubectl的自动补全功能</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>前面我们提到过<code>kubectl</code>不一定要安装在集群内，实际上只要是任何一台能连接到<code>apiserver</code>的机器上面都可以安装<code>kubectl</code>并且根据步骤配置<code>kubeconfig</code>，就可以使用<code>kubectl</code>命令行来管理对应的k8s集群。</p>
 </blockquote>
 <p>配置完成后，我们再执行相关命令就可以查看集群的信息了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubectl cluster-info
-Kubernetes control plane is running at https://10.31.88.1:6443
-CoreDNS is running at https://10.31.88.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
-
-To further debug and diagnose cluster problems, use <span class="token string">'kubectl cluster-info dump'</span>
-
-$ kubectl get nodes -o wide
-NAME                                     STATUS     ROLES                  AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
-tiny-calico-master-88-1.k8s.tcinternal   NotReady   control-plane,master   4m15s   v1.23.6   <span class="token number">10.31</span>.88.1    <span class="token operator">&lt;</span>none<span class="token operator">></span>        CentOS Linux <span class="token number">7</span> <span class="token punctuation">(</span>Core<span class="token punctuation">)</span>   <span class="token number">3.10</span>.0-1160.62.1.el7.x86_64   docker://20.10.14
-
-$ kubectl get pods -A -o wide
-NAMESPACE     NAME                                                             READY   STATUS    RESTARTS   AGE     IP           NODE                                     NOMINATED NODE   READINESS GATES
-kube-system   coredns-6d8c4cb4d-r8r9q                                          <span class="token number">0</span>/1     Pending   <span class="token number">0</span>          4m20s   <span class="token operator">&lt;</span>none<span class="token operator">></span>       <span class="token operator">&lt;</span>none<span class="token operator">></span>                                   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   coredns-6d8c4cb4d-ztq6w                                          <span class="token number">0</span>/1     Pending   <span class="token number">0</span>          4m20s   <span class="token operator">&lt;</span>none<span class="token operator">></span>       <span class="token operator">&lt;</span>none<span class="token operator">></span>                                   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   etcd-tiny-calico-master-88-1.k8s.tcinternal                      <span class="token number">1</span>/1     Running   <span class="token number">0</span>          4m25s   <span class="token number">10.31</span>.88.1   tiny-calico-master-88-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-apiserver-tiny-calico-master-88-1.k8s.tcinternal            <span class="token number">1</span>/1     Running   <span class="token number">0</span>          4m26s   <span class="token number">10.31</span>.88.1   tiny-calico-master-88-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-controller-manager-tiny-calico-master-88-1.k8s.tcinternal   <span class="token number">1</span>/1     Running   <span class="token number">0</span>          4m27s   <span class="token number">10.31</span>.88.1   tiny-calico-master-88-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-proxy-v6cg9                                                 <span class="token number">1</span>/1     Running   <span class="token number">0</span>          4m20s   <span class="token number">10.31</span>.88.1   tiny-calico-master-88-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-kube-system   kube-scheduler-tiny-calico-master-88-1.k8s.tcinternal            <span class="token number">1</span>/1     Running   <span class="token number">0</span>          4m25s   <span class="token number">10.31</span>.88.1   tiny-calico-master-88-1.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubectl cluster-info<br>Kubernetes control plane is running at https://10.31.88.1:6443<br>CoreDNS is running at https://10.31.88.1:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy<br><br>To further debug and diagnose cluster problems, use <span class="hljs-string">&#x27;kubectl cluster-info dump&#x27;</span><br><br>$ kubectl get nodes -o wide<br>NAME                                     STATUS     ROLES                  AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME<br>tiny-calico-master-88-1.k8s.tcinternal   NotReady   control-plane,master   4m15s   v1.23.6   10.31.88.1    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   docker://20.10.14<br><br>$ kubectl get pods -A -o wide<br>NAMESPACE     NAME                                                             READY   STATUS    RESTARTS   AGE     IP           NODE                                     NOMINATED NODE   READINESS GATES<br>kube-system   coredns-6d8c4cb4d-r8r9q                                          0/1     Pending   0          4m20s   &lt;none&gt;       &lt;none&gt;                                   &lt;none&gt;           &lt;none&gt;<br>kube-system   coredns-6d8c4cb4d-ztq6w                                          0/1     Pending   0          4m20s   &lt;none&gt;       &lt;none&gt;                                   &lt;none&gt;           &lt;none&gt;<br>kube-system   etcd-tiny-calico-master-88-1.k8s.tcinternal                      1/1     Running   0          4m25s   10.31.88.1   tiny-calico-master-88-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-apiserver-tiny-calico-master-88-1.k8s.tcinternal            1/1     Running   0          4m26s   10.31.88.1   tiny-calico-master-88-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-controller-manager-tiny-calico-master-88-1.k8s.tcinternal   1/1     Running   0          4m27s   10.31.88.1   tiny-calico-master-88-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-v6cg9                                                 1/1     Running   0          4m20s   10.31.88.1   tiny-calico-master-88-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-scheduler-tiny-calico-master-88-1.k8s.tcinternal            1/1     Running   0          4m25s   10.31.88.1   tiny-calico-master-88-1.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br></code></pre></td></tr></table></figure>
 
 <h2 id="4-4-添加worker节点"><a href="#4-4-添加worker节点" class="headerlink" title="4.4 添加worker节点"></a>4.4 添加worker节点</h2><p>这时候我们还需要继续添加剩下的两个节点作为worker节点运行负载，直接在剩下的节点上面运行集群初始化成功时输出的命令就可以成功加入集群：</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubeadm <span class="token function">join</span> <span class="token number">10.31</span>.88.1:6443 --token abcdef.0123456789abcdef <span class="token punctuation">\</span>
-<span class="token operator">></span>         --discovery-token-ca-cert-hash sha256:a4189d36d164a865be540d48fcd10ff13e2f90ed6e901201b6ea2baf96dae0ae
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Running pre-flight checks
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> Reading configuration from the cluster<span class="token punctuation">..</span>.
-<span class="token punctuation">[</span>preflight<span class="token punctuation">]</span> FYI: You can <span class="token function">look</span> at this config <span class="token function">file</span> with <span class="token string">'kubectl -n kube-system get cm kubeadm-config -o yaml'</span>
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Writing kubelet configuration to <span class="token function">file</span> <span class="token string">"/var/lib/kubelet/config.yaml"</span>
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Writing kubelet environment <span class="token function">file</span> with flags to <span class="token function">file</span> <span class="token string">"/var/lib/kubelet/kubeadm-flags.env"</span>
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Starting the kubelet
-<span class="token punctuation">[</span>kubelet-start<span class="token punctuation">]</span> Waiting <span class="token keyword">for</span> the kubelet to perform the TLS Bootstrap<span class="token punctuation">..</span>.
-
-This node has joined the cluster:
-* Certificate signing request was sent to apiserver and a response was received.
-* The Kubelet was informed of the new secure connection details.
-
-Run <span class="token string">'kubectl get nodes'</span> on the control-plane to see this node <span class="token function">join</span> the cluster.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubeadm join 10.31.88.1:6443 --token abcdef.0123456789abcdef \<br>&gt;         --discovery-token-ca-cert-hash sha256:a4189d36d164a865be540d48fcd10ff13e2f90ed6e901201b6ea2baf96dae0ae<br>[preflight] Running pre-flight checks<br>[preflight] Reading configuration from the cluster...<br>[preflight] FYI: You can look at this config file with <span class="hljs-string">&#x27;kubectl -n kube-system get cm kubeadm-config -o yaml&#x27;</span><br>[kubelet-start] Writing kubelet configuration to file <span class="hljs-string">&quot;/var/lib/kubelet/config.yaml&quot;</span><br>[kubelet-start] Writing kubelet environment file with flags to file <span class="hljs-string">&quot;/var/lib/kubelet/kubeadm-flags.env&quot;</span><br>[kubelet-start] Starting the kubelet<br>[kubelet-start] Waiting <span class="hljs-keyword">for</span> the kubelet to perform the TLS Bootstrap...<br><br>This node has joined the cluster:<br>* Certificate signing request was sent to apiserver and a response was received.<br>* The Kubelet was informed of the new secure connection details.<br><br>Run <span class="hljs-string">&#x27;kubectl get nodes&#x27;</span> on the control-plane to see this node join the cluster.<br></code></pre></td></tr></table></figure>
 
 <p>如果不小心没保存初始化成功的输出信息也没有关系，我们可以使用kubectl工具查看或者生成token</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看现有的token列表</span>
-$ kubeadm token list
-TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA <span class="token environment constant">GROUPS</span>
-abcdef.0123456789abcdef   23h         <span class="token number">2022</span>-05-07T05:19:08Z   authentication,signing   <span class="token operator">&lt;</span>none<span class="token operator">></span>                                                     system:bootstrappers:kubeadm:default-node-token
-
-<span class="token comment"># 如果token已经失效，那就再创建一个新的token</span>
-$ kubeadm token create
-e31cv1.lbtrzwp6mzon78ue
-$ kubeadm token list
-TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA <span class="token environment constant">GROUPS</span>
-abcdef.0123456789abcdef   23h         <span class="token number">2022</span>-05-07T05:19:08Z   authentication,signing   <span class="token operator">&lt;</span>none<span class="token operator">></span>                                                     system:bootstrappers:kubeadm:default-node-token
-e31cv1.lbtrzwp6mzon78ue   23h         <span class="token number">2022</span>-05-07T05:51:40Z   authentication,signing   <span class="token operator">&lt;</span>none<span class="token operator">></span>                                                     system:bootstrappers:kubeadm:default-node-token
-
-<span class="token comment"># 如果找不到--discovery-token-ca-cert-hash参数，则可以在master节点上使用openssl工具来获取</span>
-$ openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt <span class="token operator">|</span> openssl rsa -pubin -outform der <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null <span class="token operator">|</span>    openssl dgst -sha256 -hex <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/^.* //'</span>
-a4189d36d164a865be540d48fcd10ff13e2f90ed6e901201b6ea2baf96dae0ae<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看现有的token列表</span><br>$ kubeadm token list<br>TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS<br>abcdef.0123456789abcdef   23h         2022-05-07T05:19:08Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br><br><span class="hljs-comment"># 如果token已经失效，那就再创建一个新的token</span><br>$ kubeadm token create<br>e31cv1.lbtrzwp6mzon78ue<br>$ kubeadm token list<br>TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS<br>abcdef.0123456789abcdef   23h         2022-05-07T05:19:08Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br>e31cv1.lbtrzwp6mzon78ue   23h         2022-05-07T05:51:40Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br><br><span class="hljs-comment"># 如果找不到--discovery-token-ca-cert-hash参数，则可以在master节点上使用openssl工具来获取</span><br>$ openssl x509 -pubkey -<span class="hljs-keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null |    openssl dgst -sha256 -hex | sed <span class="hljs-string">&#x27;s/^.* //&#x27;</span><br>a4189d36d164a865be540d48fcd10ff13e2f90ed6e901201b6ea2baf96dae0ae<br></code></pre></td></tr></table></figure>
 
 
 
 <p>添加完成之后我们再查看集群的节点可以发现这时候已经多了两个node，但是此时节点的状态还是<code>NotReady</code>，接下来就需要部署CNI了。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubectl get nodes
-NAME                                      STATUS     ROLES                  AGE    VERSION
-tiny-calico-master-88-1.k8s.tcinternal    NotReady   control-plane,master   20m    v1.23.6
-tiny-calico-worker-88-11.k8s.tcinternal   NotReady   <span class="token operator">&lt;</span>none<span class="token operator">></span>                 105s   v1.23.6
-tiny-calico-worker-88-12.k8s.tcinternal   NotReady   <span class="token operator">&lt;</span>none<span class="token operator">></span>                 35s    v1.23.6<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubectl get nodes<br>NAME                                      STATUS     ROLES                  AGE    VERSION<br>tiny-calico-master-88-1.k8s.tcinternal    NotReady   control-plane,master   20m    v1.23.6<br>tiny-calico-worker-88-11.k8s.tcinternal   NotReady   &lt;none&gt;                 105s   v1.23.6<br>tiny-calico-worker-88-12.k8s.tcinternal   NotReady   &lt;none&gt;                 35s    v1.23.6<br></code></pre></td></tr></table></figure>
 
 <h1 id="5、安装CNI"><a href="#5、安装CNI" class="headerlink" title="5、安装CNI"></a>5、安装CNI</h1><h2 id="5-1-编写manifest文件"><a href="#5-1-编写manifest文件" class="headerlink" title="5.1 编写manifest文件"></a>5.1 编写manifest文件</h2><p>calico的安装也比较简单，官方提供了多种<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/getting-started/kubernetes/">安装方式</a>，我们这里使用<code>yaml</code>（<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/getting-started/kubernetes/installation/config-options">自定义manifests</a>）进行安装，并且使用<code>etcd</code>作为<code>datastore</code>。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 我们先把官方的yaml模板下载下来，然后对关键字段逐个修改</span>
-<span class="token function">curl</span> https://projectcalico.docs.tigera.io/manifests/calico-etcd.yaml -O<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 我们先把官方的yaml模板下载下来，然后对关键字段逐个修改</span><br>curl https://projectcalico.docs.tigera.io/manifests/calico-etcd.yaml -O<br></code></pre></td></tr></table></figure>
 
 <p>针对<code>calico-etcd.yaml</code>文件，我们需要修改一些参数以适配我们的集群：</p>
 <ul>
 <li><p><code>CALICO_IPV4POOL_CIDR</code>参数，配置的是pod的网段，这里我们使用此前计划好的<code>10.88.64.0/18</code>；<code>CALICO_IPV4POOL_BLOCK_SIZE</code>参数，配置的是分配子网的大小，默认是<code>26</code></p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment"># The default IPv4 pool to create on startup if none exists. Pod IPs will be</span>
-<span class="token comment"># chosen from this range. Changing this value after installation will have</span>
-<span class="token comment"># no effect. This should fall within `--cluster-cidr`.</span>
-<span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> CALICO_IPV4POOL_CIDR
-  <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"10.88.64.0/18"</span>
-<span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> CALICO_IPV4POOL_BLOCK_SIZE
-  <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"26"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></li>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># The default IPv4 pool to create on startup if none exists. Pod IPs will be</span><br><span class="hljs-comment"># chosen from this range. Changing this value after installation will have</span><br><span class="hljs-comment"># no effect. This should fall within `--cluster-cidr`.</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">CALICO_IPV4POOL_CIDR</span><br>  <span class="hljs-attr">value:</span> <span class="hljs-string">&quot;10.88.64.0/18&quot;</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">CALICO_IPV4POOL_BLOCK_SIZE</span><br>  <span class="hljs-attr">value:</span> <span class="hljs-string">&quot;26&quot;</span><br></code></pre></td></tr></table></figure></li>
 <li><p><code>CALICO_IPV4POOL_IPIP</code>参数，控制是否启用ip-ip模式，默认情况下是<code>Always</code>，由于我们的节点都在同一个二层网络，这里修改为<code>Never</code>或者是<code>CrossSubnet</code>都可以。</p>
 <p>其中<code>Never</code>表示不启用ip-ip模式，而<code>CrossSubnet</code>则表示仅当跨子网的时候才启用ip-ip模式</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment"># Enable IPIP</span>
-<span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> CALICO_IPV4POOL_IPIP
-  <span class="token key atrule">value</span><span class="token punctuation">:</span> <span class="token string">"Never"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div></li>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># Enable IPIP</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">CALICO_IPV4POOL_IPIP</span><br>  <span class="hljs-attr">value:</span> <span class="hljs-string">&quot;Never&quot;</span><br></code></pre></td></tr></table></figure></li>
 <li><p><code>ConfigMap</code>里面的<code>etcd_endpoints</code>变量配置<code>etcd</code>的连接端口和地址，为了安全我们这里开启<code>TLS</code>认证，当然如果不想配置证书的，也可以不使用TLS，然后这三个字段直接留空不做修改</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> ConfigMap
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> calico<span class="token punctuation">-</span>config
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> kube<span class="token punctuation">-</span>system
-<span class="token key atrule">data</span><span class="token punctuation">:</span>
-  <span class="token comment"># Configure this with the location of your etcd cluster.</span>
-  <span class="token comment"># etcd_endpoints: "http://&lt;ETCD_IP>:&lt;ETCD_PORT>"</span>
-  <span class="token comment"># If you're using TLS enabled etcd uncomment the following.</span>
-  <span class="token comment"># You must also populate the Secret below with these files.</span>
-  <span class="token comment"># etcd_ca: ""   # "/calico-secrets/etcd-ca"</span>
-  <span class="token comment"># etcd_cert: "" # "/calico-secrets/etcd-cert"</span>
-  <span class="token comment"># etcd_key: ""  # "/calico-secrets/etcd-key"</span>
-  <span class="token key atrule">etcd_endpoints</span><span class="token punctuation">:</span> <span class="token string">"https://10.31.88.1:2379"</span>
-  <span class="token key atrule">etcd_ca</span><span class="token punctuation">:</span> <span class="token string">"/etc/kubernetes/pki/etcd/ca.crt"</span>
-  <span class="token key atrule">etcd_cert</span><span class="token punctuation">:</span> <span class="token string">"/etc/kubernetes/pki/etcd/server.crt"</span>
-  <span class="token key atrule">etcd_key</span><span class="token punctuation">:</span> <span class="token string">"/etc/kubernetes/pki/etcd/server.key"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></li>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">kind:</span> <span class="hljs-string">ConfigMap</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">calico-config</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-system</span><br><span class="hljs-attr">data:</span><br>  <span class="hljs-comment"># Configure this with the location of your etcd cluster.</span><br>  <span class="hljs-comment"># etcd_endpoints: &quot;http://&lt;ETCD_IP&gt;:&lt;ETCD_PORT&gt;&quot;</span><br>  <span class="hljs-comment"># If you&#x27;re using TLS enabled etcd uncomment the following.</span><br>  <span class="hljs-comment"># You must also populate the Secret below with these files.</span><br>  <span class="hljs-comment"># etcd_ca: &quot;&quot;   # &quot;/calico-secrets/etcd-ca&quot;</span><br>  <span class="hljs-comment"># etcd_cert: &quot;&quot; # &quot;/calico-secrets/etcd-cert&quot;</span><br>  <span class="hljs-comment"># etcd_key: &quot;&quot;  # &quot;/calico-secrets/etcd-key&quot;</span><br>  <span class="hljs-attr">etcd_endpoints:</span> <span class="hljs-string">&quot;https://10.31.88.1:2379&quot;</span><br>  <span class="hljs-attr">etcd_ca:</span> <span class="hljs-string">&quot;/etc/kubernetes/pki/etcd/ca.crt&quot;</span><br>  <span class="hljs-attr">etcd_cert:</span> <span class="hljs-string">&quot;/etc/kubernetes/pki/etcd/server.crt&quot;</span><br>  <span class="hljs-attr">etcd_key:</span> <span class="hljs-string">&quot;/etc/kubernetes/pki/etcd/server.key&quot;</span><br></code></pre></td></tr></table></figure></li>
 <li><p><code>Secret</code>里面的 <code>name: calico-etcd-secrets</code>下面的<code>data</code>字段，需要把上面的三个证书内容使用该命令<code>cat &lt;file&gt; | base64 -w 0</code>转成base64编码格式</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">---</span>
-<span class="token comment"># Source: calico/templates/calico-etcd-secrets.yaml</span>
-<span class="token comment"># The following contains k8s Secrets for use with a TLS enabled etcd cluster.</span>
-<span class="token comment"># For information on populating Secrets, see http://kubernetes.io/docs/user-guide/secrets/</span>
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Secret
-<span class="token key atrule">type</span><span class="token punctuation">:</span> Opaque
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> calico<span class="token punctuation">-</span>etcd<span class="token punctuation">-</span>secrets
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> kube<span class="token punctuation">-</span>system
-<span class="token key atrule">data</span><span class="token punctuation">:</span>
-  <span class="token comment"># Populate the following with etcd TLS configuration if desired, but leave blank if</span>
-  <span class="token comment"># not using TLS for etcd.</span>
-  <span class="token comment"># The keys below should be uncommented and the values populated with the base64</span>
-  <span class="token comment"># encoded contents of each file that would be associated with the TLS data.</span>
-  <span class="token comment"># Example command for encoding a file contents: cat &lt;file> | base64 -w 0</span>
-  <span class="token key atrule">etcd-key</span><span class="token punctuation">:</span> LS0tLS1CRUdJTi<span class="token punctuation">...</span><span class="token punctuation">...</span>tLS0tCg==
-  <span class="token key atrule">etcd-cert</span><span class="token punctuation">:</span> LS0tLS1CRUdJT<span class="token punctuation">...</span><span class="token punctuation">...</span>tLS0tLQo=
-  <span class="token key atrule">etcd-ca</span><span class="token punctuation">:</span> LS0tLS1CRUdJTiB<span class="token punctuation">...</span><span class="token punctuation">...</span>FLS0tLS0K<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div></li>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-meta">---</span><br><span class="hljs-comment"># Source: calico/templates/calico-etcd-secrets.yaml</span><br><span class="hljs-comment"># The following contains k8s Secrets for use with a TLS enabled etcd cluster.</span><br><span class="hljs-comment"># For information on populating Secrets, see http://kubernetes.io/docs/user-guide/secrets/</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Secret</span><br><span class="hljs-attr">type:</span> <span class="hljs-string">Opaque</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">calico-etcd-secrets</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-system</span><br><span class="hljs-attr">data:</span><br>  <span class="hljs-comment"># Populate the following with etcd TLS configuration if desired, but leave blank if</span><br>  <span class="hljs-comment"># not using TLS for etcd.</span><br>  <span class="hljs-comment"># The keys below should be uncommented and the values populated with the base64</span><br>  <span class="hljs-comment"># encoded contents of each file that would be associated with the TLS data.</span><br>  <span class="hljs-comment"># Example command for encoding a file contents: cat &lt;file&gt; | base64 -w 0</span><br>  <span class="hljs-attr">etcd-key:</span> <span class="hljs-string">LS0tLS1CRUdJTi......tLS0tCg==</span><br>  <span class="hljs-attr">etcd-cert:</span> <span class="hljs-string">LS0tLS1CRUdJT......tLS0tLQo=</span><br>  <span class="hljs-attr">etcd-ca:</span> <span class="hljs-string">LS0tLS1CRUdJTiB......FLS0tLS0K</span><br></code></pre></td></tr></table></figure></li>
 </ul>
 <h2 id="5-2-部署calico"><a href="#5-2-部署calico" class="headerlink" title="5.2 部署calico"></a>5.2 部署calico</h2><p>修改完成之后我们直接部署即可</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubectl apply -f calico-etcd.yaml
-secret/calico-etcd-secrets created
-configmap/calico-config created
-clusterrole.rbac.authorization.k8s.io/calico-kube-controllers created
-clusterrolebinding.rbac.authorization.k8s.io/calico-kube-controllers created
-clusterrole.rbac.authorization.k8s.io/calico-node created
-clusterrolebinding.rbac.authorization.k8s.io/calico-node created
-daemonset.apps/calico-node created
-serviceaccount/calico-node created
-deployment.apps/calico-kube-controllers created
-serviceaccount/calico-kube-controllers created
-Warning: policy/v1beta1 PodDisruptionBudget is deprecated <span class="token keyword">in</span> v1.21+, unavailable <span class="token keyword">in</span> v1.25+<span class="token punctuation">;</span> use policy/v1 PodDisruptionBudget
-poddisruptionbudget.policy/calico-kube-controllers created
-
-<span class="token comment"># 查看pod是否正常运行</span>
-$ kubectl get pods -A
-NAMESPACE     NAME                                                             READY   STATUS    RESTARTS        AGE
-kube-system   calico-kube-controllers-5c4bd49f9b-6b2gr                         <span class="token number">1</span>/1     Running   <span class="token number">5</span> <span class="token punctuation">(</span>3m18s ago<span class="token punctuation">)</span>   6m18s
-kube-system   calico-node-bgsfs                                                <span class="token number">1</span>/1     Running   <span class="token number">5</span> <span class="token punctuation">(</span>2m55s ago<span class="token punctuation">)</span>   6m18s
-kube-system   calico-node-tr88g                                                <span class="token number">1</span>/1     Running   <span class="token number">5</span> <span class="token punctuation">(</span>3m19s ago<span class="token punctuation">)</span>   6m18s
-kube-system   calico-node-w59pc                                                <span class="token number">1</span>/1     Running   <span class="token number">5</span> <span class="token punctuation">(</span>2m36s ago<span class="token punctuation">)</span>   6m18s
-kube-system   coredns-6d8c4cb4d-r8r9q                                          <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-kube-system   coredns-6d8c4cb4d-ztq6w                                          <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-kube-system   etcd-tiny-calico-master-88-1.k8s.tcinternal                      <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-kube-system   kube-apiserver-tiny-calico-master-88-1.k8s.tcinternal            <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-kube-system   kube-controller-manager-tiny-calico-master-88-1.k8s.tcinternal   <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-kube-system   kube-proxy-n65sb                                                 <span class="token number">1</span>/1     Running   <span class="token number">0</span>               169m
-kube-system   kube-proxy-qmxhp                                                 <span class="token number">1</span>/1     Running   <span class="token number">0</span>               168m
-kube-system   kube-proxy-v6cg9                                                 <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-kube-system   kube-scheduler-tiny-calico-master-88-1.k8s.tcinternal            <span class="token number">1</span>/1     Running   <span class="token number">0</span>               3h8m
-
-<span class="token comment"># 查看calico-kube-controllers的pod日志是否有报错</span>
-$ kubectl logs -f calico-kube-controllers-5c4bd49f9b-6b2gr -n kube-system<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubectl apply -f calico-etcd.yaml<br>secret/calico-etcd-secrets created<br>configmap/calico-config created<br>clusterrole.rbac.authorization.k8s.io/calico-kube-controllers created<br>clusterrolebinding.rbac.authorization.k8s.io/calico-kube-controllers created<br>clusterrole.rbac.authorization.k8s.io/calico-node created<br>clusterrolebinding.rbac.authorization.k8s.io/calico-node created<br>daemonset.apps/calico-node created<br>serviceaccount/calico-node created<br>deployment.apps/calico-kube-controllers created<br>serviceaccount/calico-kube-controllers created<br>Warning: policy/v1beta1 PodDisruptionBudget is deprecated <span class="hljs-keyword">in</span> v1.21+, unavailable <span class="hljs-keyword">in</span> v1.25+; use policy/v1 PodDisruptionBudget<br>poddisruptionbudget.policy/calico-kube-controllers created<br><br><span class="hljs-comment"># 查看pod是否正常运行</span><br>$ kubectl get pods -A<br>NAMESPACE     NAME                                                             READY   STATUS    RESTARTS        AGE<br>kube-system   calico-kube-controllers-5c4bd49f9b-6b2gr                         1/1     Running   5 (3m18s ago)   6m18s<br>kube-system   calico-node-bgsfs                                                1/1     Running   5 (2m55s ago)   6m18s<br>kube-system   calico-node-tr88g                                                1/1     Running   5 (3m19s ago)   6m18s<br>kube-system   calico-node-w59pc                                                1/1     Running   5 (2m36s ago)   6m18s<br>kube-system   coredns-6d8c4cb4d-r8r9q                                          1/1     Running   0               3h8m<br>kube-system   coredns-6d8c4cb4d-ztq6w                                          1/1     Running   0               3h8m<br>kube-system   etcd-tiny-calico-master-88-1.k8s.tcinternal                      1/1     Running   0               3h8m<br>kube-system   kube-apiserver-tiny-calico-master-88-1.k8s.tcinternal            1/1     Running   0               3h8m<br>kube-system   kube-controller-manager-tiny-calico-master-88-1.k8s.tcinternal   1/1     Running   0               3h8m<br>kube-system   kube-proxy-n65sb                                                 1/1     Running   0               169m<br>kube-system   kube-proxy-qmxhp                                                 1/1     Running   0               168m<br>kube-system   kube-proxy-v6cg9                                                 1/1     Running   0               3h8m<br>kube-system   kube-scheduler-tiny-calico-master-88-1.k8s.tcinternal            1/1     Running   0               3h8m<br><br><span class="hljs-comment"># 查看calico-kube-controllers的pod日志是否有报错</span><br>$ kubectl logs -f calico-kube-controllers-5c4bd49f9b-6b2gr -n kube-system<br></code></pre></td></tr></table></figure>
 
 <h2 id="5-3-pod安装calicoctl"><a href="#5-3-pod安装calicoctl" class="headerlink" title="5.3 pod安装calicoctl"></a>5.3 pod安装calicoctl</h2><p>calicoctl是用来查看管理calico的命令行工具，定位上有点类似于calico版本的kubectl，因为我们前面使用了etcd作为calico的datastore，这里直接选择<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/maintenance/clis/calicoctl/install#install-calicoctl-as-a-kubernetes-pod">在k8s集群中以pod的形式部署</a><code>calicoctl</code>的方式更加简单。</p>
 <ul>
 <li><code>calicoctl</code>的版本最好和部署的calico一致，这里均为<code>v3.22.2</code></li>
 <li><code>calicoctl</code>的etcd配置最好和部署的calico一致，因为前面部署calico的时候etcd开启了TLS，因此这里我们也要修改yaml文件开启TLS</li>
 </ul>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 为了方便后期管理，我们先把calicoctl.yaml下载到本地再进行部署</span>
-$ <span class="token function">wget</span> https://projectcalico.docs.tigera.io/manifests/calicoctl-etcd.yaml
-
-$ <span class="token function">cat</span> calicoctl-etcd.yaml
-<span class="token comment"># Calico Version v3.22.2</span>
-<span class="token comment"># https://projectcalico.docs.tigera.io/releases#v3.22.2</span>
-<span class="token comment"># This manifest includes the following component versions:</span>
-<span class="token comment">#   calico/ctl:v3.22.2</span>
-
-apiVersion: v1
-kind: Pod
-metadata:
-  name: calicoctl
-  namespace: kube-system
-spec:
-  nodeSelector:
-    kubernetes.io/os: linux
-  hostNetwork: <span class="token boolean">true</span>
-  containers:
-  - name: calicoctl
-    image: calico/ctl:v3.22.2
-    command:
-      - /calicoctl
-    args:
-      - version
-      - --poll<span class="token operator">=</span>1m
-    env:
-    - name: ETCD_ENDPOINTS
-      valueFrom:
-        configMapKeyRef:
-          name: calico-config
-          key: etcd_endpoints
-    <span class="token comment"># If you're using TLS enabled etcd uncomment the following.</span>
-    <span class="token comment"># Location of the CA certificate for etcd.</span>
-    - name: ETCD_CA_CERT_FILE
-      valueFrom:
-        configMapKeyRef:
-          name: calico-config
-          key: etcd_ca
-    <span class="token comment"># Location of the client key for etcd.</span>
-    - name: ETCD_KEY_FILE
-      valueFrom:
-        configMapKeyRef:
-          name: calico-config
-          key: etcd_key
-    <span class="token comment"># Location of the client certificate for etcd.</span>
-    - name: ETCD_CERT_FILE
-      valueFrom:
-        configMapKeyRef:
-          name: calico-config
-          key: etcd_cert
-    volumeMounts:
-    - mountPath: /calico-secrets
-      name: etcd-certs
-  volumes:
-    <span class="token comment"># If you're using TLS enabled etcd uncomment the following.</span>
-    - name: etcd-certs
-      secret:
-        secretName: calico-etcd-secrets<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 为了方便后期管理，我们先把calicoctl.yaml下载到本地再进行部署</span><br>$ wget https://projectcalico.docs.tigera.io/manifests/calicoctl-etcd.yaml<br><br>$ cat calicoctl-etcd.yaml<br><span class="hljs-comment"># Calico Version v3.22.2</span><br><span class="hljs-comment"># https://projectcalico.docs.tigera.io/releases#v3.22.2</span><br><span class="hljs-comment"># This manifest includes the following component versions:</span><br><span class="hljs-comment">#   calico/ctl:v3.22.2</span><br><br>apiVersion: v1<br>kind: Pod<br>metadata:<br>  name: calicoctl<br>  namespace: kube-system<br>spec:<br>  nodeSelector:<br>    kubernetes.io/os: linux<br>  hostNetwork: <span class="hljs-literal">true</span><br>  containers:<br>  - name: calicoctl<br>    image: calico/ctl:v3.22.2<br>    <span class="hljs-built_in">command</span>:<br>      - /calicoctl<br>    args:<br>      - version<br>      - --poll=1m<br>    env:<br>    - name: ETCD_ENDPOINTS<br>      valueFrom:<br>        configMapKeyRef:<br>          name: calico-config<br>          key: etcd_endpoints<br>    <span class="hljs-comment"># If you&#x27;re using TLS enabled etcd uncomment the following.</span><br>    <span class="hljs-comment"># Location of the CA certificate for etcd.</span><br>    - name: ETCD_CA_CERT_FILE<br>      valueFrom:<br>        configMapKeyRef:<br>          name: calico-config<br>          key: etcd_ca<br>    <span class="hljs-comment"># Location of the client key for etcd.</span><br>    - name: ETCD_KEY_FILE<br>      valueFrom:<br>        configMapKeyRef:<br>          name: calico-config<br>          key: etcd_key<br>    <span class="hljs-comment"># Location of the client certificate for etcd.</span><br>    - name: ETCD_CERT_FILE<br>      valueFrom:<br>        configMapKeyRef:<br>          name: calico-config<br>          key: etcd_cert<br>    volumeMounts:<br>    - mountPath: /calico-secrets<br>      name: etcd-certs<br>  volumes:<br>    <span class="hljs-comment"># If you&#x27;re using TLS enabled etcd uncomment the following.</span><br>    - name: etcd-certs<br>      secret:<br>        secretName: calico-etcd-secrets<br></code></pre></td></tr></table></figure>
 
 <p>修改完成之后我们直接部署即可使用</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ kubectl apply -f calicoctl-etcd.yaml
-pod/calicoctl created
-
-<span class="token comment"># 创建完成后我们查看calicoctl的运行状态</span>
-$ kubectl get pods -A <span class="token operator">|</span> <span class="token function">grep</span> calicoctl
-kube-system   calicoctl                                                        <span class="token number">1</span>/1     Running   <span class="token number">0</span>             9s
-
-<span class="token comment"># 检验一下是否能够正常工作</span>
-$ kubectl <span class="token builtin class-name">exec</span> -ti -n kube-system calicoctl -- /calicoctl get nodes
-NAME
-tiny-calico-master-88-1.k8s.tcinternal
-tiny-calico-worker-88-11.k8s.tcinternal
-tiny-calico-worker-88-12.k8s.tcinternal
-
-$ kubectl <span class="token builtin class-name">exec</span> -ti -n kube-system calicoctl -- /calicoctl get profiles -o wide
-NAME                                                 LABELS
-projectcalico-default-allow
-kns.default                                          pcns.kubernetes.io/metadata.name<span class="token operator">=</span>default,pcns.projectcalico.org/name<span class="token operator">=</span>default
-kns.kube-node-lease                                  pcns.kubernetes.io/metadata.name<span class="token operator">=</span>kube-node-lease,pcns.projectcalico.org/name<span class="token operator">=</span>kube-node-lease
-kns.kube-public                                      pcns.kubernetes.io/metadata.name<span class="token operator">=</span>kube-public,pcns.projectcalico.org/name<span class="token operator">=</span>kube-public
-kns.kube-system                                      pcns.kubernetes.io/metadata.name<span class="token operator">=</span>kube-system,pcns.projectcalico.org/name<span class="token operator">=</span>kube-system
-<span class="token punctuation">..</span>.此处略去一堆输出<span class="token punctuation">..</span>.
-
-<span class="token comment"># 查看ipam的分配情况</span>
-$ calicoctl ipam show
-+----------+---------------+-----------+------------+--------------+
-<span class="token operator">|</span> GROUPING <span class="token operator">|</span>     CIDR      <span class="token operator">|</span> IPS TOTAL <span class="token operator">|</span> IPS IN USE <span class="token operator">|</span>   IPS FREE   <span class="token operator">|</span>
-+----------+---------------+-----------+------------+--------------+
-<span class="token operator">|</span> IP Pool  <span class="token operator">|</span> <span class="token number">10.88</span>.64.0/18 <span class="token operator">|</span>     <span class="token number">16384</span> <span class="token operator">|</span> <span class="token number">2</span> <span class="token punctuation">(</span><span class="token number">0</span>%<span class="token punctuation">)</span>     <span class="token operator">|</span> <span class="token number">16382</span> <span class="token punctuation">(</span><span class="token number">100</span>%<span class="token punctuation">)</span> <span class="token operator">|</span>
-+----------+---------------+-----------+------------+--------------+
-
-
-<span class="token comment"># 为了方便可以在bashrc中设置alias</span>
-<span class="token function">cat</span> <span class="token operator">>></span> ~/.bashrc <span class="token operator">&lt;&lt;</span><span class="token string">EOF
-alias calicoctl="kubectl exec -i -n kube-system calicoctl -- /calicoctl"
-EOF</span>
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ kubectl apply -f calicoctl-etcd.yaml<br>pod/calicoctl created<br><br><span class="hljs-comment"># 创建完成后我们查看calicoctl的运行状态</span><br>$ kubectl get pods -A | grep calicoctl<br>kube-system   calicoctl                                                        1/1     Running   0             9s<br><br><span class="hljs-comment"># 检验一下是否能够正常工作</span><br>$ kubectl <span class="hljs-built_in">exec</span> -ti -n kube-system calicoctl -- /calicoctl get nodes<br>NAME<br>tiny-calico-master-88-1.k8s.tcinternal<br>tiny-calico-worker-88-11.k8s.tcinternal<br>tiny-calico-worker-88-12.k8s.tcinternal<br><br>$ kubectl <span class="hljs-built_in">exec</span> -ti -n kube-system calicoctl -- /calicoctl get profiles -o wide<br>NAME                                                 LABELS<br>projectcalico-default-allow<br>kns.default                                          pcns.kubernetes.io/metadata.name=default,pcns.projectcalico.org/name=default<br>kns.kube-node-lease                                  pcns.kubernetes.io/metadata.name=kube-node-lease,pcns.projectcalico.org/name=kube-node-lease<br>kns.kube-public                                      pcns.kubernetes.io/metadata.name=kube-public,pcns.projectcalico.org/name=kube-public<br>kns.kube-system                                      pcns.kubernetes.io/metadata.name=kube-system,pcns.projectcalico.org/name=kube-system<br>...此处略去一堆输出...<br><br><span class="hljs-comment"># 查看ipam的分配情况</span><br>$ calicoctl ipam show<br>+----------+---------------+-----------+------------+--------------+<br>| GROUPING |     CIDR      | IPS TOTAL | IPS IN USE |   IPS FREE   |<br>+----------+---------------+-----------+------------+--------------+<br>| IP Pool  | 10.88.64.0/18 |     16384 | 2 (0%)     | 16382 (100%) |<br>+----------+---------------+-----------+------------+--------------+<br><br><br><span class="hljs-comment"># 为了方便可以在bashrc中设置alias</span><br>cat &gt;&gt; ~/.bashrc &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">alias calicoctl=&quot;kubectl exec -i -n kube-system calicoctl -- /calicoctl&quot;</span><br><span class="hljs-string">EOF</span><br><br></code></pre></td></tr></table></figure>
 
 <p>完整版本calicoctl命令可以参考<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/reference/calicoctl/">官方文档</a>。</p>
 <h2 id="5-4-binary安装calicoctl"><a href="#5-4-binary安装calicoctl" class="headerlink" title="5.4 binary安装calicoctl"></a>5.4 binary安装calicoctl</h2><p>使用pod方式部署<code>calicoctl</code>虽然简单，但是有个问题就是无法使用<code>calicoctl node</code>命令，这个命令需要访问部分宿主机的文件系统。因此这里我们再二进制部署一个<code>calicoctl</code>。</p>
 <blockquote>
 <p>Note that if you run <code>calicoctl</code> in a container, <code>calicoctl node ...</code> commands will not work (they need access to parts of the host filesystem).</p>
 </blockquote>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接下线二进制文件即可使用</span>
-$ <span class="token builtin class-name">cd</span> /usr/local/bin/
-$ <span class="token function">curl</span> -L https://github.com/projectcalico/calico/releases/download/v3.22.2/calicoctl-linux-amd64 -o calicoctl
-$ <span class="token function">chmod</span> +x ./calicoctl<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接下线二进制文件即可使用</span><br>$ <span class="hljs-built_in">cd</span> /usr/<span class="hljs-built_in">local</span>/bin/<br>$ curl -L https://github.com/projectcalico/calico/releases/download/v3.22.2/calicoctl-linux-amd64 -o calicoctl<br>$ chmod +x ./calicoctl<br></code></pre></td></tr></table></figure>
 
 <p>二进制的calicoctl会优先读取配置文件，当找不到配置文件的时候才会去读取环境变量，这里我们直接配置<code>/etc/calico/calicoctl.cfg</code>，注意etcd的证书直接和前面部署calico时使用的证书文件一致即可。</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 配置calicoctl的配置文件</span>
-$ <span class="token function">mkdir</span> /etc/calico
-$ <span class="token function">cat</span> /etc/calico/calicoctl.cfg
-apiVersion: projectcalico.org/v3
-kind: CalicoAPIConfig
-metadata:
-spec:
-  datastoreType: etcdv3
-  etcdEndpoints: <span class="token string">"https://10.31.88.1:2379"</span>
-  etcdCACert: <span class="token operator">|</span>
-      -----BEGIN CERTIFICATE-----
-      MIIC9TCCAd2gAwIBAgIBADANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDEwdldGNk
-      LWNhMB4XDTIyMDUwNjA1MTg1OVoXDTMyMDUwMzA1MTg1OVowEjEQMA4GA1UEAxMH
-      ZXRjZC1jYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANFFqq4Mk3DE
-      6UW581xnZPFrHqQWlGr/KptEywKH56Bp24OAnDIAkSz7KAMrJzL+OiVsj9YJV59F
-      9qH/YzU+bppctDnfk1yCuavkcXgLSd9O6EBhM2LkGtF9AdWMnFw9ui2jNhFC/QXj
-      zCvq0I1c9o9gulbFmSHwIw2GLQd7ogO+PpfLsubRscJdKkCUWVFV0mb8opccmXoF
-      vXynRX0VW3wpN+v66bD+HTdMSNK1JljfBngh9LAkibjUx7bMrHvu/GOalNCSWrtG
-      lss/hhWkzwV7Y7AIXgvxxcmDdfswe5lUYLvW2CP4e+tXfB3i2wg10fErc8z63lix
-      v9BWkIIalScCAwEAAaNWMFQwDgYDVR0PAQH/BAQDAgKkMA8GA1UdEwEB/wQFMAMB
-      Af8wHQYDVR0OBBYEFH49PpnJYxze8aq0PVwgpY4Fo6djMBIGA1UdEQQLMAmCB2V0
-      Y2QtY2EwDQYJKoZIhvcNAQELBQADggEBAAGL6KwN80YEK6gZcL+7RI9bkMKk7UWW
-      V48154CgN8w9GKvNTm4l0tZKvsWCnR61hiJtLQcG0S8HYHAvL1DBjOXw11bNilLy
-      vaVM+wqOOIxPsXLU//F46z3V9z1uV0v/yLLlg320c0wtG+OLZZIn8O+yUhtOHM09
-      K0JSAF2/KhtNxhrc0owCTOzS+DKsb0w1SzQmS0t/tflyLfc3oJZ/2V4Tqd72j7iI
-      cDBa36lGqtUBf8MXu+Xza0cdhy/f19AqkeM2fe+/DrbzR4zDVmZ7l4dqYGLbKHYo
-      XaLn8bSToYQq4dlA/oAlyyH0ekB5v0DyYiHwlqgZgiu4qcR3Gw8azVk<span class="token operator">=</span>
-      -----END CERTIFICATE-----
-  etcdCert: <span class="token operator">|</span>
-      -----BEGIN CERTIFICATE-----
-      MIIDgzCCAmugAwIBAgIIePiBSOdMGwcwDQYJKoZIhvcNAQELBQAwEjEQMA4GA1UE
-      AxMHZXRjZC1jYTAeFw0yMjA1MDYwNTE4NTlaFw0yMzA1MDYwNTE4NTlaMDExLzAt
-      BgNVBAMTJnRpbnktY2FsaWNvLW1hc3Rlci04OC0xLms4cy50Y2ludGVybmFsMIIB
-      IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqZM/jBrdXLR3ctee7LVJhGSA
-      4usg/JQXGyOAd52OkkOLYwn3fvwqeo0Z0cX0q4mqaF0cnrPYc4eExX/3fJpF3Fxy
-      D6vdpEZ/FrnzCAkibEYtK/UVhTKuV7n/VdbjFPGl8CpppuGVs6o+4NFZxffW7em0
-      8m/FK/7SDkV2qXCyG94kOaUCeDEgdBKE3cPCZQ4maFuwXi08bYs2CiTfbfa4dsT5
-      3yzaoQVX9BaBqE9IGmsHDFuxp1X8gkJXs+7wwHQX39o1oXmci6T4IVxVHA5GRbTv
-      pCDG5Wye7QqKgnxO1KRF42FKs1Nif7UJ0iR35Ydpa7cat7Fr0M7l+rZLCDTJgwID
-      AQABo4G9MIG6MA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYI
-      KwYBBQUHAwIwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBR+PT6ZyWMc3vGqtD1c
-      IKWOBaOnYzBaBgNVHREEUzBRgglsb2NhbGhvc3SCJnRpbnktY2FsaWNvLW1hc3Rl
-      ci04OC0xLms4cy50Y2ludGVybmFshwQKH1gBhwR/AAABhxAAAAAAAAAAAAAAAAAA
-      AAABMA0GCSqGSIb3DQEBCwUAA4IBAQC+pyH14/+US5Svz04Vi8QIduY/DVx1HOQq
-      hfrIZKOZCH2iKU7fZ4o9QpQZh7D9B8hgpXM6dNuFpd98c0MVPr+LesShu4BHVjHl
-      gPvUWEVB2XD5x51HqnMV2OkhMKooyAUIzI0P0YKN29SFEyJGD1XDu4UtqvBADqf7
-      COvAuqj4VbRgF/iQwNstjqZ47rSzvyp6rIwqFoHRP+Zi+8KL1qmozGjI3+H+TZFM
-      Gv3b5DRx2pmfY+kGVLO5bjl3zxylRPjCDHaRlQUWiOYSWS8OHYRCBZuSLvW4tht0
-      JjWjUAh4hF8+3lyNrfx8moz7tfm5SG2q01pO1vjkhrhxhINAwaac
-      -----END CERTIFICATE-----
-  etcdKey: <span class="token operator">|</span>
-      -----BEGIN RSA PRIVATE KEY-----
-      MIIEowIBAAKCAQEAqZM/jBrdXLR3ctee7LVJhGSA4usg/JQXGyOAd52OkkOLYwn3
-      fvwqeo0Z0cX0q4mqaF0cnrPYc4eExX/3fJpF3FxyD6vdpEZ/FrnzCAkibEYtK/UV
-      hTKuV7n/VdbjFPGl8CpppuGVs6o+4NFZxffW7em08m/FK/7SDkV2qXCyG94kOaUC
-      eDEgdBKE3cPCZQ4maFuwXi08bYs2CiTfbfa4dsT53yzaoQVX9BaBqE9IGmsHDFux
-      p1X8gkJXs+7wwHQX39o1oXmci6T4IVxVHA5GRbTvpCDG5Wye7QqKgnxO1KRF42FK
-      s1Nif7UJ0iR35Ydpa7cat7Fr0M7l+rZLCDTJgwIDAQABAoIBAE1gMw7q8zbp4dc1
-      K/82eWU/ts/UGikmKaTofiYWboeu6ls2oQgAaCGjYLSnbw0Ws/sLAZQo3AtbOuoj
-      ifoBKv9x71nXQjtDL5pfHtX71QkyvEniev9cMNE2vZudgeB8owsDT1ImfPiOJkLP
-      Q/dhL2E/0qEM/xskGxUH/S0zjxHHfPZZsYODhkVPWc6Z+XEDll48fRCFn4/48FTN
-      9GbRvo7dv34EHmNYA20K4DMHbZUdrPqSZpKWzAPJXnDlgZbpvUeAYOJxqZHQtCm1
-      zbSOyM1Ql6K0Ayro0L5GAzap+0yGuk79OWiPnEsdPneVsATKG7dT7RZIL/INrOqQ
-      0wjUmQECgYEA02OHdT1K5Au6wtiTqKD99WweltnvFd4C/Z3dobEj8M8qN6uiKCca
-      PievWahnxAlJEah3RiOgtarwA+0E/Jgsw99Qutp5BR/XdD3llTNczkPkg/RkWpve
-      2f/4DlZQrxuIem7UNLl+5BacfmF691DQQoX2RoIkvQxYJGTUNXvrSUkCgYEAzVyz
-      mvN+dvSwzAlm0gkfVP5Ez3DFESUrWd0FR2v1HR6qHQy/dkgkkic6zRGCJtGeT5V7
-      N0kbVSHsz+wi6aQkFy0Sp0TbgZzjPhSwNtk+2JsBRvMp0CYczgrfyvWuAQ3gbXGc
-      N8IkcZSSOv8TuigCnnYf2Xaz8LM50AivScnb6GsCgYEAyq4ScgnLpa3NawbnRPbf
-      qRH6nl7lC01sBqn3mBHVSQ4JB4msF92uHsxEJ639mAvjIGgrvHdqnuT/7nOypVJv
-      EXsr14ykHpKyLQUv/Idbw3V7RD3ufqYW3WS8/VorUEoQ6HsdQlRc4ur/L3ndwgWd
-      OTtir6YW/aA5XuPCSGnBZekCgYB6VtlgW+Jg91BDnO41/d0+guN3ONUNa7kxpau5
-      aqTxHg11lNySmFPBBcHP3LhOa94FxyVKQDEaPEWZcDE0QuaFMALGxwyFYHM3zpdT
-      dYQtAdp26/Fi4PGUBYJgpI9ubVffmyjXRr7zMvESWFbmNWOqBvDeWgrEP+EW/7V9
-      HdX11QKBgE1czchlibgQ/bhAl8BatKRr1X/UHvblWhmyApudOfFeGOILR6u/lWvY
-      SS+Rg0y8nnZ4hTRSXbd/sSEsUJcSmoBc1TivWzl32eVuqe9CcrUZY0JSLtoj1KiP
-      adRcCZtVDETXbW326Hvgz+MnqrIgzx+Zgy4tNtoAAbTv0q83j45I
-      -----END RSA PRIVATE KEY-----
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 配置calicoctl的配置文件</span><br>$ mkdir /etc/calico<br>$ cat /etc/calico/calicoctl.cfg<br>apiVersion: projectcalico.org/v3<br>kind: CalicoAPIConfig<br>metadata:<br>spec:<br>  datastoreType: etcdv3<br>  etcdEndpoints: <span class="hljs-string">&quot;https://10.31.88.1:2379&quot;</span><br>  etcdCACert: |<br>      -----BEGIN CERTIFICATE-----<br>      MIIC9TCCAd2gAwIBAgIBADANBgkqhkiG9w0BAQsFADASMRAwDgYDVQQDEwdldGNk<br>      LWNhMB4XDTIyMDUwNjA1MTg1OVoXDTMyMDUwMzA1MTg1OVowEjEQMA4GA1UEAxMH<br>      ZXRjZC1jYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANFFqq4Mk3DE<br>      6UW581xnZPFrHqQWlGr/KptEywKH56Bp24OAnDIAkSz7KAMrJzL+OiVsj9YJV59F<br>      9qH/YzU+bppctDnfk1yCuavkcXgLSd9O6EBhM2LkGtF9AdWMnFw9ui2jNhFC/QXj<br>      zCvq0I1c9o9gulbFmSHwIw2GLQd7ogO+PpfLsubRscJdKkCUWVFV0mb8opccmXoF<br>      vXynRX0VW3wpN+v66bD+HTdMSNK1JljfBngh9LAkibjUx7bMrHvu/GOalNCSWrtG<br>      lss/hhWkzwV7Y7AIXgvxxcmDdfswe5lUYLvW2CP4e+tXfB3i2wg10fErc8z63lix<br>      v9BWkIIalScCAwEAAaNWMFQwDgYDVR0PAQH/BAQDAgKkMA8GA1UdEwEB/wQFMAMB<br>      Af8wHQYDVR0OBBYEFH49PpnJYxze8aq0PVwgpY4Fo6djMBIGA1UdEQQLMAmCB2V0<br>      Y2QtY2EwDQYJKoZIhvcNAQELBQADggEBAAGL6KwN80YEK6gZcL+7RI9bkMKk7UWW<br>      V48154CgN8w9GKvNTm4l0tZKvsWCnR61hiJtLQcG0S8HYHAvL1DBjOXw11bNilLy<br>      vaVM+wqOOIxPsXLU//F46z3V9z1uV0v/yLLlg320c0wtG+OLZZIn8O+yUhtOHM09<br>      K0JSAF2/KhtNxhrc0owCTOzS+DKsb0w1SzQmS0t/tflyLfc3oJZ/2V4Tqd72j7iI<br>      cDBa36lGqtUBf8MXu+Xza0cdhy/f19AqkeM2fe+/DrbzR4zDVmZ7l4dqYGLbKHYo<br>      XaLn8bSToYQq4dlA/oAlyyH0ekB5v0DyYiHwlqgZgiu4qcR3Gw8azVk=<br>      -----END CERTIFICATE-----<br>  etcdCert: |<br>      -----BEGIN CERTIFICATE-----<br>      MIIDgzCCAmugAwIBAgIIePiBSOdMGwcwDQYJKoZIhvcNAQELBQAwEjEQMA4GA1UE<br>      AxMHZXRjZC1jYTAeFw0yMjA1MDYwNTE4NTlaFw0yMzA1MDYwNTE4NTlaMDExLzAt<br>      BgNVBAMTJnRpbnktY2FsaWNvLW1hc3Rlci04OC0xLms4cy50Y2ludGVybmFsMIIB<br>      IjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqZM/jBrdXLR3ctee7LVJhGSA<br>      4usg/JQXGyOAd52OkkOLYwn3fvwqeo0Z0cX0q4mqaF0cnrPYc4eExX/3fJpF3Fxy<br>      D6vdpEZ/FrnzCAkibEYtK/UVhTKuV7n/VdbjFPGl8CpppuGVs6o+4NFZxffW7em0<br>      8m/FK/7SDkV2qXCyG94kOaUCeDEgdBKE3cPCZQ4maFuwXi08bYs2CiTfbfa4dsT5<br>      3yzaoQVX9BaBqE9IGmsHDFuxp1X8gkJXs+7wwHQX39o1oXmci6T4IVxVHA5GRbTv<br>      pCDG5Wye7QqKgnxO1KRF42FKs1Nif7UJ0iR35Ydpa7cat7Fr0M7l+rZLCDTJgwID<br>      AQABo4G9MIG6MA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYI<br>      KwYBBQUHAwIwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBR+PT6ZyWMc3vGqtD1c<br>      IKWOBaOnYzBaBgNVHREEUzBRgglsb2NhbGhvc3SCJnRpbnktY2FsaWNvLW1hc3Rl<br>      ci04OC0xLms4cy50Y2ludGVybmFshwQKH1gBhwR/AAABhxAAAAAAAAAAAAAAAAAA<br>      AAABMA0GCSqGSIb3DQEBCwUAA4IBAQC+pyH14/+US5Svz04Vi8QIduY/DVx1HOQq<br>      hfrIZKOZCH2iKU7fZ4o9QpQZh7D9B8hgpXM6dNuFpd98c0MVPr+LesShu4BHVjHl<br>      gPvUWEVB2XD5x51HqnMV2OkhMKooyAUIzI0P0YKN29SFEyJGD1XDu4UtqvBADqf7<br>      COvAuqj4VbRgF/iQwNstjqZ47rSzvyp6rIwqFoHRP+Zi+8KL1qmozGjI3+H+TZFM<br>      Gv3b5DRx2pmfY+kGVLO5bjl3zxylRPjCDHaRlQUWiOYSWS8OHYRCBZuSLvW4tht0<br>      JjWjUAh4hF8+3lyNrfx8moz7tfm5SG2q01pO1vjkhrhxhINAwaac<br>      -----END CERTIFICATE-----<br>  etcdKey: |<br>      -----BEGIN RSA PRIVATE KEY-----<br>      MIIEowIBAAKCAQEAqZM/jBrdXLR3ctee7LVJhGSA4usg/JQXGyOAd52OkkOLYwn3<br>      fvwqeo0Z0cX0q4mqaF0cnrPYc4eExX/3fJpF3FxyD6vdpEZ/FrnzCAkibEYtK/UV<br>      hTKuV7n/VdbjFPGl8CpppuGVs6o+4NFZxffW7em08m/FK/7SDkV2qXCyG94kOaUC<br>      eDEgdBKE3cPCZQ4maFuwXi08bYs2CiTfbfa4dsT53yzaoQVX9BaBqE9IGmsHDFux<br>      p1X8gkJXs+7wwHQX39o1oXmci6T4IVxVHA5GRbTvpCDG5Wye7QqKgnxO1KRF42FK<br>      s1Nif7UJ0iR35Ydpa7cat7Fr0M7l+rZLCDTJgwIDAQABAoIBAE1gMw7q8zbp4dc1<br>      K/82eWU/ts/UGikmKaTofiYWboeu6ls2oQgAaCGjYLSnbw0Ws/sLAZQo3AtbOuoj<br>      ifoBKv9x71nXQjtDL5pfHtX71QkyvEniev9cMNE2vZudgeB8owsDT1ImfPiOJkLP<br>      Q/dhL2E/0qEM/xskGxUH/S0zjxHHfPZZsYODhkVPWc6Z+XEDll48fRCFn4/48FTN<br>      9GbRvo7dv34EHmNYA20K4DMHbZUdrPqSZpKWzAPJXnDlgZbpvUeAYOJxqZHQtCm1<br>      zbSOyM1Ql6K0Ayro0L5GAzap+0yGuk79OWiPnEsdPneVsATKG7dT7RZIL/INrOqQ<br>      0wjUmQECgYEA02OHdT1K5Au6wtiTqKD99WweltnvFd4C/Z3dobEj8M8qN6uiKCca<br>      PievWahnxAlJEah3RiOgtarwA+0E/Jgsw99Qutp5BR/XdD3llTNczkPkg/RkWpve<br>      2f/4DlZQrxuIem7UNLl+5BacfmF691DQQoX2RoIkvQxYJGTUNXvrSUkCgYEAzVyz<br>      mvN+dvSwzAlm0gkfVP5Ez3DFESUrWd0FR2v1HR6qHQy/dkgkkic6zRGCJtGeT5V7<br>      N0kbVSHsz+wi6aQkFy0Sp0TbgZzjPhSwNtk+2JsBRvMp0CYczgrfyvWuAQ3gbXGc<br>      N8IkcZSSOv8TuigCnnYf2Xaz8LM50AivScnb6GsCgYEAyq4ScgnLpa3NawbnRPbf<br>      qRH6nl7lC01sBqn3mBHVSQ4JB4msF92uHsxEJ639mAvjIGgrvHdqnuT/7nOypVJv<br>      EXsr14ykHpKyLQUv/Idbw3V7RD3ufqYW3WS8/VorUEoQ6HsdQlRc4ur/L3ndwgWd<br>      OTtir6YW/aA5XuPCSGnBZekCgYB6VtlgW+Jg91BDnO41/d0+guN3ONUNa7kxpau5<br>      aqTxHg11lNySmFPBBcHP3LhOa94FxyVKQDEaPEWZcDE0QuaFMALGxwyFYHM3zpdT<br>      dYQtAdp26/Fi4PGUBYJgpI9ubVffmyjXRr7zMvESWFbmNWOqBvDeWgrEP+EW/7V9<br>      HdX11QKBgE1czchlibgQ/bhAl8BatKRr1X/UHvblWhmyApudOfFeGOILR6u/lWvY<br>      SS+Rg0y8nnZ4hTRSXbd/sSEsUJcSmoBc1TivWzl32eVuqe9CcrUZY0JSLtoj1KiP<br>      adRcCZtVDETXbW326Hvgz+MnqrIgzx+Zgy4tNtoAAbTv0q83j45I<br>      -----END RSA PRIVATE KEY-----<br><br></code></pre></td></tr></table></figure>
 
 <p>配置完成之后我们检查一下效果</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ calicoctl node status
-Calico process is running.
-
-IPv4 BGP status
-+--------------+-------------------+-------+----------+-------------+
-<span class="token operator">|</span> PEER ADDRESS <span class="token operator">|</span>     PEER TYPE     <span class="token operator">|</span> STATE <span class="token operator">|</span>  SINCE   <span class="token operator">|</span>    INFO     <span class="token operator">|</span>
-+--------------+-------------------+-------+----------+-------------+
-<span class="token operator">|</span> <span class="token number">10.31</span>.88.11  <span class="token operator">|</span> node-to-node mesh <span class="token operator">|</span> up    <span class="token operator">|</span> 08:26:30 <span class="token operator">|</span> Established <span class="token operator">|</span>
-<span class="token operator">|</span> <span class="token number">10.31</span>.88.12  <span class="token operator">|</span> node-to-node mesh <span class="token operator">|</span> up    <span class="token operator">|</span> 08:26:30 <span class="token operator">|</span> Established <span class="token operator">|</span>
-+--------------+-------------------+-------+----------+-------------+
-
-IPv6 BGP status
-No IPv6 peers found.
-
-$ calicoctl get nodes
-NAME
-tiny-calico-master-88-1.k8s.tcinternal
-tiny-calico-worker-88-11.k8s.tcinternal
-tiny-calico-worker-88-12.k8s.tcinternal
-
-$ calicoctl ipam show
-+----------+---------------+-----------+------------+--------------+
-<span class="token operator">|</span> GROUPING <span class="token operator">|</span>     CIDR      <span class="token operator">|</span> IPS TOTAL <span class="token operator">|</span> IPS IN USE <span class="token operator">|</span>   IPS FREE   <span class="token operator">|</span>
-+----------+---------------+-----------+------------+--------------+
-<span class="token operator">|</span> IP Pool  <span class="token operator">|</span> <span class="token number">10.88</span>.64.0/18 <span class="token operator">|</span>     <span class="token number">16384</span> <span class="token operator">|</span> <span class="token number">2</span> <span class="token punctuation">(</span><span class="token number">0</span>%<span class="token punctuation">)</span>     <span class="token operator">|</span> <span class="token number">16382</span> <span class="token punctuation">(</span><span class="token number">100</span>%<span class="token punctuation">)</span> <span class="token operator">|</span>
-+----------+---------------+-----------+------------+--------------+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ calicoctl node status<br>Calico process is running.<br><br>IPv4 BGP status<br>+--------------+-------------------+-------+----------+-------------+<br>| PEER ADDRESS |     PEER TYPE     | STATE |  SINCE   |    INFO     |<br>+--------------+-------------------+-------+----------+-------------+<br>| 10.31.88.11  | node-to-node mesh | up    | 08:26:30 | Established |<br>| 10.31.88.12  | node-to-node mesh | up    | 08:26:30 | Established |<br>+--------------+-------------------+-------+----------+-------------+<br><br>IPv6 BGP status<br>No IPv6 peers found.<br><br>$ calicoctl get nodes<br>NAME<br>tiny-calico-master-88-1.k8s.tcinternal<br>tiny-calico-worker-88-11.k8s.tcinternal<br>tiny-calico-worker-88-12.k8s.tcinternal<br><br>$ calicoctl ipam show<br>+----------+---------------+-----------+------------+--------------+<br>| GROUPING |     CIDR      | IPS TOTAL | IPS IN USE |   IPS FREE   |<br>+----------+---------------+-----------+------------+--------------+<br>| IP Pool  | 10.88.64.0/18 |     16384 | 2 (0%)     | 16382 (100%) |<br>+----------+---------------+-----------+------------+--------------+<br></code></pre></td></tr></table></figure>
 
 <h1 id="6、部署测试用例"><a href="#6、部署测试用例" class="headerlink" title="6、部署测试用例"></a>6、部署测试用例</h1><p>集群部署完成之后我们在k8s集群中部署一个nginx测试一下是否能够正常工作。首先我们创建一个名为<code>nginx-quic</code>的命名空间（<code>namespace</code>），然后在这个命名空间内创建一个名为<code>nginx-quic-deployment</code>的<code>deployment</code>用来部署pod，最后再创建一个<code>service</code>用来暴露服务，这里我们先使用<code>nodeport</code>的方式暴露端口方便测试。</p>
-<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml">$ cat nginx<span class="token punctuation">-</span>quic.yaml
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Namespace
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-
-<span class="token punctuation">---</span>
-
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic<span class="token punctuation">-</span>deployment
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span>
-      <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">4</span>
-  <span class="token key atrule">template</span><span class="token punctuation">:</span>
-    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
-        <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
-      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-        <span class="token key atrule">image</span><span class="token punctuation">:</span> tinychen777/nginx<span class="token punctuation">-</span>quic<span class="token punctuation">:</span>latest
-        <span class="token key atrule">imagePullPolicy</span><span class="token punctuation">:</span> IfNotPresent
-        <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-        <span class="token punctuation">-</span> <span class="token key atrule">containerPort</span><span class="token punctuation">:</span> <span class="token number">80</span>
-
-<span class="token punctuation">---</span>
-
-<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
-<span class="token key atrule">kind</span><span class="token punctuation">:</span> Service
-<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
-  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic<span class="token punctuation">-</span>service
-  <span class="token key atrule">namespace</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-<span class="token key atrule">spec</span><span class="token punctuation">:</span>
-  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
-    <span class="token key atrule">app</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>quic
-  <span class="token key atrule">ports</span><span class="token punctuation">:</span>
-  <span class="token punctuation">-</span> <span class="token key atrule">protocol</span><span class="token punctuation">:</span> TCP
-    <span class="token key atrule">port</span><span class="token punctuation">:</span> <span class="token number">8080</span> <span class="token comment"># match for service access port</span>
-    <span class="token key atrule">targetPort</span><span class="token punctuation">:</span> <span class="token number">80</span> <span class="token comment"># match for pod access port</span>
-    <span class="token key atrule">nodePort</span><span class="token punctuation">:</span> <span class="token number">30088</span> <span class="token comment"># match for external access port</span>
-  <span class="token key atrule">type</span><span class="token punctuation">:</span> NodePort<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">$</span> <span class="hljs-string">cat</span> <span class="hljs-string">nginx-quic.yaml</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Namespace</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic-deployment</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">4</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">tinychen777/nginx-quic:latest</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">80</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span> <span class="hljs-comment"># match for service access port</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for pod access port</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">30088</span> <span class="hljs-comment"># match for external access port</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br></code></pre></td></tr></table></figure>
 
 <p>部署完成后我们直接查看状态</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接部署</span>
-$ kubectl apply -f nginx-quic.yaml
-namespace/nginx-quic created
-deployment.apps/nginx-quic-deployment created
-service/nginx-quic-service created
-
-<span class="token comment"># 查看deployment的运行状态</span>
-$ kubectl get deployment -o wide -n nginx-quic
-NAME                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                          SELECTOR
-nginx-quic-deployment   <span class="token number">4</span>/4     <span class="token number">4</span>            <span class="token number">4</span>           55s   nginx-quic   tinychen777/nginx-quic:latest   <span class="token assign-left variable">app</span><span class="token operator">=</span>nginx-quic
-
-<span class="token comment"># 查看service的运行状态</span>
-$ kubectl get <span class="token function">service</span> -o wide -n nginx-quic
-NAME                 TYPE       CLUSTER-IP     EXTERNAL-IP   PORT<span class="token punctuation">(</span>S<span class="token punctuation">)</span>          AGE   SELECTOR
-nginx-quic-service   NodePort   <span class="token number">10.88</span>.52.168   <span class="token operator">&lt;</span>none<span class="token operator">></span>        <span class="token number">8080</span>:30088/TCP   66s   <span class="token assign-left variable">app</span><span class="token operator">=</span>nginx-quic
-
-<span class="token comment"># 查看pod的运行状态</span>
-$ kubectl get pods -o wide -n nginx-quic
-NAME                                     READY   STATUS    RESTARTS   AGE   IP             NODE                                      NOMINATED NODE   READINESS GATES
-nginx-quic-deployment-7457f4d579-24q9z   <span class="token number">1</span>/1     Running   <span class="token number">0</span>          75s   <span class="token number">10.88</span>.120.72   tiny-calico-worker-88-12.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-nginx-quic-deployment-7457f4d579-4svv9   <span class="token number">1</span>/1     Running   <span class="token number">0</span>          75s   <span class="token number">10.88</span>.84.68    tiny-calico-worker-88-11.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-nginx-quic-deployment-7457f4d579-btrjj   <span class="token number">1</span>/1     Running   <span class="token number">0</span>          75s   <span class="token number">10.88</span>.120.71   tiny-calico-worker-88-12.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-nginx-quic-deployment-7457f4d579-lvh6x   <span class="token number">1</span>/1     Running   <span class="token number">0</span>          75s   <span class="token number">10.88</span>.84.69    tiny-calico-worker-88-11.k8s.tcinternal   <span class="token operator">&lt;</span>none<span class="token operator">></span>           <span class="token operator">&lt;</span>none<span class="token operator">></span>
-
-
-<span class="token comment"># 查看IPVS规则</span>
-$ ipvsadm -ln
-IP Virtual Server version <span class="token number">1.2</span>.1 <span class="token punctuation">(</span>size<span class="token operator">=</span><span class="token number">4096</span><span class="token punctuation">)</span>
-Prot LocalAddress:Port Scheduler Flags
-  -<span class="token operator">></span> RemoteAddress:Port           Forward Weight ActiveConn InActConn
-TCP  <span class="token number">172.17</span>.0.1:30088 rr
-  -<span class="token operator">></span> <span class="token number">10.88</span>.84.68:80               Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.84.69:80               Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.120.71:80              Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.120.72:80              Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-TCP  <span class="token number">10.31</span>.88.1:30088 rr
-  -<span class="token operator">></span> <span class="token number">10.88</span>.84.68:80               Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.84.69:80               Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.120.71:80              Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.120.72:80              Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-TCP  <span class="token number">10.88</span>.52.168:8080 rr
-  -<span class="token operator">></span> <span class="token number">10.88</span>.84.68:80               Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.84.69:80               Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.120.71:80              Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span>
-  -<span class="token operator">></span> <span class="token number">10.88</span>.120.72:80              Masq    <span class="token number">1</span>      <span class="token number">0</span>          <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 直接部署</span><br>$ kubectl apply -f nginx-quic.yaml<br>namespace/nginx-quic created<br>deployment.apps/nginx-quic-deployment created<br>service/nginx-quic-service created<br><br><span class="hljs-comment"># 查看deployment的运行状态</span><br>$ kubectl get deployment -o wide -n nginx-quic<br>NAME                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                          SELECTOR<br>nginx-quic-deployment   4/4     4            4           55s   nginx-quic   tinychen777/nginx-quic:latest   app=nginx-quic<br><br><span class="hljs-comment"># 查看service的运行状态</span><br>$ kubectl get service -o wide -n nginx-quic<br>NAME                 TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE   SELECTOR<br>nginx-quic-service   NodePort   10.88.52.168   &lt;none&gt;        8080:30088/TCP   66s   app=nginx-quic<br><br><span class="hljs-comment"># 查看pod的运行状态</span><br>$ kubectl get pods -o wide -n nginx-quic<br>NAME                                     READY   STATUS    RESTARTS   AGE   IP             NODE                                      NOMINATED NODE   READINESS GATES<br>nginx-quic-deployment-7457f4d579-24q9z   1/1     Running   0          75s   10.88.120.72   tiny-calico-worker-88-12.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment-7457f4d579-4svv9   1/1     Running   0          75s   10.88.84.68    tiny-calico-worker-88-11.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment-7457f4d579-btrjj   1/1     Running   0          75s   10.88.120.71   tiny-calico-worker-88-12.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment-7457f4d579-lvh6x   1/1     Running   0          75s   10.88.84.69    tiny-calico-worker-88-11.k8s.tcinternal   &lt;none&gt;           &lt;none&gt;<br><br><br><span class="hljs-comment"># 查看IPVS规则</span><br>$ ipvsadm -ln<br>IP Virtual Server version 1.2.1 (size=4096)<br>Prot LocalAddress:Port Scheduler Flags<br>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn<br>TCP  172.17.0.1:30088 rr<br>  -&gt; 10.88.84.68:80               Masq    1      0          0<br>  -&gt; 10.88.84.69:80               Masq    1      0          0<br>  -&gt; 10.88.120.71:80              Masq    1      0          0<br>  -&gt; 10.88.120.72:80              Masq    1      0          0<br>TCP  10.31.88.1:30088 rr<br>  -&gt; 10.88.84.68:80               Masq    1      0          0<br>  -&gt; 10.88.84.69:80               Masq    1      0          0<br>  -&gt; 10.88.120.71:80              Masq    1      0          0<br>  -&gt; 10.88.120.72:80              Masq    1      0          0<br>TCP  10.88.52.168:8080 rr<br>  -&gt; 10.88.84.68:80               Masq    1      0          0<br>  -&gt; 10.88.84.69:80               Masq    1      0          0<br>  -&gt; 10.88.120.71:80              Masq    1      0          0<br>  -&gt; 10.88.120.72:80              Masq    1      0          0<br></code></pre></td></tr></table></figure>
 
 <p>最后我们进行测试，这个nginx-quic的镜像默认情况下会返回在nginx容器中获得的用户请求的IP和端口</p>
-<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先我们在集群内进行测试</span>
-<span class="token comment"># 直接访问pod</span>
-$ <span class="token function">curl</span> <span class="token number">10.88</span>.84.68:80
-<span class="token number">10.31</span>.88.1:34612
-<span class="token comment"># 直接访问service的ClusterIP，这时请求会被转发到pod中</span>
-$ <span class="token function">curl</span> <span class="token number">10.88</span>.52.168:8080
-<span class="token number">10.31</span>.88.1:58978
-<span class="token comment"># 直接访问nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span>
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.88.1:30088
-<span class="token number">10.31</span>.88.1:56595
-
-<span class="token comment"># 接着我们在集群外进行测试</span>
-<span class="token comment"># 直接访问三个节点的nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span>
-<span class="token comment"># 由于externalTrafficPolicy默认为Cluster，因此nginx拿到的IP就是我们访问的节点的IP，而非客户端IP</span>
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.88.1:30088
-<span class="token number">10.31</span>.88.1:27851
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.88.11:30088
-<span class="token number">10.31</span>.88.11:16540
-$ <span class="token function">curl</span> <span class="token number">10.31</span>.88.12:30088
-<span class="token number">10.31</span>.88.12:5767<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们在集群内进行测试</span><br><span class="hljs-comment"># 直接访问pod</span><br>$ curl 10.88.84.68:80<br>10.31.88.1:34612<br><span class="hljs-comment"># 直接访问service的ClusterIP，这时请求会被转发到pod中</span><br>$ curl 10.88.52.168:8080<br>10.31.88.1:58978<br><span class="hljs-comment"># 直接访问nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span><br>$ curl 10.31.88.1:30088<br>10.31.88.1:56595<br><br><span class="hljs-comment"># 接着我们在集群外进行测试</span><br><span class="hljs-comment"># 直接访问三个节点的nodeport，这时请求会被转发到pod中，不会经过ClusterIP</span><br><span class="hljs-comment"># 由于externalTrafficPolicy默认为Cluster，因此nginx拿到的IP就是我们访问的节点的IP，而非客户端IP</span><br>$ curl 10.31.88.1:30088<br>10.31.88.1:27851<br>$ curl 10.31.88.11:30088<br>10.31.88.11:16540<br>$ curl 10.31.88.12:30088<br>10.31.88.12:5767<br></code></pre></td></tr></table></figure>
 
 
               
@@ -1572,8 +797,6 @@ $ <span class="token function">curl</span> <span class="token number">10.31</spa
   });
 </script>
 
-
-  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {
