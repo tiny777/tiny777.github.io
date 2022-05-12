@@ -30,8 +30,8 @@
 <meta property="article:modified_time" content="2021-08-10T09:00:00.000Z">
 <meta property="article:author" content="TinyChen">
 <meta property="article:tag" content="loadbalance">
-<meta property="article:tag" content="nat">
 <meta property="article:tag" content="lvs">
+<meta property="article:tag" content="nat">
 <meta property="article:tag" content="dpdk">
 <meta property="article:tag" content="dpvs">
 <meta name="twitter:card" content="summary_large_image">
@@ -225,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          17k words
+          16k words
         
       </span>
     
@@ -236,7 +236,7 @@
         
         
         
-          138 mins
+          136 mins
         
       </span>
     
@@ -332,10 +332,10 @@
 <p>从上面的测试结果来看，即使是安装了TOA模块，也无法获取NAT64模式下客户端的源IP地址，所有的客户端IP和端口都会变成LIP转发过来的时候的IP和端口。如果是对源IP没需求的话可以忽略这个问题，如果有需求的话则需要更改RS上面的客户端程序，下面我们以nginx为例。</p>
 <h2 id="4-2-NGINX支持NAT64"><a href="#4-2-NGINX支持NAT64" class="headerlink" title="4.2 NGINX支持NAT64"></a>4.2 NGINX支持NAT64</h2><p>dpvs还为nginx提供了一个nat64的toa模块，当VIP为ipv6而RS为ipv4的时候，可以使用这个模块在nginx中获取用户真实的ipv6地址，需要我们在源码编译安装nginx之前先打上这个补丁。</p>
 <p>从官方的文件名我们可以看出应该是基于1.14.0版本制作的patch，首先我们使用旧版的1.14.0版本能够正常打上补丁，后续的编译安装也能正常进行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@tiny-centos7 nginx-1.14.0]<span class="hljs-comment"># pwd</span><br>/home/nginx-1.14.0<br>[root@tiny-centos7 nginx-1.14.0]<span class="hljs-comment"># ls</span><br>auto  CHANGES  CHANGES.ru  conf  configure  contrib  html  LICENSE  man  nginx-1.14.0-nat64-toa.patch  README  src<br>[root@tiny-centos7 nginx-1.14.0]<span class="hljs-comment"># cp /home/dpvs/kmod/toa/example_nat64/nginx/nginx-1.14.0-nat64-toa.patch ./</span><br>[root@tiny-centos7 nginx-1.14.0]<span class="hljs-comment"># patch -p 1 &lt; nginx-1.14.0-nat64-toa.patch</span><br>patching file src/core/ngx_connection.h<br>patching file src/core/ngx_inet.h<br>patching file src/event/ngx_event_accept.c<br>patching file src/http/ngx_http_variables.c<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">pwd</span><br>/home/nginx-1.14.0<br>$ ls<br>auto  CHANGES  CHANGES.ru  conf  configure  contrib  html  LICENSE  man  nginx-1.14.0-nat64-toa.patch  README  src<br>$ cp /home/dpvs/kmod/toa/example_nat64/nginx/nginx-1.14.0-nat64-toa.patch ./<br>$ patch -p 1 &lt; nginx-1.14.0-nat64-toa.patch<br>patching file src/core/ngx_connection.h<br>patching file src/core/ngx_inet.h<br>patching file src/event/ngx_event_accept.c<br>patching file src/http/ngx_http_variables.c<br></code></pre></td></tr></table></figure>
 
 <p>使用最新的nginx-1.21.1版本的时候会有报错</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@tiny-centos7 nginx-1.21.1]<span class="hljs-comment"># cp /home/dpvs/kmod/toa/example_nat64/nginx/nginx-1.14.0-nat64-toa.patch ./</span><br>[root@tiny-centos7 nginx-1.21.1]<span class="hljs-comment"># pwd</span><br>/home/nginx-1.21.1<br>[root@tiny-centos7 nginx-1.21.1]<span class="hljs-comment"># ls</span><br>auto  CHANGES  CHANGES.ru  conf  configure  contrib  html  LICENSE  man  nginx-1.14.0-nat64-toa.patch  README  src<br><br>[root@tiny-centos7 nginx-1.21.1]<span class="hljs-comment"># patch -p 1 &lt; nginx-1.14.0-nat64-toa.patch</span><br>patching file src/core/ngx_connection.h<br>Hunk <span class="hljs-comment">#1 FAILED at 144.</span><br>1 out of 1 hunk FAILED -- saving rejects to file src/core/ngx_connection.h.rej<br>patching file src/core/ngx_inet.h<br>Hunk <span class="hljs-comment">#1 succeeded at 128 with fuzz 2 (offset 2 lines).</span><br>patching file src/event/ngx_event_accept.c<br>Hunk <span class="hljs-comment">#1 succeeded at 17 (offset -5 lines).</span><br>Hunk <span class="hljs-comment">#2 succeeded at 30 (offset -5 lines).</span><br>Hunk <span class="hljs-comment">#3 succeeded at 172 (offset -5 lines).</span><br>patching file src/http/ngx_http_variables.c<br>Hunk <span class="hljs-comment">#1 succeeded at 145 (offset 2 lines).</span><br>Hunk <span class="hljs-comment">#2 succeeded at 398 (offset 15 lines).</span><br>Hunk <span class="hljs-comment">#3 succeeded at 1311 (offset -11 lines).</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ cp /home/dpvs/kmod/toa/example_nat64/nginx/nginx-1.14.0-nat64-toa.patch ./<br>$ <span class="hljs-built_in">pwd</span><br>/home/nginx-1.21.1<br>$ ls<br>auto  CHANGES  CHANGES.ru  conf  configure  contrib  html  LICENSE  man  nginx-1.14.0-nat64-toa.patch  README  src<br><br>$ patch -p 1 &lt; nginx-1.14.0-nat64-toa.patch<br>patching file src/core/ngx_connection.h<br>Hunk <span class="hljs-comment">#1 FAILED at 144.</span><br>1 out of 1 hunk FAILED -- saving rejects to file src/core/ngx_connection.h.rej<br>patching file src/core/ngx_inet.h<br>Hunk <span class="hljs-comment">#1 succeeded at 128 with fuzz 2 (offset 2 lines).</span><br>patching file src/event/ngx_event_accept.c<br>Hunk <span class="hljs-comment">#1 succeeded at 17 (offset -5 lines).</span><br>Hunk <span class="hljs-comment">#2 succeeded at 30 (offset -5 lines).</span><br>Hunk <span class="hljs-comment">#3 succeeded at 172 (offset -5 lines).</span><br>patching file src/http/ngx_http_variables.c<br>Hunk <span class="hljs-comment">#1 succeeded at 145 (offset 2 lines).</span><br>Hunk <span class="hljs-comment">#2 succeeded at 398 (offset 15 lines).</span><br>Hunk <span class="hljs-comment">#3 succeeded at 1311 (offset -11 lines).</span><br></code></pre></td></tr></table></figure>
 
 <p>仔细查看patch文件内容可以发现出现错误是因为1.21.1版本中对应部分移除了几行代码导致patch无法匹配，我们手动将那一行代码加上去</p>
 <p><img src="https://resource.tinychen.com/20210806163641.png" srcset="/img/loading.gif" lazyload></p>
@@ -424,9 +424,9 @@
       
         <a href="/tags/loadbalance/">#loadbalance</a>
       
-        <a href="/tags/nat/">#nat</a>
-      
         <a href="/tags/lvs/">#lvs</a>
+      
+        <a href="/tags/nat/">#nat</a>
       
         <a href="/tags/dpdk/">#dpdk</a>
       
