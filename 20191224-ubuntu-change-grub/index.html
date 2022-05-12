@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.4k words
+          1.3k words
         
       </span>
     
@@ -288,11 +290,19 @@
 <span id="more"></span>
 
 <p>对于修改grub参数，不建议直接对<code>/boot/grub/grub.cfg</code>文件进行修改，一般来说是对<code>/etc/default/grub</code>进行修改，然后执行<code>update-grub</code>命令重新生成grub引导文件即可。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">sudo vim /etc/default/grub<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">vim</span> /etc/default/grub<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>然后这里有四个参数是我们需要注意修改的：</p>
 <p><img src="https://resource.tinychen.com//20191225033419.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 这个是默认的启动项，一般来说默认为0，即Ubuntu的默认启动项,1则是Ubuntu的高级启动选项，包括了除了默认内核之外的其他内核，以及对应的紧急恢复救援模式，2就是一般情况下双系统的第二个系统，这里就是windows，因为grub实际上是可以引导windows启动的，所以在更新grub文件的时候会检索到磁盘上面的引导文件并且把windows加入到引导列表中来。</span><br>GRUB_DEFAULT=2<br><br><span class="hljs-comment"># 这个参数需要注释掉保证下面的两个参数生效</span><br><span class="hljs-comment">#GRUB_TIMEOUT_STYLE=hidden</span><br><br><span class="hljs-comment"># 这两个参数就是grub引导界面在登录的时候等待时间</span><br>GRUB_TIMEOUT=5<br>GRUB_RECORDFAIL_TIMEOUT=5<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 这个是默认的启动项，一般来说默认为0，即Ubuntu的默认启动项,1则是Ubuntu的高级启动选项，包括了除了默认内核之外的其他内核，以及对应的紧急恢复救援模式，2就是一般情况下双系统的第二个系统，这里就是windows，因为grub实际上是可以引导windows启动的，所以在更新grub文件的时候会检索到磁盘上面的引导文件并且把windows加入到引导列表中来。</span>
+<span class="token assign-left variable">GRUB_DEFAULT</span><span class="token operator">=</span><span class="token number">2</span>
+
+<span class="token comment"># 这个参数需要注释掉保证下面的两个参数生效</span>
+<span class="token comment">#GRUB_TIMEOUT_STYLE=hidden</span>
+
+<span class="token comment"># 这两个参数就是grub引导界面在登录的时候等待时间</span>
+<span class="token assign-left variable">GRUB_TIMEOUT</span><span class="token operator">=</span><span class="token number">5</span>
+<span class="token assign-left variable">GRUB_RECORDFAIL_TIMEOUT</span><span class="token operator">=</span><span class="token number">5</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
@@ -301,11 +311,22 @@
 <p><img src="https://resource.tinychen.com//20191226194529.png" srcset="/img/loading.gif" lazyload></p>
 <p>不同的配置文件可以参数不太一样，大家可以查看一下自己的grub文件，再尝试一下这两个参数。</p>
 <p>接下来只要执行<code>sudo update-grub</code>就可以更新grub引导参数了。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">tinychen@Tiny-Studio:~$ sudo vim /etc/default/grub<br>tinychen@Tiny-Studio:~$ sudo update-grub<br>Sourcing file `/etc/default/grub<span class="hljs-string">&#x27;</span><br><span class="hljs-string">Generating grub configuration file ...</span><br><span class="hljs-string">Found linux image: /boot/vmlinuz-5.3.0-26-generic</span><br><span class="hljs-string">Found initrd image: /boot/initrd.img-5.3.0-26-generic</span><br><span class="hljs-string">Found linux image: /boot/vmlinuz-5.3.0-25-generic</span><br><span class="hljs-string">Found initrd image: /boot/initrd.img-5.3.0-25-generic</span><br><span class="hljs-string">Found Windows Boot Manager on /dev/nvme2n1p2@/efi/Microsoft/Boot/bootmgfw.efi</span><br><span class="hljs-string">Adding boot menu entry for EFI firmware configuration</span><br><span class="hljs-string">done</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">tinychen@Tiny-Studio:~$ <span class="token function">sudo</span> <span class="token function">vim</span> /etc/default/grub
+tinychen@Tiny-Studio:~$ <span class="token function">sudo</span> <span class="token function">update-grub</span>
+Sourcing <span class="token function">file</span> `/etc/default/grub'
+Generating grub configuration <span class="token function">file</span> <span class="token punctuation">..</span>.
+Found linux image: /boot/vmlinuz-5.3.0-26-generic
+Found initrd image: /boot/initrd.img-5.3.0-26-generic
+Found linux image: /boot/vmlinuz-5.3.0-25-generic
+Found initrd image: /boot/initrd.img-5.3.0-25-generic
+Found Windows Boot Manager on /dev/nvme2n1p2@/efi/Microsoft/Boot/bootmgfw.efi
+Adding boot menu entry <span class="token keyword">for</span> EFI firmware configuration
+<span class="token keyword">done</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>对于系统中存在的<code>update-grub</code>和<code>update-grub2</code>两个命令，我们可以看到实际上都是指向同一个文件，现在的grub引导应该都是使用了grub2，早年的grub1应该已经被彻底换下来了。</p>
 <p><img src="https://resource.tinychen.com//20191225031329.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看grub版本，可以看到确实是在使用grub2了</span><br>sudo grub-install -V<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看grub版本，可以看到确实是在使用grub2了</span>
+<span class="token function">sudo</span> grub-install -V<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com//20191226205647.png" srcset="/img/loading.gif" lazyload></p>
@@ -604,6 +625,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

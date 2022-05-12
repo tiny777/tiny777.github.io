@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.3k words
+          2.2k words
         
       </span>
     
@@ -297,17 +299,22 @@
 </blockquote>
 <p>从官网上我们可以看到，截止目前（2019.8.23），安装ansible需要python2.7以上或者是python3.5以上版本。</p>
 <p>这里为了方便管理，我选择了epel源里面的python3.6版本进行安装，需要安装最新的python3可以<a href="https://tinychen.com/20190413-centos-install-python/">参考这里</a>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们需要安装epel库</span><br>yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm<br><br><span class="hljs-comment"># 安装python3.6</span><br>yum install python36 -y<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先我们需要安装epel库</span>
+yum <span class="token function">install</span> https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+<span class="token comment"># 安装python3.6</span>
+yum <span class="token function">install</span> python36 -y<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190823/Wdn84odF5qsl.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 接着我们查看一下ansible的最新版本</span><br>yum list | grep ansible<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 接着我们查看一下ansible的最新版本</span>
+yum list <span class="token operator">|</span> <span class="token function">grep</span> ansible<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190823/IPmqRSypkcNm.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到最新版是<code>2.8.4</code>，官网上显示的最新版也是2.8，这就没问题了。</p>
 <p>然后我们直接安装</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install ansible -y<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> ansible -y<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190823/0zR6j2O50qFA.png" srcset="/img/loading.gif" lazyload></p>
@@ -324,27 +331,49 @@
 <p>ansible会根据上述顺序读取配置文件，并且使用第一个找到的配置文件并忽略剩余的配置文件。</p>
 <blockquote>
 <p><code>ansible.cfg</code>配置文件是ini配置文件，因此可以使用<code>#</code>和<code>;</code>作为注释，但是如果需要在已经写了配置的同一行后添加注释，则只能使用<code>;</code></p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># some basic default values...</span><br><span class="hljs-attr">inventory</span> = /etc/ansible/hosts  <span class="hljs-comment">; This points to the file that lists your hosts</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># some basic default values...</span>
+<span class="token constant">inventory</span> <span class="token attr-value"><span class="token punctuation">=</span> /etc/ansible/hosts  ; This points to the file that lists your hosts</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 </blockquote>
 <h2 id="ansible-cfg"><a href="#ansible-cfg" class="headerlink" title="ansible.cfg"></a><code>ansible.cfg</code></h2><p>这里为了方便我们配合git来进行版本控制，我们在github上面创建一个repo，然后clone到本地，接着把配置文件和之后会使用到的playbook都放入到这个文件夹内。</p>
 <p>具体的git使用方法比较简单，我们不在这里赘述。</p>
 <p><img src="https://resource.tinychen.com/blog/20190826/H3hMQaSXFWh2.png" srcset="/img/loading.gif" lazyload></p>
 <p><code>ansible.cfg</code>文件的配置比较简单：</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[defaults]</span><br><span class="hljs-comment"># hosts文件的存放位置</span><br><span class="hljs-attr">inventory</span>       = ./hosts<br><span class="hljs-comment"># 执行超级命令的用户</span><br><span class="hljs-attr">sudo_user</span>      = root<br><span class="hljs-comment"># 传输方式</span><br><span class="hljs-attr">transport</span>      = smart<br><span class="hljs-comment"># ssh的端口</span><br><span class="hljs-attr">remote_port</span>    = <span class="hljs-number">22</span><br><span class="hljs-comment"># 执行sudo命令的时候使用的命令</span><br><span class="hljs-attr">sudo_exe</span> = sudo<br><span class="hljs-comment"># 远程执行命令的默认用户</span><br><span class="hljs-attr">remote_user</span> = tinychen<br><span class="hljs-comment"># log日志存放的地方</span><br><span class="hljs-attr">log_path</span> = /var/log/ansible.log<br><span class="hljs-comment"># 默认使用的模块</span><br><span class="hljs-attr">module_name</span> = command<br><span class="hljs-comment"># 默认使用的shell</span><br><span class="hljs-attr">executable</span> = /bin/sh<br><span class="hljs-comment"># 使用rsa密钥进行验证登录而不是密码</span><br><span class="hljs-attr">private_key_file</span> = /home/tinychen/.ssh/id_rsa<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token selector">[defaults]</span>
+<span class="token comment"># hosts文件的存放位置</span>
+<span class="token constant">inventory</span>       <span class="token attr-value"><span class="token punctuation">=</span> ./hosts</span>
+<span class="token comment"># 执行超级命令的用户</span>
+<span class="token constant">sudo_user</span>      <span class="token attr-value"><span class="token punctuation">=</span> root</span>
+<span class="token comment"># 传输方式</span>
+<span class="token constant">transport</span>      <span class="token attr-value"><span class="token punctuation">=</span> smart</span>
+<span class="token comment"># ssh的端口</span>
+<span class="token constant">remote_port</span>    <span class="token attr-value"><span class="token punctuation">=</span> 22</span>
+<span class="token comment"># 执行sudo命令的时候使用的命令</span>
+<span class="token constant">sudo_exe</span> <span class="token attr-value"><span class="token punctuation">=</span> sudo</span>
+<span class="token comment"># 远程执行命令的默认用户</span>
+<span class="token constant">remote_user</span> <span class="token attr-value"><span class="token punctuation">=</span> tinychen</span>
+<span class="token comment"># log日志存放的地方</span>
+<span class="token constant">log_path</span> <span class="token attr-value"><span class="token punctuation">=</span> /var/log/ansible.log</span>
+<span class="token comment"># 默认使用的模块</span>
+<span class="token constant">module_name</span> <span class="token attr-value"><span class="token punctuation">=</span> command</span>
+<span class="token comment"># 默认使用的shell</span>
+<span class="token constant">executable</span> <span class="token attr-value"><span class="token punctuation">=</span> /bin/sh</span>
+<span class="token comment"># 使用rsa密钥进行验证登录而不是密码</span>
+<span class="token constant">private_key_file</span> <span class="token attr-value"><span class="token punctuation">=</span> /home/tinychen/.ssh/id_rsa</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p><code>hosts</code>文件中我们可以添加需要控制的主机的IP或者是hostname</p>
 <p><img src="https://resource.tinychen.com/blog/20190826/i1bwHLiAYiMT.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[k8s]</span><br>192.168.100.22<span class="hljs-section">[0:6]</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token selector">[k8s]</span>
+192.168.100.22[0:6]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>这里因为我的被控制主机的IP地址是连续的，因此我直接使用<code>[]</code>来表示，这里的<code>k8s</code>是这一堆被控制主机的组名，一个IP可以加入多个组，也可以一个组都不加入。</p>
 <h1 id="5、Test"><a href="#5、Test" class="headerlink" title="5、Test"></a>5、Test</h1><p>接下来我们执行几条命令来测试一下</p>
 <p>先执行一下ping模块看看能否连通</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ansible k8s -m ping<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ansible k8s -m <span class="token function">ping</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190826/aUiXKeT36Sik.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里可以看到是没有问题的（结果太长没有全部截图出来）</p>
-<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">ansible</span> k<span class="hljs-number">8</span>s -m command -a <span class="hljs-string">&quot;id&quot;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ansible k8s -m command -a &quot;id&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190826/xjrjiELxILjf.png" srcset="/img/loading.gif" lazyload></p>
@@ -644,6 +673,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

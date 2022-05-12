@@ -44,6 +44,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -221,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          928 words
+          962 words
         
       </span>
     
@@ -232,7 +234,7 @@
         
         
         
-          8 mins
+          9 mins
         
       </span>
     
@@ -297,12 +299,16 @@
 <p>这种方式释放内存最彻底，效果和物理机内存不足卡死然后直接重启是一样的。</p>
 <p><img src="https://resource.tinychen.com//20200924094350.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、限制wsl2内存使用"><a href="#3、限制wsl2内存使用" class="headerlink" title="3、限制wsl2内存使用"></a>3、限制wsl2内存使用</h1><p>这个解决方案来自<a target="_blank" rel="noopener" href="https://github.com/microsoft/WSL/issues/4166">github</a>，简单来说就是创建一个<code>%UserProfile%\.wslconfig</code>文件来限制wsl使用的内存总量。比如说我在Windows中使用的用户是tinychen，那么我就在<code>C:\Users\tinychen</code>中创建了一个<code>.wslconfig</code>文件，在里面加入以下内容来限制wsl2的内存总大小：</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[wsl2]</span><br><span class="hljs-attr">processors</span>=<span class="hljs-number">8</span><br><span class="hljs-attr">memory</span>=<span class="hljs-number">8</span>GB<br><span class="hljs-attr">swap</span>=<span class="hljs-number">8</span>GB<br><span class="hljs-attr">localhostForwarding</span>=<span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[wsl2]
+processors&#x3D;8
+memory&#x3D;8GB
+swap&#x3D;8GB
+localhostForwarding&#x3D;true<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>注意修改完成之后需要重启wsl2才能生效。更多详细的配置可以查看<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configure-global-options-with-wslconfig">官方文档</a>。</p>
 <p><img src="https://resource.tinychen.com//20200924095936.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="4、定期释放cache内存"><a href="#4、定期释放cache内存" class="headerlink" title="4、定期释放cache内存"></a>4、定期释放cache内存</h1><p>Linux内核中有一个参数<code>/proc/sys/vm/drop_caches</code>，是可以用来手动释放Linux中的cache缓存，如果发现wsl2的cache过大影响到宿主机正常运行了，可以手动执行以下命令来释放cache：</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">echo <span class="hljs-number">3</span> &gt; <span class="hljs-regexp">/proc/</span>sys<span class="hljs-regexp">/vm/</span>drop_caches<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">echo 3 &gt; &#x2F;proc&#x2F;sys&#x2F;vm&#x2F;drop_caches<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>当然也可以设置成定时任务，每隔一段时间释放一次。</p>
 
@@ -596,6 +602,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

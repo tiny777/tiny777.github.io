@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.9k words
+          2.8k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          25 mins
+          24 mins
         
       </span>
     
@@ -288,23 +290,66 @@
 <span id="more"></span>
 
 <p>使用Linux命令的时候，我们经常使用管道符号<code>|</code>来进行命令之间的输入输出的传递，例如</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat example.txt | grep uuid | sort<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> example.txt <span class="token operator">|</span> <span class="token function">grep</span> uuid <span class="token operator">|</span> <span class="token function">sort</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>这一条命令就可以将example.txt这个文件的内容全部打印到屏幕上，然后使用grep来查找带有uuid字符的行，接着使用sort命令来进行排序，当然我们也可以直接这样：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">grep uuid example.txt | sort<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> uuid example.txt <span class="token operator">|</span> <span class="token function">sort</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>两者的效果是一样的，但是对于很多命令来说管道符号<code>|</code>却不一定能用</p>
 <p>例如我们需要查找所有进程中带有nginx关键字的进程并且将其全部kill掉，我们可以这样获取到对应的进程ID信息</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs vim"># <span class="hljs-keyword">ps</span> -ef | <span class="hljs-keyword">grep</span> nginx | <span class="hljs-keyword">grep</span> -v <span class="hljs-keyword">grep</span> | awk <span class="hljs-string">&#x27;&#123;print $2&#125;&#x27;</span><br><span class="hljs-number">12245</span><br><span class="hljs-number">29913</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># ps -ef | grep nginx | grep -v grep | awk &#39;&#123;print $2&#125;&#39;
+12245
+29913<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
 <p>理论上我们只需要将对应的PID全部kill掉就可以完成操作，但是却不能直接使用管道符号，因为kill命令没办法接收这样的输入信息</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs vim"># 这样操作是不行的<br># <span class="hljs-keyword">ps</span> -ef | <span class="hljs-keyword">grep</span> nginx | <span class="hljs-keyword">grep</span> -v <span class="hljs-keyword">grep</span> | awk <span class="hljs-string">&#x27;&#123;print $2&#125;&#x27;</span> | kill -<span class="hljs-number">9</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 这样操作是不行的
+# ps -ef | grep nginx | grep -v grep | awk &#39;&#123;print $2&#125;&#39; | kill -9<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>这个时候我们就可以使用xargs命令来进行操作，xargs命令会将前面命令的输入结果逐个传递给后面的kill命令</p>
-<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl">ps -ef | <span class="hljs-keyword">grep</span> nginx | <span class="hljs-keyword">grep</span> -v <span class="hljs-keyword">grep</span> | awk <span class="hljs-string">&#x27;&#123;print $2&#125;&#x27;</span> | xargs <span class="hljs-keyword">kill</span> -<span class="hljs-number">9</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">ps -ef | grep nginx | grep -v grep | awk &#39;&#123;print $2&#125;&#39; | xargs kill -9<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>接着我们来查看一下xargs命令的使用说明：</p>
-<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs stata">[/root]# xargs --<span class="hljs-keyword">help</span><br>Usage: xargs [OPTION]... COMMAND [INITIAL-<span class="hljs-keyword">ARGS</span>]...<br><span class="hljs-keyword">Run</span> COMMAND with arguments INITIAL-<span class="hljs-keyword">ARGS</span> and <span class="hljs-keyword">more</span> arguments <span class="hljs-keyword">read</span> from <span class="hljs-keyword">input</span>.<br><br>Mandatory and optional arguments to long options are also<br>mandatory or optional <span class="hljs-keyword">for</span> the corresponding short option.<br>  -0, --null                   items are separated <span class="hljs-keyword">by</span> a null, not whitespace;<br>                                 disables quote and backslash processing and<br>                                 logical EOF processing<br>  -a, --arg-<span class="hljs-keyword">file</span>=<span class="hljs-keyword">FILE</span>          <span class="hljs-keyword">read</span> arguments from <span class="hljs-keyword">FILE</span>, not standard <span class="hljs-keyword">input</span><br>  -<span class="hljs-keyword">d</span>, --delimiter=CHARACTER    items <span class="hljs-keyword">in</span> <span class="hljs-keyword">input</span> stream are separated <span class="hljs-keyword">by</span> CHARACTER,<br>                                 not <span class="hljs-keyword">by</span> whitespace; disables quote and backslash<br>                                 processing and logical EOF processing<br>  -<span class="hljs-keyword">E</span> END                       <span class="hljs-keyword">set</span> logical EOF string; <span class="hljs-keyword">if</span> END occurs <span class="hljs-keyword">as</span> a <span class="hljs-keyword">line</span><br>                                 of <span class="hljs-keyword">input</span>, the rest of the <span class="hljs-keyword">input</span> is ignored<br>                                 (ignored <span class="hljs-keyword">if</span> -0 or -<span class="hljs-keyword">d</span> was specified)<br>  -<span class="hljs-keyword">e</span>, --eof[=END]              equivalent to -<span class="hljs-keyword">E</span> END <span class="hljs-keyword">if</span> END is specified;<br>                                 otherwise, there is <span class="hljs-keyword">no</span> end-of-<span class="hljs-keyword">file</span> string<br>  -I R                         same <span class="hljs-keyword">as</span> --<span class="hljs-keyword">replace</span>=R<br>  -i, --<span class="hljs-keyword">replace</span>[=R]            <span class="hljs-keyword">replace</span> R <span class="hljs-keyword">in</span> INITIAL-<span class="hljs-keyword">ARGS</span> with names <span class="hljs-keyword">read</span><br>                                 from standard <span class="hljs-keyword">input</span>; <span class="hljs-keyword">if</span> R is unspecified,<br>                                 assume &#123;&#125;<br>  -<span class="hljs-keyword">L</span>, --max-lines=MAX-LINES    <span class="hljs-keyword">use</span> at most MAX-LINES non-blank <span class="hljs-keyword">input</span> lines per<br>                                 command <span class="hljs-keyword">line</span><br>  -<span class="hljs-keyword">l</span>[MAX-LINES]                similar to -<span class="hljs-keyword">L</span> but defaults to at most <span class="hljs-keyword">one</span> non-<br>                                 blank <span class="hljs-keyword">input</span> <span class="hljs-keyword">line</span> <span class="hljs-keyword">if</span> MAX-LINES is not specified<br>  -<span class="hljs-keyword">n</span>, --max-<span class="hljs-keyword">args</span>=MAX-<span class="hljs-keyword">ARGS</span>      <span class="hljs-keyword">use</span> at most MAX-<span class="hljs-keyword">ARGS</span> arguments per command <span class="hljs-keyword">line</span><br>  -P, --max-procs=MAX-PROCS    <span class="hljs-keyword">run</span> at most MAX-PROCS processes at a time<br>  -p, --interactive            prompt before running commands<br>      --process-slot-<span class="hljs-keyword">var</span>=<span class="hljs-keyword">VAR</span>   <span class="hljs-keyword">set</span> environment variable <span class="hljs-keyword">VAR</span> <span class="hljs-keyword">in</span> child processes<br>  -r, --<span class="hljs-keyword">no</span>-<span class="hljs-keyword">run</span>-<span class="hljs-keyword">if</span>-empty        <span class="hljs-keyword">if</span> there are <span class="hljs-keyword">no</span> arguments, then <span class="hljs-keyword">do</span> not <span class="hljs-keyword">run</span> COMMAND;<br>                                 <span class="hljs-keyword">if</span> this option is not given, COMMAND will be<br>                                 <span class="hljs-keyword">run</span> at least once<br>  -s, --max-chars=MAX-CHARS    limit length of command <span class="hljs-keyword">line</span> to MAX-CHARS<br>      --show-limits            show limits <span class="hljs-keyword">on</span> command-<span class="hljs-keyword">line</span> length<br>  -t, --verbose                <span class="hljs-keyword">print</span> commands before executing them<br>  -x, --<span class="hljs-keyword">exit</span>                   <span class="hljs-keyword">exit</span> <span class="hljs-keyword">if</span> the size (see -s) is exceeded<br>      --<span class="hljs-keyword">help</span>                   <span class="hljs-keyword">display</span> this <span class="hljs-keyword">help</span> and <span class="hljs-keyword">exit</span><br>      --<span class="hljs-keyword">version</span>                output <span class="hljs-keyword">version</span> information and <span class="hljs-keyword">exit</span><br><br><span class="hljs-keyword">Report</span> bugs to &lt;bug-findutils@gnu.org&gt;.<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[&#x2F;root]# xargs --help
+Usage: xargs [OPTION]... COMMAND [INITIAL-ARGS]...
+Run COMMAND with arguments INITIAL-ARGS and more arguments read from input.
+
+Mandatory and optional arguments to long options are also
+mandatory or optional for the corresponding short option.
+  -0, --null                   items are separated by a null, not whitespace;
+                                 disables quote and backslash processing and
+                                 logical EOF processing
+  -a, --arg-file&#x3D;FILE          read arguments from FILE, not standard input
+  -d, --delimiter&#x3D;CHARACTER    items in input stream are separated by CHARACTER,
+                                 not by whitespace; disables quote and backslash
+                                 processing and logical EOF processing
+  -E END                       set logical EOF string; if END occurs as a line
+                                 of input, the rest of the input is ignored
+                                 (ignored if -0 or -d was specified)
+  -e, --eof[&#x3D;END]              equivalent to -E END if END is specified;
+                                 otherwise, there is no end-of-file string
+  -I R                         same as --replace&#x3D;R
+  -i, --replace[&#x3D;R]            replace R in INITIAL-ARGS with names read
+                                 from standard input; if R is unspecified,
+                                 assume &#123;&#125;
+  -L, --max-lines&#x3D;MAX-LINES    use at most MAX-LINES non-blank input lines per
+                                 command line
+  -l[MAX-LINES]                similar to -L but defaults to at most one non-
+                                 blank input line if MAX-LINES is not specified
+  -n, --max-args&#x3D;MAX-ARGS      use at most MAX-ARGS arguments per command line
+  -P, --max-procs&#x3D;MAX-PROCS    run at most MAX-PROCS processes at a time
+  -p, --interactive            prompt before running commands
+      --process-slot-var&#x3D;VAR   set environment variable VAR in child processes
+  -r, --no-run-if-empty        if there are no arguments, then do not run COMMAND;
+                                 if this option is not given, COMMAND will be
+                                 run at least once
+  -s, --max-chars&#x3D;MAX-CHARS    limit length of command line to MAX-CHARS
+      --show-limits            show limits on command-line length
+  -t, --verbose                print commands before executing them
+  -x, --exit                   exit if the size (see -s) is exceeded
+      --help                   display this help and exit
+      --version                output version information and exit
+
+Report bugs to &lt;bug-findutils@gnu.org&gt;.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>这里着重说明几个参数</p>
 <table>
@@ -329,11 +374,11 @@
 </tbody></table>
 <p>对于<code>-i</code>参数的使用可能不太能理解，我们举例进行说明：</p>
 <p>假设我们需要对当前目录下的所有txt文件进行查找，对于文件中含有tinychen关键字的文件名全部添加一个own的后缀</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">grep tinychen *.<span class="hljs-built_in">log</span> 2&gt;/dev/null | awk -F : <span class="hljs-string">&#x27;&#123;print $1&#125;&#x27;</span> | sort | uniq | xargs -t -i mv &#123;&#125; &#123;&#125;.own<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> tinychen *.log <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null <span class="token operator">|</span> <span class="token function">awk</span> -F <span class="token builtin class-name">:</span> <span class="token string">'&#123;print <span class="token variable">$1</span>&#125;'</span> <span class="token operator">|</span> <span class="token function">sort</span> <span class="token operator">|</span> <span class="token function">uniq</span> <span class="token operator">|</span> <span class="token function">xargs</span> -t -i <span class="token function">mv</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>.own<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>对于上面的这个命令中使用了<code>-i</code>参数之后，会将前面读取到的输入与<code>&#123;&#125;</code>相关联，对于使用像mv这样的需要输入不止一个变量的命令的时候特别有用。</p>
 <p>再举个例子，假设我们需要查找当前目录下面的txt文件，将所有带有<code>192.168.192.168</code>字段的行注释掉</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat *.txt 2&gt;/dev/null | grep 192.168.192.168 | xargs -t -i sed -i <span class="hljs-string">&#x27;s/&#123;&#125;/#&#123;&#125;/g&#x27;</span> *.txt<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> *.txt <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null <span class="token operator">|</span> <span class="token function">grep</span> <span class="token number">192.168</span>.192.168 <span class="token operator">|</span> <span class="token function">xargs</span> -t -i <span class="token function">sed</span> -i <span class="token string">'s/&#123;&#125;/#&#123;&#125;/g'</span> *.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
               
@@ -630,6 +675,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

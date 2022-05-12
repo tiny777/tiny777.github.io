@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          3.4k words
+          3.3k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          29 mins
+          28 mins
         
       </span>
     
@@ -288,15 +290,70 @@
 <span id="more"></span>
 
 <h1 id="1、queryperf"><a href="#1、queryperf" class="headerlink" title="1、queryperf"></a>1、queryperf</h1><h2 id="1-1-编译安装"><a href="#1-1-编译安装" class="headerlink" title="1.1 编译安装"></a>1.1 编译安装</h2><p><code>queryperf</code>是bind9出品的一款测试dns服务器性能的工具，目前在<code>9.12.4</code>版本的bind源码中还存在，再往后的新版本就没看到有<code>queryperf</code>了。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ wget https://ftp.isc.org/isc/bind9/9.12.4/bind-9.12.4.tar.gz<br>$ tar -zxvf bind-9.12.4.tar.gz<br>$ <span class="hljs-built_in">cd</span> bind-9.12.4/contrib/queryperf<br>$ ./configure<br>$ make<br>$ file queryperf<br>queryperf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), <span class="hljs-keyword">for</span> GNU/Linux 2.6.32, not stripped<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">wget</span> https://ftp.isc.org/isc/bind9/9.12.4/bind-9.12.4.tar.gz
+$ <span class="token function">tar</span> -zxvf bind-9.12.4.tar.gz
+$ <span class="token builtin class-name">cd</span> bind-9.12.4/contrib/queryperf
+$ ./configure
+$ <span class="token function">make</span>
+$ <span class="token function">file</span> queryperf
+queryperf: ELF <span class="token number">64</span>-bit LSB executable, x86-64, version <span class="token number">1</span> <span class="token punctuation">(</span>SYSV<span class="token punctuation">)</span>, dynamically linked <span class="token punctuation">(</span>uses shared libs<span class="token punctuation">)</span>, <span class="token keyword">for</span> GNU/Linux <span class="token number">2.6</span>.32, not stripped<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
-<h2 id="1-2-常用操作"><a href="#1-2-常用操作" class="headerlink" title="1.2 常用操作"></a>1.2 常用操作</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 将编译好的二进制文件直接复制到系统的bin目录中即可全局操作</span><br>$ cp queryperf /usr/<span class="hljs-built_in">local</span>/bin/<br><br><br>$ queryperf -h<br><br>DNS Query Performance Testing Tool<br>Version: <span class="hljs-variable">$Id</span>: queryperf.c,v 1.12 2007/09/05 07:36:04 marka Exp $<br><br><br>Usage: queryperf [-d datafile] [-s server_addr] [-p port] [-q num_queries]<br>                 [-b bufsize] [-t timeout] [-n] [-l <span class="hljs-built_in">limit</span>] [-f family] [-1]<br>                 [-i interval] [-r arraysize] [-u unit] [-H histfile]<br>                 [-T qps] [-e] [-D] [-R] [-c] [-v] [-h]<br>  -d specifies the input data file (default: stdin)<br>  -s sets the server to query (default: 127.0.0.1)<br>  -p sets the port on <span class="hljs-built_in">which</span> to query the server (default: 53)<br>  -q specifies the maximum number of queries outstanding (default: 20)<br>  -t specifies the timeout <span class="hljs-keyword">for</span> query completion <span class="hljs-keyword">in</span> seconds (default: 5)<br>  -n causes configuration changes to be ignored<br>  -l specifies how a <span class="hljs-built_in">limit</span> <span class="hljs-keyword">for</span> how long to run tests <span class="hljs-keyword">in</span> seconds (no default)<br>  -1 run through input only once (default: multiple iff <span class="hljs-built_in">limit</span> given)<br>  -b <span class="hljs-built_in">set</span> input/output buffer size <span class="hljs-keyword">in</span> kilobytes (default: 32 k)<br>  -i specifies interval of intermediate outputs <span class="hljs-keyword">in</span> seconds (default: 0=none)<br>  -f specify address family of DNS transport, inet or inet6 (default: any)<br>  -r <span class="hljs-built_in">set</span> RTT statistics array size (default: 50000)<br>  -u <span class="hljs-built_in">set</span> RTT statistics time unit <span class="hljs-keyword">in</span> usec (default: 100)<br>  -H specifies RTT histogram data file (default: none)<br>  -T specify the target qps (default: 0=unspecified)<br>  -e <span class="hljs-built_in">enable</span> EDNS 0<br>  -D <span class="hljs-built_in">set</span> the DNSSEC OK bit (implies EDNS)<br>  -R <span class="hljs-built_in">disable</span> recursion<br>  -c <span class="hljs-built_in">print</span> the number of packets with each rcode<br>  -v verbose: report the RCODE of each response on stdout<br>  -h <span class="hljs-built_in">print</span> this usage<br><br></code></pre></td></tr></table></figure>
+<h2 id="1-2-常用操作"><a href="#1-2-常用操作" class="headerlink" title="1.2 常用操作"></a>1.2 常用操作</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将编译好的二进制文件直接复制到系统的bin目录中即可全局操作</span>
+$ <span class="token function">cp</span> queryperf /usr/local/bin/
+
+
+$ queryperf -h
+
+DNS Query Performance Testing Tool
+Version: <span class="token variable">$Id</span><span class="token builtin class-name">:</span> queryperf.c,v <span class="token number">1.12</span> <span class="token number">2007</span>/09/05 07:36:04 marka Exp $
+
+
+Usage: queryperf <span class="token punctuation">[</span>-d datafile<span class="token punctuation">]</span> <span class="token punctuation">[</span>-s server_addr<span class="token punctuation">]</span> <span class="token punctuation">[</span>-p port<span class="token punctuation">]</span> <span class="token punctuation">[</span>-q num_queries<span class="token punctuation">]</span>
+                 <span class="token punctuation">[</span>-b bufsize<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t timeout<span class="token punctuation">]</span> <span class="token punctuation">[</span>-n<span class="token punctuation">]</span> <span class="token punctuation">[</span>-l limit<span class="token punctuation">]</span> <span class="token punctuation">[</span>-f family<span class="token punctuation">]</span> <span class="token punctuation">[</span>-1<span class="token punctuation">]</span>
+                 <span class="token punctuation">[</span>-i interval<span class="token punctuation">]</span> <span class="token punctuation">[</span>-r arraysize<span class="token punctuation">]</span> <span class="token punctuation">[</span>-u unit<span class="token punctuation">]</span> <span class="token punctuation">[</span>-H histfile<span class="token punctuation">]</span>
+                 <span class="token punctuation">[</span>-T qps<span class="token punctuation">]</span> <span class="token punctuation">[</span>-e<span class="token punctuation">]</span> <span class="token punctuation">[</span>-D<span class="token punctuation">]</span> <span class="token punctuation">[</span>-R<span class="token punctuation">]</span> <span class="token punctuation">[</span>-c<span class="token punctuation">]</span> <span class="token punctuation">[</span>-v<span class="token punctuation">]</span> <span class="token punctuation">[</span>-h<span class="token punctuation">]</span>
+  -d specifies the input data <span class="token function">file</span> <span class="token punctuation">(</span>default: stdin<span class="token punctuation">)</span>
+  -s sets the server to query <span class="token punctuation">(</span>default: <span class="token number">127.0</span>.0.1<span class="token punctuation">)</span>
+  -p sets the port on <span class="token function">which</span> to query the server <span class="token punctuation">(</span>default: <span class="token number">53</span><span class="token punctuation">)</span>
+  -q specifies the maximum number of queries outstanding <span class="token punctuation">(</span>default: <span class="token number">20</span><span class="token punctuation">)</span>
+  -t specifies the <span class="token function">timeout</span> <span class="token keyword">for</span> query completion <span class="token keyword">in</span> seconds <span class="token punctuation">(</span>default: <span class="token number">5</span><span class="token punctuation">)</span>
+  -n causes configuration changes to be ignored
+  -l specifies how a limit <span class="token keyword">for</span> how long to run tests <span class="token keyword">in</span> seconds <span class="token punctuation">(</span>no default<span class="token punctuation">)</span>
+  -1 run through input only once <span class="token punctuation">(</span>default: multiple iff limit given<span class="token punctuation">)</span>
+  -b <span class="token builtin class-name">set</span> input/output buffer size <span class="token keyword">in</span> kilobytes <span class="token punctuation">(</span>default: <span class="token number">32</span> k<span class="token punctuation">)</span>
+  -i specifies interval of intermediate outputs <span class="token keyword">in</span> seconds <span class="token punctuation">(</span>default: <span class="token assign-left variable">0</span><span class="token operator">=</span>none<span class="token punctuation">)</span>
+  -f specify address family of DNS transport, inet or inet6 <span class="token punctuation">(</span>default: any<span class="token punctuation">)</span>
+  -r <span class="token builtin class-name">set</span> RTT statistics array size <span class="token punctuation">(</span>default: <span class="token number">50000</span><span class="token punctuation">)</span>
+  -u <span class="token builtin class-name">set</span> RTT statistics <span class="token function">time</span> unit <span class="token keyword">in</span> usec <span class="token punctuation">(</span>default: <span class="token number">100</span><span class="token punctuation">)</span>
+  -H specifies RTT histogram data <span class="token function">file</span> <span class="token punctuation">(</span>default: none<span class="token punctuation">)</span>
+  -T specify the target qps <span class="token punctuation">(</span>default: <span class="token assign-left variable">0</span><span class="token operator">=</span>unspecified<span class="token punctuation">)</span>
+  -e <span class="token builtin class-name">enable</span> EDNS <span class="token number">0</span>
+  -D <span class="token builtin class-name">set</span> the DNSSEC OK bit <span class="token punctuation">(</span>implies EDNS<span class="token punctuation">)</span>
+  -R disable recursion
+  -c print the number of packets with each rcode
+  -v verbose: report the RCODE of each response on stdout
+  -h print this usage
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>在压测之前需要我们自己准备压测的测试数据，格式为<code>域名 查询类型</code>，如：</p>
-<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs dns">tinychen.com <span class="hljs-keyword">A</span><br>tiny777.com <span class="hljs-keyword">A</span><br>tinychen.com <span class="hljs-keyword">MX</span><br>tiny777.com <span class="hljs-keyword">MX</span><br>tinychen777.com <span class="hljs-keyword">AAAA</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">tinychen.com A
+tiny777.com A
+tinychen.com MX
+tiny777.com MX
+tinychen777.com AAAA<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>常用的操作命令有：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 对192.168.1.1进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -d query.domain.list<br><br><span class="hljs-comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list<br><br><span class="hljs-comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000<br><br><span class="hljs-comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps，每次查询超时时间为3s</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000 -t 3<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 对192.168.1.1进行压测，查询域名为文件query.domain.list的内容</span>
+queryperf -s <span class="token number">192.168</span>.1.1 -d query.domain.list
+
+<span class="token comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容</span>
+queryperf -s <span class="token number">192.168</span>.1.1 -p <span class="token number">5353</span> -d query.domain.list
+
+<span class="token comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps</span>
+queryperf -s <span class="token number">192.168</span>.1.1 -p <span class="token number">5353</span> -d query.domain.list -T <span class="token number">1000</span>
+
+<span class="token comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps，每次查询超时时间为3s</span>
+queryperf -s <span class="token number">192.168</span>.1.1 -p <span class="token number">5353</span> -d query.domain.list -T <span class="token number">1000</span> -t <span class="token number">3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
@@ -645,6 +702,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

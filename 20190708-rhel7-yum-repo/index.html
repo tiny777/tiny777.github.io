@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -366,10 +368,31 @@
 <h1 id="3、Yum"><a href="#3、Yum" class="headerlink" title="3、Yum"></a>3、Yum</h1><h2 id="3-1-yum简介"><a href="#3-1-yum简介" class="headerlink" title="3.1 yum简介"></a>3.1 yum简介</h2><p>当客户端有升级、安装的需求时，yum会向软件库要求清单的更新，等到清单更新到本机的<br><code>/var/cache/yum</code>里面后，等一下更新时就会用这个本机清单与本机的RPM数据库进行比较，这样就知道该下载什么软件。接下来yum会跑到软件库服务器（<code>yum server</code>）下载所需要的软件（因为有记录软件所在的网址），然后再透过RPM的机制开始安装软件。这就是yum安装软件的整个流程。</p>
 <p>yum的repo文件一般在<code>/etc/yum.repo.d/</code>目录下，如图所示就是小七的CentOS7中的yum repo list</p>
 <p><img src="https://resource.tinychen.com/blog/20190708/PpfaSN8jr03X.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="3-2-yum-update和upgrade"><a href="#3-2-yum-update和upgrade" class="headerlink" title="3.2 yum update和upgrade"></a>3.2 yum update和upgrade</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 升级所有包同时也升级软件和系统内核</span><br>yum update<br><br><span class="hljs-comment"># 只升级所有包，不升级软件和系统内核</span><br>yum upgrade<br></code></pre></td></tr></table></figure>
+<h2 id="3-2-yum-update和upgrade"><a href="#3-2-yum-update和upgrade" class="headerlink" title="3.2 yum update和upgrade"></a>3.2 yum update和upgrade</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 升级所有包同时也升级软件和系统内核</span>
+yum update
+
+<span class="token comment"># 只升级所有包，不升级软件和系统内核</span>
+yum upgrade<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h2 id="3-3-yum-repo文件构成"><a href="#3-3-yum-repo文件构成" class="headerlink" title="3.3 yum repo文件构成"></a>3.3 yum repo文件构成</h2><p>一般来说，一个<code>yum repo</code>文件由下面的几部分构成</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 必须是独一无二的ID来标记这个yum repo，如果重复了，后面的会覆盖掉前面的</span><br>[serverid]<br><br><span class="hljs-comment"># 添加一段文字来描述这个yum repo</span><br>name=Description<br><br><span class="hljs-comment"># 设置资源库的地址，可以是http或者ftp等多种形式</span><br>baseurl=&#123;ftp://|http://|file://&#125;<br><br><span class="hljs-comment"># enabled=1开启本地更新模式</span><br>enabled=&#123;1|0&#125;<br><br><span class="hljs-comment"># gpgcheck=1表示检查；可以不检查gpgcheck=0</span><br>gpgcheck=&#123;1|0&#125;<br><br><span class="hljs-comment"># 检查的key；如果上面不检查这一行可以不写</span><br><span class="hljs-comment"># gpgkey的地址也可以是http或者ftp等多种形式</span><br>gpgkey=<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 必须是独一无二的ID来标记这个yum repo，如果重复了，后面的会覆盖掉前面的</span>
+<span class="token punctuation">[</span>serverid<span class="token punctuation">]</span>
+
+<span class="token comment"># 添加一段文字来描述这个yum repo</span>
+<span class="token assign-left variable">name</span><span class="token operator">=</span>Description
+
+<span class="token comment"># 设置资源库的地址，可以是http或者ftp等多种形式</span>
+<span class="token assign-left variable">baseurl</span><span class="token operator">=</span><span class="token punctuation">&#123;</span>ftp://<span class="token operator">|</span>http://<span class="token operator">|</span>file://<span class="token punctuation">&#125;</span>
+
+<span class="token comment"># enabled=1开启本地更新模式</span>
+<span class="token assign-left variable">enabled</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token number">1</span><span class="token operator">|</span><span class="token number">0</span><span class="token punctuation">&#125;</span>
+
+<span class="token comment"># gpgcheck=1表示检查；可以不检查gpgcheck=0</span>
+<span class="token assign-left variable">gpgcheck</span><span class="token operator">=</span><span class="token punctuation">&#123;</span><span class="token number">1</span><span class="token operator">|</span><span class="token number">0</span><span class="token punctuation">&#125;</span>
+
+<span class="token comment"># 检查的key；如果上面不检查这一行可以不写</span>
+<span class="token comment"># gpgkey的地址也可以是http或者ftp等多种形式</span>
+<span class="token assign-left variable">gpgkey</span><span class="token operator">=</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -664,6 +687,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

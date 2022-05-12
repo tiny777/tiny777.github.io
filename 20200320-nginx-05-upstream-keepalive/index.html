@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -364,7 +366,10 @@
 <p>当我们配置Nginx作为代理服务器的时候，想要支持HTTP长连接，需要client到Nginx和Nginx到server都是长连接，因为此时Nginx既是client的server也是server的client。</p>
 </blockquote>
 <p>了解了上面的原理之后，Nginx中的keepalive指令我们就非常好理解了，相关的指令主要有三个，我们逐个进行解释：</p>
-<h2 id="2-1-keepalive"><a href="#2-1-keepalive" class="headerlink" title="2.1 keepalive"></a>2.1 <code>keepalive</code></h2><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Syntax</span>:	keepalive connections;<br><span class="hljs-attribute">Default</span>:	—<br><span class="hljs-attribute">Context</span>:	upstream<br><span class="hljs-attribute">This</span> directive appeared in version <span class="hljs-number">1</span>.<span class="hljs-number">1</span>.<span class="hljs-number">4</span>.<br></code></pre></td></tr></table></figure>
+<h2 id="2-1-keepalive"><a href="#2-1-keepalive" class="headerlink" title="2.1 keepalive"></a>2.1 <code>keepalive</code></h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Syntax:	keepalive connections;
+Default:	—
+Context:	upstream
+This directive appeared in version 1.1.4.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>在upstream模块中配置，启用连接到upstream中的服务器的缓存，<code>connections</code>参数的主要作用是设定每个Nginx的<strong>单个worker进程（each worker process）</strong>对于upstream中的server的最大空闲连接数，当超过该数字的时候，会关闭使用得最少的连接。</p>
 <ul>
@@ -373,13 +378,35 @@
 <li><p>对于FastCGI服务器，需要设置<code>fastcgi_keep_conn</code>以启用<code>keepalive</code>连接</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">upstream http_backend &#123;<br>    server 127.0.0.1:8080;<br>    keepalive 16;<br>&#125;<br><br>server &#123;<br>    location /http/ &#123;<br>        proxy_pass http://http_backend;<br>        proxy_http_version 1.1;<br>        proxy_set_header Connection <span class="hljs-string">&quot;&quot;</span>;<br>    &#125;<br>    <br>    lcaotion /FastCGI/ &#123;<br>    	fastcgi_pass fastcgi_backend;<br>    	fastcgi_keep_conn on;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">upstream http_backend <span class="token punctuation">&#123;</span>
+    server <span class="token number">127.0</span>.0.1:8080<span class="token punctuation">;</span>
+    keepalive <span class="token number">16</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+server <span class="token punctuation">&#123;</span>
+    location /http/ <span class="token punctuation">&#123;</span>
+        proxy_pass http://http_backend<span class="token punctuation">;</span>
+        proxy_http_version <span class="token number">1.1</span><span class="token punctuation">;</span>
+        proxy_set_header Connection <span class="token string">""</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    lcaotion /FastCGI/ <span class="token punctuation">&#123;</span>
+    	fastcgi_pass fastcgi_backend<span class="token punctuation">;</span>
+    	fastcgi_keep_conn on<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>需要注意的是，keepalive指令并不会限制Nginx的<strong>所有worker</strong>进程能开启的连接到upstream服务器中的<strong>连接总数（total number）</strong>。也就是如果设得太大了，会导致过多的空闲连接占满了upstream中的server资源，导致新的连接无法建立，因此这个数值的设定需要根据worker进程数量来调整。</p>
-<h2 id="2-2-keepalive-requests"><a href="#2-2-keepalive-requests" class="headerlink" title="2.2 keepalive_requests"></a>2.2 <code>keepalive_requests</code></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">Syntax:	keepalive_requests number;<br>Default:	keepalive_requests 100;<br>Context:	upstream<br>This directive appeared <span class="hljs-keyword">in</span> version 1.15.3.<br></code></pre></td></tr></table></figure>
+<h2 id="2-2-keepalive-requests"><a href="#2-2-keepalive-requests" class="headerlink" title="2.2 keepalive_requests"></a>2.2 <code>keepalive_requests</code></h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Syntax:	keepalive_requests number<span class="token punctuation">;</span>
+Default:	keepalive_requests <span class="token number">100</span><span class="token punctuation">;</span>
+Context:	upstream
+This directive appeared <span class="token keyword">in</span> version <span class="token number">1.15</span>.3.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p><code>keepalive_requests</code>设定可以通过一个连接（connection）发送的请求（request）数量，超过最大请求数量之后，该连接会被关闭。为了释放每个连接的内存分配，定期关闭连接是很有必要的。因此，不建议将<code>keepalive_requests</code>设定过大，否则可能会导致过高的内存占用。</p>
-<h2 id="2-3-keepalive-timeout"><a href="#2-3-keepalive-timeout" class="headerlink" title="2.3 keepalive_timeout"></a>2.3 <code>keepalive_timeout</code></h2><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Syntax</span>:	keepalive_timeout timeout;<br><span class="hljs-attribute">Default</span>:	keepalive_timeout <span class="hljs-number">60</span>s;<br><span class="hljs-attribute">Context</span>:	upstream<br><span class="hljs-attribute">This</span> directive appeared in version <span class="hljs-number">1</span>.<span class="hljs-number">15</span>.<span class="hljs-number">3</span>.<br></code></pre></td></tr></table></figure>
+<h2 id="2-3-keepalive-timeout"><a href="#2-3-keepalive-timeout" class="headerlink" title="2.3 keepalive_timeout"></a>2.3 <code>keepalive_timeout</code></h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Syntax:	keepalive_timeout timeout;
+Default:	keepalive_timeout 60s;
+Context:	upstream
+This directive appeared in version 1.15.3.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>设定连接超时时间，在此设定的时间内，client与upstream中的server的空闲keepalive连接将保持打开状态（open）。此外，虽然官方文档说的默认值是60s，但是1.17.9版本的Nginx在安装之后配置文件nginx.conf上面设定的是65s。</p>
 
@@ -675,6 +702,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

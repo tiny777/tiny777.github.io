@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.8k words
+          5.9k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          49 mins
+          50 mins
         
       </span>
     
@@ -366,7 +368,45 @@
 <p>上面两个请求命令中的<code>1557156844</code>就是在第一个连接中使用UID SEARCH命令查询到的邮件的UID，这里使用了<code>UID FETCH</code>命令来获取邮件的对应内容。由于前面我们提到邮件的格式是符合MIME标准的，而IMAP协议又是允许MUA下载符合MIME标准的部分邮件内容，因此这两条UID命令就是<strong>用于获取对应的邮件的特定部分的内容</strong>。</p>
 <h2 id="2-4-小结"><a href="#2-4-小结" class="headerlink" title="2.4 小结"></a>2.4 小结</h2><p>在换了另一个测试账号进行同样的抓包操作之后我发现两次的数据请求操作几乎是一模一样的，都是有三个连接，操作也和上面相同。由此可以分析IMAP协议的可操作性要比POP3强很多，因此在具体的功能实现上对于不同的MUA而言也有不同。</p>
 <h1 id="3、telnet操作"><a href="#3、telnet操作" class="headerlink" title="3、telnet操作"></a>3、telnet操作</h1><p>同样的我们也可以telnet到邮件服务器的143端口来进行命令操作：</p>
-<figure class="highlight sqf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs sqf">[root@www coremail]<span class="hljs-meta"># telnet localhost 143</span><br>Trying <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>...<br>Connected <span class="hljs-keyword">to</span> localhost.<br>Escape character is <span class="hljs-string">&#x27;^]&#x27;</span>.<br>* OK Coremail System IMap Server Ready(<span class="hljs-number">126</span>com[c92b4e18679ada4069d0bde6e2528ad1])<br>C1 LOGIN <span class="hljs-string">&quot;test02@coremail.cn&quot;</span> password<br>C1 OK LOGIN completed<br>C2 <span class="hljs-built_in">LIST</span> <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;&quot;</span><br>* <span class="hljs-built_in">LIST</span> (\Noselect) <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;&quot;</span><br>C2 OK <span class="hljs-built_in">LIST</span> Completed<br>C3 <span class="hljs-built_in">LIST</span> <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;*&quot;</span><br>* <span class="hljs-built_in">LIST</span> () <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;INBOX&quot;</span><br>* <span class="hljs-built_in">LIST</span> (\Drafts) <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Drafts&quot;</span><br>* <span class="hljs-built_in">LIST</span> (\Sent) <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Sent Items&quot;</span><br>* <span class="hljs-built_in">LIST</span> (\Trash) <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Trash&quot;</span><br>* <span class="hljs-built_in">LIST</span> (\Junk) <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Junk E-mail&quot;</span><br>* <span class="hljs-built_in">LIST</span> () <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Virus Items&quot;</span><br>C3 OK <span class="hljs-built_in">LIST</span> Completed<br>C4 <span class="hljs-built_in">SELECT</span> INBOX<br>* <span class="hljs-number">8</span> EXISTS<br>* <span class="hljs-number">0</span> RECENT<br>* OK [UIDVALIDITY <span class="hljs-number">1</span>] UIDs valid<br>* FLAGS (\Answered \Seen \Deleted \Draft \Flagged)<br>* OK [PERMANENTFLAGS (\Answered \Seen \Deleted \Draft \Flagged)] Limited<br>C4 OK [READ-WRITE] <span class="hljs-built_in">SELECT</span> completed<br>C5 UID SEARCH <span class="hljs-number">1</span>:*<br>* SEARCH <span class="hljs-number">1557156839</span> <span class="hljs-number">1557156840</span> <span class="hljs-number">1557156841</span> <span class="hljs-number">1557156842</span> <span class="hljs-number">1557156843</span> <span class="hljs-number">1557156844</span> <span class="hljs-number">1557156845</span> <span class="hljs-number">1557156846</span><br>C5 OK SEARCH completed<br>C6 UID FETCH <span class="hljs-number">1557156839</span><br>C6 BAD Parse command error<br>C7 UID FETCH <span class="hljs-number">1557156839</span> FULL<br>* <span class="hljs-number">1</span> FETCH (UID <span class="hljs-number">1557156839</span> INTERNALDATE <span class="hljs-string">&quot; 6-May-2019 23:33:59 +0800&quot;</span> FLAGS (\Seen) ENVELOPE (<span class="hljs-string">&quot;Mon, 6 May 2019 23:33:59 +0800 (GMT+08:00)&quot;</span> <span class="hljs-string">&quot;=?UTF-8?B?5qyi6L+O5L2/55SoQ29yZW1haWznlLXlrZDpgq7ku7bns7vnu58vV2VsY29tZSB0byB0aGUgQ29yZW1haWwgZS1tYWlsIHN5c3RlbQ==?=&quot;</span> ((<span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;postmaster&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;postmaster&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;postmaster&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test02&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;&lt;1106604853.1.1557156839490@www.example.com&gt;&quot;</span>) BODY ((<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-string">&quot;html&quot;</span> (<span class="hljs-string">&quot;charset&quot;</span> <span class="hljs-string">&quot;UTF-8&quot;</span>) <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;quoted-printable&quot;</span> <span class="hljs-number">7274</span> <span class="hljs-number">152</span>) <span class="hljs-string">&quot;related&quot;</span>) RFC822.<span class="hljs-built_in">SIZE</span> <span class="hljs-number">7959</span>)<br>C7 OK Fetch completed<br>C8 UID FETCH <span class="hljs-number">1557156846</span> FULL<br>* <span class="hljs-number">8</span> FETCH (UID <span class="hljs-number">1557156846</span> INTERNALDATE <span class="hljs-string">&quot; 8-May-2019 09:43:11 +0800&quot;</span> FLAGS (\Seen) ENVELOPE (<span class="hljs-string">&quot;Wed, 8 May 2019 09:43:11 +0800 (CST)&quot;</span> <span class="hljs-string">&quot;=?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbCBBdXRoZW50aWNhdGVk?=&quot;</span> ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMiI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test02&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;&lt;5CD2342F.000006.02460@coremail.cn&gt;&quot;</span>) BODY (<span class="hljs-string">&quot;TEXT&quot;</span> <span class="hljs-string">&quot;PLAIN&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;7BIT&quot;</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>) RFC822.<span class="hljs-built_in">SIZE</span> <span class="hljs-number">656</span>)<br>C8 OK Fetch completed<br>C9 UID FETCH <span class="hljs-number">1557156844</span> FULL<br>* <span class="hljs-number">6</span> FETCH (UID <span class="hljs-number">1557156844</span> INTERNALDATE <span class="hljs-string">&quot; 8-May-2019 16:59:38 +0800&quot;</span> FLAGS (\Seen) ENVELOPE (<span class="hljs-string">&quot;Wed, 8 May 2019 16:59:38 +0800 (CST)&quot;</span> <span class="hljs-string">&quot;=?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbA==?=&quot;</span> ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMiI=?=&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;test02&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;&lt;5CD29A7A.000004.02460@coremail.cn&gt;&quot;</span>) BODY (<span class="hljs-string">&quot;TEXT&quot;</span> <span class="hljs-string">&quot;PLAIN&quot;</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-literal">NIL</span> <span class="hljs-string">&quot;7BIT&quot;</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>) RFC822.<span class="hljs-built_in">SIZE</span> <span class="hljs-number">642</span>)<br>C9 OK Fetch completed<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[root@www coremail]# telnet localhost 143
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is &#39;^]&#39;.
+* OK Coremail System IMap Server Ready(126com[c92b4e18679ada4069d0bde6e2528ad1])
+C1 LOGIN &quot;test02@coremail.cn&quot; password
+C1 OK LOGIN completed
+C2 LIST &quot;&quot; &quot;&quot;
+* LIST (\Noselect) &quot;&#x2F;&quot; &quot;&quot;
+C2 OK LIST Completed
+C3 LIST &quot;&quot; &quot;*&quot;
+* LIST () &quot;&#x2F;&quot; &quot;INBOX&quot;
+* LIST (\Drafts) &quot;&#x2F;&quot; &quot;Drafts&quot;
+* LIST (\Sent) &quot;&#x2F;&quot; &quot;Sent Items&quot;
+* LIST (\Trash) &quot;&#x2F;&quot; &quot;Trash&quot;
+* LIST (\Junk) &quot;&#x2F;&quot; &quot;Junk E-mail&quot;
+* LIST () &quot;&#x2F;&quot; &quot;Virus Items&quot;
+C3 OK LIST Completed
+C4 SELECT INBOX
+* 8 EXISTS
+* 0 RECENT
+* OK [UIDVALIDITY 1] UIDs valid
+* FLAGS (\Answered \Seen \Deleted \Draft \Flagged)
+* OK [PERMANENTFLAGS (\Answered \Seen \Deleted \Draft \Flagged)] Limited
+C4 OK [READ-WRITE] SELECT completed
+C5 UID SEARCH 1:*
+* SEARCH 1557156839 1557156840 1557156841 1557156842 1557156843 1557156844 1557156845 1557156846
+C5 OK SEARCH completed
+C6 UID FETCH 1557156839
+C6 BAD Parse command error
+C7 UID FETCH 1557156839 FULL
+* 1 FETCH (UID 1557156839 INTERNALDATE &quot; 6-May-2019 23:33:59 +0800&quot; FLAGS (\Seen) ENVELOPE (&quot;Mon, 6 May 2019 23:33:59 +0800 (GMT+08:00)&quot; &quot;&#x3D;?UTF-8?B?5qyi6L+O5L2&#x2F;55SoQ29yZW1haWznlLXlrZDpgq7ku7bns7vnu58vV2VsY29tZSB0byB0aGUgQ29yZW1haWwgZS1tYWlsIHN5c3RlbQ&#x3D;&#x3D;?&#x3D;&quot; ((NIL NIL &quot;postmaster&quot; &quot;coremail.cn&quot;)) ((NIL NIL &quot;postmaster&quot; &quot;coremail.cn&quot;)) ((NIL NIL &quot;postmaster&quot; &quot;coremail.cn&quot;)) ((NIL NIL &quot;test02&quot; &quot;coremail.cn&quot;)) NIL NIL NIL &quot;&lt;1106604853.1.1557156839490@www.example.com&gt;&quot;) BODY ((&quot;text&quot; &quot;html&quot; (&quot;charset&quot; &quot;UTF-8&quot;) NIL NIL &quot;quoted-printable&quot; 7274 152) &quot;related&quot;) RFC822.SIZE 7959)
+C7 OK Fetch completed
+C8 UID FETCH 1557156846 FULL
+* 8 FETCH (UID 1557156846 INTERNALDATE &quot; 8-May-2019 09:43:11 +0800&quot; FLAGS (\Seen) ENVELOPE (&quot;Wed, 8 May 2019 09:43:11 +0800 (CST)&quot; &quot;&#x3D;?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbCBBdXRoZW50aWNhdGVk?&#x3D;&quot; ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMiI&#x3D;?&#x3D;&quot; NIL &quot;test02&quot; &quot;coremail.cn&quot;)) NIL NIL NIL &quot;&lt;5CD2342F.000006.02460@coremail.cn&gt;&quot;) BODY (&quot;TEXT&quot; &quot;PLAIN&quot; NIL NIL NIL &quot;7BIT&quot; 0 0) RFC822.SIZE 656)
+C8 OK Fetch completed
+C9 UID FETCH 1557156844 FULL
+* 6 FETCH (UID 1557156844 INTERNALDATE &quot; 8-May-2019 16:59:38 +0800&quot; FLAGS (\Seen) ENVELOPE (&quot;Wed, 8 May 2019 16:59:38 +0800 (CST)&quot; &quot;&#x3D;?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbA&#x3D;&#x3D;?&#x3D;&quot; ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMSI&#x3D;?&#x3D;&quot; NIL &quot;test01&quot; &quot;coremail.cn&quot;)) ((&quot;&#x3D;?UTF-8?B?InRlc3QwMiI&#x3D;?&#x3D;&quot; NIL &quot;test02&quot; &quot;coremail.cn&quot;)) NIL NIL NIL &quot;&lt;5CD29A7A.000004.02460@coremail.cn&gt;&quot;) BODY (&quot;TEXT&quot; &quot;PLAIN&quot; NIL NIL NIL &quot;7BIT&quot; 0 0) RFC822.SIZE 642)
+C9 OK Fetch completed<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -663,6 +703,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

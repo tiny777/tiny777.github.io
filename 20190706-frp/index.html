@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.2k words
+          3.9k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          35 mins
+          33 mins
         
       </span>
     
@@ -292,27 +294,82 @@
 <h1 id="1、服务端配置"><a href="#1、服务端配置" class="headerlink" title="1、服务端配置"></a>1、服务端配置</h1><p>首先我们对服务端的阿里云主机进行配置，当然有其他的公网IP主机都是可以的。这里使用的操作系统是CentOS7.3。</p>
 <h2 id="1-1-下载Frp"><a href="#1-1-下载Frp" class="headerlink" title="1.1 下载Frp"></a>1.1 下载Frp</h2><p><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/releases">github上各个配置版本下载地址</a></p>
 <p><img src="https://resource.tinychen.com/blog/20190706/QEPAirRf1m3C.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用wget指令下载linux版本</span><br>wget https://github.com/fatedier/frp/releases/download/v0.27.0/frp_0.27.0_linux_amd64.tar.gz<br><br><span class="hljs-comment"># 使用tar命令解压</span><br>tar -zxvf frp_0.27.0_linux_amd64.tar.gz<br><br><span class="hljs-comment"># 使用cp命令复制到/etc目录中并重命名为frps</span><br>cp -r frp_0.27.0_linux_amd64 /etc/frps<br><br><span class="hljs-comment"># 使用rm命令删除掉多余的frpc客户端文件，只留下服务端frps相关的文件</span><br>rm -f frpc frpc_full.ini frpc.ini<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用wget指令下载linux版本</span>
+<span class="token function">wget</span> https://github.com/fatedier/frp/releases/download/v0.27.0/frp_0.27.0_linux_amd64.tar.gz
+
+<span class="token comment"># 使用tar命令解压</span>
+<span class="token function">tar</span> -zxvf frp_0.27.0_linux_amd64.tar.gz
+
+<span class="token comment"># 使用cp命令复制到/etc目录中并重命名为frps</span>
+<span class="token function">cp</span> -r frp_0.27.0_linux_amd64 /etc/frps
+
+<span class="token comment"># 使用rm命令删除掉多余的frpc客户端文件，只留下服务端frps相关的文件</span>
+<span class="token function">rm</span> -f frpc frpc_full.ini frpc.ini<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190706/PjcMH3c9D5VT.png" srcset="/img/loading.gif" lazyload></p>
 <p>这些就是剩下的我们需要的文件，这里我们可以看到有两个ini配置文件，其中<code>frps_full,ini</code>是完整的带有注释说明和所有功能的配置文件，我们把需要的简单配置摘到<code>frps.ini</code>这个文件，方便我们管理配置。</p>
 <h2 id="1-2-编辑配置文件"><a href="#1-2-编辑配置文件" class="headerlink" title="1.2 编辑配置文件"></a>1.2 编辑配置文件</h2><p>接下来我们编辑配置文件启用frp的监听端口7000和监控面板dashboard的监听端口7500。</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment"># 将下列内容加入到frps.ini中</span><br><span class="hljs-section">[common]</span><br><span class="hljs-attr">bind_addr</span> = <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span><br><span class="hljs-attr">bind_port</span> = <span class="hljs-number">7000</span><br><span class="hljs-attr">auto_token</span> = 你的连接认证密码<br><br><span class="hljs-attr">dashboard_port</span> = <span class="hljs-number">7500</span><br><span class="hljs-attr">dashboard_user</span> = admin<br><span class="hljs-attr">dashboard_pwd</span> = 你的管理登录密码<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># 将下列内容加入到frps.ini中</span>
+<span class="token selector">[common]</span>
+<span class="token constant">bind_addr</span> <span class="token attr-value"><span class="token punctuation">=</span> 0.0.0.0</span>
+<span class="token constant">bind_port</span> <span class="token attr-value"><span class="token punctuation">=</span> 7000</span>
+<span class="token constant">auto_token</span> <span class="token attr-value"><span class="token punctuation">=</span> 你的连接认证密码</span>
+
+<span class="token constant">dashboard_port</span> <span class="token attr-value"><span class="token punctuation">=</span> 7500</span>
+<span class="token constant">dashboard_user</span> <span class="token attr-value"><span class="token punctuation">=</span> admin</span>
+<span class="token constant">dashboard_pwd</span> <span class="token attr-value"><span class="token punctuation">=</span> 你的管理登录密码</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>需要注意的是，这上面说的7000和7500端口都需要在阿里云的防火墙里面配置放行，否则会无法访问。</p>
 <h2 id="1-3-设置开启自动和后台运行"><a href="#1-3-设置开启自动和后台运行" class="headerlink" title="1.3 设置开启自动和后台运行"></a>1.3 设置开启自动和后台运行</h2><p>我们新建一个文件，将Frps注册成Linux中的服务进程。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个文件设置frps服务能够实现后台启动和开机启动</span><br>vim /etc/systemd/system/frpsd.service<br><br><span class="hljs-comment"># 将下列内容加入到frpsd.service中</span><br>[Unit]<br>Description=frps daemon<br>After=syslog.target  network.target<br>Wants=network.target<br><br>[Service]<br>Type=simple<br>ExecStart=/etc/frps/frps -c /etc/frps/frps.ini<br>Restart= always<br>RestartSec=1min<br><br>[Install]<br>WantedBy=multi-user.target<br><br><span class="hljs-comment"># 启动frps服务</span><br>systemctl start frpsd.service<br><br><span class="hljs-comment"># 设置frps服务开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> frpsd.service<br><br><span class="hljs-comment"># 查看frps状态</span><br>systemctl status frpsd.service<br><br><span class="hljs-comment"># 重启frps服务</span><br>systemctl restart frpsd.service<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建一个文件设置frps服务能够实现后台启动和开机启动</span>
+<span class="token function">vim</span> /etc/systemd/system/frpsd.service
+
+<span class="token comment"># 将下列内容加入到frpsd.service中</span>
+<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>frps daemon
+<span class="token assign-left variable">After</span><span class="token operator">=</span>syslog.target  network.target
+<span class="token assign-left variable">Wants</span><span class="token operator">=</span>network.target
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/etc/frps/frps -c /etc/frps/frps.ini
+<span class="token assign-left variable">Restart</span><span class="token operator">=</span> always
+<span class="token assign-left variable">RestartSec</span><span class="token operator">=</span>1min
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
+
+<span class="token comment"># 启动frps服务</span>
+systemctl start frpsd.service
+
+<span class="token comment"># 设置frps服务开机启动</span>
+systemctl <span class="token builtin class-name">enable</span> frpsd.service
+
+<span class="token comment"># 查看frps状态</span>
+systemctl status frpsd.service
+
+<span class="token comment"># 重启frps服务</span>
+systemctl restart frpsd.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190706/iDX1mDiMgUGM.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、Windows客户端配置"><a href="#2、Windows客户端配置" class="headerlink" title="2、Windows客户端配置"></a>2、Windows客户端配置</h1><h2 id="2-1-下载Frp"><a href="#2-1-下载Frp" class="headerlink" title="2.1 下载Frp"></a>2.1 下载Frp</h2><p>我们按照之前的下载好对应的Windows版本之后，删除掉多余的frps服务端文件，只留下对应的frpc客户端文件。</p>
 <p><img src="https://resource.tinychen.com/blog/20190706/iCbfgRJ2uTV4.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-2-编辑配置文件"><a href="#2-2-编辑配置文件" class="headerlink" title="2.2 编辑配置文件"></a>2.2 编辑配置文件</h2><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[common]</span><br><span class="hljs-attr">server_addr</span> = 你的公网主机的公网IP<br><span class="hljs-attr">server_port</span> = <span class="hljs-number">7000</span><br><br><span class="hljs-section">[MSRDP]</span><br><span class="hljs-attr">type</span> = tcp<br><span class="hljs-attr">local_ip</span> = <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span><br><span class="hljs-attr">local_port</span> = <span class="hljs-number">3389</span><br><span class="hljs-attr">remote_port</span> = <span class="hljs-number">7777</span><br></code></pre></td></tr></table></figure>
+<h2 id="2-2-编辑配置文件"><a href="#2-2-编辑配置文件" class="headerlink" title="2.2 编辑配置文件"></a>2.2 编辑配置文件</h2><div class="code-wrapper"><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token selector">[common]</span>
+<span class="token constant">server_addr</span> <span class="token attr-value"><span class="token punctuation">=</span> 你的公网主机的公网IP</span>
+<span class="token constant">server_port</span> <span class="token attr-value"><span class="token punctuation">=</span> 7000</span>
+
+<span class="token selector">[MSRDP]</span>
+<span class="token constant">type</span> <span class="token attr-value"><span class="token punctuation">=</span> tcp</span>
+<span class="token constant">local_ip</span> <span class="token attr-value"><span class="token punctuation">=</span> 127.0.0.1</span>
+<span class="token constant">local_port</span> <span class="token attr-value"><span class="token punctuation">=</span> 3389</span>
+<span class="token constant">remote_port</span> <span class="token attr-value"><span class="token punctuation">=</span> 7777</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>这里的<code>server_port</code>就是我们前面的服务端配置的端口7000，<code>local_port</code>则是微软自带的远程桌面mstsc的默认端口3389，<code>remote_port</code>就是到时候使用mstsc远程的时候需要在这个公网IP后面加上的端口号，注意这个端口号也是需要在阿里云主机的防火墙中放行。</p>
 <p>然后我们就可以启用frpc客户端来建立连接</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 在命令行中输入</span><br>frpc.exe -c frpc.ini<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在命令行中输入</span>
+frpc.exe -c frpc.ini<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190706/qvHyuBzi26Ps.png" srcset="/img/loading.gif" lazyload></p>
@@ -321,12 +378,25 @@
 <p><img src="https://resource.tinychen.com/blog/20190706/GXeLCvfem8lH.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我使用的是<code>WinSW.NET4.exe</code>这个版本，这个需要电脑安装了<code>.net4</code>才可以使用，一般win10应该都是安装了的，此外我们还要下载一个xml文件作为启动配置文件。</p>
 <p>然后我们在对应的xml配置文件中加入下列内容</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">configuration</span>&gt;</span><br>  <br>  <span class="hljs-comment">&lt;!-- ID of the service. It should be unique accross the Windows system--&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">id</span>&gt;</span>frpc<span class="hljs-tag">&lt;/<span class="hljs-name">id</span>&gt;</span><br>  <span class="hljs-comment">&lt;!-- Display name of the service --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>Frpc Service (powered by WinSW)<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>  <span class="hljs-comment">&lt;!-- Service description --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">description</span>&gt;</span>This frpc service can realize reverse Proxy<span class="hljs-tag">&lt;/<span class="hljs-name">description</span>&gt;</span><br>  <span class="hljs-comment">&lt;!-- Path to the executable, which should be started --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">executable</span>&gt;</span>frpc<span class="hljs-tag">&lt;/<span class="hljs-name">executable</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">arguments</span>&gt;</span>-c frpc.ini<span class="hljs-tag">&lt;/<span class="hljs-name">arguments</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">logmode</span>&gt;</span>reset<span class="hljs-tag">&lt;/<span class="hljs-name">logmode</span>&gt;</span><br><br><span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-xml" data-language="xml"><code class="language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>configuration</span><span class="token punctuation">></span></span>
+  
+  <span class="token comment">&lt;!-- ID of the service. It should be unique accross the Windows system--></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>id</span><span class="token punctuation">></span></span>frpc<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>id</span><span class="token punctuation">></span></span>
+  <span class="token comment">&lt;!-- Display name of the service --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">></span></span>Frpc Service (powered by WinSW)<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">></span></span>
+  <span class="token comment">&lt;!-- Service description --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">></span></span>This frpc service can realize reverse Proxy<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">></span></span>
+  <span class="token comment">&lt;!-- Path to the executable, which should be started --></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>executable</span><span class="token punctuation">></span></span>frpc<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>executable</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>arguments</span><span class="token punctuation">></span></span>-c frpc.ini<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>arguments</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>logmode</span><span class="token punctuation">></span></span>reset<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>logmode</span><span class="token punctuation">></span></span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>configuration</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>接着我们把这两个文件都命名为WinSW，然后放在刚刚frpc的目录下。</p>
 <p><img src="https://resource.tinychen.com/blog/20190706/ewPkXMG4Qpfl.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们以管理员身份启动<code>powershell</code>或者<code>cmd</code>，输入下列命令</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">WinSW.exe install<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">WinSW.exe <span class="token function">install</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190706/C6KW7eQUIUH1.png" srcset="/img/loading.gif" lazyload></p>
@@ -338,15 +408,63 @@
 <p>到这里windows客户端的配置就已经完成了。我们在远程的时候只需要输入刚刚使用的公网IP地址加上端口号即可进行远程连接，如果有多台电脑需要进行远程，只需要给每个电脑设置一个不同的端口号即可。</p>
 <p><img src="https://resource.tinychen.com/blog/20190706/BYdBdqgN4Pqq.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、Linux客户端配置"><a href="#3、Linux客户端配置" class="headerlink" title="3、Linux客户端配置"></a>3、Linux客户端配置</h1><p>Linux客户端的配置和上面的服务端大同小异，只需要将<code>frps</code>换为<code>frpc</code>并且修改对应的配置文件即可。注意下面的操作小七在CentOS7.6和Ubuntu18.04上面都能成功实现。</p>
-<h2 id="3-1-下载Frp"><a href="#3-1-下载Frp" class="headerlink" title="3.1 下载Frp"></a>3.1 下载Frp</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用wget指令下载linux版本</span><br>wget https://github.com/fatedier/frp/releases/download/v0.27.0/frp_0.27.0_linux_amd64.tar.gz<br><br><span class="hljs-comment"># 使用tar命令解压</span><br>tar -zxvf frp_0.27.0_linux_amd64.tar.gz<br><br><span class="hljs-comment"># 使用cp命令复制到/etc目录中并重命名为frpc</span><br>cp -r frp_0.27.0_linux_amd64 /etc/frpc<br><br><span class="hljs-comment"># 使用rm命令删除掉多余的frps服务端文件，只留下客户端</span><br>rm -f frps frps_full.ini frps.ini<br><br><span class="hljs-comment"># 使用vim编辑客户端配置文件</span><br>vim /etc/frpc/frpc.ini<br></code></pre></td></tr></table></figure>
+<h2 id="3-1-下载Frp"><a href="#3-1-下载Frp" class="headerlink" title="3.1 下载Frp"></a>3.1 下载Frp</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用wget指令下载linux版本</span>
+<span class="token function">wget</span> https://github.com/fatedier/frp/releases/download/v0.27.0/frp_0.27.0_linux_amd64.tar.gz
+
+<span class="token comment"># 使用tar命令解压</span>
+<span class="token function">tar</span> -zxvf frp_0.27.0_linux_amd64.tar.gz
+
+<span class="token comment"># 使用cp命令复制到/etc目录中并重命名为frpc</span>
+<span class="token function">cp</span> -r frp_0.27.0_linux_amd64 /etc/frpc
+
+<span class="token comment"># 使用rm命令删除掉多余的frps服务端文件，只留下客户端</span>
+<span class="token function">rm</span> -f frps frps_full.ini frps.ini
+
+<span class="token comment"># 使用vim编辑客户端配置文件</span>
+<span class="token function">vim</span> /etc/frpc/frpc.ini<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
-<h2 id="3-2-编辑配置文件"><a href="#3-2-编辑配置文件" class="headerlink" title="3.2 编辑配置文件"></a>3.2 编辑配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 配置本地的frpc.ini文件</span><br><br>[common]<br>server_addr = 你的公网主机的公网IP<br>server_port = 7000<br><br>[ssh]<br><span class="hljs-built_in">type</span> = tcp<br>local_ip = 127.0.0.1<br>local_port = 22<br>remote_port = 8000<br></code></pre></td></tr></table></figure>
+<h2 id="3-2-编辑配置文件"><a href="#3-2-编辑配置文件" class="headerlink" title="3.2 编辑配置文件"></a>3.2 编辑配置文件</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 配置本地的frpc.ini文件</span>
+
+<span class="token punctuation">[</span>common<span class="token punctuation">]</span>
+server_addr <span class="token operator">=</span> 你的公网主机的公网IP
+server_port <span class="token operator">=</span> <span class="token number">7000</span>
+
+<span class="token punctuation">[</span>ssh<span class="token punctuation">]</span>
+<span class="token builtin class-name">type</span> <span class="token operator">=</span> tcp
+local_ip <span class="token operator">=</span> <span class="token number">127.0</span>.0.1
+local_port <span class="token operator">=</span> <span class="token number">22</span>
+remote_port <span class="token operator">=</span> <span class="token number">8000</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
-<h2 id="3-3-设置开机启动和后台运行"><a href="#3-3-设置开机启动和后台运行" class="headerlink" title="3.3 设置开机启动和后台运行"></a>3.3 设置开机启动和后台运行</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个文件设置frps服务能够实现后台启动和开机启动</span><br>vim /etc/systemd/system/frpcd.service<br><br><span class="hljs-comment"># 将下列内容加入到frpcd.service中</span><br>[Unit]<br>Description=frpc daemon<br>After=syslog.target  network.target<br>Wants=network.target<br><br>[Service]<br>Type=simple<br>ExecStart=/etc/frpc/frpc -c /etc/frpc/frpc.ini<br>Restart= always<br>RestartSec=1min<br><br>[Install]<br>WantedBy=multi-user.target<br><br><span class="hljs-comment"># 启动frpc服务</span><br>systemctl start frpcd.service<br><br><span class="hljs-comment"># 设置frpc服务开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> frpcd.service<br><br><span class="hljs-comment"># 查看frpc服务状态</span><br>systemctl status frpcd.service<br></code></pre></td></tr></table></figure>
+<h2 id="3-3-设置开机启动和后台运行"><a href="#3-3-设置开机启动和后台运行" class="headerlink" title="3.3 设置开机启动和后台运行"></a>3.3 设置开机启动和后台运行</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建一个文件设置frps服务能够实现后台启动和开机启动</span>
+<span class="token function">vim</span> /etc/systemd/system/frpcd.service
+
+<span class="token comment"># 将下列内容加入到frpcd.service中</span>
+<span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>frpc daemon
+<span class="token assign-left variable">After</span><span class="token operator">=</span>syslog.target  network.target
+<span class="token assign-left variable">Wants</span><span class="token operator">=</span>network.target
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">Type</span><span class="token operator">=</span>simple
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/etc/frpc/frpc -c /etc/frpc/frpc.ini
+<span class="token assign-left variable">Restart</span><span class="token operator">=</span> always
+<span class="token assign-left variable">RestartSec</span><span class="token operator">=</span>1min
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
+
+<span class="token comment"># 启动frpc服务</span>
+systemctl start frpcd.service
+
+<span class="token comment"># 设置frpc服务开机启动</span>
+systemctl <span class="token builtin class-name">enable</span> frpcd.service
+
+<span class="token comment"># 查看frpc服务状态</span>
+systemctl status frpcd.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190706/wkuIU9En3z6S.png" srcset="/img/loading.gif" lazyload></p>
@@ -651,6 +769,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

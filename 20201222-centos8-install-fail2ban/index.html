@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.1k words
+          2k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          18 mins
+          17 mins
         
       </span>
     
@@ -290,13 +292,87 @@
 
 <p>fail2ban用来保护ssh的原理非常简单，主要就是通过检测ssh的日志，记录下频繁登录失败的IP，然后使用iptables来直接禁用掉这个IP对应的请求即可实现ssh的防暴力破解。</p>
 <h1 id="1、安装fail2ban"><a href="#1、安装fail2ban" class="headerlink" title="1、安装fail2ban"></a>1、安装fail2ban</h1><p>centos中可以直接启用epel源来直接进行安装</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> epel-release<br>yum <span class="hljs-keyword">install</span> fail2ban<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">yum install epel-release
+yum install fail2ban<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <h1 id="2、配置fail2ban"><a href="#2、配置fail2ban" class="headerlink" title="2、配置fail2ban"></a>2、配置fail2ban</h1><p><code>fail2ban</code>的主要配置目录位于<code>/etc/fail2ban</code></p>
 <p><img src="https://resource.tinychen.com/20201222151327.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ cat jail.local<br>[DEFAULT]<br><span class="hljs-comment"># 以空格分隔的列表，可以是 IP 地址、CIDR 前缀或者 DNS 主机名</span><br><span class="hljs-comment"># 用于指定哪些地址可以忽略 fail2ban 防御</span><br>ignoreip = 192.168.0.0/24<br><br><span class="hljs-comment"># 客户端主机被禁止的时长（秒）</span><br>bantime = 8640000<br><br><span class="hljs-comment"># 客户端主机被禁止前允许失败的次数</span><br>maxretry = 3<br><br><span class="hljs-comment"># 查找失败次数的时长（秒）</span><br>findtime = 600<br><br>mta = sendmail<br><br>[ssh-iptables]<br>enabled = <span class="hljs-literal">true</span><br>filter = sshd<br>action = iptables[name=SSH, port=ssh, protocol=tcp]<br>sendmail-whois[name=SSH-Fail2ban, dest=example@mail.com, sender=fail2ban@email.com]<br><span class="hljs-comment"># Red Hat 系的发行版</span><br>logpath = /var/<span class="hljs-built_in">log</span>/secure<br><span class="hljs-comment"># ssh 服务的最大尝试次数</span><br>maxretry = 3<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">cat</span> jail.local
+<span class="token punctuation">[</span>DEFAULT<span class="token punctuation">]</span>
+<span class="token comment"># 以空格分隔的列表，可以是 IP 地址、CIDR 前缀或者 DNS 主机名</span>
+<span class="token comment"># 用于指定哪些地址可以忽略 fail2ban 防御</span>
+ignoreip <span class="token operator">=</span> <span class="token number">192.168</span>.0.0/24
 
-<h1 id="3、重启服务"><a href="#3、重启服务" class="headerlink" title="3、重启服务"></a>3、重启服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ sudo systemctl restart fail2ban<br>$ sudo systemctl status fail2ban<br>● fail2ban.service - Fail2Ban Service<br>   Loaded: loaded (/usr/lib/systemd/system/fail2ban.service; disabled; vendor preset: disabled)<br>   Active: active (running) since Tue 2020-12-22 16:01:45 +08; 5s ago<br>     Docs: man:fail2ban(1)<br>  Process: 46536 ExecStartPre=/bin/mkdir -p /run/fail2ban (code=exited, status=0/SUCCESS)<br> Main PID: 46539 (f2b/server)<br>    Tasks: 5 (<span class="hljs-built_in">limit</span>: 408286)<br>   Memory: 13.4M<br>   CGroup: /system.slice/fail2ban.service<br>           └─46539 /usr/bin/python3.6 -s /usr/bin/fail2ban-server -xf start<br><br>Dec 22 16:01:45 tiny-server systemd[1]: Starting Fail2Ban Service...<br>Dec 22 16:01:45 tiny-server systemd[1]: Started Fail2Ban Service.<br>Dec 22 16:01:45 tiny-server fail2ban-server[46539]: Server ready<br><br><span class="hljs-comment"># 测试是否正常运行</span><br>$ sudo fail2ban-client ping<br>Server replied: pong<br><br><span class="hljs-comment"># 添加服务开机启动</span><br>$ sudo systemctl <span class="hljs-built_in">enable</span> fail2ban<br>Created symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /usr/lib/systemd/system/fail2ban.service.<br><br><span class="hljs-comment"># 查看fail2ban的日志</span><br>$ tail -f /var/<span class="hljs-built_in">log</span>/fail2ban.log<br><br><span class="hljs-comment"># 查看fail2ban状态</span><br>$ fail2ban-client status<br>Status<br>|- Number of jail:      1<br>`- Jail list:   ssh-iptables<br>$ fail2ban-client status ssh-iptables<br>Status <span class="hljs-keyword">for</span> the jail: ssh-iptables<br>|- Filter<br>|  |- Currently failed: 0<br>|  |- Total failed:     0<br>|  `- File list:        /var/<span class="hljs-built_in">log</span>/secure<br>`- Actions<br>   |- Currently banned: 0<br>   |- Total banned:     0<br>   `- Banned IP list:<br><br><span class="hljs-comment"># 查看iptables的禁用情况</span><br>sudo iptables --list -n<br>    <br><span class="hljs-comment"># 解禁一个特定IP</span><br>fail2ban-client <span class="hljs-built_in">set</span> ssh-iptables unbanip 192.168.1.8<br></code></pre></td></tr></table></figure>
+<span class="token comment"># 客户端主机被禁止的时长（秒）</span>
+bantime <span class="token operator">=</span> <span class="token number">8640000</span>
+
+<span class="token comment"># 客户端主机被禁止前允许失败的次数</span>
+maxretry <span class="token operator">=</span> <span class="token number">3</span>
+
+<span class="token comment"># 查找失败次数的时长（秒）</span>
+findtime <span class="token operator">=</span> <span class="token number">600</span>
+
+mta <span class="token operator">=</span> <span class="token function">sendmail</span>
+
+<span class="token punctuation">[</span>ssh-iptables<span class="token punctuation">]</span>
+enabled <span class="token operator">=</span> <span class="token boolean">true</span>
+filter <span class="token operator">=</span> sshd
+action <span class="token operator">=</span> iptables<span class="token punctuation">[</span>name<span class="token operator">=</span>SSH, <span class="token assign-left variable">port</span><span class="token operator">=</span>ssh, <span class="token assign-left variable">protocol</span><span class="token operator">=</span>tcp<span class="token punctuation">]</span>
+sendmail-whois<span class="token punctuation">[</span>name<span class="token operator">=</span>SSH-Fail2ban, <span class="token assign-left variable">dest</span><span class="token operator">=</span>example@mail.com, <span class="token assign-left variable">sender</span><span class="token operator">=</span>fail2ban@email.com<span class="token punctuation">]</span>
+<span class="token comment"># Red Hat 系的发行版</span>
+logpath <span class="token operator">=</span> /var/log/secure
+<span class="token comment"># ssh 服务的最大尝试次数</span>
+maxretry <span class="token operator">=</span> <span class="token number">3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+
+<h1 id="3、重启服务"><a href="#3、重启服务" class="headerlink" title="3、重启服务"></a>3、重启服务</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> systemctl restart fail2ban
+$ <span class="token function">sudo</span> systemctl status fail2ban
+● fail2ban.service - Fail2Ban Service
+   Loaded: loaded <span class="token punctuation">(</span>/usr/lib/systemd/system/fail2ban.service<span class="token punctuation">;</span> disabled<span class="token punctuation">;</span> vendor preset: disabled<span class="token punctuation">)</span>
+   Active: active <span class="token punctuation">(</span>running<span class="token punctuation">)</span> since Tue <span class="token number">2020</span>-12-22 <span class="token number">16</span>:01:45 +08<span class="token punctuation">;</span> 5s ago
+     Docs: man:fail2ban<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+  Process: <span class="token number">46536</span> <span class="token assign-left variable">ExecStartPre</span><span class="token operator">=</span>/bin/mkdir -p /run/fail2ban <span class="token punctuation">(</span>code<span class="token operator">=</span>exited, <span class="token assign-left variable">status</span><span class="token operator">=</span><span class="token number">0</span>/SUCCESS<span class="token punctuation">)</span>
+ Main PID: <span class="token number">46539</span> <span class="token punctuation">(</span>f2b/server<span class="token punctuation">)</span>
+    Tasks: <span class="token number">5</span> <span class="token punctuation">(</span>limit: <span class="token number">408286</span><span class="token punctuation">)</span>
+   Memory: <span class="token number">13</span>.4M
+   CGroup: /system.slice/fail2ban.service
+           └─46539 /usr/bin/python3.6 -s /usr/bin/fail2ban-server -xf start
+
+Dec <span class="token number">22</span> <span class="token number">16</span>:01:45 tiny-server systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: Starting Fail2Ban Service<span class="token punctuation">..</span>.
+Dec <span class="token number">22</span> <span class="token number">16</span>:01:45 tiny-server systemd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>: Started Fail2Ban Service.
+Dec <span class="token number">22</span> <span class="token number">16</span>:01:45 tiny-server fail2ban-server<span class="token punctuation">[</span><span class="token number">46539</span><span class="token punctuation">]</span>: Server ready
+
+<span class="token comment"># 测试是否正常运行</span>
+$ <span class="token function">sudo</span> fail2ban-client <span class="token function">ping</span>
+Server replied: pong
+
+<span class="token comment"># 添加服务开机启动</span>
+$ <span class="token function">sudo</span> systemctl <span class="token builtin class-name">enable</span> fail2ban
+Created symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /usr/lib/systemd/system/fail2ban.service.
+
+<span class="token comment"># 查看fail2ban的日志</span>
+$ <span class="token function">tail</span> -f /var/log/fail2ban.log
+
+<span class="token comment"># 查看fail2ban状态</span>
+$ fail2ban-client status
+Status
+<span class="token operator">|</span>- Number of jail:      <span class="token number">1</span>
+<span class="token variable"><span class="token variable">`</span>- Jail list:   ssh-iptables
+$ fail2ban-client status ssh-iptables
+Status <span class="token keyword">for</span> the jail: ssh-iptables
+<span class="token operator">|</span>- Filter
+<span class="token operator">|</span>  <span class="token operator">|</span>- Currently failed: <span class="token number">0</span>
+<span class="token operator">|</span>  <span class="token operator">|</span>- Total failed:     <span class="token number">0</span>
+<span class="token operator">|</span>  <span class="token variable">`</span></span>- File list:        /var/log/secure
+<span class="token variable"><span class="token variable">`</span>- Actions
+   <span class="token operator">|</span>- Currently banned: <span class="token number">0</span>
+   <span class="token operator">|</span>- Total banned:     <span class="token number">0</span>
+   <span class="token variable">`</span></span>- Banned IP list:
+
+<span class="token comment"># 查看iptables的禁用情况</span>
+<span class="token function">sudo</span> iptables --list -n
+    
+<span class="token comment"># 解禁一个特定IP</span>
+fail2ban-client <span class="token builtin class-name">set</span> ssh-iptables unbanip <span class="token number">192.168</span>.1.8<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -593,6 +669,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

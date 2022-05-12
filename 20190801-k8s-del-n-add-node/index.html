@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.3k words
+          1.2k words
         
       </span>
     
@@ -288,25 +290,36 @@
 <span id="more"></span>
 
 <h1 id="1、删除节点"><a href="#1、删除节点" class="headerlink" title="1、删除节点"></a>1、删除节点</h1><p>如果需要在k8s集群中删除节点，首先需要在master节点上删除该节点的相关数据，再删除该节点，接着在该节点上进行reset操作，接着删除相关文件。</p>
-<h2 id="在master节点上"><a href="#在master节点上" class="headerlink" title="在master节点上"></a>在master节点上</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 其中&lt; node name &gt;是在k8s集群中使用&lt; kubectl get nodes &gt;查询到的节点名称</span><br>kubectl drain &lt;node name&gt; --delete-local-data --force --ignore-daemonsets<br>kubectl delete node &lt;node name&gt;<br></code></pre></td></tr></table></figure>
+<h2 id="在master节点上"><a href="#在master节点上" class="headerlink" title="在master节点上"></a>在master节点上</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 其中&lt; node name >是在k8s集群中使用&lt; kubectl get nodes >查询到的节点名称</span>
+kubectl drain <span class="token operator">&lt;</span>node name<span class="token operator">></span> --delete-local-data --force --ignore-daemonsets
+kubectl delete node <span class="token operator">&lt;</span>node name<span class="token operator">></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/EORre3VEGpKk.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="在需要删除的节点上"><a href="#在需要删除的节点上" class="headerlink" title="在需要删除的节点上"></a>在需要删除的节点上</h2><figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs perl"><span class="hljs-comment"># 重置k8s</span><br>sudo kubeadm <span class="hljs-keyword">reset</span><br></code></pre></td></tr></table></figure>
+<h2 id="在需要删除的节点上"><a href="#在需要删除的节点上" class="headerlink" title="在需要删除的节点上"></a>在需要删除的节点上</h2><div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 重置k8s
+sudo kubeadm reset<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/dWqs7mrdCIB8.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 删除残留的文件</span><br>sudo rm -rf /etc/kubernetes/<br><br><span class="hljs-comment"># 清除iptables或者ipvs的配置</span><br>sudo iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X<br>sudo ipvsadm --clear<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 删除残留的文件</span>
+<span class="token function">sudo</span> <span class="token function">rm</span> -rf /etc/kubernetes/
+
+<span class="token comment"># 清除iptables或者ipvs的配置</span>
+<span class="token function">sudo</span> iptables -F <span class="token operator">&amp;&amp;</span> iptables -t nat -F <span class="token operator">&amp;&amp;</span> iptables -t mangle -F <span class="token operator">&amp;&amp;</span> iptables -X
+<span class="token function">sudo</span> ipvsadm --clear<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/HnuNsnOApNKD.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>如果删除的是master节点，还需要删除用户目录下的<code>.kube</code>文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">rm -rf ~/.kube<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">rm</span> -rf ~/.kube<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 </blockquote>
 <p><strong>最后重启设备完成操作。</strong></p>
 <h1 id="2、添加节点"><a href="#2、添加节点" class="headerlink" title="2、添加节点"></a>2、添加节点</h1><h2 id="生成token"><a href="#生成token" class="headerlink" title="生成token"></a>生成token</h2><p>一般来说在k8s集群初始化完成的时候，会输出一条<code>token</code>来让我们添加其他的节点，但是这个<code>token</code>的有效时间只有24小时。我们可以这样查询<code>token</code>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查询token</span><br>kubeadm token list<br><span class="hljs-comment"># 创建一个token</span><br>kubeadm token create<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查询token</span>
+kubeadm token list
+<span class="token comment"># 创建一个token</span>
+kubeadm token create<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/sbjkRzBJGqrv.png" srcset="/img/loading.gif" lazyload></p>
@@ -314,18 +327,19 @@
 <p>这里我们可以看到ttl值就是这个token对应的有效时间了</p>
 </blockquote>
 <h2 id="生成sha256加密字符串"><a href="#生成sha256加密字符串" class="headerlink" title="生成sha256加密字符串"></a>生成sha256加密字符串</h2><p>除了<code>token</code>之外，我们还需要一个<code>sha256</code>的加密字符串，这个我们可以这样获得</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">openssl x509 -pubkey -<span class="hljs-keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed <span class="hljs-string">&#x27;s/^.* //&#x27;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt <span class="token operator">|</span> openssl rsa -pubin -outform der <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null <span class="token operator">|</span> openssl dgst -sha256 -hex <span class="token operator">|</span> <span class="token function">sed</span> <span class="token string">'s/^.* //'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/yqHmvgaXDult.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们就可以把node节点添加到集群中了</p>
 <p>命令的格式如下：</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">kubeadm <span class="hljs-keyword">join</span> &lt;集群master节点IP：端口&gt; --token <span class="hljs-symbol">&lt;token&gt;</span> --discovery-token-<span class="hljs-keyword">ca</span>-cert-hash <span class="hljs-built_in">sha256</span>:<span class="hljs-symbol">&lt;sha256&gt;</span> <br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubeadm join &lt;集群master节点IP：端口&gt; --token &lt;token&gt; --discovery-token-ca-cert-hash sha256:&lt;sha256&gt; <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 
 <p>对应到小七这里的操作命令如下：</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs vim">kubeadm <span class="hljs-keyword">join</span> kubernetes.haproxy.<span class="hljs-keyword">com</span>:<span class="hljs-number">8443</span> --token d98xt5.<span class="hljs-number">6</span>xvz7nldv2niknnv \<br>    --discovery-token-<span class="hljs-keyword">ca</span>-cert-hash <span class="hljs-built_in">sha256</span>:ae8d99e389a6a3109c188b5c27792c490e6a18e438bb4fc81a0a44b9542f3835 <br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubeadm join kubernetes.haproxy.com:8443 --token d98xt5.6xvz7nldv2niknnv \
+    --discovery-token-ca-cert-hash sha256:ae8d99e389a6a3109c188b5c27792c490e6a18e438bb4fc81a0a44b9542f3835 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/93of3AtxBuny.png" srcset="/img/loading.gif" lazyload></p>
@@ -626,6 +640,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

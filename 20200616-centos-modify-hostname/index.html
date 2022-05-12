@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -222,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2k words
+          1.7k words
         
       </span>
     
@@ -233,7 +235,7 @@
         
         
         
-          17 mins
+          15 mins
         
       </span>
     
@@ -287,21 +289,68 @@
 <span id="more"></span>
 
 <h1 id="1、CentOS6-RHEL6"><a href="#1、CentOS6-RHEL6" class="headerlink" title="1、CentOS6/RHEL6"></a>1、CentOS6/RHEL6</h1><p>对于6系的红帽Linux，修改hostname较为麻烦，如果只是需要临时修改hostname，只需要使用hostname命令即可：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">hostname your-new-temp-hostname<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">hostname</span> your-new-temp-hostname<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>如果需要永久修改hostname，则需要修改两个地方：</p>
 <p>首先是<code>/etc/hosts</code>文件中，需要添加<code>IP</code>和<code>hostname</code>的映射关系，如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">127.0.0.1	your-new-perm-hostname<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1	your-new-perm-hostname<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>然后在<code>/etc/sysconfig/network</code>文件中修改对应的<code>HOSTNAME=</code>参数为新的hostname</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">HOSTNAME=your-new-perm-hostname<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable"><span class="token environment constant">HOSTNAME</span></span><span class="token operator">=</span>your-new-perm-hostname<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>注意两处地方需要同时修改，否则会报错，最后需要重启系统才会生效。</p>
 <h1 id="2、CentOS7、8-RHEL7、8"><a href="#2、CentOS7、8-RHEL7、8" class="headerlink" title="2、CentOS7、8/RHEL7、8"></a>2、CentOS7、8/RHEL7、8</h1><p>对于7系及之后的红帽Linux，只需要直接修改<code>/etc/hostname</code>文件然后重启就可以完成永久修改</p>
 <p>如果不想重启，可以使用新的<code>hostnamectl</code>工具来进行永久修改</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">hostnamectl set-hostname your-new-perm-hostname<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">hostnamectl set-hostname your-new-perm-hostname<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
-<h1 id="3、使用脚本自动执行"><a href="#3、使用脚本自动执行" class="headerlink" title="3、使用脚本自动执行"></a>3、使用脚本自动执行</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><span class="hljs-comment"># Determine  whether executor is root or not</span><br><span class="hljs-keyword">if</span> [ $(whoami) != <span class="hljs-string">&quot;root&quot;</span> ]; <span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;please exec this shell script with sudo or in root mode&quot;</span><br>    <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><br><span class="hljs-comment"># Determine if there is a new hostname</span><br><span class="hljs-keyword">if</span> [ -z <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> ]; <span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;please input the new hostname&quot;</span><br>    <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><br><span class="hljs-comment"># get the release version</span><br>version=$(cat /etc/redhat-release | awk -F <span class="hljs-string">&#x27;release&#x27;</span> <span class="hljs-string">&#x27;&#123;print $2&#125;&#x27;</span> | cut -c -2)<br><br><span class="hljs-keyword">if</span> [ <span class="hljs-variable">$version</span> -ne 6 ] &amp;&amp; [ <span class="hljs-variable">$version</span> -ne 7 ] &amp;&amp; [ <span class="hljs-variable">$version</span> -ne 8 ]; <span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;This script do not suit your system, Bye!&quot;</span><br>    <span class="hljs-built_in">exit</span> 1<br><span class="hljs-keyword">fi</span><br><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;your hostname will be change to <span class="hljs-variable">$1</span>&quot;</span><br><br><span class="hljs-keyword">if</span> [ <span class="hljs-variable">$version</span> == 6 ]; <span class="hljs-keyword">then</span><br>    <span class="hljs-comment"># get hostname from /etc/sysconfig/network</span><br>    hostnameCurrent=$(cat /etc/sysconfig/network | grep HOSTNAME | awk -F <span class="hljs-string">&#x27;=&#x27;</span> <span class="hljs-string">&#x27;&#123; print $NF &#125;&#x27;</span>)<br>    <span class="hljs-comment"># echo &quot;your hostname now is $hostnameCurrent&quot;</span><br>    <span class="hljs-comment"># modify the tmp hostname</span><br>    hostname <span class="hljs-variable">$1</span><br>    <span class="hljs-comment"># Determine if there is a field about $hostnameCurrent in /etc/hosts</span><br>    <span class="hljs-comment"># if yes, use awk to replace it</span><br>    <span class="hljs-comment"># if no, echo a new line aboout new hostname</span><br>    cat /etc/hosts | grep <span class="hljs-variable">$hostnameCurrent</span><br>    <span class="hljs-keyword">if</span> [ $? -ne 0 ]; <span class="hljs-keyword">then</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;127.0.0.1     <span class="hljs-variable">$1</span>&quot;</span> &gt;&gt;/etc/hosts<br>    <span class="hljs-keyword">else</span><br>        sed -i <span class="hljs-string">&quot;s/<span class="hljs-variable">$hostnameCurrent</span>/<span class="hljs-variable">$1</span>/g&quot;</span> /etc/hosts<br>    <span class="hljs-keyword">fi</span><br>    <span class="hljs-comment"># modify the hostname in /etc/sysconfig/network</span><br>    sed -i <span class="hljs-string">&quot;s/<span class="hljs-variable">$hostnameCurrent</span>/<span class="hljs-variable">$1</span>/g&quot;</span> /etc/sysconfig/network<br><span class="hljs-keyword">else</span><br>    <span class="hljs-keyword">if</span> [ <span class="hljs-variable">$version</span> == 7 ] || [ <span class="hljs-variable">$version</span> == 8 ]; <span class="hljs-keyword">then</span><br>        hostnamectl set-hostname <span class="hljs-variable">$1</span><br>    <span class="hljs-keyword">fi</span><br><span class="hljs-keyword">fi</span><br><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hostname modification is done !&quot;</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;A restart might be better for apply the change&quot;</span><br></code></pre></td></tr></table></figure>
+<h1 id="3、使用脚本自动执行"><a href="#3、使用脚本自动执行" class="headerlink" title="3、使用脚本自动执行"></a>3、使用脚本自动执行</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token comment"># Determine  whether executor is root or not</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">whoami</span><span class="token variable">)</span></span> <span class="token operator">!=</span> <span class="token string">"root"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"please exec this shell script with sudo or in root mode"</span>
+    <span class="token builtin class-name">exit</span> <span class="token number">1</span>
+<span class="token keyword">fi</span>
+
+<span class="token comment"># Determine if there is a new hostname</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> -z <span class="token string">"<span class="token variable">$1</span>"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"please input the new hostname"</span>
+    <span class="token builtin class-name">exit</span> <span class="token number">1</span>
+<span class="token keyword">fi</span>
+
+<span class="token comment"># get the release version</span>
+<span class="token assign-left variable">version</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> /etc/redhat-release <span class="token operator">|</span> <span class="token function">awk</span> -F <span class="token string">'release'</span> <span class="token string">'&#123;print <span class="token variable">$2</span>&#125;'</span> <span class="token operator">|</span> <span class="token function">cut</span> -c -2<span class="token variable">)</span></span>
+
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$version</span> -ne <span class="token number">6</span> <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">[</span> <span class="token variable">$version</span> -ne <span class="token number">7</span> <span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">[</span> <span class="token variable">$version</span> -ne <span class="token number">8</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"This script do not suit your system, Bye!"</span>
+    <span class="token builtin class-name">exit</span> <span class="token number">1</span>
+<span class="token keyword">fi</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"your hostname will be change to <span class="token variable">$1</span>"</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$version</span> <span class="token operator">==</span> <span class="token number">6</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token comment"># get hostname from /etc/sysconfig/network</span>
+    <span class="token assign-left variable">hostnameCurrent</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> /etc/sysconfig/network <span class="token operator">|</span> <span class="token function">grep</span> <span class="token environment constant">HOSTNAME</span> <span class="token operator">|</span> <span class="token function">awk</span> -F <span class="token string">'='</span> <span class="token string">'&#123; print <span class="token variable">$NF</span> &#125;'</span><span class="token variable">)</span></span>
+    <span class="token comment"># echo "your hostname now is $hostnameCurrent"</span>
+    <span class="token comment"># modify the tmp hostname</span>
+    <span class="token function">hostname</span> <span class="token variable">$1</span>
+    <span class="token comment"># Determine if there is a field about $hostnameCurrent in /etc/hosts</span>
+    <span class="token comment"># if yes, use awk to replace it</span>
+    <span class="token comment"># if no, echo a new line aboout new hostname</span>
+    <span class="token function">cat</span> /etc/hosts <span class="token operator">|</span> <span class="token function">grep</span> <span class="token variable">$hostnameCurrent</span>
+    <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$?</span> -ne <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+        <span class="token builtin class-name">echo</span> <span class="token string">"127.0.0.1     <span class="token variable">$1</span>"</span> <span class="token operator">>></span>/etc/hosts
+    <span class="token keyword">else</span>
+        <span class="token function">sed</span> -i <span class="token string">"s/<span class="token variable">$hostnameCurrent</span>/<span class="token variable">$1</span>/g"</span> /etc/hosts
+    <span class="token keyword">fi</span>
+    <span class="token comment"># modify the hostname in /etc/sysconfig/network</span>
+    <span class="token function">sed</span> -i <span class="token string">"s/<span class="token variable">$hostnameCurrent</span>/<span class="token variable">$1</span>/g"</span> /etc/sysconfig/network
+<span class="token keyword">else</span>
+    <span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$version</span> <span class="token operator">==</span> <span class="token number">7</span> <span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span> <span class="token variable">$version</span> <span class="token operator">==</span> <span class="token number">8</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+        hostnamectl set-hostname <span class="token variable">$1</span>
+    <span class="token keyword">fi</span>
+<span class="token keyword">fi</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Hostname modification is done !"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"A restart might be better for apply the change"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>将上述的代码保存为脚本再加上需要修改的hostname直接执行就可以了。</p>
 
@@ -597,6 +646,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

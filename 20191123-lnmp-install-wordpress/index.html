@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.2k words
+          4k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          35 mins
+          34 mins
         
       </span>
     
@@ -293,15 +295,55 @@
 <p>We recommend servers running version 7.3 or greater of <a target="_blank" rel="noopener" href="https://secure.php.net/">PHP</a> and <a target="_blank" rel="noopener" href="https://www.mysql.com/">MySQL</a> version 5.6 <em>OR</em> <a target="_blank" rel="noopener" href="https://mariadb.org/">MariaDB</a> version 10.0 or greater.<br>We also recommend either <a target="_blank" rel="noopener" href="https://httpd.apache.org/">Apache</a> or <a target="_blank" rel="noopener" href="https://nginx.org/">Nginx</a> as the most robust options for running WordPress, but neither is required.</p>
 </blockquote>
 <h1 id="1、安装nginx"><a href="#1、安装nginx" class="headerlink" title="1、安装nginx"></a>1、安装nginx</h1><p>nginx这里为了使用较新的版本，我们使用nginx官网提供的yum源来进行安装。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个yum repo文件</span><br>cat &gt;&gt; /etc/yum.repo.d/nginx.repo &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[nginx] </span><br><span class="hljs-string">name=nginx repo </span><br><span class="hljs-string">baseurl=http://nginx.org/packages/mainline/centos/7/x86_64/</span><br><span class="hljs-string">gpgcheck=0 </span><br><span class="hljs-string">enabled=1 </span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-comment"># 使用yum安装nginx</span><br>yum clean all<br>yum repolist<br>yum install nginx -y<br><br><br><span class="hljs-comment"># 启动nginx并设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> nginx.service<br>systemctl start nginx.service<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 新建一个yum repo文件</span>
+<span class="token function">cat</span> <span class="token operator">>></span> /etc/yum.repo.d/nginx.repo <span class="token operator">&lt;&lt;</span> <span class="token string">EOF
+[nginx] 
+name=nginx repo 
+baseurl=http://nginx.org/packages/mainline/centos/7/x86_64/
+gpgcheck=0 
+enabled=1 
+EOF</span>
+
+<span class="token comment"># 使用yum安装nginx</span>
+yum clean all
+yum repolist
+yum <span class="token function">install</span> nginx -y
+
+
+<span class="token comment"># 启动nginx并设置开机启动</span>
+systemctl <span class="token builtin class-name">enable</span> nginx.service
+systemctl start nginx.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h1 id="2、安装PHP7-3"><a href="#2、安装PHP7-3" class="headerlink" title="2、安装PHP7.3"></a>2、安装PHP7.3</h1><p>centos系统源中自带的php版本较旧，这里我们需要使用epel源和<a target="_blank" rel="noopener" href="https://rpms.remirepo.net/">remi源</a>来安装新版本的php。截止写这篇文章的时候php官网的稳定版本是7.3,7.4版本虽然已经发布但是好像还没有到稳定版。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum来安装epel源</span><br>yum install epel-release<br><span class="hljs-comment"># 这里使用清华镜像源的remi源</span><br>rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm<br><span class="hljs-comment"># 启用remi源中的php73</span><br>yum install yum-utils<br>yum-config-manager --<span class="hljs-built_in">enable</span> remi-php73<br>yum install php73 php-fpm php-opcache php-cli php-gd php-curl php-mysql php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用yum来安装epel源</span>
+yum <span class="token function">install</span> epel-release
+<span class="token comment"># 这里使用清华镜像源的remi源</span>
+<span class="token function">rpm</span> -ivh https://mirrors.tuna.tsinghua.edu.cn/remi/enterprise/remi-release-7.rpm
+<span class="token comment"># 启用remi源中的php73</span>
+yum <span class="token function">install</span> yum-utils
+yum-config-manager --enable remi-php73
+yum <span class="token function">install</span> php73 php-fpm php-opcache php-cli php-gd php-curl php-mysql php-intl php-mbstring php-soap php-xml php-xmlrpc php-zip<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
 <p>安装完成之后我们查看一下php的版本，然后建立软链接把php指向php73。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看php73的版本信息</span><br>$ php73 -v<br>PHP 7.3.12 (cli) (built: Nov 19 2019 10:24:51) ( NTS )<br>Copyright (c) 1997-2018 The PHP Group<br>Zend Engine v3.3.12, Copyright (c) 1998-2018 Zend Technologies<br><br><span class="hljs-comment"># 确定php73的执行文件位置</span><br>$ <span class="hljs-built_in">which</span> php73<br>/usr/bin/php73<br><br><span class="hljs-comment"># 建立软链接将php指向php73</span><br>$ ln -s /usr/bin/php73 /usr/bin/php<br><span class="hljs-comment"># 查看php指令对应的版本信息</span><br>$ php -v<br>PHP 7.3.12 (cli) (built: Nov 19 2019 10:24:51) ( NTS )<br>Copyright (c) 1997-2018 The PHP Group<br>Zend Engine v3.3.12, Copyright (c) 1998-2018 Zend Technologies<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看php73的版本信息</span>
+$ php73 -v
+PHP <span class="token number">7.3</span>.12 <span class="token punctuation">(</span>cli<span class="token punctuation">)</span> <span class="token punctuation">(</span>built: Nov <span class="token number">19</span> <span class="token number">2019</span> <span class="token number">10</span>:24:51<span class="token punctuation">)</span> <span class="token punctuation">(</span> NTS <span class="token punctuation">)</span>
+Copyright <span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token number">1997</span>-2018 The PHP Group
+Zend Engine v3.3.12, Copyright <span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token number">1998</span>-2018 Zend Technologies
+
+<span class="token comment"># 确定php73的执行文件位置</span>
+$ <span class="token function">which</span> php73
+/usr/bin/php73
+
+<span class="token comment"># 建立软链接将php指向php73</span>
+$ <span class="token function">ln</span> -s /usr/bin/php73 /usr/bin/php
+<span class="token comment"># 查看php指令对应的版本信息</span>
+$ php -v
+PHP <span class="token number">7.3</span>.12 <span class="token punctuation">(</span>cli<span class="token punctuation">)</span> <span class="token punctuation">(</span>built: Nov <span class="token number">19</span> <span class="token number">2019</span> <span class="token number">10</span>:24:51<span class="token punctuation">)</span> <span class="token punctuation">(</span> NTS <span class="token punctuation">)</span>
+Copyright <span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token number">1997</span>-2018 The PHP Group
+Zend Engine v3.3.12, Copyright <span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token number">1998</span>-2018 Zend Technologies<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h1 id="3、安装MYSQL8"><a href="#3、安装MYSQL8" class="headerlink" title="3、安装MYSQL8"></a>3、安装MYSQL8</h1><p>wordpress官网要求的数据库可以是MySQL或者是MariaDB，这里我们使用MySQL8。</p>
 <p>详细的安装教程之前已经写过博客了，需要的同学可以查看这篇文章：</p>
@@ -309,30 +351,68 @@
 <p><a href="https://tinychen.com/20191122-mysql8-reset-passwd/">MySQL8重置root密码</a></p>
 <p>接下来就是在mysql中创建一个数据库和用户用来给wordpress使用。</p>
 <p>首先我们使用root用户登录mysql，然后执行下面的命令来创建一个名为wordpress的数据库和一个wordpress的用户：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">CREATE DATABASE wordpress;<br>CREATE USER <span class="hljs-string">&#x27;wordpress&#x27;</span> IDENTIFIED BY <span class="hljs-string">&#x27;一个复杂的密码&#x27;</span>;<br>GRANT ALL PRIVILEGES ON wordpress.* TO wordpress;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">CREATE DATABASE wordpress<span class="token punctuation">;</span>
+CREATE <span class="token environment constant">USER</span> <span class="token string">'wordpress'</span> IDENTIFIED BY <span class="token string">'一个复杂的密码'</span><span class="token punctuation">;</span>
+GRANT ALL PRIVILEGES ON wordpress.* TO wordpress<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
 <blockquote>
 <p>这里的grant语句的授权方式和之前的mysql版本有些不太一样，还需要注意一下。</p>
 </blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; create database wordpress;<br>Query OK, 1 row affected (0.01 sec)<br>mysql&gt; CREATE USER &#x27;wordpress&#x27; IDENTIFIED BY &#x27;一个复杂的密码&#x27;;<br>Query OK, 0 rows affected (0.01 sec)<br>mysql&gt; GRANT ALL PRIVILEGES ON wordpress.* TO wordpress;<br>Query OK, 0 rows affected (0.00 sec)<br><br>$ mysql -u wordpress -p<br>Enter password: <br>Welcome to the MySQL monitor.  Commands end with ; or \g.<br>Your MySQL connection id is 10<br>Server version: 8.0.18 MySQL Community Server - GPL<br><br>Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.<br><br>Oracle is a registered trademark of Oracle Corporation and/or its<br>affiliates. Other names may be trademarks of their respective<br>owners.<br><br>Type &#x27;help;&#x27; or &#x27;\h&#x27; for help. Type &#x27;\c&#x27; to clear the current input statement.<br><br>mysql&gt; show databases;<br>+--------------------+<br>| Database           |<br>+--------------------+<br>| information_schema |<br>| wordpress          |<br>+--------------------+<br>2 rows in set (0.00 sec)<br><br>mysql&gt; <br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; create database wordpress;
+Query OK, 1 row affected (0.01 sec)
+mysql&gt; CREATE USER &#39;wordpress&#39; IDENTIFIED BY &#39;一个复杂的密码&#39;;
+Query OK, 0 rows affected (0.01 sec)
+mysql&gt; GRANT ALL PRIVILEGES ON wordpress.* TO wordpress;
+Query OK, 0 rows affected (0.00 sec)
+
+$ mysql -u wordpress -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 10
+Server version: 8.0.18 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2019, Oracle and&#x2F;or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and&#x2F;or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type &#39;help;&#39; or &#39;\h&#39; for help. Type &#39;\c&#39; to clear the current input statement.
+
+mysql&gt; show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| wordpress          |
++--------------------+
+2 rows in set (0.00 sec)
+
+mysql&gt; <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h1 id="4、安装wordpress"><a href="#4、安装wordpress" class="headerlink" title="4、安装wordpress"></a>4、安装wordpress</h1><p>接下来的wordpress的配置就比较简单了，我们先去<a target="_blank" rel="noopener" href="https://wordpress.org/download/">官网</a>下载最新版本的wordpress，解压之后配置一下配置文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用wget指令下载并使用tar -zxvf参数进行解压</span><br>wget https://wordpress.org/latest.tar.gz<br>tar -zxvf wordpress-5.3-zh_CN.tar.gz<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用wget指令下载并使用tar -zxvf参数进行解压</span>
+<span class="token function">wget</span> https://wordpress.org/latest.tar.gz
+<span class="token function">tar</span> -zxvf wordpress-5.3-zh_CN.tar.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
 <p>接下来我们需要对配置文件进行编辑，按照官网所述，我们最好将<code>wp-config-sample.php</code>复制成<code>wp-config.php</code>然后再进行编辑，不复制直接编辑<code>wp-config-sample.php</code>也是可以自动生成新的<code>wp-config.php</code>，但是出于备份一份源配置文件模板的考虑，最好还是复制一下。</p>
-<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs vim"><span class="hljs-keyword">cp</span> <span class="hljs-keyword">wp</span>-config-sample.php <span class="hljs-keyword">wp</span>-config.php <br><span class="hljs-keyword">vim</span> <span class="hljs-keyword">wp</span>-config.php <br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">cp wp-config-sample.php wp-config.php 
+vim wp-config.php <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>这里我们填入前面创建的数据库用户名和密码以及对应的数据库。</p>
 <p><img src="https://resource.tinychen.com//20191123021459.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来这一步就是根据主机生成独一无二的密钥。这里我们使用<code>curl</code>命令来访问这个链接生成密钥并保持到<code>key.txt</code>文件中，然后把<code>key.txt</code>的文件里面的内容复制替换掉里面的<code>define</code>部分。</p>
 <p><img src="https://resource.tinychen.com//20191126102630.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">curl -s https:<span class="hljs-regexp">//</span>api.wordpress.org<span class="hljs-regexp">/secret-key/</span><span class="hljs-number">1.1</span><span class="hljs-regexp">/salt/</span> &gt; key.txt<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">curl -s https:&#x2F;&#x2F;api.wordpress.org&#x2F;secret-key&#x2F;1.1&#x2F;salt&#x2F; &gt; key.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>然后我们将整个解压出来的wordpress文件夹移动到我们的web服务器的目录下面，这里我使用的目录是<code>/etc/nginx/wordpress</code>，这里在后面的nginx配置文件中会用到。接下来我们对nginx进行配置。</p>
 <p>下面的是我的nginx配置文件，文件位于<code>/etc/nginx/nginx.conf</code>，注意里面的目录和域名要换成自己对应的目录和域名，以及这里还额外配置了https证书加密认证和http强制跳转https，具体的操作和解释已经在这篇博客<a target="_blank" rel="noopener" href="https://tiny777.github.io/190829httpd2Nginx/">（个人博客web服务器换用nginx）</a>里面有解释，有需要的同学可以看看。</p>
 <p><img src="https://resource.tinychen.com//20191123035102.png" srcset="/img/loading.gif" lazyload></p>
 <p>我们使用root用户登录mysql，然后更新wordpress用户的加密方式为<code>mysql_native_password</code>，然后刷新配置即可。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mysql">// 更改用户密码的加密形式<br>ALTER USER &#x27;wordpress&#x27;@&#x27;%&#x27; IDENTIFIED WITH mysql_native_password BY &#x27;你的用户密码&#x27;;<br>// 刷新MySQL的系统权限相关表<br>FLUSH PRIVILEGES;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-mysql" data-language="mysql"><code class="language-mysql">&#x2F;&#x2F; 更改用户密码的加密形式
+ALTER USER &#39;wordpress&#39;@&#39;%&#39; IDENTIFIED WITH mysql_native_password BY &#39;你的用户密码&#39;;
+&#x2F;&#x2F; 刷新MySQL的系统权限相关表
+FLUSH PRIVILEGES;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>再次登录就会发现已经可以连接数据库并正常设置了，简单配置过后就可以开始正常运行了。</p>
 <p><img src="https://resource.tinychen.com//20191123035332.png" srcset="/img/loading.gif" lazyload></p>
@@ -636,6 +716,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

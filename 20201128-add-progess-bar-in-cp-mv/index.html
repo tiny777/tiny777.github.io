@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.1k words
+          1.5k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          10 mins
+          13 mins
         
       </span>
     
@@ -288,13 +290,40 @@
 <span id="more"></span>
 
 <p>由于<code>cp</code>和<code>mv</code>命令都是属于<code>coreutils</code>工具包下的，因此我们的主要操作就是在编译<code>coreutils</code>的时候加入补丁从而实现进度条功能</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 注意尽量不要使用root用户操作</span><br>$ <span class="hljs-built_in">pwd</span><br>/home/tinychen<br><span class="hljs-comment"># 下载coreutils</span><br>$ wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.32.tar.xz<br>$ tar -xJf coreutils-8.32.tar.xz<br>$ <span class="hljs-built_in">cd</span> coreutils-8.32/<br><span class="hljs-comment"># 下载github上的补丁</span><br>$ wget https://raw.githubusercontent.com/jarun/advcpmv/master/advcpmv-0.8-8.32.patch<br><span class="hljs-comment"># 打补丁，实现进度条显示</span><br>$ patch -p1 -i advcpmv-0.8-8.32.patch<br>patching file src/copy.c<br>patching file src/copy.h<br>patching file src/cp.c<br>patching file src/mv.c<br><span class="hljs-comment"># 编译安装</span><br>$ ./configure<br>$ make<br><span class="hljs-comment"># 将打补丁生成的cp和mv命令的二进制文件复制到bin目录下</span><br>$ sudo cp src/cp /usr/<span class="hljs-built_in">local</span>/bin/cp<br>$ sudo cp src/mv /usr/<span class="hljs-built_in">local</span>/bin/mv<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 注意尽量不要使用root用户操作</span>
+$ <span class="token builtin class-name">pwd</span>
+/home/tinychen
+<span class="token comment"># 下载coreutils</span>
+$ <span class="token function">wget</span> http://ftp.gnu.org/gnu/coreutils/coreutils-8.32.tar.xz
+$ <span class="token function">tar</span> -xJf coreutils-8.32.tar.xz
+$ <span class="token builtin class-name">cd</span> coreutils-8.32/
+<span class="token comment"># 下载github上的补丁</span>
+$ <span class="token function">wget</span> https://raw.githubusercontent.com/jarun/advcpmv/master/advcpmv-0.8-8.32.patch
+<span class="token comment"># 打补丁，实现进度条显示</span>
+$ patch -p1 -i advcpmv-0.8-8.32.patch
+patching <span class="token function">file</span> src/copy.c
+patching <span class="token function">file</span> src/copy.h
+patching <span class="token function">file</span> src/cp.c
+patching <span class="token function">file</span> src/mv.c
+<span class="token comment"># 编译安装</span>
+$ ./configure
+$ <span class="token function">make</span>
+<span class="token comment"># 将打补丁生成的cp和mv命令的二进制文件复制到bin目录下</span>
+$ <span class="token function">sudo</span> <span class="token function">cp</span> src/cp /usr/local/bin/cp
+$ <span class="token function">sudo</span> <span class="token function">cp</span> src/mv /usr/local/bin/mv<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>接着我们只需要在使用<code>cp</code>和<code>mv</code>命令的时候加上<code>-g</code>参数就可以显示进度条了，为了方便起见我们可以在<code>.bashrc</code>文件中设置<code>alias</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">alias</span> cp=<span class="hljs-string">&#x27;cp -ig&#x27;</span><br><span class="hljs-built_in">alias</span> mv=<span class="hljs-string">&#x27;mv -ig&#x27;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">alias cp&#x3D;&#39;cp -ig&#39;
+alias mv&#x3D;&#39;mv -ig&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>试一下实际效果，复制一个大文件夹的时候可以显示总进度和当前文件复制进度，以及在复制完成之后还可以显示复制的过程中的平均速度。</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs awk">$ cp -r <span class="hljs-regexp">/samba/</span>Elements02<span class="hljs-regexp">/kvm/</span>* <span class="hljs-regexp">/kvm/</span><br><br><span class="hljs-number">0</span> files copied so far...                                                                                                                                     <span class="hljs-number">1.6</span> GiB /  <span class="hljs-number">67.2</span> GiB<br>[===&gt;                                                                                                                                                                   ]  <span class="hljs-number">2.4</span> %<br>Copying at <span class="hljs-number">178.4</span> MiB/s (about <span class="hljs-number">0</span>h <span class="hljs-number">6</span>m <span class="hljs-number">45</span>s remaining)<br><span class="hljs-regexp">/samba/</span>Elements02<span class="hljs-regexp">/kvm/i</span>so<span class="hljs-regexp">/CentOS-6.10-x86_64-bin-DVD1.iso                                                                                                    1.6 GiB /</span>   <span class="hljs-number">3.7</span> GiB<br>[========================================================================&gt;                                                                                              ] <span class="hljs-number">43.4</span> %<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ cp -r &#x2F;samba&#x2F;Elements02&#x2F;kvm&#x2F;* &#x2F;kvm&#x2F;
+
+0 files copied so far...                                                                                                                                     1.6 GiB &#x2F;  67.2 GiB
+[&#x3D;&#x3D;&#x3D;&gt;                                                                                                                                                                   ]  2.4 %
+Copying at 178.4 MiB&#x2F;s (about 0h 6m 45s remaining)
+&#x2F;samba&#x2F;Elements02&#x2F;kvm&#x2F;iso&#x2F;CentOS-6.10-x86_64-bin-DVD1.iso                                                                                                    1.6 GiB &#x2F;   3.7 GiB
+[&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&gt;                                                                                              ] 43.4 %<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p><img src="https://resource.tinychen.com/20201130093041.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/20201130093045.png" srcset="/img/loading.gif" lazyload></p>
@@ -593,6 +622,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

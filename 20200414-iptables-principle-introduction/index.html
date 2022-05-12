@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -222,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.3k words
+          5.2k words
         
       </span>
     
@@ -372,7 +374,7 @@
 <p>实际上对于大多数人来说日常接触到最多的就是路由器做的SNAT和DNAT操作，它们一般成对出现用于解决公网IP资源不足的问题，需要注意的是NAT是可以进行嵌套操作的，即NAT下面的网络设备还可以继续做NAT，只要做NAT的网段不和上层的NAT的网段相同即可。</p>
 <h1 id="4、iptables配置"><a href="#4、iptables配置" class="headerlink" title="4、iptables配置"></a>4、iptables配置</h1><p>在了解清楚iptables的工作原理和每个表以及链的作用之后，我们就可以根据其特点进行针对性的配置。</p>
 <p>iptables 的基本语法命令格式</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css">iptables <span class="hljs-selector-attr">[-t 表名]</span> 管理选项 <span class="hljs-selector-attr">[链名]</span> <span class="hljs-selector-attr">[匹配条件]</span> <span class="hljs-selector-attr">[-j 控制类型]</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">iptables [-t 表名] 管理选项 [链名] [匹配条件] [-j 控制类型]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <ul>
 <li><code>表名</code>、<code>链名</code>：指定<code>iptables</code>命令所操作的<code>表</code>和<code>链</code>，未指定表名时将默认使用<code>filter</code>表；</li>
@@ -380,13 +382,28 @@
 <li><code>匹配条件</code>：指定要处理的数据包的特征，不符合指定条件的数据包不处理；</li>
 <li><code>控制类型</code>：指数据包的处理方式，比如：<code>允许accept</code>、<code>拒绝reject</code>、<code>丢弃drop</code>、<code>日志LOG</code>等；</li>
 </ul>
-<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs diff">iptables 命令的常用管理选项<br><span class="hljs-deletion">-A:在指定链的末尾添加一条新的规则</span><br><span class="hljs-deletion">-D:删除指定链中的某一条规则，可删除指定序号或具体内容</span><br><span class="hljs-deletion">-I:在指定链中插入一条新规则，未指定序号时默认作为第一条规则</span><br><span class="hljs-deletion">-R:修改、替换指定链中的某一条规则，可指定规则序号或具体内容</span><br><span class="hljs-deletion">-L:列出指定链中所有的规则，未指定链名，则列出表中的所有链</span><br><span class="hljs-deletion">-F:清空指定链中所有的规则，未指定链名，则清空表中的所有链</span><br><span class="hljs-deletion">-P:设置指定链的默认策略</span><br><span class="hljs-deletion">-n:使用数字形式显示输出结果</span><br><span class="hljs-deletion">-v:查看规则列表时显示详细的信息</span><br><span class="hljs-deletion">-h:查看命令帮助信息</span><br><span class="hljs-deletion">--line-numbers:查看规则列表时，同时显示规则在链中的顺序号</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">iptables 命令的常用管理选项
+-A:在指定链的末尾添加一条新的规则
+-D:删除指定链中的某一条规则，可删除指定序号或具体内容
+-I:在指定链中插入一条新规则，未指定序号时默认作为第一条规则
+-R:修改、替换指定链中的某一条规则，可指定规则序号或具体内容
+-L:列出指定链中所有的规则，未指定链名，则列出表中的所有链
+-F:清空指定链中所有的规则，未指定链名，则清空表中的所有链
+-P:设置指定链的默认策略
+-n:使用数字形式显示输出结果
+-v:查看规则列表时显示详细的信息
+-h:查看命令帮助信息
+--line-numbers:查看规则列表时，同时显示规则在链中的顺序号<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>在添加规则之前我们先开启iptables的独立log功能，对于centos6，我们可以执行以下操作：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;kern.*     /var/log/iptables.log&quot;</span> &gt;&gt; /etc/rsyslog.conf<br><span class="hljs-comment"># 记录所有级别的日志到指定目录中</span><br>service rsyslog restart<br><span class="hljs-comment"># 重启rsyslog服务使配置生效</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"kern.*     /var/log/iptables.log"</span> <span class="token operator">>></span> /etc/rsyslog.conf
+<span class="token comment"># 记录所有级别的日志到指定目录中</span>
+<span class="token function">service</span> rsyslog restart
+<span class="token comment"># 重启rsyslog服务使配置生效</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>接着我们开始添加一条比较有针对性的规则：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">iptables -A INPUT -j LOG --log-prefix <span class="hljs-string">&quot;*** INPUT ***&quot;</span> --log-level debug<br>iptables -t filter -A INPUT -p tcp -s 192.168.100.100 --dport 80 -j REJECT <br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">iptables -A INPUT -j LOG --log-prefix <span class="token string">"*** INPUT ***"</span> --log-level debug
+iptables -t filter -A INPUT -p tcp -s <span class="token number">192.168</span>.100.100 --dport <span class="token number">80</span> -j REJECT <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>上述两条命令第一条增加了一条记录日志的规则，对于INPUT链中的所有操作都记录到日志中，添加日志前缀<code>*** INPUT ***</code>并设定日志级别为<code>debug</code></p>
 <p>第二条是在INPUT链的filter表中插入一条规则，限定对<code>192.168.100.100</code>这个IP使用<code>tcp</code>协议访问本机的目的端口<code>80</code>端口的时候拒绝掉数据包。</p>
@@ -691,6 +708,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

@@ -44,6 +44,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -221,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          469 words
+          450 words
         
       </span>
     
@@ -290,7 +292,20 @@
 <p>接着我们找到倒数第二行的<code>LANG=en_US.UTF-8</code>这个位置，在后面加入<code>rd.break console=tty0</code>这一行指令，然后按<code>ctrl+x</code>执行</p>
 <p><img src="https://resource.tinychen.com/blog/20190707/aPmuhCYnm9FF.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们会进入到一个操作终端，进行下列操作</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 重新挂载/sysroot分区为可读写模式</span><br>mount -o rw,remount /sysroot<br><br><span class="hljs-comment"># 更改root到这个可读写的/sysroot分区</span><br>chroot /sysroot<br><br><span class="hljs-comment"># 使用passwd指令修改root账户的密码</span><br>paawd<br><br><span class="hljs-comment"># 或者使用echo的方式修改密码</span><br><span class="hljs-built_in">echo</span> 你的新密码 | passwd --stdin root<br><br><span class="hljs-comment"># 如果系统打开了SELinux，还需要新建一个文件，否则修改密码不生效</span><br>touch /.autorelabel<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 重新挂载/sysroot分区为可读写模式</span>
+<span class="token function">mount</span> -o rw,remount /sysroot
+
+<span class="token comment"># 更改root到这个可读写的/sysroot分区</span>
+<span class="token function">chroot</span> /sysroot
+
+<span class="token comment"># 使用passwd指令修改root账户的密码</span>
+paawd
+
+<span class="token comment"># 或者使用echo的方式修改密码</span>
+<span class="token builtin class-name">echo</span> 你的新密码 <span class="token operator">|</span> <span class="token function">passwd</span> --stdin root
+
+<span class="token comment"># 如果系统打开了SELinux，还需要新建一个文件，否则修改密码不生效</span>
+<span class="token function">touch</span> /.autorelabel<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190707/OVGBsRyEdXYB.png" srcset="/img/loading.gif" lazyload></p>
@@ -588,6 +603,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -234,7 +236,7 @@
         
         
         
-          54 mins
+          53 mins
         
       </span>
     
@@ -320,7 +322,7 @@
 <p><img src="https://resource.tinychen.com/20200427092441.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>LVS的NAT模式需要开启LB的内核中的ip_forward功能</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token number">1</span> <span class="token operator">></span> /proc/sys/net/ipv4/ip_forward<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 </blockquote>
 <h1 id="4、LVS-via-IP-Tunneling-TUN"><a href="#4、LVS-via-IP-Tunneling-TUN" class="headerlink" title="4、LVS  via IP Tunneling(TUN)"></a>4、LVS  via IP Tunneling(TUN)</h1><p>采用NAT技术时，虽然对于客户端来说整个服务器集群中的LVS负载均衡过程是无感的（因为对于客户端来说请求包发送的目标IP和响应包返回的源IP都没有改变），但是由于请求和响应报文都必须经过LB进行重写，当客户请求越来越多时，LB的处理能力将成为整个集群中的瓶颈。</p>
 <p>为了解决这个问题，LB把请求报文通过IP隧道转发至RS，而RS将响应直接返回给客户端，所以LB只需要处理请求报文。由于一般网络服务应答的数据包要比请求数据包大许多，采用 VS/TUN技术后，集群系统的最大吞吐量可以大大提高。</p>
@@ -361,7 +363,10 @@
 <p>那么当LB和RS都绑定了VIP的时候，问题又来了：</p>
 <p>当客户端的请求数据包传到LVS集群所在的网关的时候，它是不知道LB的MAC地址的，因此需要通过ARP协议来进行查询，也就是在局域网中发送ARP请求，看谁会响应，响应的就是要发送的MAC地址。而这个时候，由于DR模式下的LB和RS都在同一个局域网中且都绑定了VIP，那么它们就都会响应这个ARP请求。这样一来客户端的数据包就不一定会发送到LB上面，也就不一定会触发整个负载均衡效果。</p>
 <p>因此这种情况下一般都会对RS上面的网卡接口的ARP请求设置进行修改：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;1&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;2&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_announce<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;1&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;2&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"1"</span> <span class="token operator">></span>/proc/sys/net/ipv4/conf/lo/arp_ignore
+<span class="token builtin class-name">echo</span> <span class="token string">"2"</span> <span class="token operator">></span>/proc/sys/net/ipv4/conf/lo/arp_announce
+<span class="token builtin class-name">echo</span> <span class="token string">"1"</span> <span class="token operator">></span>/proc/sys/net/ipv4/conf/all/arp_ignore
+<span class="token builtin class-name">echo</span> <span class="token string">"2"</span> <span class="token operator">></span>/proc/sys/net/ipv4/conf/all/arp_announce<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>我们看一下kernel的文档中对这两个参数的相关描述</p>
 <p><strong>arp_ignore的意义</strong></p>
@@ -697,6 +702,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

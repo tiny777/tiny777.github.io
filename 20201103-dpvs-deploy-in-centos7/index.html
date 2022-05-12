@@ -47,6 +47,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +226,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          11k words
+          10k words
         
       </span>
     
@@ -235,7 +237,7 @@
         
         
         
-          89 mins
+          86 mins
         
       </span>
     
@@ -330,24 +332,124 @@
 </ul>
 <h2 id="关闭超线程和启用NUMA策略"><a href="#关闭超线程和启用NUMA策略" class="headerlink" title="关闭超线程和启用NUMA策略"></a>关闭超线程和启用NUMA策略</h2><p>关闭超线程最好的办法是在BIOS中找到相关的超线程设置并且将其禁用，而NUMA策略也是一样，最好在BIOS中直接打开。</p>
 <p>打开超线程技术的时候我们可以看到<code>Thread(s) per core</code>是2，也就是每个物理核心对应有2个逻辑核心，而<code>Core(s) per socket</code>表示每个<code>socket</code>有10个物理核心（一般一个CPU对应一个<code>socket</code>），<code>Socket(s)</code>表示当前服务器有两个CPU，也就是常说的<code>双路</code>。</p>
-<figure class="highlight ldif"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs ldif">$ lscpu<br><span class="hljs-attribute">Architecture</span>:          x86_64<br><span class="hljs-attribute">CPU op-mode(s)</span>:        32-bit, 64-bit<br><span class="hljs-attribute">Byte Order</span>:            Little Endian<br><span class="hljs-attribute">CPU(s)</span>:                40<br><span class="hljs-attribute">On-line CPU(s) list</span>:   0-39<br><span class="hljs-attribute">Thread(s) per core</span>:    2<br><span class="hljs-attribute">Core(s) per socket</span>:    10<br><span class="hljs-attribute">Socket(s)</span>:             2<br><span class="hljs-attribute">NUMA node(s)</span>:          2<br><span class="hljs-attribute">Vendor ID</span>:             GenuineIntel<br><span class="hljs-attribute">CPU family</span>:            6<br><span class="hljs-attribute">Model</span>:                 79<br><span class="hljs-attribute">Model name</span>:            Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz<br><span class="hljs-attribute">Stepping</span>:              1<br><span class="hljs-attribute">CPU MHz</span>:               2669.567<br><span class="hljs-attribute">CPU max MHz</span>:           3100.0000<br><span class="hljs-attribute">CPU min MHz</span>:           1200.0000<br><span class="hljs-attribute">BogoMIPS</span>:              4399.75<br><span class="hljs-attribute">Virtualization</span>:        VT-x<br><span class="hljs-attribute">L1d cache</span>:             32K<br><span class="hljs-attribute">L1i cache</span>:             32K<br><span class="hljs-attribute">L2 cache</span>:              256K<br><span class="hljs-attribute">L3 cache</span>:              25600K<br><span class="hljs-attribute">NUMA node0 CPU(s)</span>:     0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38<br><span class="hljs-attribute">NUMA node1 CPU(s)</span>:     1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39<br><span class="hljs-comment"># 当硬件的超线程设置打开的时候，显示为1，表明硬件启用了超线程</span><br>$ cat /sys/devices/system/cpu/smt/active<br><span class="hljs-attribute">1</span><br><span class="hljs-attribute"># 当然较高版本的内核也可以通过smt.control参数来从操作系统层面控制超线程技术</span><br><span class="hljs-attribute">$ cat /sys/devices/system/cpu/smt/control</span><br><span class="hljs-attribute">on</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ lscpu
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                40
+On-line CPU(s) list:   0-39
+Thread(s) per core:    2
+Core(s) per socket:    10
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 79
+Model name:            Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz
+Stepping:              1
+CPU MHz:               2669.567
+CPU max MHz:           3100.0000
+CPU min MHz:           1200.0000
+BogoMIPS:              4399.75
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              25600K
+NUMA node0 CPU(s):     0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38
+NUMA node1 CPU(s):     1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39
+# 当硬件的超线程设置打开的时候，显示为1，表明硬件启用了超线程
+$ cat &#x2F;sys&#x2F;devices&#x2F;system&#x2F;cpu&#x2F;smt&#x2F;active
+1
+# 当然较高版本的内核也可以通过smt.control参数来从操作系统层面控制超线程技术
+$ cat &#x2F;sys&#x2F;devices&#x2F;system&#x2F;cpu&#x2F;smt&#x2F;control
+on<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>关闭超线程技术之后的时候我们可以看到<code>Thread(s) per core</code>是1，也就是每个物理核心对应有1个逻辑核心。这时候<code>CPU(s)</code>的数值和CPU的物理核心数值应该相等。</p>
-<figure class="highlight ldif"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs ldif">$ lscpu<br><span class="hljs-attribute">Architecture</span>:          x86_64<br><span class="hljs-attribute">CPU op-mode(s)</span>:        32-bit, 64-bit<br><span class="hljs-attribute">Byte Order</span>:            Little Endian<br><span class="hljs-attribute">CPU(s)</span>:                20<br><span class="hljs-attribute">On-line CPU(s) list</span>:   0-19<br><span class="hljs-attribute">Thread(s) per core</span>:    1<br><span class="hljs-attribute">Core(s) per socket</span>:    10<br><span class="hljs-attribute">Socket(s)</span>:             2<br><span class="hljs-attribute">NUMA node(s)</span>:          2<br><span class="hljs-attribute">Vendor ID</span>:             GenuineIntel<br><span class="hljs-attribute">CPU family</span>:            6<br><span class="hljs-attribute">Model</span>:                 79<br><span class="hljs-attribute">Model name</span>:            Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz<br><span class="hljs-attribute">Stepping</span>:              1<br><span class="hljs-attribute">CPU MHz</span>:               1200.036<br><span class="hljs-attribute">CPU max MHz</span>:           3100.0000<br><span class="hljs-attribute">CPU min MHz</span>:           1200.0000<br><span class="hljs-attribute">BogoMIPS</span>:              4400.07<br><span class="hljs-attribute">Virtualization</span>:        VT-x<br><span class="hljs-attribute">L1d cache</span>:             32K<br><span class="hljs-attribute">L1i cache</span>:             32K<br><span class="hljs-attribute">L2 cache</span>:              256K<br><span class="hljs-attribute">L3 cache</span>:              25600K<br><span class="hljs-attribute">NUMA node0 CPU(s)</span>:     0,2,4,6,8,10,12,14,16,18<br><span class="hljs-attribute">NUMA node1 CPU(s)</span>:     1,3,5,7,9,11,13,15,17,19<br>$ cat /sys/devices/system/cpu/smt/active<br><span class="hljs-attribute">0</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ lscpu
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                20
+On-line CPU(s) list:   0-19
+Thread(s) per core:    1
+Core(s) per socket:    10
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 79
+Model name:            Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz
+Stepping:              1
+CPU MHz:               1200.036
+CPU max MHz:           3100.0000
+CPU min MHz:           1200.0000
+BogoMIPS:              4400.07
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              25600K
+NUMA node0 CPU(s):     0,2,4,6,8,10,12,14,16,18
+NUMA node1 CPU(s):     1,3,5,7,9,11,13,15,17,19
+$ cat &#x2F;sys&#x2F;devices&#x2F;system&#x2F;cpu&#x2F;smt&#x2F;active
+0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>使用<code>numastat</code>命令可以看到有两个node，表明已经打开NUMA策略，同样的还可以使用<code>lscpu</code>命令查看<code>NUMA node(s)</code>的数量。</p>
-<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs tap">$ numastat<br>                           node0           node1<br>numa_hit              <span class="hljs-number"> 654623151 </span>       11334196<br>numa_miss                     <span class="hljs-number"> 0 </span>              0<br>numa_foreign                  <span class="hljs-number"> 0 </span>              0<br>interleave_hit            <span class="hljs-number"> 34599 </span>          34359<br>local_node            <span class="hljs-number"> 654619810 </span>       11281809<br>other_node                 <span class="hljs-number"> 3341 </span>          52387<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ numastat
+                           node0           node1
+numa_hit               654623151        11334196
+numa_miss                      0               0
+numa_foreign                   0               0
+interleave_hit             34599           34359
+local_node             654619810        11281809
+other_node                  3341           52387<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h1 id="2、安装"><a href="#2、安装" class="headerlink" title="2、安装"></a>2、安装</h1><p>开始之前我们需要使用yum安装一些编译安装的时候需要使用的工具和软件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ yum group install <span class="hljs-string">&quot;Development Tools&quot;</span><br>$ yum install patch libnuma* numactl numactl-devel kernel-devel openssl* popt* -y<br><span class="hljs-comment"># 2021-0722更新，centos7.9系统需要安装</span><br>$ yum install libpcap-devel -y<br><span class="hljs-comment"># 2021-0722更新，需要支持ipv6需要安装libnl3-devel</span><br><span class="hljs-comment"># *** WARNING - this build will not support IPVS with IPv6. Please install libnl/libnl-3 dev libraries to support IPv6 with IPVS.</span><br>$ yum install libnl3-devel -y<br><br><span class="hljs-comment"># 注意kernel以及相应的kernel组件的版本需要和现在使用的kernel版本相对应</span><br>$ rpm -qa | grep kernel | grep <span class="hljs-string">&quot;3.10.0-1127.19.1&quot;</span> | sort<br>kernel-3.10.0-1127.19.1.el7.x86_64<br>kernel-debug-devel-3.10.0-1127.19.1.el7.x86_64<br>kernel-devel-3.10.0-1127.19.1.el7.x86_64<br>kernel-headers-3.10.0-1127.19.1.el7.x86_64<br>kernel-tools-3.10.0-1127.19.1.el7.x86_64<br>kernel-tools-libs-3.10.0-1127.19.1.el7.x86_64<br>$ uname -r<br>3.10.0-1127.19.1.el7.x86_64<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ yum group <span class="token function">install</span> <span class="token string">"Development Tools"</span>
+$ yum <span class="token function">install</span> patch libnuma* numactl numactl-devel kernel-devel openssl* popt* -y
+<span class="token comment"># 2021-0722更新，centos7.9系统需要安装</span>
+$ yum <span class="token function">install</span> libpcap-devel -y
+<span class="token comment"># 2021-0722更新，需要支持ipv6需要安装libnl3-devel</span>
+<span class="token comment"># *** WARNING - this build will not support IPVS with IPv6. Please install libnl/libnl-3 dev libraries to support IPv6 with IPVS.</span>
+$ yum <span class="token function">install</span> libnl3-devel -y
+
+<span class="token comment"># 注意kernel以及相应的kernel组件的版本需要和现在使用的kernel版本相对应</span>
+$ <span class="token function">rpm</span> -qa <span class="token operator">|</span> <span class="token function">grep</span> kernel <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">"3.10.0-1127.19.1"</span> <span class="token operator">|</span> <span class="token function">sort</span>
+kernel-3.10.0-1127.19.1.el7.x86_64
+kernel-debug-devel-3.10.0-1127.19.1.el7.x86_64
+kernel-devel-3.10.0-1127.19.1.el7.x86_64
+kernel-headers-3.10.0-1127.19.1.el7.x86_64
+kernel-tools-3.10.0-1127.19.1.el7.x86_64
+kernel-tools-libs-3.10.0-1127.19.1.el7.x86_64
+$ <span class="token function">uname</span> -r
+<span class="token number">3.10</span>.0-1127.19.1.el7.x86_64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>这时候需要机器能够连接外网（互联网），直接从github将dpvs项目clone下来，同时还需要下载特定版本的dpdk，无法联网的机器也可以直接下载之后传输到服务器中，后续的安装过程并不需要联网</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们从GitHub上面把dpvs整个项目clone下来</span><br>$ <span class="hljs-built_in">cd</span> /home/<br>$ git <span class="hljs-built_in">clone</span> https://github.com/iqiyi/dpvs.git<br>$ <span class="hljs-built_in">cd</span> /home/dpvs<br><span class="hljs-comment"># 然后我们下载特定版本的dpdk并解压</span><br>$ wget https://fast.dpdk.org/rel/dpdk-17.11.2.tar.xz<br>$ tar vxf dpdk-17.11.2.tar.xz<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先我们从GitHub上面把dpvs整个项目clone下来</span>
+$ <span class="token builtin class-name">cd</span> /home/
+$ <span class="token function">git</span> clone https://github.com/iqiyi/dpvs.git
+$ <span class="token builtin class-name">cd</span> /home/dpvs
+<span class="token comment"># 然后我们下载特定版本的dpdk并解压</span>
+$ <span class="token function">wget</span> https://fast.dpdk.org/rel/dpdk-17.11.2.tar.xz
+$ <span class="token function">tar</span> vxf dpdk-17.11.2.tar.xz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>接下来需要对dpdk进行打补丁，<strong>注意这里的补丁并不是必须的</strong>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">cd</span> /home/dpvs<br>$ cp patch/dpdk-stable-17.11.2/*.patch dpdk-stable-17.11.2/<br>$ <span class="hljs-built_in">cd</span> dpdk-stable-17.11.2/<br><span class="hljs-comment"># 0001号补丁主要是用于在kni网卡上开启硬件多播功能，比如在kni设备上启动ospfd</span><br>$ patch -p 1 &lt; 0001-kni-use-netlink-event-for-multicast-driver-part.patch<br><span class="hljs-comment"># patching file lib/librte_eal/linuxapp/kni/kni_net.c</span><br><br><span class="hljs-comment"># 0002号补丁主要是使用dpvs的UOA模块的时候需要用到</span><br>$ patch -p 1 &lt; 0002-net-support-variable-IP-header-len-for-checksum-API.patch<br><span class="hljs-comment"># patching file lib/librte_net/rte_ip.h</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> /home/dpvs
+$ <span class="token function">cp</span> patch/dpdk-stable-17.11.2/*.patch dpdk-stable-17.11.2/
+$ <span class="token builtin class-name">cd</span> dpdk-stable-17.11.2/
+<span class="token comment"># 0001号补丁主要是用于在kni网卡上开启硬件多播功能，比如在kni设备上启动ospfd</span>
+$ patch -p <span class="token number">1</span> <span class="token operator">&lt;</span> 0001-kni-use-netlink-event-for-multicast-driver-part.patch
+<span class="token comment"># patching file lib/librte_eal/linuxapp/kni/kni_net.c</span>
 
-<h2 id="编译dpdk"><a href="#编译dpdk" class="headerlink" title="编译dpdk"></a>编译dpdk</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">cd</span> /home/dpvs/dpdk-stable-17.11.2<br>$ make config T=x86_64-native-linuxapp-gcc<br><span class="hljs-comment"># Configuration done using x86_64-native-linuxapp-gcc</span><br>$ make<br></code></pre></td></tr></table></figure>
+<span class="token comment"># 0002号补丁主要是使用dpvs的UOA模块的时候需要用到</span>
+$ patch -p <span class="token number">1</span> <span class="token operator">&lt;</span> 0002-net-support-variable-IP-header-len-for-checksum-API.patch
+<span class="token comment"># patching file lib/librte_net/rte_ip.h</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+
+<h2 id="编译dpdk"><a href="#编译dpdk" class="headerlink" title="编译dpdk"></a>编译dpdk</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> /home/dpvs/dpdk-stable-17.11.2
+$ <span class="token function">make</span> config <span class="token assign-left variable">T</span><span class="token operator">=</span>x86_64-native-linuxapp-gcc
+<span class="token comment"># Configuration done using x86_64-native-linuxapp-gcc</span>
+$ <span class="token function">make</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>如果出现下面的问题</p>
 <p><img src="https://resource.tinychen.com//20201109144502.png" srcset="/img/loading.gif" lazyload></p>
@@ -357,27 +459,112 @@
 <p>会看到ndo_change_mtu被替换成对应版本的ndo_change_mtu_rhXX,比如 ndo_change_mtu_rh75 将 /kni_net.c:704:2 中 ndo_change_mtu 用 ndo_change_mtu_rh75 替换试试？</p>
 </blockquote>
 <p>查看对应内核中的文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ find / -name netdevice.h<br>/usr/include/linux/netdevice.h<br>/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64.debug/include/linux/netdevice.h<br>/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64.debug/include/uapi/linux/netdevice.h<br>/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64/include/linux/netdevice.h<br>/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64/include/uapi/linux/netdevice.h<br>$ grep ndo_change_mtu /usr/src/kernels/3.10.0-1127.19.1.el7.x86_64/include/linux/netdevice.h<br> * int (*ndo_change_mtu)(struct net_device *dev, int new_mtu);<br>        int                     (*ndo_change_mtu)(struct net_device *dev,<br> * int (*ndo_change_mtu)(struct net_device *dev, int new_mtu);<br>        RH_KABI_RENAME(int      (*ndo_change_mtu),<br>                       int      (*ndo_change_mtu_rh74))(struct net_device *dev,<br> *              .ndo_change_mtu_rh74 handler is *not* provided.<br> * both .extended.ndo_change_mtu() as well as .ndo_change_mtu_rh74() are<br>$ grep ndo_change_mtu /home/dpvs/dpdk-stable-17.11.2/lib/librte_eal/linuxapp/kni/kni_net.c<br>        .ndo_change_mtu = kni_net_change_mtu,<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">find</span> / -name netdevice.h
+/usr/include/linux/netdevice.h
+/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64.debug/include/linux/netdevice.h
+/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64.debug/include/uapi/linux/netdevice.h
+/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64/include/linux/netdevice.h
+/usr/src/kernels/3.10.0-1127.19.1.el7.x86_64/include/uapi/linux/netdevice.h
+$ <span class="token function">grep</span> ndo_change_mtu /usr/src/kernels/3.10.0-1127.19.1.el7.x86_64/include/linux/netdevice.h
+ * int <span class="token punctuation">(</span>*ndo_change_mtu<span class="token punctuation">)</span><span class="token punctuation">(</span>struct net_device *dev, int new_mtu<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        int                     <span class="token punctuation">(</span>*ndo_change_mtu<span class="token punctuation">)</span><span class="token punctuation">(</span>struct net_device *dev,
+ * int <span class="token punctuation">(</span>*ndo_change_mtu<span class="token punctuation">)</span><span class="token punctuation">(</span>struct net_device *dev, int new_mtu<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        RH_KABI_RENAME<span class="token punctuation">(</span>int      <span class="token punctuation">(</span>*ndo_change_mtu<span class="token punctuation">)</span>,
+                       int      <span class="token punctuation">(</span>*ndo_change_mtu_rh74<span class="token punctuation">))</span><span class="token punctuation">(</span>struct net_device *dev,
+ *              .ndo_change_mtu_rh74 handler is *not* provided.
+ * both .extended.ndo_change_mtu<span class="token punctuation">(</span><span class="token punctuation">)</span> as well as .ndo_change_mtu_rh74<span class="token punctuation">(</span><span class="token punctuation">)</span> are
+$ <span class="token function">grep</span> ndo_change_mtu /home/dpvs/dpdk-stable-17.11.2/lib/librte_eal/linuxapp/kni/kni_net.c
+        .ndo_change_mtu <span class="token operator">=</span> kni_net_change_mtu,<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>或者对于<code>CentOS7.5</code>之后的版本可以直接执行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">sed -i <span class="hljs-string">&#x27;s/ndo_change_mtu/ndo_change_mtu_rh74/g&#x27;</span> /home/dpvs/dpdk-stable-17.11.2/lib/librte_eal/linuxapp/kni/kni_net.c<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sed</span> -i <span class="token string">'s/ndo_change_mtu/ndo_change_mtu_rh74/g'</span> /home/dpvs/dpdk-stable-17.11.2/lib/librte_eal/linuxapp/kni/kni_net.c<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>然后我们重新执行make操作</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ make clean<br>$ make <br><span class="hljs-comment"># 出现下面字段说明make成功</span><br><span class="hljs-comment"># Build complete [x86_64-native-linuxapp-gcc]</span><br><span class="hljs-comment"># 接着设置变量</span><br>$ <span class="hljs-built_in">export</span> RTE_SDK=<span class="hljs-variable">$PWD</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">make</span> clean
+$ <span class="token function">make</span> 
+<span class="token comment"># 出现下面字段说明make成功</span>
+<span class="token comment"># Build complete [x86_64-native-linuxapp-gcc]</span>
+<span class="token comment"># 接着设置变量</span>
+$ <span class="token builtin class-name">export</span> <span class="token assign-left variable">RTE_SDK</span><span class="token operator">=</span><span class="token environment constant">$PWD</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h2 id="配置hugepage"><a href="#配置hugepage" class="headerlink" title="配置hugepage"></a>配置hugepage</h2><p>和其他的一般程序不同，dpvs使用的dpdk并不是从操作系统中索要内存，而是直接使用大页内存（hugepage），极大地提高了内存分配的效率。</p>
 <p>官方的配置过程中使用的是2MB的大页内存，这里的8192指的是分配了8192个2MB的大页内存，也就是一个node对应16GB的内存，一共分配了32GB的内存，这里的内存可以根据机器的大小来自行调整。但是如果小于1GB可能会导致启动报错。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># for NUMA machine</span><br>$ <span class="hljs-built_in">echo</span> 8192 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages<br>$ <span class="hljs-built_in">echo</span> 8192 &gt; /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages<br><br>$ mkdir /mnt/huge<br>$ mount -t hugetlbfs nodev /mnt/huge<br><br><span class="hljs-comment"># 需要开机自动挂载的话可以在</span><br>$ <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;nodev /mnt/huge hugetlbfs defaults 0 0&quot;</span> &gt;&gt; /etc/fstab<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># for NUMA machine</span>
+$ <span class="token builtin class-name">echo</span> <span class="token number">8192</span> <span class="token operator">></span> /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+$ <span class="token builtin class-name">echo</span> <span class="token number">8192</span> <span class="token operator">></span> /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
 
-<h2 id="挂载驱动模块"><a href="#挂载驱动模块" class="headerlink" title="挂载驱动模块"></a>挂载驱动模块</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ modprobe uio<br>$ <span class="hljs-built_in">cd</span> /home/dpvs/dpdk-stable-17.11.2<br>$ insmod /home/dpvs/dpdk-stable-17.11.2/build/kmod/igb_uio.ko<br>$ insmod /home/dpvs/dpdk-stable-17.11.2/build/kmod/rte_kni.ko<br></code></pre></td></tr></table></figure>
+$ <span class="token function">mkdir</span> /mnt/huge
+$ <span class="token function">mount</span> -t hugetlbfs nodev /mnt/huge
+
+<span class="token comment"># 需要开机自动挂载的话可以在</span>
+$ <span class="token builtin class-name">echo</span> <span class="token string">"nodev /mnt/huge hugetlbfs defaults 0 0"</span> <span class="token operator">>></span> /etc/fstab<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+
+<h2 id="挂载驱动模块"><a href="#挂载驱动模块" class="headerlink" title="挂载驱动模块"></a>挂载驱动模块</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ modprobe uio
+$ <span class="token builtin class-name">cd</span> /home/dpvs/dpdk-stable-17.11.2
+$ insmod /home/dpvs/dpdk-stable-17.11.2/build/kmod/igb_uio.ko
+$ insmod /home/dpvs/dpdk-stable-17.11.2/build/kmod/rte_kni.ko<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>使用脚本查看目前机器和dpvs兼容的设备，这里我们只截取部分重点内容</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ ./usertools/dpdk-devbind.py --status<br><br>$ ./usertools/dpdk-devbind.py --status<br><br>Network devices using DPDK-compatible driver<br>============================================<br>&lt;none&gt;<br><br>Network devices using kernel driver<br>===================================<br>0000:01:00.0 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth0 drv=ixgbe unused=igb_uio<br>0000:01:00.1 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth1 drv=ixgbe unused=igb_uio<br>0000:04:00.0 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth4 drv=ixgbe unused=igb_uio *Active*<br>0000:04:00.1 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth5 drv=ixgbe unused=igb_uio *Active*<br>0000:08:00.0 <span class="hljs-string">&#x27;I350 Gigabit Network Connection 1521&#x27;</span> <span class="hljs-keyword">if</span>=eth2 drv=igb unused=igb_uio<br>0000:08:00.1 <span class="hljs-string">&#x27;I350 Gigabit Network Connection 1521&#x27;</span> <span class="hljs-keyword">if</span>=eth3 drv=igb unused=igb_uio<br><br><span class="hljs-comment"># 对需要使用dpvs的网卡加载特定的驱动</span><br>$ ifconfig eth5 down<br>$ ./usertools/dpdk-devbind.py -b igb_uio 0000:04:00.1<br><br><span class="hljs-comment"># 再次检查是否加载成功</span><br>$ ./usertools/dpdk-devbind.py --status<br><br>Network devices using DPDK-compatible driver<br>============================================<br>0000:04:00.1 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> drv=igb_uio unused=ixgbe<br><br>Network devices using kernel driver<br>===================================<br>0000:01:00.0 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth0 drv=ixgbe unused=igb_uio<br>0000:01:00.1 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth1 drv=ixgbe unused=igb_uio<br>0000:04:00.0 <span class="hljs-string">&#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27;</span> <span class="hljs-keyword">if</span>=eth4 drv=ixgbe unused=igb_uio *Active*<br>0000:08:00.0 <span class="hljs-string">&#x27;I350 Gigabit Network Connection 1521&#x27;</span> <span class="hljs-keyword">if</span>=eth2 drv=igb unused=igb_uio<br>0000:08:00.1 <span class="hljs-string">&#x27;I350 Gigabit Network Connection 1521&#x27;</span> <span class="hljs-keyword">if</span>=eth3 drv=igb unused=igb_uio<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ ./usertools/dpdk-devbind.py --status
 
-<h2 id="编译安装dpvs"><a href="#编译安装dpvs" class="headerlink" title="编译安装dpvs"></a>编译安装dpvs</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">cd</span> /home/dpvs/dpdk-stable-17.11.2/<br>$ <span class="hljs-built_in">export</span> RTE_SDK=<span class="hljs-variable">$PWD</span><br>$ <span class="hljs-built_in">cd</span> /home/dpvs/<br>$ make<br>$ make install<br><br>$ <span class="hljs-built_in">cd</span> bin/<br>$ ls<br>dpip  dpvs  ipvsadm  keepalived<br><br>$ cp conf/dpvs.conf.single-nic.sample /etc/dpvs.conf<br>$ <span class="hljs-built_in">cd</span> /home/dpvs/bin/<br>$ ./dpvs &amp;<br><span class="hljs-comment"># 如果安装成功并且成功运行了，执行命令就可以看到</span><br>$ ./dpip link show<br>1: dpdk0: socket 0 mtu 1500 rx-queue 8 tx-queue 8<br>    UP 10000 Mbps full-duplex auto-nego<br>    addr 00:1B:21:BE:EA:C2 OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br></code></pre></td></tr></table></figure>
+$ ./usertools/dpdk-devbind.py --status
+
+Network devices using DPDK-compatible driver
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+<span class="token operator">&lt;</span>none<span class="token operator">></span>
+
+Network devices using kernel driver
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+0000:01:00.0 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth0 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+0000:01:00.1 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth1 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+0000:04:00.0 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth4 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio *Active*
+0000:04:00.1 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth5 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio *Active*
+0000:08:00.0 <span class="token string">'I350 Gigabit Network Connection 1521'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth2 <span class="token assign-left variable">drv</span><span class="token operator">=</span>igb <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+0000:08:00.1 <span class="token string">'I350 Gigabit Network Connection 1521'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth3 <span class="token assign-left variable">drv</span><span class="token operator">=</span>igb <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+
+<span class="token comment"># 对需要使用dpvs的网卡加载特定的驱动</span>
+$ <span class="token function">ifconfig</span> eth5 down
+$ ./usertools/dpdk-devbind.py -b igb_uio 0000:04:00.1
+
+<span class="token comment"># 再次检查是否加载成功</span>
+$ ./usertools/dpdk-devbind.py --status
+
+Network devices using DPDK-compatible driver
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+0000:04:00.1 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">drv</span><span class="token operator">=</span>igb_uio <span class="token assign-left variable">unused</span><span class="token operator">=</span>ixgbe
+
+Network devices using kernel driver
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+0000:01:00.0 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth0 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+0000:01:00.1 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth1 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+0000:04:00.0 <span class="token string">'82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth4 <span class="token assign-left variable">drv</span><span class="token operator">=</span>ixgbe <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio *Active*
+0000:08:00.0 <span class="token string">'I350 Gigabit Network Connection 1521'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth2 <span class="token assign-left variable">drv</span><span class="token operator">=</span>igb <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio
+0000:08:00.1 <span class="token string">'I350 Gigabit Network Connection 1521'</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>eth3 <span class="token assign-left variable">drv</span><span class="token operator">=</span>igb <span class="token assign-left variable">unused</span><span class="token operator">=</span>igb_uio<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+
+<h2 id="编译安装dpvs"><a href="#编译安装dpvs" class="headerlink" title="编译安装dpvs"></a>编译安装dpvs</h2><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token builtin class-name">cd</span> /home/dpvs/dpdk-stable-17.11.2/
+$ <span class="token builtin class-name">export</span> <span class="token assign-left variable">RTE_SDK</span><span class="token operator">=</span><span class="token environment constant">$PWD</span>
+$ <span class="token builtin class-name">cd</span> /home/dpvs/
+$ <span class="token function">make</span>
+$ <span class="token function">make</span> <span class="token function">install</span>
+
+$ <span class="token builtin class-name">cd</span> bin/
+$ <span class="token function">ls</span>
+dpip  dpvs  ipvsadm  keepalived
+
+$ <span class="token function">cp</span> conf/dpvs.conf.single-nic.sample /etc/dpvs.conf
+$ <span class="token builtin class-name">cd</span> /home/dpvs/bin/
+$ ./dpvs <span class="token operator">&amp;</span>
+<span class="token comment"># 如果安装成功并且成功运行了，执行命令就可以看到</span>
+$ ./dpip <span class="token function">link</span> show
+<span class="token number">1</span>: dpdk0: socket <span class="token number">0</span> mtu <span class="token number">1500</span> rx-queue <span class="token number">8</span> tx-queue <span class="token number">8</span>
+    UP <span class="token number">10000</span> Mbps full-duplex auto-nego
+    addr 00:1B:21:BE:EA:C2 OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>为了方便管理可以将相关的操作命令软链接到/sbin下方便全局执行</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">ln -s /home/dpvs/bin/dpvs /sbin/dpvs<br>ln -s /home/dpvs/bin/dpip /sbin/dpip<br>ln -s /home/dpvs/bin/ipvsadm /sbin/ipvsadm<br>ln -s /home/dpvs/bin/keepalived /sbin/keepalived<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ln</span> -s /home/dpvs/bin/dpvs /sbin/dpvs
+<span class="token function">ln</span> -s /home/dpvs/bin/dpip /sbin/dpip
+<span class="token function">ln</span> -s /home/dpvs/bin/ipvsadm /sbin/ipvsadm
+<span class="token function">ln</span> -s /home/dpvs/bin/keepalived /sbin/keepalived<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -676,6 +863,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -222,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.3k words
+          1.2k words
         
       </span>
     
@@ -233,7 +235,7 @@
         
         
         
-          11 mins
+          10 mins
         
       </span>
     
@@ -287,47 +289,70 @@
 <p>Ubunut18.04版本请移步<a href="https://tinychen.com/20190614-ubuntu-update-kernel/">这里</a></p>
 <span id="more"></span>
 
-<h1 id="1、yum升级内核"><a href="#1、yum升级内核" class="headerlink" title="1、yum升级内核"></a>1、yum升级内核</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前内核版本</span><br>uname -r<br><br><span class="hljs-comment"># 更新yum源</span><br>yum update -y<br><br><span class="hljs-comment"># 升级yum源中的最新版内核</span><br>yum install -y kernel<br></code></pre></td></tr></table></figure>
+<h1 id="1、yum升级内核"><a href="#1、yum升级内核" class="headerlink" title="1、yum升级内核"></a>1、yum升级内核</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前内核版本</span>
+<span class="token function">uname</span> -r
 
-<h1 id="2、升级ELRepo库提供的内核"><a href="#2、升级ELRepo库提供的内核" class="headerlink" title="2、升级ELRepo库提供的内核"></a>2、升级ELRepo库提供的内核</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 导入 ELRepo 仓库的KEY</span><br>rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org<br><span class="hljs-comment"># 使用yum安装 elrepo的仓库包</span><br>yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm<br></code></pre></td></tr></table></figure>
+<span class="token comment"># 更新yum源</span>
+yum update -y
+
+<span class="token comment"># 升级yum源中的最新版内核</span>
+yum <span class="token function">install</span> -y kernel<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
+
+<h1 id="2、升级ELRepo库提供的内核"><a href="#2、升级ELRepo库提供的内核" class="headerlink" title="2、升级ELRepo库提供的内核"></a>2、升级ELRepo库提供的内核</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 导入 ELRepo 仓库的KEY</span>
+<span class="token function">rpm</span> --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+<span class="token comment"># 使用yum安装 elrepo的仓库包</span>
+yum <span class="token function">install</span> https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <blockquote>
 <p>ELRepo 仓库是基于社区的用于企业级 Linux 仓库，提供对 RedHat Enterprise (RHEL) 和 其他基于 RHEL的 Linux 发行版（CentOS、Scientific、Fedora 等）的支持。 </p>
 <p>ELRepo 聚焦于和硬件相关的软件包，包括文件系统驱动、显卡驱动、网络驱动、声卡驱动和摄像头驱动等。</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看可用的系统内核包</span><br>yum --disablerepo=<span class="hljs-string">&quot;*&quot;</span> --enablerepo=<span class="hljs-string">&quot;elrepo-kernel&quot;</span> list available<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看可用的系统内核包</span>
+yum --disablerepo<span class="token operator">=</span><span class="token string">"*"</span> --enablerepo<span class="token operator">=</span><span class="token string">"elrepo-kernel"</span> list available<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/BqT0hrwhaRc8.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装最新版内核</span><br>yum --enablerepo=elrepo-kernel install kernel-ml<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装最新版内核</span>
+yum --enablerepo<span class="token operator">=</span>elrepo-kernel <span class="token function">install</span> kernel-ml<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/W4FFAbKnvAXD.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前一共安装了多少个内核</span><br>cat /etc/grub2.cfg | grep menuentry | awk <span class="hljs-string">&#x27;&#123;print $2$4$5$6&#125;&#x27;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前一共安装了多少个内核</span>
+<span class="token function">cat</span> /etc/grub2.cfg <span class="token operator">|</span> <span class="token function">grep</span> menuentry <span class="token operator">|</span> <span class="token function">awk</span> <span class="token string">'&#123;print <span class="token variable">$2</span><span class="token variable">$4</span><span class="token variable">$5</span><span class="token variable">$6</span>&#125;'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/lqzAq3euQXmL.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 或者这样，找到网上的一个大佬的正则表达式，比我这种菜鸡强多了</span><br>awk -F\<span class="hljs-string">&#x27; &#x27;</span><span class="hljs-variable">$1</span>==<span class="hljs-string">&quot;menuentry &quot;</span> &#123;<span class="hljs-built_in">print</span> i++ <span class="hljs-string">&quot; : &quot;</span> <span class="hljs-variable">$2</span>&#125;<span class="hljs-string">&#x27; /etc/grub2.cfg</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 或者这样，找到网上的一个大佬的正则表达式，比我这种菜鸡强多了</span>
+<span class="token function">awk</span> -F<span class="token punctuation">\</span>' <span class="token string">'<span class="token variable">$1</span>=="menuentry " &#123;print i++ " : " <span class="token variable">$2</span>&#125;'</span> /etc/grub2.cfg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/Qsz4B1UdaBqe.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意这个升级的内核和通过yum升级的不同，yum升级内核之后会把新内核作为启动的默认内核，而这样升级并不会，因此我们需要手动更改默认的启动内核。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 将GRUB_DEFAULT从saved改为0</span><br>vim /etc/default/grub<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将GRUB_DEFAULT从saved改为0</span>
+<span class="token function">vim</span> /etc/default/grub<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/GxM4tkhCFhVf.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20190612/iFxmpK0XqSsh.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用grub2重新生成grub配置文件</span><br>grub2-mkconfig -o /boot/grub2/grub.cfg<br><span class="hljs-comment"># 如果是使用uefi引导安装启动的话目录应该是下面这个</span><br>grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg <br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用grub2重新生成grub配置文件</span>
+grub2-mkconfig -o /boot/grub2/grub.cfg
+<span class="token comment"># 如果是使用uefi引导安装启动的话目录应该是下面这个</span>
+grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/zvvS1LJjL4WU.png" srcset="/img/loading.gif" lazyload></p>
 <p>重启之后就会看到默认启动的是新内核</p>
 <p><img src="https://resource.tinychen.com/blog/20190612/dDPW4w4o1QUW.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="3、删除旧内核"><a href="#3、删除旧内核" class="headerlink" title="3、删除旧内核"></a>3、删除旧内核</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看系统中的所有内核相关包</span><br>rpm -qa | grep kernel<br><br><span class="hljs-comment"># 使用yum卸载</span><br>yum remove &lt;package&gt;<br></code></pre></td></tr></table></figure>
+<h1 id="3、删除旧内核"><a href="#3、删除旧内核" class="headerlink" title="3、删除旧内核"></a>3、删除旧内核</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看系统中的所有内核相关包</span>
+<span class="token function">rpm</span> -qa <span class="token operator">|</span> <span class="token function">grep</span> kernel
+
+<span class="token comment"># 使用yum卸载</span>
+yum remove <span class="token operator">&lt;</span>package<span class="token operator">></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/C9FkojA3hKvG.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 删除最旧的那个内核</span><br>yum remove kernel-3.10.0-957.el7.x86_64 kernel-devel-3.10.0-957.el7.x86_64<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 删除最旧的那个内核</span>
+yum remove kernel-3.10.0-957.el7.x86_64 kernel-devel-3.10.0-957.el7.x86_64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/OSuvgt86M1O5.png" srcset="/img/loading.gif" lazyload></p>
@@ -626,6 +651,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

@@ -47,6 +47,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -224,7 +226,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k words
+          1.7k words
         
       </span>
     
@@ -235,7 +237,7 @@
         
         
         
-          14 mins
+          15 mins
         
       </span>
     
@@ -291,7 +293,11 @@
 <span id="more"></span>
 
 <h1 id="1、openssl自签证书"><a href="#1、openssl自签证书" class="headerlink" title="1、openssl自签证书"></a>1、openssl自签证书</h1><p>在开始之前我们新建一个目录专门用来存放这次生成证书相关的全部文件。openssl生成自签证书的命令非常简单，总结如下：</p>
-<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xquery">openssl genrsa -out<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span> <span class="hljs-number">1024</span><br><br>openssl req -new -out<span class="hljs-built_in"> root</span>.csr -key<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span><br><br>openssl x509 -req -<span class="hljs-keyword">in</span><span class="hljs-built_in"> root</span>.csr -out<span class="hljs-built_in"> root</span>.crt -signkey<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span> -CAcreateserial -days <span class="hljs-number">3650</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">openssl genrsa -out root.key 1024
+
+openssl req -new -out root.csr -key root.key
+
+openssl x509 -req -in root.csr -out root.crt -signkey root.key -CAcreateserial -days 3650<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>接下来我们开始逐个命令进行讲解，首先我们需要生成一个<code>root.key</code>文件</p>
 <p><img src="https://resource.tinychen.com/20210304165627.png" srcset="/img/loading.gif" lazyload></p>
@@ -304,20 +310,32 @@
 <p><strong>到这一步，我们已经生成了一个完整的自签CA证书，其中包含了私钥key文件，证书信息csr文件和公钥crt文件。</strong></p>
 <p><img src="https://resource.tinychen.com/20210304165646.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、生成p12证书"><a href="#2、生成p12证书" class="headerlink" title="2、生成p12证书"></a>2、生成p12证书</h1><p>为了方便使用，我们需要把证书打包成p12格式的证书文件，然后在客户端的电脑上导入。同样的在生成p12文件的时候我们最好添加一个密码保护，这样就算证书泄露了也不会导致安全问题。</p>
-<figure class="highlight xquery"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs xquery">openssl pkcs12 -export -clcerts -<span class="hljs-keyword">in</span><span class="hljs-built_in"> root</span>.crt -inkey<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span> -out<span class="hljs-built_in"> root</span>.p12<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">openssl pkcs12 -export -clcerts -in root.crt -inkey root.key -out root.p12<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p><img src="https://resource.tinychen.com/20210304165650.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、配置nginx"><a href="#3、配置nginx" class="headerlink" title="3、配置nginx"></a>3、配置nginx</h1><p>最后我们只需要在nginx中需要使用双向认证的部分添加以下配置然后重启即可生效</p>
-<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-comment"># 客户端公钥证书</span><br><span class="hljs-attribute">ssl_client_certificate</span> /path/to/root.crt;<br><span class="hljs-comment"># 开启客户端证书验证</span><br><span class="hljs-attribute">ssl_verify_client</span> <span class="hljs-literal">on</span>;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># 客户端公钥证书
+ssl_client_certificate &#x2F;path&#x2F;to&#x2F;root.crt;
+# 开启客户端证书验证
+ssl_verify_client on;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>最后我们在windows或者mac上面导入p12文件之后，打开对应的网站就会有相应的提示了：</p>
 <p><img src="https://resource.tinychen.com/20210304165654.png" srcset="/img/loading.gif" lazyload></p>
 <p>如果不进行证书验证，则服务器会返回400错误。</p>
 <p>我们还可以使用curl来进行测试，如果不带上证书，会直接报400错误。</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-meta"># curl https:<span class="hljs-comment">//ip.tinychen.com</span></span><br><span class="hljs-params">&lt;html&gt;</span><br><span class="hljs-params">&lt;head&gt;</span><span class="hljs-params">&lt;title&gt;</span><span class="hljs-number">400</span> No required SSL certificate was sent<span class="hljs-params">&lt;/title&gt;</span><span class="hljs-params">&lt;/head&gt;</span><br><span class="hljs-params">&lt;body&gt;</span><br><span class="hljs-params">&lt;center&gt;</span><span class="hljs-params">&lt;h1&gt;</span><span class="hljs-number">400</span> Bad Request<span class="hljs-params">&lt;/h1&gt;</span><span class="hljs-params">&lt;/center&gt;</span><br><span class="hljs-params">&lt;center&gt;</span>No required SSL certificate was sent<span class="hljs-params">&lt;/center&gt;</span><br><span class="hljs-params">&lt;hr&gt;</span><span class="hljs-params">&lt;center&gt;</span>nginx<span class="hljs-params">&lt;/center&gt;</span><br><span class="hljs-params">&lt;/body&gt;</span><br><span class="hljs-params">&lt;/html&gt;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># curl https:&#x2F;&#x2F;ip.tinychen.com
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;400 No required SSL certificate was sent&lt;&#x2F;title&gt;&lt;&#x2F;head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;400 Bad Request&lt;&#x2F;h1&gt;&lt;&#x2F;center&gt;
+&lt;center&gt;No required SSL certificate was sent&lt;&#x2F;center&gt;
+&lt;hr&gt;&lt;center&gt;nginx&lt;&#x2F;center&gt;
+&lt;&#x2F;body&gt;
+&lt;&#x2F;html&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>带上证书之后则访问正常</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gradle">[root@tiny-cloud <span class="hljs-regexp">/home/</span>certs]# curl --cert .<span class="hljs-regexp">/root.crt --key ./</span>root.key https:<span class="hljs-comment">//ip.tinychen.com</span><br>hello world<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">[root@tiny-cloud &#x2F;home&#x2F;certs]# curl --cert .&#x2F;root.crt --key .&#x2F;root.key https:&#x2F;&#x2F;ip.tinychen.com
+hello world<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>如果想要查看curl的详细过程，我们可以加上-v参数来查看。</p>
 
@@ -617,6 +635,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -222,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2k words
+          1.9k words
         
       </span>
     
@@ -233,7 +235,7 @@
         
         
         
-          17 mins
+          16 mins
         
       </span>
     
@@ -286,16 +288,45 @@
               <p>本文主要讲解在<code>ubuntu20.04</code>系统安装后需要进行的一些初始化事项。</p>
 <span id="more"></span>
 
-<h1 id="1、安装ssh服务"><a href="#1、安装ssh服务" class="headerlink" title="1、安装ssh服务"></a>1、安装ssh服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># ubuntu默认情况下需要自己安装ssh服务</span><br>sudo apt install openssl-server<br></code></pre></td></tr></table></figure>
+<h1 id="1、安装ssh服务"><a href="#1、安装ssh服务" class="headerlink" title="1、安装ssh服务"></a>1、安装ssh服务</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># ubuntu默认情况下需要自己安装ssh服务</span>
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> openssl-server<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <h1 id="2、更换镜像源（清华）"><a href="#2、更换镜像源（清华）" class="headerlink" title="2、更换镜像源（清华）"></a>2、更换镜像源（清华）</h1><p>参考的<a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/help/ubuntu/">官方链接</a>，Ubuntu 的软件源配置文件是 <code>/etc/apt/sources.list</code>。将系统自带的该文件做个备份，将该文件替换为下面内容，即可使用 TUNA 的软件源镜像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释</span><br>deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse<br><span class="hljs-comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse</span><br>deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse<br><span class="hljs-comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse</span><br>deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse<br><span class="hljs-comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse</span><br>deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse<br><span class="hljs-comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse</span><br><br><span class="hljs-comment"># 预发布软件源，不建议启用</span><br><span class="hljs-comment"># deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse</span><br><span class="hljs-comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse</span>
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse</span>
 
-<h1 id="3、防火墙"><a href="#3、防火墙" class="headerlink" title="3、防火墙"></a>3、防火墙</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 禁用防火墙</span><br>tinychen@tiny-server:~$ sudo ufw <span class="hljs-built_in">disable</span><br>Firewall stopped and disabled on system startup<br></code></pre></td></tr></table></figure>
+<span class="token comment"># 预发布软件源，不建议启用</span>
+<span class="token comment"># deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse</span>
+<span class="token comment"># deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
-<h1 id="4、禁用IPv6"><a href="#4、禁用IPv6" class="headerlink" title="4、禁用IPv6"></a>4、禁用IPv6</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;net.ipv6.conf.all.disable_ipv6=1&quot;</span> &gt;&gt; /etc/sysctl.conf<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;net.ipv6.conf.default.disable_ipv6=1&quot;</span> &gt;&gt; /etc/sysctl.conf<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;net.ipv6.conf.lo.disable_ipv6=1&quot;</span> &gt;&gt; /etc/sysctl.conf<br>sudo sysctl -p<br></code></pre></td></tr></table></figure>
+<h1 id="3、防火墙"><a href="#3、防火墙" class="headerlink" title="3、防火墙"></a>3、防火墙</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 禁用防火墙</span>
+tinychen@tiny-server:~$ <span class="token function">sudo</span> ufw disable
+Firewall stopped and disabled on system startup<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
-<h1 id="5、安装nvidia显卡驱动"><a href="#5、安装nvidia显卡驱动" class="headerlink" title="5、安装nvidia显卡驱动"></a>5、安装nvidia显卡驱动</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看显卡型号和推荐安装的驱动</span><br>tinychen@tiny-server:~$ ubuntu-drivers devices<br>== /sys/devices/pci0000:00/0000:00:1c.7/0000:08:00.0 ==<br>modalias : pci:v000010DEd00000A66sv00001B0Asd00009060bc03sc00i00<br>vendor   : NVIDIA Corporation<br>model    : GT218 [GeForce 310]<br>driver   : nvidia-340 - distro non-free recommended<br>driver   : xserver-xorg-video-nouveau - distro free <span class="hljs-built_in">builtin</span><br><br><span class="hljs-comment"># 自动安装默认推荐的驱动</span><br>tinychen@tiny-server:~$ sudo ubuntu-drivers autoinstall<br>[sudo] password <span class="hljs-keyword">for</span> tinychen:<br></code></pre></td></tr></table></figure>
+<h1 id="4、禁用IPv6"><a href="#4、禁用IPv6" class="headerlink" title="4、禁用IPv6"></a>4、禁用IPv6</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"net.ipv6.conf.all.disable_ipv6=1"</span> <span class="token operator">>></span> /etc/sysctl.conf
+<span class="token builtin class-name">echo</span> <span class="token string">"net.ipv6.conf.default.disable_ipv6=1"</span> <span class="token operator">>></span> /etc/sysctl.conf
+<span class="token builtin class-name">echo</span> <span class="token string">"net.ipv6.conf.lo.disable_ipv6=1"</span> <span class="token operator">>></span> /etc/sysctl.conf
+<span class="token function">sudo</span> sysctl -p<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
+
+<h1 id="5、安装nvidia显卡驱动"><a href="#5、安装nvidia显卡驱动" class="headerlink" title="5、安装nvidia显卡驱动"></a>5、安装nvidia显卡驱动</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看显卡型号和推荐安装的驱动</span>
+tinychen@tiny-server:~$ ubuntu-drivers devices
+<span class="token operator">==</span> /sys/devices/pci0000:00/0000:00:1c.7/0000:08:00.0 <span class="token operator">==</span>
+modalias <span class="token builtin class-name">:</span> pci:v000010DEd00000A66sv00001B0Asd00009060bc03sc00i00
+vendor   <span class="token builtin class-name">:</span> NVIDIA Corporation
+model    <span class="token builtin class-name">:</span> GT218 <span class="token punctuation">[</span>GeForce <span class="token number">310</span><span class="token punctuation">]</span>
+driver   <span class="token builtin class-name">:</span> nvidia-340 - distro non-free recommended
+driver   <span class="token builtin class-name">:</span> xserver-xorg-video-nouveau - distro <span class="token function">free</span> <span class="token builtin class-name">builtin</span>
+
+<span class="token comment"># 自动安装默认推荐的驱动</span>
+tinychen@tiny-server:~$ <span class="token function">sudo</span> ubuntu-drivers autoinstall
+<span class="token punctuation">[</span>sudo<span class="token punctuation">]</span> password <span class="token keyword">for</span> tinychen:<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -590,6 +621,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

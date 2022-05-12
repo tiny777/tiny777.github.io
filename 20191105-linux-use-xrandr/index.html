@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -222,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.3k words
+          3.8k words
         
       </span>
     
@@ -233,7 +235,7 @@
         
         
         
-          37 mins
+          33 mins
         
       </span>
     
@@ -288,14 +290,126 @@
 
 <p>最近在用主板自带的板载集显外接显示器的时候，最大应该是可以输出1080P的分辨率，但是由于各种原因好像不能自动识别出来，只能自己使用<code>xrandr</code>手动新建分辨率。</p>
 <p>在<code>CentOS8</code>和<code>Ubuntu18.04.3</code>上面都实操过没有问题，步骤也都基本相同，只有最后一步的文件路径不太一样。（个人猜测CentOS7上面应该和CentOS8通用）</p>
-<h1 id="1、CentOS8操作记录"><a href="#1、CentOS8操作记录" class="headerlink" title="1、CentOS8操作记录"></a>1、<code>CentOS8</code>操作记录</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 以下是CentOS8中的实际操作记录</span><br><br><span class="hljs-comment"># 使用xrandr查看目前支持的分辨率，这里我们可以看到只有三个，且和显示器的最佳分辨率都对不上</span><br>$ xrandr<br>Screen 0: minimum 320 x 200, current 1024 x 768, maximum 1920 x 2048<br>VGA-1 connected primary 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm<br>   1024x768      60.00* <br>   800x600       60.32    56.25  <br>   640x480       59.94  <br><br><br><span class="hljs-comment"># 使用cvt命令生成对应分辨率的数据，后面的三个参数分别是横向分辨率和纵向分辨率以及刷新率</span><br><span class="hljs-comment"># 这里我们使用最常见的1080p 60帧</span><br><span class="hljs-comment"># 注意这里生成的Modeline这一行参数我们后面要用到，需要提前保存一下</span><br>$ cvt 1920 1080 60<br><span class="hljs-comment"># 1920x1080 59.96 Hz (CVT 2.07M9) hsync: 67.16 kHz; pclk: 173.00 MHz</span><br>Modeline <span class="hljs-string">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync<br><br><span class="hljs-comment"># 在xrandr中添加新的分辨率选项，参数直接照搬上面的即可</span><br>$ xrandr --newmode <span class="hljs-string">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync<br><br><span class="hljs-comment"># 再次查看分辨率，可以看到新增加的已经在列表中了</span><br><span class="hljs-comment"># 额外需要注意的是下面的VGA-1选项，后面要用到，这里是用来定位显示器的（如果有多个显示器的话）</span><br>$ xrandr <br>Screen 0: minimum 320 x 200, current 1024 x 768, maximum 1920 x 2048<br>VGA-1 connected primary 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm<br>   1024x768      60.00* <br>   800x600       60.32    56.25  <br>   640x480       59.94  <br>  1920x1080_60.00 (0x3ad) 173.000MHz -HSync +VSync<br>        h: width  1920 start 2048 end 2248 total 2576 skew    0 clock  67.16KHz<br>        v: height 1080 start 1083 end 1088 total 1120           clock  59.96Hz<br><br><span class="hljs-comment"># 将刚刚生成的分辨率选项添加到VGA-1这个显示器中</span><br>$ xrandr --addmode VGA-1 <span class="hljs-string">&quot;1920x1080_60.00&quot;</span><br><span class="hljs-comment"># 再次查看可以发现已经是正常的了</span><br>$ xrandr<br>Screen 0: minimum 320 x 200, current 1024 x 768, maximum 1920 x 2048<br>VGA-1 connected primary 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm<br>   1024x768      60.00* <br>   800x600       60.32    56.25  <br>   640x480       59.94  <br>   1920x1080_60.00  59.96  <br><br><span class="hljs-comment"># 手动调整分辨率为1080P，这时候应该就可以感觉到分辨率的变化了</span><br>$ xrandr -s 1920x1080_60.00<br>$ <br><br><br><span class="hljs-comment"># 为了保证重启后分辨率依旧生效，我们新建一个配置文件</span><br><span class="hljs-comment"># 需要注意的是文件中的Modeline这一行就是前面我们生成的参数，如果没保存的话再重新输一遍前面的cvt命令即可</span><br>[root@tiny-studio xorg.conf.d]<span class="hljs-comment"># vim /etc/X11/xorg.conf.d/monitor.conf</span><br>[root@tiny-studio xorg.conf.d]<span class="hljs-comment"># cat /etc/X11/xorg.conf.d/monitor.conf</span><br>Section <span class="hljs-string">&quot;Monitor&quot;</span><br>Identifier <span class="hljs-string">&quot;Configured Monitor&quot;</span><br>Modeline <span class="hljs-string">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync<br>Option <span class="hljs-string">&quot;PreferredMode&quot;</span> <span class="hljs-string">&quot;1920x1080_60.00&quot;</span><br>EndSection<br>Section <span class="hljs-string">&quot;Screen&quot;</span><br>Identifier <span class="hljs-string">&quot;Default Screen&quot;</span><br>Monitor <span class="hljs-string">&quot;Configured Monitor&quot;</span><br>Device <span class="hljs-string">&quot;Configured Video Device&quot;</span><br>EndSection<br>Section <span class="hljs-string">&quot;Device&quot;</span><br>Identifier <span class="hljs-string">&quot;Configured Video Device&quot;</span><br>EndSection<br></code></pre></td></tr></table></figure>
+<h1 id="1、CentOS8操作记录"><a href="#1、CentOS8操作记录" class="headerlink" title="1、CentOS8操作记录"></a>1、<code>CentOS8</code>操作记录</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 以下是CentOS8中的实际操作记录</span>
+
+<span class="token comment"># 使用xrandr查看目前支持的分辨率，这里我们可以看到只有三个，且和显示器的最佳分辨率都对不上</span>
+$ xrandr
+Screen <span class="token number">0</span>: minimum <span class="token number">320</span> x <span class="token number">200</span>, current <span class="token number">1024</span> x <span class="token number">768</span>, maximum <span class="token number">1920</span> x <span class="token number">2048</span>
+VGA-1 connected primary 1024x768+0+0 <span class="token punctuation">(</span>normal left inverted right x axis y axis<span class="token punctuation">)</span> 0mm x 0mm
+   1024x768      <span class="token number">60.00</span>* 
+   800x600       <span class="token number">60.32</span>    <span class="token number">56.25</span>  
+   640x480       <span class="token number">59.94</span>  
+
+
+<span class="token comment"># 使用cvt命令生成对应分辨率的数据，后面的三个参数分别是横向分辨率和纵向分辨率以及刷新率</span>
+<span class="token comment"># 这里我们使用最常见的1080p 60帧</span>
+<span class="token comment"># 注意这里生成的Modeline这一行参数我们后面要用到，需要提前保存一下</span>
+$ cvt <span class="token number">1920</span> <span class="token number">1080</span> <span class="token number">60</span>
+<span class="token comment"># 1920x1080 59.96 Hz (CVT 2.07M9) hsync: 67.16 kHz; pclk: 173.00 MHz</span>
+Modeline <span class="token string">"1920x1080_60.00"</span>  <span class="token number">173.00</span>  <span class="token number">1920</span> <span class="token number">2048</span> <span class="token number">2248</span> <span class="token number">2576</span>  <span class="token number">1080</span> <span class="token number">1083</span> <span class="token number">1088</span> <span class="token number">1120</span> -hsync +vsync
+
+<span class="token comment"># 在xrandr中添加新的分辨率选项，参数直接照搬上面的即可</span>
+$ xrandr --newmode <span class="token string">"1920x1080_60.00"</span>  <span class="token number">173.00</span>  <span class="token number">1920</span> <span class="token number">2048</span> <span class="token number">2248</span> <span class="token number">2576</span>  <span class="token number">1080</span> <span class="token number">1083</span> <span class="token number">1088</span> <span class="token number">1120</span> -hsync +vsync
+
+<span class="token comment"># 再次查看分辨率，可以看到新增加的已经在列表中了</span>
+<span class="token comment"># 额外需要注意的是下面的VGA-1选项，后面要用到，这里是用来定位显示器的（如果有多个显示器的话）</span>
+$ xrandr 
+Screen <span class="token number">0</span>: minimum <span class="token number">320</span> x <span class="token number">200</span>, current <span class="token number">1024</span> x <span class="token number">768</span>, maximum <span class="token number">1920</span> x <span class="token number">2048</span>
+VGA-1 connected primary 1024x768+0+0 <span class="token punctuation">(</span>normal left inverted right x axis y axis<span class="token punctuation">)</span> 0mm x 0mm
+   1024x768      <span class="token number">60.00</span>* 
+   800x600       <span class="token number">60.32</span>    <span class="token number">56.25</span>  
+   640x480       <span class="token number">59.94</span>  
+  1920x1080_60.00 <span class="token punctuation">(</span>0x3ad<span class="token punctuation">)</span> <span class="token number">173</span>.000MHz -HSync +VSync
+        h: width  <span class="token number">1920</span> start <span class="token number">2048</span> end <span class="token number">2248</span> total <span class="token number">2576</span> skew    <span class="token number">0</span> clock  <span class="token number">67</span>.16KHz
+        v: height <span class="token number">1080</span> start <span class="token number">1083</span> end <span class="token number">1088</span> total <span class="token number">1120</span>           clock  <span class="token number">59</span>.96Hz
+
+<span class="token comment"># 将刚刚生成的分辨率选项添加到VGA-1这个显示器中</span>
+$ xrandr --addmode VGA-1 <span class="token string">"1920x1080_60.00"</span>
+<span class="token comment"># 再次查看可以发现已经是正常的了</span>
+$ xrandr
+Screen <span class="token number">0</span>: minimum <span class="token number">320</span> x <span class="token number">200</span>, current <span class="token number">1024</span> x <span class="token number">768</span>, maximum <span class="token number">1920</span> x <span class="token number">2048</span>
+VGA-1 connected primary 1024x768+0+0 <span class="token punctuation">(</span>normal left inverted right x axis y axis<span class="token punctuation">)</span> 0mm x 0mm
+   1024x768      <span class="token number">60.00</span>* 
+   800x600       <span class="token number">60.32</span>    <span class="token number">56.25</span>  
+   640x480       <span class="token number">59.94</span>  
+   1920x1080_60.00  <span class="token number">59.96</span>  
+
+<span class="token comment"># 手动调整分辨率为1080P，这时候应该就可以感觉到分辨率的变化了</span>
+$ xrandr -s 1920x1080_60.00
+$ 
+
+
+<span class="token comment"># 为了保证重启后分辨率依旧生效，我们新建一个配置文件</span>
+<span class="token comment"># 需要注意的是文件中的Modeline这一行就是前面我们生成的参数，如果没保存的话再重新输一遍前面的cvt命令即可</span>
+<span class="token punctuation">[</span>root@tiny-studio xorg.conf.d<span class="token punctuation">]</span><span class="token comment"># vim /etc/X11/xorg.conf.d/monitor.conf</span>
+<span class="token punctuation">[</span>root@tiny-studio xorg.conf.d<span class="token punctuation">]</span><span class="token comment"># cat /etc/X11/xorg.conf.d/monitor.conf</span>
+Section <span class="token string">"Monitor"</span>
+Identifier <span class="token string">"Configured Monitor"</span>
+Modeline <span class="token string">"1920x1080_60.00"</span>  <span class="token number">173.00</span>  <span class="token number">1920</span> <span class="token number">2048</span> <span class="token number">2248</span> <span class="token number">2576</span>  <span class="token number">1080</span> <span class="token number">1083</span> <span class="token number">1088</span> <span class="token number">1120</span> -hsync +vsync
+Option <span class="token string">"PreferredMode"</span> <span class="token string">"1920x1080_60.00"</span>
+EndSection
+Section <span class="token string">"Screen"</span>
+Identifier <span class="token string">"Default Screen"</span>
+Monitor <span class="token string">"Configured Monitor"</span>
+Device <span class="token string">"Configured Video Device"</span>
+EndSection
+Section <span class="token string">"Device"</span>
+Identifier <span class="token string">"Configured Video Device"</span>
+EndSection<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
 
 
 <h1 id="2、Ubuntu18-04-3操作记录"><a href="#2、Ubuntu18-04-3操作记录" class="headerlink" title="2、Ubuntu18.04.3操作记录"></a>2、<code>Ubuntu18.04.3</code>操作记录</h1><p><code>Ubuntu</code>上面操作和<code>CentOS8</code>基本一样，除了最后的配置文件从<code>/etc/X11/xorg.conf.d/monitor.conf</code>变成了<code>/etc/X11/xorg.conf.d/monitor.conf</code>，其他的基本一样，这里就不再赘述。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 以下为ubuntu18.04.3上的操作记录</span><br><br>root@Tiny-Studio:~<span class="hljs-comment"># </span><br>root@Tiny-Studio:~<span class="hljs-comment"># xrandr</span><br>Screen 0: minimum 320 x 200, current 1024 x 768, maximum 1920 x 2048<br>VGA-1 connected primary 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm<br>   1024x768      60.00* <br>   800x600       60.32    56.25  <br>   640x480       59.94  <br>root@Tiny-Studio:~<span class="hljs-comment"># cvt 1920 1080 60</span><br><span class="hljs-comment"># 1920x1080 59.96 Hz (CVT 2.07M9) hsync: 67.16 kHz; pclk: 173.00 MHz</span><br>Modeline <span class="hljs-string">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync<br>root@Tiny-Studio:~<span class="hljs-comment"># xrandr --newmode &quot;1920x1080_60.00&quot; 173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync</span><br>root@Tiny-Studio:~<span class="hljs-comment"># xrandr</span><br>Screen 0: minimum 320 x 200, current 1024 x 768, maximum 1920 x 2048<br>VGA-1 connected primary 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm<br>   1024x768      60.00* <br>   800x600       60.32    56.25  <br>   640x480       59.94  <br>  1920x1080_60.00 (0x306) 173.000MHz -HSync +VSync<br>        h: width  1920 start 2048 end 2248 total 2576 skew    0 clock  67.16KHz<br>        v: height 1080 start 1083 end 1088 total 1120           clock  59.96Hz<br>root@Tiny-Studio:~<span class="hljs-comment"># xrandr --addmode VGA-1 &quot;1920x1080_60.00&quot;</span><br>root@Tiny-Studio:~<span class="hljs-comment"># xrandr</span><br>Screen 0: minimum 320 x 200, current 1024 x 768, maximum 1920 x 2048<br>VGA-1 connected primary 1024x768+0+0 (normal left inverted right x axis y axis) 0mm x 0mm<br>   1024x768      60.00* <br>   800x600       60.32    56.25  <br>   640x480       59.94  <br>   1920x1080_60.00  59.96  <br>root@Tiny-Studio:~<span class="hljs-comment"># xrandr -s 1920x1080_60.00</span><br><br>root@Tiny-Studio:~<span class="hljs-comment"># vim /etc/X11/xorg.conf</span><br>root@Tiny-Studio:~<span class="hljs-comment"># cat /etc/X11/xorg.conf </span><br>Section <span class="hljs-string">&quot;Monitor&quot;</span><br>Identifier <span class="hljs-string">&quot;Configured Monitor&quot;</span><br>Modeline <span class="hljs-string">&quot;1920x1080_60.00&quot;</span>  173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync<br>Option <span class="hljs-string">&quot;PreferredMode&quot;</span> <span class="hljs-string">&quot;1920x1080_60.00&quot;</span><br>EndSection<br>Section <span class="hljs-string">&quot;Screen&quot;</span><br>Identifier <span class="hljs-string">&quot;Default Screen&quot;</span><br>Monitor <span class="hljs-string">&quot;Configured Monitor&quot;</span><br>Device <span class="hljs-string">&quot;Configured Video Device&quot;</span><br>EndSection<br>Section <span class="hljs-string">&quot;Device&quot;</span><br>Identifier <span class="hljs-string">&quot;Configured Video Device&quot;</span><br>EndSection<br>root@Tiny-Studio:~<span class="hljs-comment"># </span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 以下为ubuntu18.04.3上的操作记录</span>
+
+root@Tiny-Studio:~<span class="token comment"># </span>
+root@Tiny-Studio:~<span class="token comment"># xrandr</span>
+Screen <span class="token number">0</span>: minimum <span class="token number">320</span> x <span class="token number">200</span>, current <span class="token number">1024</span> x <span class="token number">768</span>, maximum <span class="token number">1920</span> x <span class="token number">2048</span>
+VGA-1 connected primary 1024x768+0+0 <span class="token punctuation">(</span>normal left inverted right x axis y axis<span class="token punctuation">)</span> 0mm x 0mm
+   1024x768      <span class="token number">60.00</span>* 
+   800x600       <span class="token number">60.32</span>    <span class="token number">56.25</span>  
+   640x480       <span class="token number">59.94</span>  
+root@Tiny-Studio:~<span class="token comment"># cvt 1920 1080 60</span>
+<span class="token comment"># 1920x1080 59.96 Hz (CVT 2.07M9) hsync: 67.16 kHz; pclk: 173.00 MHz</span>
+Modeline <span class="token string">"1920x1080_60.00"</span>  <span class="token number">173.00</span>  <span class="token number">1920</span> <span class="token number">2048</span> <span class="token number">2248</span> <span class="token number">2576</span>  <span class="token number">1080</span> <span class="token number">1083</span> <span class="token number">1088</span> <span class="token number">1120</span> -hsync +vsync
+root@Tiny-Studio:~<span class="token comment"># xrandr --newmode "1920x1080_60.00" 173.00  1920 2048 2248 2576  1080 1083 1088 1120 -hsync +vsync</span>
+root@Tiny-Studio:~<span class="token comment"># xrandr</span>
+Screen <span class="token number">0</span>: minimum <span class="token number">320</span> x <span class="token number">200</span>, current <span class="token number">1024</span> x <span class="token number">768</span>, maximum <span class="token number">1920</span> x <span class="token number">2048</span>
+VGA-1 connected primary 1024x768+0+0 <span class="token punctuation">(</span>normal left inverted right x axis y axis<span class="token punctuation">)</span> 0mm x 0mm
+   1024x768      <span class="token number">60.00</span>* 
+   800x600       <span class="token number">60.32</span>    <span class="token number">56.25</span>  
+   640x480       <span class="token number">59.94</span>  
+  1920x1080_60.00 <span class="token punctuation">(</span>0x306<span class="token punctuation">)</span> <span class="token number">173</span>.000MHz -HSync +VSync
+        h: width  <span class="token number">1920</span> start <span class="token number">2048</span> end <span class="token number">2248</span> total <span class="token number">2576</span> skew    <span class="token number">0</span> clock  <span class="token number">67</span>.16KHz
+        v: height <span class="token number">1080</span> start <span class="token number">1083</span> end <span class="token number">1088</span> total <span class="token number">1120</span>           clock  <span class="token number">59</span>.96Hz
+root@Tiny-Studio:~<span class="token comment"># xrandr --addmode VGA-1 "1920x1080_60.00"</span>
+root@Tiny-Studio:~<span class="token comment"># xrandr</span>
+Screen <span class="token number">0</span>: minimum <span class="token number">320</span> x <span class="token number">200</span>, current <span class="token number">1024</span> x <span class="token number">768</span>, maximum <span class="token number">1920</span> x <span class="token number">2048</span>
+VGA-1 connected primary 1024x768+0+0 <span class="token punctuation">(</span>normal left inverted right x axis y axis<span class="token punctuation">)</span> 0mm x 0mm
+   1024x768      <span class="token number">60.00</span>* 
+   800x600       <span class="token number">60.32</span>    <span class="token number">56.25</span>  
+   640x480       <span class="token number">59.94</span>  
+   1920x1080_60.00  <span class="token number">59.96</span>  
+root@Tiny-Studio:~<span class="token comment"># xrandr -s 1920x1080_60.00</span>
+
+root@Tiny-Studio:~<span class="token comment"># vim /etc/X11/xorg.conf</span>
+root@Tiny-Studio:~<span class="token comment"># cat /etc/X11/xorg.conf </span>
+Section <span class="token string">"Monitor"</span>
+Identifier <span class="token string">"Configured Monitor"</span>
+Modeline <span class="token string">"1920x1080_60.00"</span>  <span class="token number">173.00</span>  <span class="token number">1920</span> <span class="token number">2048</span> <span class="token number">2248</span> <span class="token number">2576</span>  <span class="token number">1080</span> <span class="token number">1083</span> <span class="token number">1088</span> <span class="token number">1120</span> -hsync +vsync
+Option <span class="token string">"PreferredMode"</span> <span class="token string">"1920x1080_60.00"</span>
+EndSection
+Section <span class="token string">"Screen"</span>
+Identifier <span class="token string">"Default Screen"</span>
+Monitor <span class="token string">"Configured Monitor"</span>
+Device <span class="token string">"Configured Video Device"</span>
+EndSection
+Section <span class="token string">"Device"</span>
+Identifier <span class="token string">"Configured Video Device"</span>
+EndSection
+root@Tiny-Studio:~<span class="token comment"># </span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -590,6 +704,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

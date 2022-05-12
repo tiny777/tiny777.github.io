@@ -44,6 +44,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -221,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.1k words
+          1.9k words
         
       </span>
     
@@ -232,7 +234,7 @@
         
         
         
-          18 mins
+          16 mins
         
       </span>
     
@@ -287,11 +289,71 @@
 
 
 <p>VSC的安装非常简单，因为微软官方有提供yum repo，因此我们直接添加repo然后使用yum安装即可，注意在CentOS8中的yum实际上已经被替换成了dnf，所以使用yum或者是dnf都是一样的。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 导入gpgkey</span><br>sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc<br><span class="hljs-comment"># 新建repo文件</span><br>sudo sh -c <span class="hljs-string">&#x27;echo -e &quot;[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc&quot; &gt; /etc/yum.repos.d/vscode.repo&#x27;</span><br><span class="hljs-comment"># 更新repo list</span><br>sudo yum check-update<br><span class="hljs-comment"># 安装vsc</span><br>sudo yum install code<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 导入gpgkey</span>
+<span class="token function">sudo</span> <span class="token function">rpm</span> --import https://packages.microsoft.com/keys/microsoft.asc
+<span class="token comment"># 新建repo文件</span>
+<span class="token function">sudo</span> <span class="token function">sh</span> -c <span class="token string">'echo -e "[code]<span class="token entity" title="\n">\n</span>name=Visual Studio Code<span class="token entity" title="\n">\n</span>baseurl=https://packages.microsoft.com/yumrepos/vscode<span class="token entity" title="\n">\n</span>enabled=1<span class="token entity" title="\n">\n</span>gpgcheck=1<span class="token entity" title="\n">\n</span>gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'</span>
+<span class="token comment"># 更新repo list</span>
+<span class="token function">sudo</span> yum check-update
+<span class="token comment"># 安装vsc</span>
+<span class="token function">sudo</span> yum <span class="token function">install</span> code<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p>VSC官网提供了非常详细的安装教程，需要的同学可以点击<a target="_blank" rel="noopener" href="https://code.visualstudio.com/docs/setup/linux#_rhel-fedora-and-centos-based-distributions">这里查看</a>。下面只贴出安装记录。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc<br>$ sudo sh -c <span class="hljs-string">&#x27;echo -e &quot;[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc&quot; &gt; /etc/yum.repos.d/vscode.repo&#x27;</span><br><br><br>$ cat /etc/yum.repos.d/vscode.repo <br>[code]<br>name=Visual Studio Code<br>baseurl=https://packages.microsoft.com/yumrepos/vscode<br>enabled=1<br>gpgcheck=1<br>gpgkey=https://packages.microsoft.com/keys/microsoft.asc<br><br>$ sudo dnf check-update<br>Visual Studio Code                                                              122 kB/s | 2.2 MB     00:18    <br><br>$ dnf install code<br><br>依赖关系解决。<br>================================================================================================================<br><br> 软件包               架构                   版本                                    仓库                  大小<br>================================================================================================================<br><br>Installing:<br> code                 x86_64                 1.39.2-1571154220.el7                   code                  77 M<br><br>事务概要<br>================================================================================================================<br><br>安装  1 软件包<br><br>总下载：77 M<br>安装大小：230 M<br>确定吗？[y/N]： y<br>下载软件包：<br><br>code-1.39.2-1571154220.el7.x86_64.rpm                                           4.5 MB/s |  77 MB     00:17    <br>----------------------------------------------------------------------------------------------------------------<br><br>总计                                                                            4.5 MB/s |  77 MB     00:17     <br>运行事务检查<br>事务检查成功。<br>运行事务测试<br>事务测试成功。<br>运行事务<br>  准备中      :                                                                                             1/1 <br>  Installing  : code-1.39.2-1571154220.el7.x86_64                                                           1/1 <br>  运行脚本    : code-1.39.2-1571154220.el7.x86_64                                                           1/1 <br>  验证        : code-1.39.2-1571154220.el7.x86_64                                                           1/1 <br><br>已安装:<br>  code-1.39.2-1571154220.el7.x86_64                                                                             <br><br>完毕！<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">sudo</span> <span class="token function">rpm</span> --import https://packages.microsoft.com/keys/microsoft.asc
+$ <span class="token function">sudo</span> <span class="token function">sh</span> -c <span class="token string">'echo -e "[code]<span class="token entity" title="\n">\n</span>name=Visual Studio Code<span class="token entity" title="\n">\n</span>baseurl=https://packages.microsoft.com/yumrepos/vscode<span class="token entity" title="\n">\n</span>enabled=1<span class="token entity" title="\n">\n</span>gpgcheck=1<span class="token entity" title="\n">\n</span>gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'</span>
+
+
+$ <span class="token function">cat</span> /etc/yum.repos.d/vscode.repo 
+<span class="token punctuation">[</span>code<span class="token punctuation">]</span>
+<span class="token assign-left variable">name</span><span class="token operator">=</span>Visual Studio Code
+<span class="token assign-left variable">baseurl</span><span class="token operator">=</span>https://packages.microsoft.com/yumrepos/vscode
+<span class="token assign-left variable">enabled</span><span class="token operator">=</span><span class="token number">1</span>
+<span class="token assign-left variable">gpgcheck</span><span class="token operator">=</span><span class="token number">1</span>
+<span class="token assign-left variable">gpgkey</span><span class="token operator">=</span>https://packages.microsoft.com/keys/microsoft.asc
+
+$ <span class="token function">sudo</span> dnf check-update
+Visual Studio Code                                                              <span class="token number">122</span> kB/s <span class="token operator">|</span> <span class="token number">2.2</span> MB     00:18    
+
+$ dnf <span class="token function">install</span> code
+
+依赖关系解决。
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+ 软件包               架构                   版本                                    仓库                  大小
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+Installing:
+ code                 x86_64                 <span class="token number">1.39</span>.2-1571154220.el7                   code                  <span class="token number">77</span> M
+
+事务概要
+<span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span>
+
+安装  <span class="token number">1</span> 软件包
+
+总下载：77 M
+安装大小：230 M
+确定吗？<span class="token punctuation">[</span>y/N<span class="token punctuation">]</span>： y
+下载软件包：
+
+code-1.39.2-1571154220.el7.x86_64.rpm                                           <span class="token number">4.5</span> MB/s <span class="token operator">|</span>  <span class="token number">77</span> MB     00:17    
+----------------------------------------------------------------------------------------------------------------
+
+总计                                                                            <span class="token number">4.5</span> MB/s <span class="token operator">|</span>  <span class="token number">77</span> MB     00:17     
+运行事务检查
+事务检查成功。
+运行事务测试
+事务测试成功。
+运行事务
+  准备中      <span class="token builtin class-name">:</span>                                                                                             <span class="token number">1</span>/1 
+  Installing  <span class="token builtin class-name">:</span> code-1.39.2-1571154220.el7.x86_64                                                           <span class="token number">1</span>/1 
+  运行脚本    <span class="token builtin class-name">:</span> code-1.39.2-1571154220.el7.x86_64                                                           <span class="token number">1</span>/1 
+  验证        <span class="token builtin class-name">:</span> code-1.39.2-1571154220.el7.x86_64                                                           <span class="token number">1</span>/1 
+
+已安装:
+  code-1.39.2-1571154220.el7.x86_64                                                                             
+
+完毕！<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
               
@@ -584,6 +646,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

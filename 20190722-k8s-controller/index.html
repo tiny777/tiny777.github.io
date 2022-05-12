@@ -46,6 +46,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -223,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.8k words
+          4.6k words
         
       </span>
     
@@ -234,7 +236,7 @@
         
         
         
-          40 mins
+          39 mins
         
       </span>
     
@@ -297,7 +299,7 @@
 </li>
 </ul>
 <h1 id="2、Deployment"><a href="#2、Deployment" class="headerlink" title="2、Deployment"></a>2、Deployment</h1><h2 id="2-1-cli部署"><a href="#2-1-cli部署" class="headerlink" title="2.1 cli部署"></a>2.1 cli部署</h2><p>我们先使用命令行（cli）创建一个deployment，名字（<code>NAME</code>）是<code>nginx-clideployment</code>，使用的镜像（<code>image</code>）版本为<code>1.17</code>，创建的副本（<code>replicas</code>）数量为<code>3</code>。</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">kubectl <span class="hljs-builtin-name">run</span> nginx-clideployment <span class="hljs-attribute">--image</span>=nginx:1.17 <span class="hljs-attribute">--replicas</span>=3<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubectl run nginx-clideployment --image&#x3D;nginx:1.17 --replicas&#x3D;3<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>我们查看一下部署是否成功：</p>
 <p><img src="https://resource.tinychen.com/blog/20190722/mClOrDnEL2WF.png" srcset="/img/loading.gif" lazyload></p>
@@ -305,13 +307,13 @@
 <p>我们还可以发现ReplicaSet的命名就是在我们指定的<code>NAME</code>后面加上了一串哈希数值。</p>
 <p><code>&lt;the name of the Deployment&gt;-&lt;hash value of the pod template&gt;</code>.</p>
 <p>想要查看更详细的pod情况，我们可以这样：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">kubectl get pod -o wide<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">kubectl get pod -o wide<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190722/AL5Cu1h0amel.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以发现三个pod被k8s自动的分配到了三个节点上而实现集群中的负载均衡（LB），而这里的IP是创建pod的时候进行随机分配的，我们并不能预知。</p>
 <p>如果想要查看某一个pod部署之后的情况，我们可以这样：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">kubectl describe pods nginx-clideployment-5696d55d9d-gdtrt<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">kubectl describe pods nginx-clideployment-5696d55d9d-gdtrt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>如果我们只是输入<code>nginx-clideployment</code>的话就会把所有相关的<code>nginx-clideployment</code>都列出来。</p>
 <p><img src="https://resource.tinychen.com/blog/20190722/Jutvf3JCdqkU.png" srcset="/img/loading.gif" lazyload></p>
@@ -322,7 +324,20 @@
 <p><code>Volumes</code>称之为卷，这个概念我们暂时还没有接触到，等到我们的宿主机需要与容器内的服务进行数据交互的时候再进行了解。</p>
 <p><code>Events</code>则相当于log，记录了pod运行的所有情况，如果遇到了运行不正常的情况，我们也可以查看这里来了解详情。</p>
 <h2 id="2-2-yaml配置文件部署"><a href="#2-2-yaml配置文件部署" class="headerlink" title="2.2 yaml配置文件部署"></a>2.2 yaml配置文件部署</h2><p>接下来我们尝试使用yaml文件来进行部署。我们新建一个文件，命名为<code>nginx-yamldeployment.yml</code></p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">extensions/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-yamldeployment</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">5</span><br>  <span class="hljs-attr">template:</span> <br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">web_server</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">nginx:1.17.1</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> extensions/v1beta1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx<span class="token punctuation">-</span>yamldeployment
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">5</span>
+  <span class="token key atrule">template</span><span class="token punctuation">:</span> 
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> web_server
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx
+        <span class="token key atrule">image</span><span class="token punctuation">:</span> nginx<span class="token punctuation">:</span>1.17.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <ul>
 <li>apiVersion是当前配置格式的版本。</li>
@@ -335,13 +350,13 @@
 <li>spec 描述Pod的规格，此部分定义Pod中每一个容器的属性，name和image是必需的。</li>
 </ul>
 <p>接下来我们使用<code>kubectl apply</code>指令进行部署。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">kubectl apply -f nginx-yamldeployment.yml<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">kubectl apply -f nginx-yamldeployment.yml<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190722/1qNQA1MogwjW.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20190722/UeztE4dn2Akf.png" srcset="/img/loading.gif" lazyload></p>
 <p>我们可以看到这里是已经运行正常了，那么如果我们想要修改这个deployment的属性，比如说副本数量从5改为6，那么我们可以直接编辑刚刚的<code>nginx-yamldeployment.yml</code>文件，然后再执行<code>kubectl apply -f nginx-yamldeployment.yml</code>，但是如果文件找不到了，我们可以使用另外的方法：</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">kubectl <span class="hljs-builtin-name">edit</span> deployments.apps nginx-yamldeployment<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubectl edit deployments.apps nginx-yamldeployment<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>这样子我们就能直接编辑这个deployment的yaml配置文件，编辑的操作方式和vim相同，修改完成后会自动生效。</p>
 <p><img src="https://resource.tinychen.com/blog/20190722/X9zrozUlt8TB.png" srcset="/img/loading.gif" lazyload></p>
@@ -369,19 +384,36 @@
 </ul>
 <p>直接照搬官网的解释可能会有些难以理解，我们来运行一个例子就能很好的说明情况了。</p>
 <p>我们先新建一个job的配置文件，命名为<code>pijob.yml</code>,这个任务是将pi计算到小数点后两千位，然后再打印出来。我们运行一下看看。</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">batch/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Job</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">pi</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">pi</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">perl</span><br>        <span class="hljs-attr">command:</span> [<span class="hljs-string">&quot;perl&quot;</span>,  <span class="hljs-string">&quot;-Mbignum=bpi&quot;</span>, <span class="hljs-string">&quot;-wle&quot;</span>, <span class="hljs-string">&quot;print bpi(2000)&quot;</span>]<br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Never</span><br>  <span class="hljs-attr">backoffLimit:</span> <span class="hljs-number">4</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> batch/v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Job
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> pi
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">template</span><span class="token punctuation">:</span>
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> pi
+        <span class="token key atrule">image</span><span class="token punctuation">:</span> perl
+        <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"perl"</span><span class="token punctuation">,</span>  <span class="token string">"-Mbignum=bpi"</span><span class="token punctuation">,</span> <span class="token string">"-wle"</span><span class="token punctuation">,</span> <span class="token string">"print bpi(2000)"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">restartPolicy</span><span class="token punctuation">:</span> Never
+  <span class="token key atrule">backoffLimit</span><span class="token punctuation">:</span> <span class="token number">4</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190722/VP8WHET3smgj.png" srcset="/img/loading.gif" lazyload></p>
 <p>我们查看它的详细情况</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">kubectl describe jobs/<span class="hljs-literal">pi</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">kubectl describe jobs&#x2F;pi<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190722/0A67XaVCvl2R.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里可以看到，运行了37s后成功计算出结果。</p>
 <p><img src="https://resource.tinychen.com/blog/20190722/CXlbvVrzRVCF.png" srcset="/img/loading.gif" lazyload></p>
 <p>查看pod也可以看到它的状态是<code>Completed</code>，说明已经完成了。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看创建的pod的名称</span><br>pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath=<span class="hljs-string">&#x27;&#123;.items[*].metadata.name&#125;&#x27;</span>)<br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$pods</span><br><br><span class="hljs-comment"># 查看pod的运行结果</span><br>kubectl logs <span class="hljs-variable">$pods</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看创建的pod的名称</span>
+<span class="token assign-left variable">pods</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span>kubectl get pods --selector<span class="token operator">=</span>job-name<span class="token operator">=</span>pi --output<span class="token operator">=</span>jsonpath<span class="token operator">=</span><span class="token string">'&#123;.items[*].metadata.name&#125;'</span><span class="token variable">)</span></span>
+<span class="token builtin class-name">echo</span> <span class="token variable">$pods</span>
+
+<span class="token comment"># 查看pod的运行结果</span>
+kubectl logs <span class="token variable">$pods</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190722/Rfm3s2p7aiIR.png" srcset="/img/loading.gif" lazyload></p>
@@ -410,10 +442,30 @@
 <p>Cronjob只负责创建与其计划相匹配的Job，而Job则负责管理它所代表的Pod。也就是说，CronJob只负责创建Job，具体的管理操作还是由Job来负责。</p>
 <p>这里是CronJob的<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">官方文档</a>。</p>
 <p>我们新建一个<code>hellocronjob.yml</code>来查看一下它的工作情况。</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">batch/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">CronJob</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">hello</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">schedule:</span> <span class="hljs-string">&quot;*/1 * * * *&quot;</span><br>  <span class="hljs-attr">jobTemplate:</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">template:</span><br>        <span class="hljs-attr">spec:</span><br>          <span class="hljs-attr">containers:</span><br>          <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">hello</span><br>            <span class="hljs-attr">image:</span> <span class="hljs-string">busybox</span><br>            <span class="hljs-attr">args:</span><br>            <span class="hljs-bullet">-</span> <span class="hljs-string">/bin/sh</span><br>            <span class="hljs-bullet">-</span> <span class="hljs-string">-c</span><br>            <span class="hljs-bullet">-</span> <span class="hljs-string">date;</span> <span class="hljs-string">echo</span> <span class="hljs-string">Hello</span> <span class="hljs-string">from</span> <span class="hljs-string">the</span> <span class="hljs-string">Kubernetes</span> <span class="hljs-string">cluster</span><br>          <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">OnFailure</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> batch/v1beta1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> CronJob
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> hello
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">schedule</span><span class="token punctuation">:</span> <span class="token string">"*/1 * * * *"</span>
+  <span class="token key atrule">jobTemplate</span><span class="token punctuation">:</span>
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">template</span><span class="token punctuation">:</span>
+        <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+          <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+          <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> hello
+            <span class="token key atrule">image</span><span class="token punctuation">:</span> busybox
+            <span class="token key atrule">args</span><span class="token punctuation">:</span>
+            <span class="token punctuation">-</span> /bin/sh
+            <span class="token punctuation">-</span> <span class="token punctuation">-</span>c
+            <span class="token punctuation">-</span> date; echo Hello from the Kubernetes cluster
+          <span class="token key atrule">restartPolicy</span><span class="token punctuation">:</span> OnFailure<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>这个定时任务的操作就是每分钟输出一次时间和<code>Hello from the Kubernetes cluster</code>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看cronjob的运行状态</span><br>kubectl get cronjobs.batch<br><br>kubectl get jobs.batch --watch<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看cronjob的运行状态</span>
+kubectl get cronjobs.batch
+
+kubectl get jobs.batch --watch<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190722/N47BvxckinQ4.png" srcset="/img/loading.gif" lazyload></p>
@@ -714,6 +766,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

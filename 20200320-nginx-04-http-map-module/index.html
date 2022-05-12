@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -288,10 +290,12 @@
 
 <p>map模块是由<code>ngx_http_map_module</code>模块提供的，<strong>只能在<code>http模块</code>下使用</strong>，nginx默认自带安装。<strong>map 的主要作用简单来说就和编程语言中的赋值语句有点像，只不过这里称为映射（map）。</strong>具体来说是创建一个自定义变量，去匹配某些指定的字符串或者是正则表达式，如果匹配成功则将该匹配值赋值给该自定义变量，然后该自定义变量可以作其他用途。</p>
 <h1 id="1、语法格式"><a href="#1、语法格式" class="headerlink" title="1、语法格式"></a>1、语法格式</h1><p>我们先来看一下<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_map_module.html">官网</a>给出的语法格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">Syntax:	map string <span class="hljs-variable">$variable</span> &#123; ... &#125;<br>Default:	—<br>Context:	http<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Syntax:	map string <span class="token variable">$variable</span> <span class="token punctuation">&#123;</span> <span class="token punctuation">..</span>. <span class="token punctuation">&#125;</span>
+Default:	—
+Context:	http<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
 <p>实际上现在的版本中map指令后面的第一个参数也就是源变量可以是字符串、正则表达式或者是另一个变量。因此这样表示会更容易理解一些。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">Syntax:	map <span class="hljs-variable">$source_var</span> <span class="hljs-variable">$result_var</span> &#123; ... &#125;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Syntax:	map <span class="token variable">$source_var</span> <span class="token variable">$result_var</span> <span class="token punctuation">&#123;</span> <span class="token punctuation">..</span>. <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>此外，map模块内还有<code>default</code>、<code>hostnames</code>、<code>include</code>、<code>volatile</code>这四个关键字可以使用</p>
 <ul>
@@ -301,13 +305,27 @@
 <li><code>volatile</code>：指明该变量不可缓存</li>
 </ul>
 <p>我们来看一个复杂一点的配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">map <span class="hljs-variable">$http_host</span> <span class="hljs-variable">$name</span> &#123;<br>    default 0;<br>    hostnames;<br>    volatile;<br>    *.example.com 1;<br>    *.example.org 2;<br>    *.example.net 3;<br>    mail.* 4;<br>    mail.example.com 5;<br>    include /var/www/html/host.list;<br>&#125;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">map <span class="token variable">$http_host</span> <span class="token variable">$name</span> <span class="token punctuation">&#123;</span>
+    default <span class="token number">0</span><span class="token punctuation">;</span>
+    hostnames<span class="token punctuation">;</span>
+    volatile<span class="token punctuation">;</span>
+    *.example.com <span class="token number">1</span><span class="token punctuation">;</span>
+    *.example.org <span class="token number">2</span><span class="token punctuation">;</span>
+    *.example.net <span class="token number">3</span><span class="token punctuation">;</span>
+    mail.* <span class="token number">4</span><span class="token punctuation">;</span>
+    mail.example.com <span class="token number">5</span><span class="token punctuation">;</span>
+    include /var/www/html/host.list<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>需要注意这里的include使用的文件格式应该如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-variable">$source_var0</span> <span class="hljs-variable">$result_var0</span>;<br><span class="hljs-variable">$source_var1</span> <span class="hljs-variable">$result_var1</span>;<br>...<br><span class="hljs-variable">$source_varN</span> <span class="hljs-variable">$result_varN</span>;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token variable">$source_var0</span> <span class="token variable">$result_var0</span><span class="token punctuation">;</span>
+<span class="token variable">$source_var1</span> <span class="token variable">$result_var1</span><span class="token punctuation">;</span>
+<span class="token punctuation">..</span>.
+<span class="token variable">$source_varN</span> <span class="token variable">$result_varN</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>例如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">nginx.example.com 7;<br>awesome.example.com 8;<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">nginx.example.com <span class="token number">7</span><span class="token punctuation">;</span>
+awesome.example.com <span class="token number">8</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <h1 id="2、注意事项"><a href="#2、注意事项" class="headerlink" title="2、注意事项"></a>2、注意事项</h1><p>这里有几点需要注意：</p>
 <ul>
@@ -624,6 +642,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

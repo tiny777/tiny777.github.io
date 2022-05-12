@@ -45,6 +45,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -233,7 +235,7 @@
         
         
         
-          27 mins
+          26 mins
         
       </span>
     
@@ -297,11 +299,28 @@
 <li><p>用户任务调度：用户定期要执行的工作，比如用户数据备份、定时邮件提醒等。用户可以使用 crontab 工具来定制自己的计划任务。<strong>所有用户定义的crontab 文件都被保存在 /var/spool/cron目录中。其文件名与用户名一致。</strong></p>
 </li>
 </ul>
-<h1 id="2、cron安装"><a href="#2、cron安装" class="headerlink" title="2、cron安装"></a>2、cron安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># cron的安装进程是cronie</span><br>yum install -y cronie<br></code></pre></td></tr></table></figure>
+<h1 id="2、cron安装"><a href="#2、cron安装" class="headerlink" title="2、cron安装"></a>2、cron安装</h1><div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cron的安装进程是cronie</span>
+yum <span class="token function">install</span> -y cronie<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190709/O6eDpJ2adV2B.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 设置cron开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> crond.service<br><br><span class="hljs-comment"># 关闭cron开机启动</span><br>systemctl <span class="hljs-built_in">disable</span> crond.service<br><br><span class="hljs-comment"># 启动cron</span><br>systemctl start crond.service<br><br><span class="hljs-comment"># 查看cron运行状态</span><br>systemctl status crond.service<br><br><span class="hljs-comment"># 重启cron</span><br>systemctl restart crond.service<br><br><span class="hljs-comment"># 关闭cron</span><br>systemctl stop crond.service<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 设置cron开机启动</span>
+systemctl <span class="token builtin class-name">enable</span> crond.service
+
+<span class="token comment"># 关闭cron开机启动</span>
+systemctl disable crond.service
+
+<span class="token comment"># 启动cron</span>
+systemctl start crond.service
+
+<span class="token comment"># 查看cron运行状态</span>
+systemctl status crond.service
+
+<span class="token comment"># 重启cron</span>
+systemctl restart crond.service
+
+<span class="token comment"># 关闭cron</span>
+systemctl stop crond.service<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 
@@ -309,7 +328,23 @@
 <p><img src="https://resource.tinychen.com/blog/20190710/fY25X17dYdiG.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="3-1-etc-crontab"><a href="#3-1-etc-crontab" class="headerlink" title="3.1 /etc/crontab"></a>3.1 /etc/crontab</h2><p>我们cat一下<code>/etc/crontab</code>这个文件看看里面的内容</p>
 <p><img src="https://resource.tinychen.com/blog/20190709/UUFUSB1FVE07.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用哪种she11接口</span><br>SHELL=/bin/bash<br><span class="hljs-comment"># 执行文件搜寻路径</span><br>PATH=/sbin:/bin:/usr/sbin:/usr/bin<br><span class="hljs-comment"># 若有额外STDOUT，以email将数据送给谁</span><br>MAILTO=root<br><br><span class="hljs-comment"># For details see man 4 crontabs</span><br><br><span class="hljs-comment"># Example of job definition:</span><br><span class="hljs-comment"># .---------------- minute (0 - 59)</span><br><span class="hljs-comment"># |  .------------- hour (0 - 23)</span><br><span class="hljs-comment"># |  |  .---------- day of month (1 - 31)</span><br><span class="hljs-comment"># |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...</span><br><span class="hljs-comment"># |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat</span><br><span class="hljs-comment"># |  |  |  |  |</span><br><span class="hljs-comment"># *  *  *  *  * user-name  command to be executed</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用哪种she11接口</span>
+<span class="token assign-left variable"><span class="token environment constant">SHELL</span></span><span class="token operator">=</span>/bin/bash
+<span class="token comment"># 执行文件搜寻路径</span>
+<span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span>/sbin:/bin:/usr/sbin:/usr/bin
+<span class="token comment"># 若有额外STDOUT，以email将数据送给谁</span>
+<span class="token assign-left variable">MAILTO</span><span class="token operator">=</span>root
+
+<span class="token comment"># For details see man 4 crontabs</span>
+
+<span class="token comment"># Example of job definition:</span>
+<span class="token comment"># .---------------- minute (0 - 59)</span>
+<span class="token comment"># |  .------------- hour (0 - 23)</span>
+<span class="token comment"># |  |  .---------- day of month (1 - 31)</span>
+<span class="token comment"># |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...</span>
+<span class="token comment"># |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat</span>
+<span class="token comment"># |  |  |  |  |</span>
+<span class="token comment"># *  *  *  *  * user-name  command to be executed</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <ul>
 <li><strong>MAILTO=root：</strong>这个项目是说，当<code>/etc/crontab</code>这个文件中的例行性工作的指令发生错误时，或者是该工作的执行结果有STDOUT/STDERR时，默认是由系统直接寄发一封mail给root。由于root 并无法在客户端中以POP3之类的协议接收邮件，因此你也可以改成自己的邮箱。</li>
@@ -365,13 +400,22 @@
 </tr>
 </tbody></table>
 <p><strong>参考实例</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用tinychen用户，每年的1月1日输出HappyNewYear！</span><br>crontab -e -u tinychen<br><span class="hljs-comment"># 然后和vim一样的编辑模式，输入下列参数</span><br>0 0 1 1 * /bin/<span class="hljs-built_in">echo</span> HappyNewYear! &gt; /dev/pts/0<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用tinychen用户，每年的1月1日输出HappyNewYear！</span>
+<span class="token function">crontab</span> -e -u tinychen
+<span class="token comment"># 然后和vim一样的编辑模式，输入下列参数</span>
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">1</span> <span class="token number">1</span> * /bin/echo HappyNewYear<span class="token operator">!</span> <span class="token operator">></span> /dev/pts/0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <blockquote>
 <p>需要注意的是，和<code>/etc/crontab</code>文件不同，使用<code>crontab</code>命令进入到编辑模式的时候不需要再加执行用户这一参数，默认是使用当前的登录账户，如果需要指定，使用<code>-u</code>参数即可。</p>
 </blockquote>
 <p><strong>此外，crontab中还有几种简化的写法需要我们了解一下</strong></p>
-<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc"><span class="hljs-bullet">*	</span>代表所有的取值范围内的数字<br><br>/	代表每的意思,如/5表示每5个单位<br><br><span class="hljs-bullet">-	</span>代表从某个数字到某个数字<br><br>,	分开几个离散的数字<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">*	代表所有的取值范围内的数字
+
+&#x2F;	代表每的意思,如&#x2F;5表示每5个单位
+
+-	代表从某个数字到某个数字
+
+,	分开几个离散的数字<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p><strong>需要注意的是，<code>crontab -r</code>是删除该用户的所有定时任务。</strong></p>
 <p><img src="https://resource.tinychen.com/blog/20190710/NEkfbtYTLoMU.png" srcset="/img/loading.gif" lazyload></p>
@@ -682,6 +726,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {

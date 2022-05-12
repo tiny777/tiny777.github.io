@@ -44,6 +44,8 @@
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
 
+  <link  rel="stylesheet" href="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.css" />
+
   <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
@@ -310,20 +312,31 @@
 <h1 id="2、Tomcat安装配置"><a href="#2、Tomcat安装配置" class="headerlink" title="2、Tomcat安装配置"></a>2、Tomcat安装配置</h1><p>tomcat的配置安装需要先在系统上配置好jdk环境，这里我们使用centos7.7版本的Linux系统和jdk8版本。</p>
 <h2 id="2-1-配置jdk8"><a href="#2-1-配置jdk8" class="headerlink" title="2.1 配置jdk8"></a>2.1 配置jdk8</h2><p>我们首先到<a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">官网</a>下载JDK8的安装包，这里我们选择<code>tar.gz</code>格式的压缩包下载，需要注意建议先使用浏览器下载再使用工具传输到Linux上，因为下载需要登录注册账号。</p>
 <p>接着我们解压将安装包解压到自己想要配置的jdk安装目录下，这里我们使用/home/目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">tar -zxvf jdk-8u241-linux-x64.tar.gz -C /home/<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">tar</span> -zxvf jdk-8u241-linux-x64.tar.gz -C /home/<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>在<code>/etc/profile</code>中添加以下三个参数并导入</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">JAVA_HOME=/home/jdk_1.8.0_241<br>CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>PATH=<span class="hljs-variable">$PATH</span>:<span class="hljs-variable">$JAVA_HOME</span>/bin:<span class="hljs-variable">$JAVA_HOME</span>/jre/bin<br><span class="hljs-built_in">export</span> JAVA_HOME CLASSPATH PATH<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token assign-left variable">JAVA_HOME</span><span class="token operator">=</span>/home/jdk_1.8.0_241
+<span class="token assign-left variable">CLASSPATH</span><span class="token operator">=</span>%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib
+<span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token environment constant">$PATH</span><span class="token builtin class-name">:</span><span class="token variable">$JAVA_HOME</span>/bin:<span class="token variable">$JAVA_HOME</span>/jre/bin
+<span class="token builtin class-name">export</span> JAVA_HOME CLASSPATH <span class="token environment constant">PATH</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>重新载入配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">source</span> /etc/profile<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">source</span> /etc/profile<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>检查配置是否生效，如不生效可以重启终端试试：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@tiny-yun ~]<span class="hljs-comment"># java -version</span><br>java version <span class="hljs-string">&quot;1.8.0_241&quot;</span><br>Java(TM) SE Runtime Environment (build 1.8.0_241-b07)<br>Java HotSpot(TM) 64-Bit Server VM (build 25.241-b07, mixed mode)<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@tiny-yun ~<span class="token punctuation">]</span><span class="token comment"># java -version</span>
+java version <span class="token string">"1.8.0_241"</span>
+Java<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> SE Runtime Environment <span class="token punctuation">(</span>build <span class="token number">1.8</span>.0_241-b07<span class="token punctuation">)</span>
+Java HotSpot<span class="token punctuation">(</span>TM<span class="token punctuation">)</span> <span class="token number">64</span>-Bit Server VM <span class="token punctuation">(</span>build <span class="token number">25.241</span>-b07, mixed mode<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h2 id="2-2-配置tomcat"><a href="#2-2-配置tomcat" class="headerlink" title="2.2 配置tomcat"></a>2.2 配置tomcat</h2><p>tomcat的安装配置和上面几乎一样，由于我们已经在<code>/etc/profile</code>中设定了全局的java环境变量，因此在tomcat中就不用再特殊配置，直接就会使用默认的全局变量。</p>
 <p>这里我们还是使用<a target="_blank" rel="noopener" href="https://downloads.apache.org/">官网</a><br>提供的<code>tar.gz</code>压缩包来安装。</p>
-<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># tomcat可以直接使用wget下载</span><br><span class="hljs-attribute">wget</span> https://downloads.apache.org/tomcat/tomcat-<span class="hljs-number">8</span>/v<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>/bin/apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz<br><span class="hljs-comment"># 解压到安装目录并重命名</span><br><span class="hljs-attribute">tar</span> -zxvf apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz /home/<br><span class="hljs-attribute">cd</span> /home<br><span class="hljs-attribute">mv</span> apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span> tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none"># tomcat可以直接使用wget下载
+wget https:&#x2F;&#x2F;downloads.apache.org&#x2F;tomcat&#x2F;tomcat-8&#x2F;v8.5.53&#x2F;bin&#x2F;apache-tomcat-8.5.53.tar.gz
+# 解压到安装目录并重命名
+tar -zxvf apache-tomcat-8.5.53.tar.gz &#x2F;home&#x2F;
+cd &#x2F;home
+mv apache-tomcat-8.5.53 tomcat-8.5.53<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h3 id="tomcat目录"><a href="#tomcat目录" class="headerlink" title="tomcat目录"></a>tomcat目录</h3><p>首先我们来看一下tomcat中的主要目录：</p>
 <ul>
@@ -351,28 +364,75 @@
 <blockquote>
 <p>注意前面提到的<code>CATALINA_HOME</code>和<code>CATALINA_BASE</code>两个变量不能在这里设定，因为tomcat就是根据这两个变量来找到 <code>setenv.sh</code>的。</p>
 </blockquote>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ cat setenv.sh <br><span class="hljs-attribute">JRE_HOME</span>=/home/jdk1.8.0_241/jre<br><span class="hljs-attribute">CATALINA_PID</span>=<span class="hljs-string">&quot;<span class="hljs-variable">$CATALINA_BASE</span>/tomcat.pid&quot;</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ cat setenv.sh 
+JRE_HOME&#x3D;&#x2F;home&#x2F;jdk1.8.0_241&#x2F;jre
+CATALINA_PID&#x3D;&quot;$CATALINA_BASE&#x2F;tomcat.pid&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></div>
 
 <p>这时候运行<code>./catalina.sh start</code>或者是<code>./startup.sh</code>文件就可以启动tomcat，注意要在防火墙中放行默认的8080端口。如果没有指定PID文件的位置，在关闭tomcat的时候可能会出现错误。此外，一般不建议使用root用户来运行tomcat。</p>
 <p><img src="https://resource.tinychen.com/blog/20200325/Jdtn5kIniRtV.png" srcset="/img/loading.gif" lazyload></p>
 <p>个人感觉使用<code>catalina.sh</code>加参数的方式来控制tomcat进程要更加灵活强大一些。</p>
-<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">$ ./catalina.sh -h<br>Using CATALINA_BASE:   /home/tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><br>Using CATALINA_HOME:   /home/tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span><br>Using CATALINA_TMPDIR: /home/tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span>/temp<br>Using JRE_HOME:        /home/jdk1<span class="hljs-number">.8</span><span class="hljs-number">.0</span>_241/jre<br>Using CLASSPATH:       /home/tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span>/bin/bootstrap.jar:/home/tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span>/bin/tomcat-juli.jar<br>Using CATALINA_PID:    /home/tomcat<span class="hljs-number">-8.5</span><span class="hljs-number">.53</span>/tomcat.pid<br>Usage: catalina.sh ( commands ... )<br>commands:<br>  debug             Start Catalina <span class="hljs-keyword">in</span> <span class="hljs-keyword">a</span> debugger<br>  debug -security   Debug Catalina <span class="hljs-keyword">with</span> <span class="hljs-keyword">a</span> security manager<br>  jpda <span class="hljs-built_in">start</span>        Start Catalina under JPDA debugger<br>  run               Start Catalina <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> current window<br>  run -security     Start <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> current window <span class="hljs-keyword">with</span> security manager<br>  <span class="hljs-built_in">start</span>             Start Catalina <span class="hljs-keyword">in</span> <span class="hljs-keyword">a</span> separate window<br>  <span class="hljs-built_in">start</span> -security   Start <span class="hljs-keyword">in</span> <span class="hljs-keyword">a</span> separate window <span class="hljs-keyword">with</span> security manager<br>  <span class="hljs-built_in">stop</span>              Stop Catalina, waiting up <span class="hljs-built_in">to</span> <span class="hljs-number">5</span> <span class="hljs-built_in">seconds</span> <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">process</span> <span class="hljs-built_in">to</span> <span class="hljs-function"><span class="hljs-keyword">end</span></span><br><span class="hljs-function">  <span class="hljs-title">stop</span> <span class="hljs-title">n</span>            <span class="hljs-title">Stop</span> <span class="hljs-title">Catalina</span>, <span class="hljs-title">waiting</span> <span class="hljs-title">up</span> <span class="hljs-title">to</span> <span class="hljs-title">n</span> <span class="hljs-title">seconds</span> <span class="hljs-title">for</span> <span class="hljs-title">the</span> <span class="hljs-title">process</span> <span class="hljs-title">to</span> <span class="hljs-title">end</span></span><br>  <span class="hljs-built_in">stop</span> -force       Stop Catalina, <span class="hljs-built_in">wait</span> up <span class="hljs-built_in">to</span> <span class="hljs-number">5</span> <span class="hljs-built_in">seconds</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">then</span> use <span class="hljs-built_in">kill</span> -KILL <span class="hljs-keyword">if</span> still running<br>  <span class="hljs-built_in">stop</span> n -force     Stop Catalina, <span class="hljs-built_in">wait</span> up <span class="hljs-built_in">to</span> n <span class="hljs-built_in">seconds</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">then</span> use <span class="hljs-built_in">kill</span> -KILL <span class="hljs-keyword">if</span> still running<br>  configtest        Run <span class="hljs-keyword">a</span> basic syntax check <span class="hljs-keyword">on</span> <span class="hljs-title">server</span>.<span class="hljs-title">xml</span> - <span class="hljs-title">check</span> <span class="hljs-title">exit</span> <span class="hljs-title">code</span> <span class="hljs-title">for</span> <span class="hljs-title">result</span><br>  <span class="hljs-built_in">version</span>           What <span class="hljs-built_in">version</span> <span class="hljs-keyword">of</span> tomcat are you running?<br>Note: Waiting <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">process</span> <span class="hljs-built_in">to</span> <span class="hljs-function"><span class="hljs-keyword">end</span> <span class="hljs-title">and</span> <span class="hljs-title">use</span> <span class="hljs-title">of</span> <span class="hljs-title">the</span> -<span class="hljs-title">force</span> <span class="hljs-title">option</span> <span class="hljs-title">require</span> <span class="hljs-title">that</span> $<span class="hljs-title">CATALINA_PID</span> <span class="hljs-title">is</span> <span class="hljs-title">defined</span></span><br><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">$ .&#x2F;catalina.sh -h
+Using CATALINA_BASE:   &#x2F;home&#x2F;tomcat-8.5.53
+Using CATALINA_HOME:   &#x2F;home&#x2F;tomcat-8.5.53
+Using CATALINA_TMPDIR: &#x2F;home&#x2F;tomcat-8.5.53&#x2F;temp
+Using JRE_HOME:        &#x2F;home&#x2F;jdk1.8.0_241&#x2F;jre
+Using CLASSPATH:       &#x2F;home&#x2F;tomcat-8.5.53&#x2F;bin&#x2F;bootstrap.jar:&#x2F;home&#x2F;tomcat-8.5.53&#x2F;bin&#x2F;tomcat-juli.jar
+Using CATALINA_PID:    &#x2F;home&#x2F;tomcat-8.5.53&#x2F;tomcat.pid
+Usage: catalina.sh ( commands ... )
+commands:
+  debug             Start Catalina in a debugger
+  debug -security   Debug Catalina with a security manager
+  jpda start        Start Catalina under JPDA debugger
+  run               Start Catalina in the current window
+  run -security     Start in the current window with security manager
+  start             Start Catalina in a separate window
+  start -security   Start in a separate window with security manager
+  stop              Stop Catalina, waiting up to 5 seconds for the process to end
+  stop n            Stop Catalina, waiting up to n seconds for the process to end
+  stop -force       Stop Catalina, wait up to 5 seconds and then use kill -KILL if still running
+  stop n -force     Stop Catalina, wait up to n seconds and then use kill -KILL if still running
+  configtest        Run a basic syntax check on server.xml - check exit code for result
+  version           What version of tomcat are you running?
+Note: Waiting for the process to end and use of the -force option require that $CATALINA_PID is defined
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h1 id="3、-jsvc配置daemon（守护进程）"><a href="#3、-jsvc配置daemon（守护进程）" class="headerlink" title="3、 jsvc配置daemon（守护进程）"></a>3、 jsvc配置daemon（守护进程）</h1><p>在Windows上，tomcat会默认注册成系统服务，这样设置启动和运行都方便很多，而在Linux上，我们需要借助jsvc来实现这一效果。</p>
 <h2 id="3-1-什么是jsvc"><a href="#3-1-什么是jsvc" class="headerlink" title="3.1 什么是jsvc"></a>3.1 什么是jsvc</h2><p><strong>Commons Daemon</strong>（共享守护进程），<a target="_blank" rel="noopener" href="http://commons.apache.org/proper/commons-daemon/jsvc.html">原名JSVC</a>，是一个属于Apache的Commons项目的Java库。守护程序提供了一种启动和停止正在运行服务器端应用程序的Java虚拟机（JVM）的便携式方法。<strong>守护程序包括两部分：用C编写的操作系统接口的原生库 ，以及提供用Java编写的Daemon API的库。</strong></p>
 <p><strong>有两种使用Commons守护程序的方法：直接调用实现守护程序接口（interface）或调用为守护程序提供所需方法（method）的类（class）。</strong>例如，Tomcat-4.1.x使用守护程序接口，而Tomcat-5.0.x提供了一个类，该类的方法直接由JSVC调用。</p>
 <h2 id="3-2-jsvc工作原理"><a href="#3-2-jsvc工作原理" class="headerlink" title="3.2 jsvc工作原理"></a>3.2 jsvc工作原理</h2><p>jsvc使用了三个进程来工作：一个启动进程、一个控制进程、一个被控制进程。其中被控制进程一般来说就是java主线程（我们这里就是tomcat），如果JVM虚拟机崩溃了，那么控制进程会在下一分钟重启。因为jsvc是守护进程，所以它应该使用root用户来启动，同时我们可以使用-user参数来进行用户的降级（downgrade），即先使用root用户来创建进程，然后再降级到指定的非root用户而不丢失root用户的特殊权限，如监听1024以下的端口。</p>
 <h2 id="3-3-jsvc配置tomcat守护进程（daemon）"><a href="#3-3-jsvc配置tomcat守护进程（daemon）" class="headerlink" title="3.3 jsvc配置tomcat守护进程（daemon）"></a>3.3 jsvc配置tomcat守护进程（daemon）</h2><p>tomcat的二进制安装包中的bin目录下就有jsvc的安装包，我们需要使用GCC编译器对其进行编译安装。同时在编译的时候我们需要指定jdk的路径，由于我们前面已经手动指定了，这里不需要再指定。如果没有，可以使用<code>./configure --with-java=$JAVA_HOME</code>来进行操作。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们进入tomcat的bin目录进行编译</span><br><span class="hljs-built_in">cd</span> <span class="hljs-variable">$CATALINA_HOME</span>/bin<br>tar xvfz commons-daemon-native.tar.gz<br><span class="hljs-built_in">cd</span> commons-daemon-1.2.2-native-src/unix<br>./configure<br>make<br><span class="hljs-comment"># 编译完成后，会在当前文件夹生成一个jsvc的文件，将它拷贝到tomcat的/bin/目录下</span><br>cp jsvc ../..<br><span class="hljs-built_in">cd</span> ../..<br><span class="hljs-comment"># 接着我们可以这样查看jsvc的帮助文档</span><br>./jsvc -<span class="hljs-built_in">help</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先我们进入tomcat的bin目录进行编译</span>
+<span class="token builtin class-name">cd</span> <span class="token variable">$CATALINA_HOME</span>/bin
+<span class="token function">tar</span> xvfz commons-daemon-native.tar.gz
+<span class="token builtin class-name">cd</span> commons-daemon-1.2.2-native-src/unix
+./configure
+<span class="token function">make</span>
+<span class="token comment"># 编译完成后，会在当前文件夹生成一个jsvc的文件，将它拷贝到tomcat的/bin/目录下</span>
+<span class="token function">cp</span> jsvc <span class="token punctuation">..</span>/<span class="token punctuation">..</span>
+<span class="token builtin class-name">cd</span> <span class="token punctuation">..</span>/<span class="token punctuation">..</span>
+<span class="token comment"># 接着我们可以这样查看jsvc的帮助文档</span>
+./jsvc -help<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>使用jsvc来启动tomcat，我们使用下面的参数来进行启动</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs stylus">./jsvc \<br>    -user tomcat \<br>    -classpath <span class="hljs-variable">$CATALINA_HOME</span>/bin/bootstrap<span class="hljs-selector-class">.jar</span>:<span class="hljs-variable">$CATALINA_HOME</span>/bin/tomcat-juli<span class="hljs-selector-class">.jar</span> \<br>    -outfile <span class="hljs-variable">$CATALINA_BASE</span>/logs/catalina<span class="hljs-selector-class">.out</span> \<br>    -errfile <span class="hljs-variable">$CATALINA_BASE</span>/logs/catalina<span class="hljs-selector-class">.err</span> \<br>    -Dcatalina.home=<span class="hljs-variable">$CATALINA_HOME</span> \<br>    -Dcatalina.base=<span class="hljs-variable">$CATALINA_BASE</span> \<br>    -Djava<span class="hljs-selector-class">.util</span><span class="hljs-selector-class">.logging</span>.manager=org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.juli</span><span class="hljs-selector-class">.ClassLoaderLogManager</span> \<br>    -Djava<span class="hljs-selector-class">.util</span><span class="hljs-selector-class">.logging</span><span class="hljs-selector-class">.config</span>.file=<span class="hljs-variable">$CATALINA_BASE</span>/conf/logging<span class="hljs-selector-class">.properties</span> \<br>    org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.catalina</span><span class="hljs-selector-class">.startup</span>.Bootstrap<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">.&#x2F;jsvc \
+    -user tomcat \
+    -classpath $CATALINA_HOME&#x2F;bin&#x2F;bootstrap.jar:$CATALINA_HOME&#x2F;bin&#x2F;tomcat-juli.jar \
+    -outfile $CATALINA_BASE&#x2F;logs&#x2F;catalina.out \
+    -errfile $CATALINA_BASE&#x2F;logs&#x2F;catalina.err \
+    -Dcatalina.home&#x3D;$CATALINA_HOME \
+    -Dcatalina.base&#x3D;$CATALINA_BASE \
+    -Djava.util.logging.manager&#x3D;org.apache.juli.ClassLoaderLogManager \
+    -Djava.util.logging.config.file&#x3D;$CATALINA_BASE&#x2F;conf&#x2F;logging.properties \
+    org.apache.catalina.startup.Bootstrap<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200326/jlQScDXanNG5.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意看这时的用户和PID，上面的12839的用户为root，也就是我们前面说的控制进程，后面被12839进程控制的12840进程才是我们主要运行的tomcat进程，而这里的用户也符合我们使用-user参数指定的tomcat用户。如果我们不指定进程的PID文件位置，那么默认就会在/var/run目录下生成PID文件，我们可以看到这个jsvc.pid对应的正好是jsvc运行的三个进程中的被控制进程。</p>
 <p>如果需要关闭，我们可以使用下面的命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">./jsvc -stop org.apache.catalina.startup.Bootstrap stop<br><br><span class="hljs-comment"># 还可以指定pid文件位置，如果前面没有使用默认的pid文件目录的话</span><br>./jsvc -stop -pidfile /var/run/jsvc.pid org.apache.catalina.startup.Bootstrap stop<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">./jsvc -stop org.apache.catalina.startup.Bootstrap stop
+
+<span class="token comment"># 还可以指定pid文件位置，如果前面没有使用默认的pid文件目录的话</span>
+./jsvc -stop -pidfile /var/run/jsvc.pid org.apache.catalina.startup.Bootstrap stop<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>这个时候可能就会有同学发现，前面不是说jsvc主要有三个进程来工作的吗，怎么这里只有两个进程呢？</p>
 <p>我们在上面的启动命令的选项里面加入一个<code>-wait 10</code>的参数，然后启动之后迅速查看一下进程。</p>
@@ -460,13 +520,31 @@
 </blockquote>
 <h3 id="使用daemon-sh"><a href="#使用daemon-sh" class="headerlink" title="使用daemon.sh"></a>使用daemon.sh</h3><p>首先我们尝试在systemd中使用自带的脚本进行启动和关闭tomcat，这里我们先把<code>startup.sh</code>和<code>shutdown.sh</code>两个脚本给排除掉，虽然它们无法启动守护进程的缺陷可以使用systemd来进行弥补，但是还是无法使用jsvc，无法在特权端口和运行用户之间取得两全，我们直接使用<code>daemon.sh</code>来运行。</p>
 <p>需要注意的是，systemd并不会去读取我们先前在/etc/profile中设定的变量，因此我们直接把变量写进unit配置文件中。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs bash">[Unit]<br>Description=Apache Tomcat 9<br><br>[Service]<br>User=tomcat<br>Group=tomcat<br>PIDFile=/var/run/tomcat.pid<br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br>ExecStart=/home/tomcat9/bin/daemon.sh start<br>ExecStop=/home/tomcat9/bin/daemon.sh stop<br><br>[Install]<br>WantedBy=multi-user.target<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Apache Tomcat <span class="token number">9</span>
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">User</span><span class="token operator">=</span>tomcat
+<span class="token assign-left variable">Group</span><span class="token operator">=</span>tomcat
+<span class="token assign-left variable">PIDFile</span><span class="token operator">=</span>/var/run/tomcat.pid
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>JAVA_HOME<span class="token operator">=</span>/home/jdk8/
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>JRE_HOME<span class="token operator">=</span>/home/jdk8/jre
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CLASSPATH<span class="token operator">=</span>%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_HOME<span class="token operator">=</span>/home/tomcat9
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_BASE<span class="token operator">=</span>/home/tomcat9
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_TMPDIR<span class="token operator">=</span>/home/tomcat9/temp
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/tomcat9/bin/daemon.sh start
+<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/home/tomcat9/bin/daemon.sh stop
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <p>添加了新的unit单元之后我们先<code>systemctl daemon-reload</code>重启一下daemon进程，再使用<code>systemctl start tomcat9.service</code>来启动服务，接着查看状态，发现无法正常运行，一启动进程就failed掉了，查看daemon脚本默认的日志文件（位于tomcat目录下的<code>logs/catalina-daemon.out</code>）我们发现返回了143错误。</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">Service <span class="hljs-keyword">exit</span> with a return value of <span class="hljs-number">143</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-none"><code class="language-none">Service exit with a return value of 143<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></div>
 
 <p>网上搜索了一下，有个解决方案是把daemon.sh脚本中的wait参数时间从10调成240，在125行左右的位置：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># Set the default service-start wait time if necessary</span><br><span class="hljs-built_in">test</span> <span class="hljs-string">&quot;.<span class="hljs-variable">$SERVICE_START_WAIT_TIME</span>&quot;</span> = . &amp;&amp; SERVICE_START_WAIT_TIME=10<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># Set the default service-start wait time if necessary</span>
+<span class="token builtin class-name">test</span> <span class="token string">".<span class="token variable">$SERVICE_START_WAIT_TIME</span>"</span> <span class="token operator">=</span> <span class="token builtin class-name">.</span> <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">SERVICE_START_WAIT_TIME</span><span class="token operator">=</span><span class="token number">10</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></div>
 
 <p>wait参数调大之后，等待启动成功之后（这里用的主机配置很低，启动比较耗时）就可以正常访问了</p>
 <p><img src="https://resource.tinychen.com/blog/20200327/KFmNuX2L0N1j.png" srcset="/img/loading.gif" lazyload></p>
@@ -489,10 +567,84 @@
 <p>我们直接在终端中运行jsvc并加上<code>-nodetach</code>参数，可以看到即使是运行成功了之后也不会退出（控制进程继承了启动进程成为守护进程一直运行），而没加的情况下则是jsvc启动进程退出后就会退出。</p>
 <p><img src="https://resource.tinychen.com/blog/20200327/nOEzacp0ewCV.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里再放上systemd使用daemon.sh启动tomcat的整个unit文件的配置及注释：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs bash">[Unit]<br>Description=Apache Tomcat 9<br><span class="hljs-comment"># 对整个serive的描述，相当于备注，会出现在systemd的log中</span><br>After=network.target<br><span class="hljs-comment"># 在network服务启动之后再启动</span><br><br>[Service]<br>User=tomcat<br>Group=tomcat<br><span class="hljs-comment"># 运行该service的用户及用户组</span><br><br>PIDFile=/var/run/tomcat.pid<br><span class="hljs-comment"># 该service的PID文件</span><br><br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br><span class="hljs-comment"># 定义了运行时需要的变量</span><br><br>ExecStart=/home/tomcat9/bin/daemon.sh start<br>ExecStop=/home/tomcat9/bin/daemon.sh stop<br><span class="hljs-comment"># 对应systemd控制的start和stop命令</span><br><br>[Install]<br>WantedBy=multi-user.target<br><span class="hljs-comment"># 运行级别为第三级（带有网络的多用户模式）</span><br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Apache Tomcat <span class="token number">9</span>
+<span class="token comment"># 对整个serive的描述，相当于备注，会出现在systemd的log中</span>
+<span class="token assign-left variable">After</span><span class="token operator">=</span>network.target
+<span class="token comment"># 在network服务启动之后再启动</span>
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">User</span><span class="token operator">=</span>tomcat
+<span class="token assign-left variable">Group</span><span class="token operator">=</span>tomcat
+<span class="token comment"># 运行该service的用户及用户组</span>
+
+<span class="token assign-left variable">PIDFile</span><span class="token operator">=</span>/var/run/tomcat.pid
+<span class="token comment"># 该service的PID文件</span>
+
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>JAVA_HOME<span class="token operator">=</span>/home/jdk8/
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>JRE_HOME<span class="token operator">=</span>/home/jdk8/jre
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CLASSPATH<span class="token operator">=</span>%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_HOME<span class="token operator">=</span>/home/tomcat9
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_BASE<span class="token operator">=</span>/home/tomcat9
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_TMPDIR<span class="token operator">=</span>/home/tomcat9/temp
+<span class="token comment"># 定义了运行时需要的变量</span>
+
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/tomcat9/bin/daemon.sh start
+<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/home/tomcat9/bin/daemon.sh stop
+<span class="token comment"># 对应systemd控制的start和stop命令</span>
+
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target
+<span class="token comment"># 运行级别为第三级（带有网络的多用户模式）</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <h3 id="直接使用jsvc"><a href="#直接使用jsvc" class="headerlink" title="直接使用jsvc"></a>直接使用jsvc</h3><p>既然搞清楚了运行原理，我们也就可以跳过脚本直接在unit文件中定义各种参数：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs bash">[Unit]<br>Description=Apache Tomcat 9<br>After=network.target<br><br>[Service]<br>User=root<br>Group=root<br><span class="hljs-comment"># 这里使用root用户启动方便jsvc监听特权端口</span><br><span class="hljs-comment"># 后面可以在jsvc参数中使用-user降权到tomcat用户</span><br><br>PIDFile=/var/run/tomcat.pid<br><br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br><br>ExecStart=/home/tomcat9/bin/jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home <span class="hljs-variable">$&#123;JAVA_HOME&#125;</span> \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -classpath <span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/bootstrap.jar:<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/tomcat-juli.jar \<br>        -outfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.out \<br>        -errfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.err \<br>        -Dcatalina.home=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -Dcatalina.base=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Djava.io.tmpdir=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.file=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties \<br>        org.apache.catalina.startup.Bootstrap<br><br>ExecStop=/home/tomcat9/bin/jsvc \<br>        -stop \<br>        -classpath <span class="hljs-variable">$&#123;CLASSPATH&#125;</span> \<br>        -Dcatalina.base=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Dcatalina.home=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -Djava.io.tmpdir=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.config.file=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties \<br>        -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \<br>        org.apache.catalina.startup.Bootstrap<br> <br>[Install]<br>WantedBy=multi-user.target<br></code></pre></td></tr></table></figure>
+<div class="code-wrapper"><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>Unit<span class="token punctuation">]</span>
+<span class="token assign-left variable">Description</span><span class="token operator">=</span>Apache Tomcat <span class="token number">9</span>
+<span class="token assign-left variable">After</span><span class="token operator">=</span>network.target
+
+<span class="token punctuation">[</span>Service<span class="token punctuation">]</span>
+<span class="token assign-left variable">User</span><span class="token operator">=</span>root
+<span class="token assign-left variable">Group</span><span class="token operator">=</span>root
+<span class="token comment"># 这里使用root用户启动方便jsvc监听特权端口</span>
+<span class="token comment"># 后面可以在jsvc参数中使用-user降权到tomcat用户</span>
+
+<span class="token assign-left variable">PIDFile</span><span class="token operator">=</span>/var/run/tomcat.pid
+
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>JAVA_HOME<span class="token operator">=</span>/home/jdk8/
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>JRE_HOME<span class="token operator">=</span>/home/jdk8/jre
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CLASSPATH<span class="token operator">=</span>%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_HOME<span class="token operator">=</span>/home/tomcat9
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_BASE<span class="token operator">=</span>/home/tomcat9
+<span class="token assign-left variable">Environment</span><span class="token operator">=</span>CATALINA_TMPDIR<span class="token operator">=</span>/home/tomcat9/temp
+
+<span class="token assign-left variable">ExecStart</span><span class="token operator">=</span>/home/tomcat9/bin/jsvc <span class="token punctuation">\</span>
+        -user tomcat <span class="token punctuation">\</span>
+        -nodetach <span class="token punctuation">\</span>
+        -java-home <span class="token variable">$&#123;JAVA_HOME&#125;</span> <span class="token punctuation">\</span>
+        -pidfile <span class="token variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid <span class="token punctuation">\</span>
+        -classpath <span class="token variable">$&#123;CATALINA_HOME&#125;</span>/bin/bootstrap.jar:<span class="token variable">$&#123;CATALINA_HOME&#125;</span>/bin/tomcat-juli.jar <span class="token punctuation">\</span>
+        -outfile <span class="token variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.out <span class="token punctuation">\</span>
+        -errfile <span class="token variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.err <span class="token punctuation">\</span>
+        -Dcatalina.home<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_HOME&#125;</span> <span class="token punctuation">\</span>
+        -Dcatalina.base<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_BASE&#125;</span> <span class="token punctuation">\</span>
+        -Djava.io.tmpdir<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_TMPDIR&#125;</span> <span class="token punctuation">\</span>
+        -Djava.util.logging.manager<span class="token operator">=</span>org.apache.juli.ClassLoaderLogManager <span class="token punctuation">\</span>
+        -Djava.util.logging.config.file<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties <span class="token punctuation">\</span>
+        org.apache.catalina.startup.Bootstrap
+
+<span class="token assign-left variable">ExecStop</span><span class="token operator">=</span>/home/tomcat9/bin/jsvc <span class="token punctuation">\</span>
+        -stop <span class="token punctuation">\</span>
+        -classpath <span class="token variable">$&#123;CLASSPATH&#125;</span> <span class="token punctuation">\</span>
+        -Dcatalina.base<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_BASE&#125;</span> <span class="token punctuation">\</span>
+        -Dcatalina.home<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_HOME&#125;</span> <span class="token punctuation">\</span>
+        -pidfile <span class="token variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid <span class="token punctuation">\</span>
+        -Djava.io.tmpdir<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_TMPDIR&#125;</span> <span class="token punctuation">\</span>
+        -Djava.util.logging.config.file<span class="token operator">=</span><span class="token variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties <span class="token punctuation">\</span>
+        -Djava.util.logging.manager<span class="token operator">=</span>org.apache.juli.ClassLoaderLogManager <span class="token punctuation">\</span>
+        org.apache.catalina.startup.Bootstrap
+ 
+<span class="token punctuation">[</span>Install<span class="token punctuation">]</span>
+<span class="token assign-left variable">WantedBy</span><span class="token operator">=</span>multi-user.target<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></div>
 
 <blockquote>
 <p>注意：ExecStart和ExecStop两个命令中的执行文件路径需要使用绝对路径</p>
@@ -789,6 +941,8 @@
   });
 </script>
 
+
+  <script  src="https://lib.baomitu.com/prism/1.26.0/plugins/line-numbers/prism-line-numbers.min.js" ></script>
 
   <script>
   (function() {
