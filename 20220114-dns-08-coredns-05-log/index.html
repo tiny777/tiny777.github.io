@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -9,69 +9,98 @@
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
   <link rel="icon" href="https://resource.tinychen.com/logos.png">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="本文主要用于介绍CoreDNS用来记录日志的几种方式以及在生产环境中遇到的一些问题和解决方案。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
+    <meta name="description" content="本文主要用于介绍CoreDNS用来记录日志的几种方式以及在生产环境中遇到的一些问题和解决方案。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CoreDNS篇5-日志处理">
+<meta property="og:url" content="https://tinychen.com/20220114-dns-08-coredns-05-log/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要用于介绍CoreDNS用来记录日志的几种方式以及在生产环境中遇到的一些问题和解决方案。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/202201141619652.jpg">
+<meta property="article:published_time" content="2022-01-14T03:00:00.000Z">
+<meta property="article:modified_time" content="2022-01-14T03:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="dns">
+<meta property="article:tag" content="coredns">
+<meta property="article:tag" content="dnstap">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/202201141619652.jpg">
+  
+  
   <title>CoreDNS篇5-日志处理 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
-  
-    
-    
-      
-      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
-    
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
 
-  
-    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
 
 
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-<!-- 自定义样式保持在最底部 -->
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"shell"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
+
+  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  <header style="height: 70vh;">
-    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand"
-       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -145,13 +174,15 @@
         
         
           <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
-                class="iconfont icon-search"></i>&nbsp;</a>
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
           </li>
+          
         
         
           <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self">&nbsp;<i
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
                 class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
           </li>
         
@@ -160,65 +191,69 @@
   </div>
 </nav>
 
-    <div class="banner" id="banner" parallax=true
-         style="background: url('https://resource.tinychen.com/202201141620356.jpg') no-repeat center center;
-           background-size: cover;">
-      <div class="full-bg-img">
-        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-          <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="CoreDNS篇5-日志处理">
-              
-            </span>
-
-            
-              <div class="mt-3">
-  
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-author" aria-hidden="true"></i>
-      TinyChen
-    </span>
-  
-  
-    <span class="post-meta">
-      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2022-01-14 11:00" pubdate>
-        January 14, 2022 am
-      </time>
-    </span>
-  
-</div>
-
-<div class="mt-1">
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-chart"></i>
-      5.4k 字
-    </span>
   
 
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-clock-fill"></i>
-      
-      
-      43
-       分钟
-    </span>
-  
-
-  
-  
-</div>
-
-            
-          </div>
-
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://resource.tinychen.com/202201141620356.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="CoreDNS篇5-日志处理"></span>
           
         </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2022-01-14 11:00" pubdate>
+          January 14, 2022 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          21k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          175 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
       </div>
+
+      
     </div>
+  </div>
+</div>
+
+</div>
+
   </header>
 
   <main>
@@ -227,21 +262,28 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div class="py-5" id="board">
+        <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">CoreDNS篇5-日志处理</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：January 14, 2022 am
+                  
+                    Last updated on January 14, 2022 am
+                  
                 
               </p>
             
             <div class="markdown-body">
+              
               <p>本文主要用于介绍CoreDNS用来记录日志的几种方式以及在生产环境中遇到的一些问题和解决方案。</p>
 <span id="more"></span>
 
@@ -250,7 +292,7 @@
 <h2 id="1-1-log插件配置"><a href="#1-1-log插件配置" class="headerlink" title="1.1 log插件配置"></a>1.1 log插件配置</h2><p>前面的文章里我们有简单的介绍过coredns的日志处理，对于log插件也是类似的操作。考虑到CentOS8已经结束支持，这里仅介绍CentOS7的配置方法，更高版本的<code>systemd</code>可以参考<a href="https://tinychen.com/20210509-dns-03-coredns-01-introduction/">之前的文章</a>。</p>
 <p>对于centos7等系统而言，是不支持在高版本的systemd中的<code>unit</code>文件中使用<code>append</code>和<code>file</code>两个参数的，并且对于这种方式输出的日志缺少了前面的时间和主机名等信息，相对而言还是修改rsyslog的方式要更加的可靠。那么在开启了<code>rsyslog.service</code>服务的情况下，日志就会输出到<code>/var/log/messages</code>文件中，或者可以使用<code>journalctl -u coredns</code>命令来查看全部的日志。</p>
 <p>如果想要将coredns的日志全部集中到一个文件进行统一管理，我们可以对负责管理<code>systemd</code>的日志的<code>rsyslog</code>服务的配置进行修改，然后再重启rsyslog服务即可生效。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 注意这段配置需要添加在其他日志配置规则之前</span><br><span class="hljs-meta">#</span><span class="bash"> 否则日志会在/var/<span class="hljs-built_in">log</span>/messages和/home/coredns/logs/coredns.log都写入一份</span><br>[root@tiny-server coredns]# vim /etc/rsyslog.conf<br>if $programname == &#x27;coredns&#x27; then /home/coredns/logs/coredns.log<br>&amp; stop<br><br>[root@tiny-server coredns]# systemctl restart rsyslog.service<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 注意这段配置需要添加在其他日志配置规则之前</span><br><span class="hljs-meta">#</span><span class="bash"> 否则日志会在/var/<span class="hljs-built_in">log</span>/messages和/home/coredns/logs/coredns.log都写入一份</span><br>[root@tiny-server coredns]# vim /etc/rsyslog.conf<br>if $programname == &#x27;coredns&#x27; then /home/coredns/logs/coredns.log<br>&amp; stop<br><br>[root@tiny-server coredns]# systemctl restart rsyslog.service<br></code></pre></td></tr></table></figure>
 
 
 
@@ -261,9 +303,9 @@
 </ul>
 <h2 id="1-2-rsyslog配置"><a href="#1-2-rsyslog配置" class="headerlink" title="1.2 rsyslog配置"></a>1.2 rsyslog配置</h2><p>下面具体介绍一下如何配置<code>rsyslog</code>和<code>systemd-journald</code>解除相关的日志限制。</p>
 <p>默认情况下我们查看<code>systemd-journald.service</code>的日志或者是查看<code>/var/log/messages</code>文件，如果看到类似下面的提示信息，就说明日志的输出频率太高被抑制了</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-server coredns]# systemctl status systemd-journald.service<br>● systemd-journald.service - Journal Service<br>   Loaded: loaded (/usr/lib/systemd/system/systemd-journald.service; static; vendor preset: disabled)<br>   Active: active (running) since Wed 2021-12-01 09:30:03 CST; 3 weeks 6 days ago<br>     Docs: man:systemd-journald.service(8)<br>           man:journald.conf(5)<br> Main PID: 709 (systemd-journal)<br>   Status: &quot;Processing requests...&quot;<br>   CGroup: /system.slice/systemd-journald.service<br>           └─709 /usr/lib/systemd/systemd-journald<br><br>Dec 28 15:36:27 tiny-server systemd-journal[709]: Suppressed 13174 messages from /system.slice/coredns.service<br>Dec 28 15:36:57 tiny-server systemd-journal[709]: Suppressed 13185 messages from /system.slice/coredns.service<br>Dec 28 15:37:27 tiny-server systemd-journal[709]: Suppressed 11600 messages from /system.slice/coredns.service<br>Dec 28 15:37:57 tiny-server systemd-journal[709]: Suppressed 13896 messages from /system.slice/coredns.service<br>Dec 28 15:38:27 tiny-server systemd-journal[709]: Suppressed 13653 messages from /system.slice/coredns.service<br>Dec 28 15:38:57 tiny-server systemd-journal[709]: Suppressed 16503 messages from /system.slice/coredns.service<br>Dec 28 15:39:27 tiny-server systemd-journal[709]: Suppressed 13300 messages from /system.slice/coredns.service<br>Dec 28 15:39:57 tiny-server systemd-journal[709]: Suppressed 10491 messages from /system.slice/coredns.service<br>Dec 28 15:40:27 tiny-server systemd-journal[709]: Suppressed 12079 messages from /system.slice/coredns.service<br>Dec 28 15:40:57 tiny-server systemd-journal[709]: Suppressed 17182 messages from /system.slice/coredns.service<br><br>[root@tiny-server coredns]# tail -f /var/log/messages<br>Dec 28 15:43:55 tiny-server rsyslogd: imjournal: begin to drop messages due to rate-limiting<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@tiny-server coredns]# systemctl status systemd-journald.service<br>● systemd-journald.service - Journal Service<br>   Loaded: loaded (/usr/lib/systemd/system/systemd-journald.service; static; vendor preset: disabled)<br>   Active: active (running) since Wed 2021-12-01 09:30:03 CST; 3 weeks 6 days ago<br>     Docs: man:systemd-journald.service(8)<br>           man:journald.conf(5)<br> Main PID: 709 (systemd-journal)<br>   Status: &quot;Processing requests...&quot;<br>   CGroup: /system.slice/systemd-journald.service<br>           └─709 /usr/lib/systemd/systemd-journald<br><br>Dec 28 15:36:27 tiny-server systemd-journal[709]: Suppressed 13174 messages from /system.slice/coredns.service<br>Dec 28 15:36:57 tiny-server systemd-journal[709]: Suppressed 13185 messages from /system.slice/coredns.service<br>Dec 28 15:37:27 tiny-server systemd-journal[709]: Suppressed 11600 messages from /system.slice/coredns.service<br>Dec 28 15:37:57 tiny-server systemd-journal[709]: Suppressed 13896 messages from /system.slice/coredns.service<br>Dec 28 15:38:27 tiny-server systemd-journal[709]: Suppressed 13653 messages from /system.slice/coredns.service<br>Dec 28 15:38:57 tiny-server systemd-journal[709]: Suppressed 16503 messages from /system.slice/coredns.service<br>Dec 28 15:39:27 tiny-server systemd-journal[709]: Suppressed 13300 messages from /system.slice/coredns.service<br>Dec 28 15:39:57 tiny-server systemd-journal[709]: Suppressed 10491 messages from /system.slice/coredns.service<br>Dec 28 15:40:27 tiny-server systemd-journal[709]: Suppressed 12079 messages from /system.slice/coredns.service<br>Dec 28 15:40:57 tiny-server systemd-journal[709]: Suppressed 17182 messages from /system.slice/coredns.service<br><br>[root@tiny-server coredns]# tail -f /var/log/messages<br>Dec 28 15:43:55 tiny-server rsyslogd: imjournal: begin to drop messages due to rate-limiting<br></code></pre></td></tr></table></figure>
 <p>解决方案也比较简单，我们对这两个服务的配置参数进行调整，将限制日志写入频率和写入时间间隔都设为0（即不做限制），然后重启服务即可。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">echo &quot;RateLimitInterval=0&quot; &gt;&gt; /etc/systemd/journald.conf<br>echo &quot;RateLimitBurst=0&quot; &gt;&gt; /etc/systemd/journald.conf<br>systemctl restart systemd-journald.service <br><br>echo &quot;\$imjournalRatelimitInterval 0&quot; &gt;&gt; /etc/rsyslog.conf<br>echo &quot;\$imjournalRatelimitBurst 0&quot; &gt;&gt; /etc/rsyslog.conf<br>systemctl restart rsyslog.service<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">echo &quot;RateLimitInterval=0&quot; &gt;&gt; /etc/systemd/journald.conf<br>echo &quot;RateLimitBurst=0&quot; &gt;&gt; /etc/systemd/journald.conf<br>systemctl restart systemd-journald.service <br><br>echo &quot;\$imjournalRatelimitInterval 0&quot; &gt;&gt; /etc/rsyslog.conf<br>echo &quot;\$imjournalRatelimitBurst 0&quot; &gt;&gt; /etc/rsyslog.conf<br>systemctl restart rsyslog.service<br></code></pre></td></tr></table></figure>
 
 <p>需要特别注意的是：上述两个参数对所有使用rsyslog的服务都会生效，如果有其他大量写入日志的服务，建议调整日志文件输出目录，同时关注<code>/var/log</code>等目录的硬盘空间情况。</p>
 <h1 id="2、dnstap插件"><a href="#2、dnstap插件" class="headerlink" title="2、dnstap插件"></a>2、dnstap插件</h1><p>CoreDNS的原生日志功能对于一个DNS服务器的绝大部分应用场景来说是足够使用的，如果有更进阶的需求，可以考虑使用<code>dnstap</code>插件来实现。</p>
@@ -283,13 +325,13 @@
 <li>尽管CoreDNS默认内置dnstap插件，但是要使用dnstap还是需要我们自己手动安装dnstap，再到corefile中配置dnstap的socket路径或者通信端口才能使用</li>
 </ul>
 <h2 id="2-1-dnstap安装"><a href="#2-1-dnstap安装" class="headerlink" title="2.1 dnstap安装"></a>2.1 dnstap安装</h2><p>dnstap官方在github上面开源了一个<a target="_blank" rel="noopener" href="https://github.com/dnstap/golang-dnstap">golang-dnstap</a>的项目，可以使用go来快速安装dnstap</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> golang的安装配置比较简单，我们从https://go.dev/dl/直接下载最新的稳定版本即可。</span><br>wget https://go.dev/dl/go1.17.5.linux-amd64.tar.gz<br>tar -zxvf go1.17.5.linux-amd64.tar.gz -C /usr/local<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 修改系统默认的go文件</span><br>ln -s /usr/local/go/bin/go /usr/bin/go<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 接下来的go环境变量同学们可以根据自己的实际需求进行配置。</span><br><span class="hljs-meta">#</span><span class="bash"> 对于我个人而言，我直接在/etc/profile中添加下面的配置然后<span class="hljs-built_in">source</span>生效即可。</span><br>export GOROOT=/usr/local/go<br>export GOBIN=$GOROOT/bin<br>export PATH=$PATH:$GOBIN<br>export GOPATH=/home/gopath<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> golang的安装配置比较简单，我们从https://go.dev/dl/直接下载最新的稳定版本即可。</span><br>wget https://go.dev/dl/go1.17.5.linux-amd64.tar.gz<br>tar -zxvf go1.17.5.linux-amd64.tar.gz -C /usr/local<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 修改系统默认的go文件</span><br>ln -s /usr/local/go/bin/go /usr/bin/go<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 接下来的go环境变量同学们可以根据自己的实际需求进行配置。</span><br><span class="hljs-meta">#</span><span class="bash"> 对于我个人而言，我直接在/etc/profile中添加下面的配置然后<span class="hljs-built_in">source</span>生效即可。</span><br>export GOROOT=/usr/local/go<br>export GOBIN=$GOROOT/bin<br>export PATH=$PATH:$GOBIN<br>export GOPATH=/home/gopath<br></code></pre></td></tr></table></figure>
 
 <p>执行<code>go version</code>命令确定go安装无误之后就可以直接安装dnstap：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 接着就可以使用go命令来快速安装dnstap</span><br>go get -u github.com/dnstap/golang-dnstap/dnstap<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> go版本高于v1.16建议使用下面这条指令</span><br><span class="hljs-meta">#</span><span class="bash"> 关于go get和go install的区别可以查看go的官方文档https://golang.org/doc/go-get-install-deprecation</span><br>go install github.com/dnstap/golang-dnstap/dnstap@latest<br>   <br><span class="hljs-meta">#</span><span class="bash"> 如果不确定是否安装成功，可以执行下面的命令查看安装信息进行确定</span><br>[root@coredns2 home]# dnstap --help<br>Usage: dnstap [OPTION]...<br>  -T value<br>        write dnstap payloads to tcp/ip address<br>  -U value<br>        write dnstap payloads to unix socket<br>  -a    append to the given file, do not overwrite. valid only when outputting a text or YAML file.<br>  -j    use verbose JSON output<br>  -l value<br>        read dnstap payloads from tcp/ip<br>  -q    use quiet text output<br>  -r value<br>        read dnstap payloads from file<br>  -t duration<br>        I/O timeout for tcp/ip and unix domain sockets<br>  -u value<br>        read dnstap payloads from unix socket<br>  -w string<br>        write output to file<br>  -y    use verbose YAML output<br><br>Quiet text output format mnemonics:<br>    AQ: AUTH_QUERY<br>    AR: AUTH_RESPONSE<br>    RQ: RESOLVER_QUERY<br>    RR: RESOLVER_RESPONSE<br>    CQ: CLIENT_QUERY<br>    CR: CLIENT_RESPONSE<br>    FQ: FORWARDER_QUERY<br>    FR: FORWARDER_RESPONSE<br>    SQ: STUB_QUERY<br>    SR: STUB_RESPONSE<br>    TQ: TOOL_QUERY<br>    TR: TOOL_RESPONSE<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 接着就可以使用go命令来快速安装dnstap</span><br>go get -u github.com/dnstap/golang-dnstap/dnstap<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> go版本高于v1.16建议使用下面这条指令</span><br><span class="hljs-meta">#</span><span class="bash"> 关于go get和go install的区别可以查看go的官方文档https://golang.org/doc/go-get-install-deprecation</span><br>go install github.com/dnstap/golang-dnstap/dnstap@latest<br>   <br><span class="hljs-meta">#</span><span class="bash"> 如果不确定是否安装成功，可以执行下面的命令查看安装信息进行确定</span><br>[root@coredns2 home]# dnstap --help<br>Usage: dnstap [OPTION]...<br>  -T value<br>        write dnstap payloads to tcp/ip address<br>  -U value<br>        write dnstap payloads to unix socket<br>  -a    append to the given file, do not overwrite. valid only when outputting a text or YAML file.<br>  -j    use verbose JSON output<br>  -l value<br>        read dnstap payloads from tcp/ip<br>  -q    use quiet text output<br>  -r value<br>        read dnstap payloads from file<br>  -t duration<br>        I/O timeout for tcp/ip and unix domain sockets<br>  -u value<br>        read dnstap payloads from unix socket<br>  -w string<br>        write output to file<br>  -y    use verbose YAML output<br><br>Quiet text output format mnemonics:<br>    AQ: AUTH_QUERY<br>    AR: AUTH_RESPONSE<br>    RQ: RESOLVER_QUERY<br>    RR: RESOLVER_RESPONSE<br>    CQ: CLIENT_QUERY<br>    CR: CLIENT_RESPONSE<br>    FQ: FORWARDER_QUERY<br>    FR: FORWARDER_RESPONSE<br>    SQ: STUB_QUERY<br>    SR: STUB_RESPONSE<br>    TQ: TOOL_QUERY<br>    TR: TOOL_RESPONSE<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-2-coredns配置"><a href="#2-2-coredns配置" class="headerlink" title="2.2 coredns配置"></a>2.2 coredns配置</h2><p>coredns中对dnstap的配置非常简单，可以选择配置<strong>socket通信</strong>或者是<strong>tcp通信</strong>，<code>full</code>参数则是可以记录更多的参数信息，如同样的一次查询，红框是开启了<code>full</code>参数，而绿框则是不开启，两者相差较大。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 使用tcp通信</span><br>dnstap tcp://127.0.0.1:6000 full<br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信</span><br>dnstap unix:///tmp/dnstap.sock full<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 使用tcp通信</span><br>dnstap tcp://127.0.0.1:6000 full<br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信</span><br>dnstap unix:///tmp/dnstap.sock full<br></code></pre></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/202201121704374.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-3-dnstap配置"><a href="#2-3-dnstap配置" class="headerlink" title="2.3 dnstap配置"></a>2.3 dnstap配置</h2><p>dnstap的配置也比较简单，基本可以分为三个部分：</p>
@@ -299,7 +341,7 @@
 <li>指定日志格式：默认为二进制格式，<code>-q</code>为<code>text文本</code>，<code>-y</code>为<code>yaml格式</code>，<code>-j</code>为<code>json格式</code></li>
 <li>其他参数：如<code>-a</code>追加写入内容到日志文件中而非覆盖原有的文件</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以默认的二进制格式记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log<br><span class="hljs-meta">#</span><span class="bash"> 此时无法直接查看日志文件中的内容</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>&quot;protobuf:dnstap.Dnstap<br>^C<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以text文本格式追加记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log -q -a<br><span class="hljs-meta">#</span><span class="bash"> 这里的coredns对tinychen.com的查询会forward出去，</span><br><span class="hljs-meta">#</span><span class="bash"> 因此日志中会有CLIENT_QUERY CLIENT_RESPONSE FORWARDER_QUERY FORWARDER_RESPONSE四条记录</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>16:14:39.329430 CQ 10.31.100.100 UDP 53b &quot;tinychen.com.&quot; IN A<br>16:14:39.329546 FQ 127.0.0.1 UDP 53b &quot;tinychen.com.&quot; IN A<br>16:14:39.330241 FR 127.0.0.1 UDP 69b &quot;tinychen.com.&quot; IN A<br>16:14:39.330441 CR 10.31.100.100 UDP 81b &quot;tinychen.com.&quot; IN A<br><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以yaml格式追加记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log -y -a<br><span class="hljs-meta">#</span><span class="bash"> 这里的coredns对tinychen.com的查询会forward出去，</span><br><span class="hljs-meta">#</span><span class="bash"> 因此日志中会有CLIENT_QUERY CLIENT_RESPONSE FORWARDER_QUERY FORWARDER_RESPONSE四条记录</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>type: MESSAGE<br>message:<br>  type: CLIENT_QUERY<br>  query_time: !!timestamp 2022-01-12 08:23:25.211126656<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  query_port: 58562<br>  query_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: ; udp: 4096<br>    ; COOKIE: 22c8a1e55b27c1b9<br>---<br>type: MESSAGE<br>message:<br>  type: FORWARDER_QUERY<br>  query_time: !!timestamp 2022-01-12 08:23:25.211208675<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  response_address: 127.0.0.1<br>  query_port: 58562<br>  response_port: 35353<br>  query_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: do; udp: 2048<br>    ; COOKIE: 22c8a1e55b27c1b9<br>---<br>type: MESSAGE<br>message:<br>  type: FORWARDER_RESPONSE<br>  query_time: !!timestamp 2022-01-12 08:23:25.211208675<br>  response_time: !!timestamp 2022-01-12 08:23:25.243335638<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  response_address: 127.0.0.1<br>  query_port: 58562<br>  response_port: 35353<br>  response_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ANSWER SECTION:<br>    tinychen.com.       589     IN      A       1.12.217.55<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: do; udp: 1232<br>---<br>type: MESSAGE<br>message:<br>  type: CLIENT_RESPONSE<br>  query_time: !!timestamp 2022-01-12 08:23:25.211126656<br>  response_time: !!timestamp 2022-01-12 08:23:25.243503207<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  query_port: 58562<br>  response_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ANSWER SECTION:<br>    tinychen.com.       589     IN      A       1.12.217.55<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: ; udp: 4096<br>    ; COOKIE: 22c8a1e55b27c1b9<br>---<br><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以yaml格式追加记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log -j -a<br><span class="hljs-meta">#</span><span class="bash"> 这里的coredns对tinychen.com的查询会forward出去，</span><br><span class="hljs-meta">#</span><span class="bash"> 因此日志中会有CLIENT_QUERY CLIENT_RESPONSE FORWARDER_QUERY FORWARDER_RESPONSE四条记录</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;CLIENT_QUERY&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745130199Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;query_port&quot;:58561,&quot;query_message&quot;:&quot;;; opcode: QUERY, status: NOERROR, id: 5835\n;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: ; udp: 4096\n; COOKIE: fd6716688b43710a\n&quot;&#125;&#125;<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;FORWARDER_QUERY&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745243809Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;response_address&quot;:&quot;127.0.0.1&quot;,&quot;query_port&quot;:58561,&quot;response_port&quot;:35353,&quot;query_message&quot;:&quot;;; opcode: QUERY, status: NOERROR, id: 5835\n;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: do; udp: 2048\n; COOKIE: fd6716688b43710a\n&quot;&#125;&#125;<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;FORWARDER_RESPONSE&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745243809Z&quot;,&quot;response_time&quot;:&quot;2022-01-12T08:36:41.83691354Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;response_address&quot;:&quot;127.0.0.1&quot;,&quot;query_port&quot;:58561,&quot;response_port&quot;:35353,&quot;response_message&quot;:&quot;;; opcode: QUERY, status: SERVFAIL, id: 5835\n;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: do; udp: 1232\n&quot;&#125;&#125;<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;CLIENT_RESPONSE&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745130199Z&quot;,&quot;response_time&quot;:&quot;2022-01-12T08:36:41.837144129Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;query_port&quot;:58561,&quot;response_message&quot;:&quot;;; opcode: QUERY, status: SERVFAIL, id: 5835\n;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: ; udp: 4096\n; COOKIE: fd6716688b43710a\n&quot;&#125;&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以默认的二进制格式记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log<br><span class="hljs-meta">#</span><span class="bash"> 此时无法直接查看日志文件中的内容</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>&quot;protobuf:dnstap.Dnstap<br>^C<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以text文本格式追加记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log -q -a<br><span class="hljs-meta">#</span><span class="bash"> 这里的coredns对tinychen.com的查询会forward出去，</span><br><span class="hljs-meta">#</span><span class="bash"> 因此日志中会有CLIENT_QUERY CLIENT_RESPONSE FORWARDER_QUERY FORWARDER_RESPONSE四条记录</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>16:14:39.329430 CQ 10.31.100.100 UDP 53b &quot;tinychen.com.&quot; IN A<br>16:14:39.329546 FQ 127.0.0.1 UDP 53b &quot;tinychen.com.&quot; IN A<br>16:14:39.330241 FR 127.0.0.1 UDP 69b &quot;tinychen.com.&quot; IN A<br>16:14:39.330441 CR 10.31.100.100 UDP 81b &quot;tinychen.com.&quot; IN A<br><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以yaml格式追加记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log -y -a<br><span class="hljs-meta">#</span><span class="bash"> 这里的coredns对tinychen.com的查询会forward出去，</span><br><span class="hljs-meta">#</span><span class="bash"> 因此日志中会有CLIENT_QUERY CLIENT_RESPONSE FORWARDER_QUERY FORWARDER_RESPONSE四条记录</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>type: MESSAGE<br>message:<br>  type: CLIENT_QUERY<br>  query_time: !!timestamp 2022-01-12 08:23:25.211126656<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  query_port: 58562<br>  query_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: ; udp: 4096<br>    ; COOKIE: 22c8a1e55b27c1b9<br>---<br>type: MESSAGE<br>message:<br>  type: FORWARDER_QUERY<br>  query_time: !!timestamp 2022-01-12 08:23:25.211208675<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  response_address: 127.0.0.1<br>  query_port: 58562<br>  response_port: 35353<br>  query_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: do; udp: 2048<br>    ; COOKIE: 22c8a1e55b27c1b9<br>---<br>type: MESSAGE<br>message:<br>  type: FORWARDER_RESPONSE<br>  query_time: !!timestamp 2022-01-12 08:23:25.211208675<br>  response_time: !!timestamp 2022-01-12 08:23:25.243335638<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  response_address: 127.0.0.1<br>  query_port: 58562<br>  response_port: 35353<br>  response_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ANSWER SECTION:<br>    tinychen.com.       589     IN      A       1.12.217.55<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: do; udp: 1232<br>---<br>type: MESSAGE<br>message:<br>  type: CLIENT_RESPONSE<br>  query_time: !!timestamp 2022-01-12 08:23:25.211126656<br>  response_time: !!timestamp 2022-01-12 08:23:25.243503207<br>  socket_family: INET<br>  socket_protocol: UDP<br>  query_address: 10.31.100.100<br>  query_port: 58562<br>  response_message: |<br>    ;; opcode: QUERY, status: NOERROR, id: 30286<br>    ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1<br><br>    ;; QUESTION SECTION:<br>    ;tinychen.com.      IN       A<br><br>    ;; ANSWER SECTION:<br>    tinychen.com.       589     IN      A       1.12.217.55<br><br>    ;; ADDITIONAL SECTION:<br><br>    ;; OPT PSEUDOSECTION:<br>    ; EDNS: version 0; flags: ; udp: 4096<br>    ; COOKIE: 22c8a1e55b27c1b9<br>---<br><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用socket通信，并以yaml格式追加记录到/home/coredns/logs/dnstap.log文件中</span><br>dnstap -u /tmp/dnstap.sock -w /home/coredns/logs/dnstap.log -j -a<br><span class="hljs-meta">#</span><span class="bash"> 这里的coredns对tinychen.com的查询会forward出去，</span><br><span class="hljs-meta">#</span><span class="bash"> 因此日志中会有CLIENT_QUERY CLIENT_RESPONSE FORWARDER_QUERY FORWARDER_RESPONSE四条记录</span><br>[root@coredns2 logs]# tail -f /home/coredns/logs/dnstap.log<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;CLIENT_QUERY&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745130199Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;query_port&quot;:58561,&quot;query_message&quot;:&quot;;; opcode: QUERY, status: NOERROR, id: 5835\n;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: ; udp: 4096\n; COOKIE: fd6716688b43710a\n&quot;&#125;&#125;<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;FORWARDER_QUERY&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745243809Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;response_address&quot;:&quot;127.0.0.1&quot;,&quot;query_port&quot;:58561,&quot;response_port&quot;:35353,&quot;query_message&quot;:&quot;;; opcode: QUERY, status: NOERROR, id: 5835\n;; flags: rd ad; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: do; udp: 2048\n; COOKIE: fd6716688b43710a\n&quot;&#125;&#125;<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;FORWARDER_RESPONSE&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745243809Z&quot;,&quot;response_time&quot;:&quot;2022-01-12T08:36:41.83691354Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;response_address&quot;:&quot;127.0.0.1&quot;,&quot;query_port&quot;:58561,&quot;response_port&quot;:35353,&quot;response_message&quot;:&quot;;; opcode: QUERY, status: SERVFAIL, id: 5835\n;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: do; udp: 1232\n&quot;&#125;&#125;<br>&#123;&quot;type&quot;:&quot;MESSAGE&quot;,&quot;message&quot;:&#123;&quot;type&quot;:&quot;CLIENT_RESPONSE&quot;,&quot;query_time&quot;:&quot;2022-01-12T08:36:41.745130199Z&quot;,&quot;response_time&quot;:&quot;2022-01-12T08:36:41.837144129Z&quot;,&quot;socket_family&quot;:&quot;INET&quot;,&quot;socket_protocol&quot;:&quot;UDP&quot;,&quot;query_address&quot;:&quot;10.31.100.100&quot;,&quot;query_port&quot;:58561,&quot;response_message&quot;:&quot;;; opcode: QUERY, status: SERVFAIL, id: 5835\n;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; QUESTION SECTION:\n;tinychen.com.\tIN\t A\n\n;; ADDITIONAL SECTION:\n\n;; OPT PSEUDOSECTION:\n; EDNS: version 0; flags: ; udp: 4096\n; COOKIE: fd6716688b43710a\n&quot;&#125;&#125;<br></code></pre></td></tr></table></figure>
 
 
 
@@ -308,10 +350,10 @@
 <li><p>dnstap日志记录时间使用的是UTC时间记录，对于国内的用户，时间上就有八个小时的差距</p>
 </li>
 <li><p>dnstap限制缓冲区的消息条数为10000条，超出限制的消息不会被写入dnstap中</p>
-<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">Jan 13 20:41:56 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">196</span><br><span class="hljs-attr">Jan 13 20:41:56 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">680</span><br><span class="hljs-attr">Jan 13 20:41:58 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">1900</span><br><span class="hljs-attr">Jan 13 20:41:58 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">10118</span><br><span class="hljs-attr">Jan 13 20:41:59 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">1472</span><br><span class="hljs-attr">Jan 13 20:41:59 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">9430</span><br><span class="hljs-attr">Jan 13 20:42:02 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">3669</span><br><span class="hljs-attr">Jan 13 20:42:02 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">23351</span><br><span class="hljs-attr">Jan 13 20:42:06 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">5776</span><br><span class="hljs-attr">Jan 13 20:42:06 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">35511</span><br><span class="hljs-attr">Jan 13 20:42:17 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">13161</span><br><span class="hljs-attr">Jan 13 20:42:17 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">81395</span><br><span class="hljs-attr">Jan 13 20:42:41 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">29500</span><br><span class="hljs-attr">Jan 13 20:42:41 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">180877</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">Jan 13 20:41:56 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">196</span><br><span class="hljs-attr">Jan 13 20:41:56 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">680</span><br><span class="hljs-attr">Jan 13 20:41:58 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">1900</span><br><span class="hljs-attr">Jan 13 20:41:58 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">10118</span><br><span class="hljs-attr">Jan 13 20:41:59 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">1472</span><br><span class="hljs-attr">Jan 13 20:41:59 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">9430</span><br><span class="hljs-attr">Jan 13 20:42:02 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">3669</span><br><span class="hljs-attr">Jan 13 20:42:02 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">23351</span><br><span class="hljs-attr">Jan 13 20:42:06 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">5776</span><br><span class="hljs-attr">Jan 13 20:42:06 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">35511</span><br><span class="hljs-attr">Jan 13 20:42:17 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">13161</span><br><span class="hljs-attr">Jan 13 20:42:17 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">81395</span><br><span class="hljs-attr">Jan 13 20:42:41 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">29500</span><br><span class="hljs-attr">Jan 13 20:42:41 coredns2 coredns:</span> [<span class="hljs-string">WARNING</span>] <span class="hljs-attr">plugin/dnstap: Dropped dnstap messages:</span> <span class="hljs-number">180877</span><br></code></pre></td></tr></table></figure>
 
 <p>如果想要突破这个限制，可以考虑在编译的时候修改源码</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> github地址</span><br><span class="hljs-meta">#</span><span class="bash"> https://github.com/coredns/coredns/blob/master/plugin/dnstap/io.go</span><br><br>const (<br>	tcpWriteBufSize = 1024 * 1024 // there is no good explanation for why this number has this value.<br>	queueSize       = 10000       // idem.<br><br>	tcpTimeout   = 4 * time.Second<br>	flushTimeout = 1 * time.Second<br>)<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> github地址</span><br><span class="hljs-meta">#</span><span class="bash"> https://github.com/coredns/coredns/blob/master/plugin/dnstap/io.go</span><br><br>const (<br>	tcpWriteBufSize = 1024 * 1024 // there is no good explanation for why this number has this value.<br>	queueSize       = 10000       // idem.<br><br>	tcpTimeout   = 4 * time.Second<br>	flushTimeout = 1 * time.Second<br>)<br></code></pre></td></tr></table></figure></li>
 </ul>
 <h1 id="3、errors插件"><a href="#3、errors插件" class="headerlink" title="3、errors插件"></a>3、errors插件</h1><h2 id="3-1-errors插件简介"><a href="#3-1-errors插件简介" class="headerlink" title="3.1 errors插件简介"></a>3.1 errors插件简介</h2><p>CoreDNS官方有对errors插件比较详细的<a target="_blank" rel="noopener" href="https://coredns.io/plugins/errors/">介绍和使用说明</a>，简单来说errors插件就是专门用来记录错误信息日志的一个组件。这里需要注意的是：</p>
 <ul>
@@ -319,50 +361,68 @@
 <li>errors插件默认情况下输出的日志级别都是<code>[ERROR]</code>，但是也可以通过<code>consolidate</code>命令进行定义</li>
 </ul>
 <h2 id="3-2-errors插件配置"><a href="#3-2-errors插件配置" class="headerlink" title="3.2 errors插件配置"></a>3.2 errors插件配置</h2><p>errors的配置非常简单，位置和log插件一样</p>
-<figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">.:<span class="hljs-number">53</span> &#123;<br>    forward . <span class="hljs-number">127.0.0.1</span>:<span class="hljs-number">35353</span><br>    log<br>    errors<br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs dns">.:<span class="hljs-number">53</span> &#123;<br>    forward . <span class="hljs-number">127.0.0.1</span>:<span class="hljs-number">35353</span><br>    log<br>    errors<br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
 
 <p>开启前后的对比如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 不开启error插件</span><br>Jan 14 11:50:12 coredns2 coredns: [INFO] 10.31.53.2:36586 - 34882 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 1.001413555s<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 开启error插件</span><br>Jan 14 11:50:33 coredns2 coredns: [INFO] 10.31.53.2:33796 - 62387 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 1.001076641s<br>Jan 14 11:50:33 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:57591-&gt;127.0.0.1:35353: read: connection refused<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 不开启error插件</span><br>Jan 14 11:50:12 coredns2 coredns: [INFO] 10.31.53.2:36586 - 34882 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 1.001413555s<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 开启error插件</span><br>Jan 14 11:50:33 coredns2 coredns: [INFO] 10.31.53.2:33796 - 62387 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 1.001076641s<br>Jan 14 11:50:33 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:57591-&gt;127.0.0.1:35353: read: connection refused<br></code></pre></td></tr></table></figure>
 
 <p>当然还可以有类似正则的配置方式可以简化日志输出，同时定义</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">errors &#123;<br>    consolidate 30s &quot;.* connection refused$&quot; warning<br>    consolidate 5m &quot;.* i/o timeout$&quot; warning<br>    consolidate 30s &quot;^Failed to .+&quot;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">errors &#123;<br>    consolidate 30s &quot;.* connection refused$&quot; warning<br>    consolidate 5m &quot;.* i/o timeout$&quot; warning<br>    consolidate 30s &quot;^Failed to .+&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>这样子可以把多条错误日志合并输出，结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 合并错误日志之前，每次错误日志都会单独输出，日志级别默认均为[ERROR]</span><br>Jan 14 14:29:31 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:53697-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:32 coredns2 coredns: [INFO] 10.31.53.2:38422 - 21429 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000386185s<br>Jan 14 14:29:32 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:34774-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:33 coredns2 coredns: [INFO] 10.31.53.2:44775 - 40543 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000418209s<br>Jan 14 14:29:33 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:51575-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:33 coredns2 coredns: [INFO] 10.31.53.2:41858 - 30773 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000285244s<br>Jan 14 14:29:33 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:54027-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:34 coredns2 coredns: [INFO] 10.31.53.2:56657 - 31457 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000280881s<br>Jan 14 14:29:34 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:59189-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:34 coredns2 coredns: [INFO] 10.31.53.2:48445 - 29130 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000399419s<br>Jan 14 14:29:34 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:35171-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:35 coredns2 coredns: [INFO] 10.31.53.2:42290 - 310 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000359849s<br>Jan 14 14:29:35 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:40662-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:36 coredns2 coredns: [INFO] 10.31.53.2:33545 - 28529 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000456204s<br>Jan 14 14:29:36 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:37439-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:36 coredns2 coredns: [INFO] 10.31.53.2:53167 - 18372 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000426039s<br>Jan 14 14:29:36 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:45881-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:37 coredns2 coredns: [INFO] 10.31.53.2:44851 - 52388 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000264627s<br>Jan 14 14:29:37 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:58678-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:37 coredns2 coredns: [INFO] 10.31.53.2:59500 - 19169 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000385832s<br>Jan 14 14:29:37 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:36355-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:38 coredns2 coredns: [INFO] 10.31.53.2:48272 - 35987 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000359493s<br>Jan 14 14:29:38 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:52055-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:39 coredns2 coredns: [INFO] 10.31.53.2:55974 - 48529 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.00035554s<br>Jan 14 14:29:39 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:51253-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:39 coredns2 coredns: [INFO] 10.31.53.2:40670 - 43374 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.00024835s<br>Jan 14 14:29:39 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:41919-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:40 coredns2 coredns: [INFO] 10.31.53.2:42067 - 780 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000257447s<br>Jan 14 14:29:40 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:49359-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:40 coredns2 coredns: [INFO] 10.31.53.2:56758 - 62500 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000338204s<br>Jan 14 14:29:40 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:44658-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:41 coredns2 coredns: [INFO] 10.31.53.2:36149 - 32955 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000400937s<br>Jan 14 14:29:41 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:33750-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:41 coredns2 coredns: [INFO] 10.31.53.2:60504 - 49021 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000272807s<br>Jan 14 14:29:41 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:41003-&gt;127.0.0.1:35353: read: connection refused<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 合并错误日志之后,合并输出30s内符合条件的错误日志总数，并且日志级别变为我们自定义的[WARNING]</span><br>Jan 14 14:32:48 coredns2 coredns: [INFO] 10.31.53.2:60095 - 763 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000389099s<br>Jan 14 14:33:10 coredns2 coredns: [INFO] 10.31.53.2:44256 - 21788 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000556023s<br>Jan 14 14:33:11 coredns2 coredns: [INFO] 10.31.53.2:39654 - 18638 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000394553s<br>Jan 14 14:33:11 coredns2 coredns: [INFO] 10.31.53.2:46340 - 23770 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000405404s<br>Jan 14 14:33:12 coredns2 coredns: [INFO] 10.31.53.2:56168 - 59588 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000351365s<br>Jan 14 14:33:13 coredns2 coredns: [INFO] 10.31.53.2:52337 - 28311 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.00033022s<br>Jan 14 14:33:14 coredns2 coredns: [INFO] 10.31.53.2:55564 - 52773 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.0002756s<br>Jan 14 14:33:14 coredns2 coredns: [INFO] 10.31.53.2:36233 - 21289 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000307114s<br>Jan 14 14:33:15 coredns2 coredns: [INFO] 10.31.53.2:41822 - 41368 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000379377s<br>Jan 14 14:33:18 coredns2 coredns: [WARNING] plugin/errors: 9 errors like &#x27;.* connection refused$&#x27; occurred in last 30s<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 合并错误日志之前，每次错误日志都会单独输出，日志级别默认均为[ERROR]</span><br>Jan 14 14:29:31 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:53697-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:32 coredns2 coredns: [INFO] 10.31.53.2:38422 - 21429 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000386185s<br>Jan 14 14:29:32 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:34774-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:33 coredns2 coredns: [INFO] 10.31.53.2:44775 - 40543 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000418209s<br>Jan 14 14:29:33 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:51575-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:33 coredns2 coredns: [INFO] 10.31.53.2:41858 - 30773 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000285244s<br>Jan 14 14:29:33 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:54027-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:34 coredns2 coredns: [INFO] 10.31.53.2:56657 - 31457 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000280881s<br>Jan 14 14:29:34 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:59189-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:34 coredns2 coredns: [INFO] 10.31.53.2:48445 - 29130 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000399419s<br>Jan 14 14:29:34 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:35171-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:35 coredns2 coredns: [INFO] 10.31.53.2:42290 - 310 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000359849s<br>Jan 14 14:29:35 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:40662-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:36 coredns2 coredns: [INFO] 10.31.53.2:33545 - 28529 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000456204s<br>Jan 14 14:29:36 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:37439-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:36 coredns2 coredns: [INFO] 10.31.53.2:53167 - 18372 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000426039s<br>Jan 14 14:29:36 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:45881-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:37 coredns2 coredns: [INFO] 10.31.53.2:44851 - 52388 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000264627s<br>Jan 14 14:29:37 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:58678-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:37 coredns2 coredns: [INFO] 10.31.53.2:59500 - 19169 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000385832s<br>Jan 14 14:29:37 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:36355-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:38 coredns2 coredns: [INFO] 10.31.53.2:48272 - 35987 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000359493s<br>Jan 14 14:29:38 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:52055-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:39 coredns2 coredns: [INFO] 10.31.53.2:55974 - 48529 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.00035554s<br>Jan 14 14:29:39 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:51253-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:39 coredns2 coredns: [INFO] 10.31.53.2:40670 - 43374 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.00024835s<br>Jan 14 14:29:39 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:41919-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:40 coredns2 coredns: [INFO] 10.31.53.2:42067 - 780 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000257447s<br>Jan 14 14:29:40 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:49359-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:40 coredns2 coredns: [INFO] 10.31.53.2:56758 - 62500 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000338204s<br>Jan 14 14:29:40 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:44658-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:41 coredns2 coredns: [INFO] 10.31.53.2:36149 - 32955 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000400937s<br>Jan 14 14:29:41 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:33750-&gt;127.0.0.1:35353: read: connection refused<br>Jan 14 14:29:41 coredns2 coredns: [INFO] 10.31.53.2:60504 - 49021 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000272807s<br>Jan 14 14:29:41 coredns2 coredns: [ERROR] plugin/errors: 2 tinychen.com. A: read udp 127.0.0.1:41003-&gt;127.0.0.1:35353: read: connection refused<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 合并错误日志之后,合并输出30s内符合条件的错误日志总数，并且日志级别变为我们自定义的[WARNING]</span><br>Jan 14 14:32:48 coredns2 coredns: [INFO] 10.31.53.2:60095 - 763 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000389099s<br>Jan 14 14:33:10 coredns2 coredns: [INFO] 10.31.53.2:44256 - 21788 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000556023s<br>Jan 14 14:33:11 coredns2 coredns: [INFO] 10.31.53.2:39654 - 18638 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000394553s<br>Jan 14 14:33:11 coredns2 coredns: [INFO] 10.31.53.2:46340 - 23770 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000405404s<br>Jan 14 14:33:12 coredns2 coredns: [INFO] 10.31.53.2:56168 - 59588 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000351365s<br>Jan 14 14:33:13 coredns2 coredns: [INFO] 10.31.53.2:52337 - 28311 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.00033022s<br>Jan 14 14:33:14 coredns2 coredns: [INFO] 10.31.53.2:55564 - 52773 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.0002756s<br>Jan 14 14:33:14 coredns2 coredns: [INFO] 10.31.53.2:36233 - 21289 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000307114s<br>Jan 14 14:33:15 coredns2 coredns: [INFO] 10.31.53.2:41822 - 41368 &quot;A IN tinychen.com. udp 38 false 4096&quot; - - 0 0.000379377s<br>Jan 14 14:33:18 coredns2 coredns: [WARNING] plugin/errors: 9 errors like &#x27;.* connection refused$&#x27; occurred in last 30s<br></code></pre></td></tr></table></figure>
 
 
+              
             </div>
-            <hr>
+            <hr/>
             <div>
-              <div class="post-metas mb-3">
-                
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/network/">network</a>
-                    
-                  </div>
-                
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/dns/">dns</a>
-                    
-                      <a class="hover-with-bg" href="/tags/coredns/">coredns</a>
-                    
-                      <a class="hover-with-bg" href="/tags/dnstap/">dnstap</a>
-                    
-                  </div>
-                
-              </div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/network/" class="category-chain-item">network</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/dns/">#dns</a>
+      
+        <a href="/tags/coredns/">#coredns</a>
+      
+        <a href="/tags/dnstap/">#dnstap</a>
+      
+    </div>
+  
+</div>
+
+
               
+
               
-                <div class="post-prevnext">
+                <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20220220-dns-09-coredns-06-recursive-dns/">
+                      <a href="/20220220-dns-09-coredns-06-recursive-dns/" title="CoreDNS篇6-递归服务器">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">CoreDNS篇6-递归服务器</span>
                         <span class="visible-mobile">Previous</span>
@@ -372,7 +432,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20211203-dpvs-fullnat-keepalived/">
+                      <a href="/20211203-dpvs-fullnat-keepalived/" title="DPVS-FullNAT模式keepalived篇">
                         <span class="hidden-mobile">DPVS-FullNAT模式keepalived篇</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -388,25 +448,55 @@
         </div>
       </div>
     </div>
-    
-      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
-        <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-      </div>
-    
+
+
+  </aside>
+
+
+    </div>
   </div>
 </div>
 
-<!-- Custom -->
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
 
 
     
 
     
-      <a id="scroll-top-button" href="#" role="button">
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
         <i class="iconfont icon-arrowup" aria-hidden="true"></i>
       </a>
     
@@ -425,45 +515,48 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v"
-                 for="local-search-input">keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
+
     
 
     
   </main>
 
-  <footer class="text-center mt-5 py-3">
-  <div class="footer-content">
-     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-  </div>
+  <footer>
+    <div class="footer-inner">
   
+    <div class="footer-content">
+       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      粤ICP备18140640号
+    </a>
+  </span>
+  
+</div>
 
   
-  <!-- 备案信息 -->
-  <div class="beian">
-    <span>
-      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-        粤ICP备18140640号
-      </a>
-    </span>
-    
-  </div>
-
-
   
-</footer>
+</div>
 
+  </footer>
 
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   
-  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -474,12 +567,70 @@
   </script>
 
 
-<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
-<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-<!-- Plugins -->
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
+          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
+          ga.l = +new Date;
+          ga('create', 'UA-166769908-1', 'auto');
+          ga('send', 'pageview');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
 
 
   
@@ -488,105 +639,153 @@
 
 
 
+
   
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
 
 
-
-  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
-
-
-
-  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
-
-
-
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
   <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var title = document.getElementById('subtitle').title;
-      
-      typing(title)
-      
-    })(window, document);
-  </script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
 
 
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
-  <script>
-    (function () {
-      var path = "/local-search.xml";
-      $('#local-search-input').on('click', function() {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      });
-      $('#modalSearch').on('shown.bs.modal', function() {
-        $('#local-search-input').focus();
-      });
-    })()
-  </script>
 
 
 
 
 
-
-
-
-
-
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
-      ga.l = +new Date;
-      ga('create', 'UA-166769908-1', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  
-
-  
-
-  
-
-  
-
-  
-
-
-
-
-
-<!-- 主题的启动项 保持在最底部 -->
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
 <script  src="/js/boot.js" ></script>
 
 
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
 </body>
 </html>

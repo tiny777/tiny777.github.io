@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -9,69 +9,97 @@
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
   <link rel="icon" href="https://resource.tinychen.com/logos.png">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP/3协议。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
+    <meta name="description" content="本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP&#x2F;3协议。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用nginx-quic支持HTTP&#x2F;3">
+<meta property="og:url" content="https://tinychen.com/20200821-nginx-quic-compile-to-implement-http3/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP&#x2F;3协议。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210106165522s.jpg">
+<meta property="article:published_time" content="2020-08-21T07:00:00.000Z">
+<meta property="article:modified_time" content="2021-11-03T10:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="http">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210106165522s.jpg">
+  
+  
   <title>使用nginx-quic支持HTTP/3 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
-  
-    
-    
-      
-      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
-    
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
 
-  
-    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
 
 
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-<!-- 自定义样式保持在最底部 -->
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"shell"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
+
+  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  <header style="height: 70vh;">
-    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand"
-       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -145,13 +173,15 @@
         
         
           <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
-                class="iconfont icon-search"></i>&nbsp;</a>
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
           </li>
+          
         
         
           <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self">&nbsp;<i
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
                 class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
           </li>
         
@@ -160,65 +190,69 @@
   </div>
 </nav>
 
-    <div class="banner" id="banner" parallax=true
-         style="background: url('https://resource.tinychen.com/20210106165522.jpg') no-repeat center center;
-           background-size: cover;">
-      <div class="full-bg-img">
-        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-          <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="使用nginx-quic支持HTTP/3">
-              
-            </span>
-
-            
-              <div class="mt-3">
-  
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-author" aria-hidden="true"></i>
-      TinyChen
-    </span>
-  
-  
-    <span class="post-meta">
-      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2020-08-21 15:00" pubdate>
-        August 21, 2020 pm
-      </time>
-    </span>
-  
-</div>
-
-<div class="mt-1">
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-chart"></i>
-      5k 字
-    </span>
   
 
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-clock-fill"></i>
-      
-      
-      39
-       分钟
-    </span>
-  
-
-  
-  
-</div>
-
-            
-          </div>
-
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://resource.tinychen.com/20210106165522.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="使用nginx-quic支持HTTP/3"></span>
           
         </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-08-21 15:00" pubdate>
+          August 21, 2020 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          18k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          149 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
       </div>
+
+      
     </div>
+  </div>
+</div>
+
+</div>
+
   </header>
 
   <main>
@@ -227,21 +261,28 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div class="py-5" id="board">
+        <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">使用nginx-quic支持HTTP/3</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：November 3, 2021 pm
+                  
+                    Last updated on November 3, 2021 pm
+                  
                 
               </p>
             
             <div class="markdown-body">
+              
               <p>本文主要介绍使用nginx-quic和boringssl项目来对服务器进行升级支持HTTP/3协议。</p>
 <span id="more"></span>
 
@@ -250,7 +291,7 @@
 <p>The code is at an early alpha level of quality and should not be used in production.</p>
 </blockquote>
 <p>nginx-quic的安装包可以在下面这里找到，由于还处于开发阶段，项目更新得非常快。</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">https:<span class="hljs-regexp">//</span>hg.nginx.org<span class="hljs-regexp">/nginx-quic/</span>shortlog/quic<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">https:<span class="hljs-regexp">//</span>hg.nginx.org<span class="hljs-regexp">/nginx-quic/</span>shortlog/quic<br></code></pre></td></tr></table></figure>
 
 <p>从官网的readme文件我们可以了解到，<strong>截止到2020年8月21日，nginx-quic项目目前只支持<code>h3-27</code>、<code>h3-28</code>、<code>h3-29</code>三个版本</strong>，再早期的草案版本并不支持，不过目前更新的速度非常快，变动也很大。</p>
 <blockquote>
@@ -267,58 +308,58 @@
 <p><a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc9000">rfc9000 (ietf.org)</a></p>
 </blockquote>
 <h1 id="2、编译安装nginx-quic"><a href="#2、编译安装nginx-quic" class="headerlink" title="2、编译安装nginx-quic"></a>2、编译安装nginx-quic</h1><p>这里我们使用了<strong>CentOS7</strong>来进行编译安装</p>
-<figure class="highlight subunit"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs subunit">[root@tiny-centos7 nginx-quic-quic]# lsb_release -a<br>LSB Version:    :core<span class="hljs-string">-4</span>.1-amd64:core<span class="hljs-string">-4</span>.1-noarch:cxx<span class="hljs-string">-4</span>.1-amd64:cxx<span class="hljs-string">-4</span>.1-noarch:desktop<span class="hljs-string">-4</span>.1-amd64:desktop<span class="hljs-string">-4</span>.1-noarch:languages<span class="hljs-string">-4</span>.1-amd64:languages<span class="hljs-string">-4</span>.1-noarch:printing<span class="hljs-string">-4</span>.1-amd64:printing<span class="hljs-string">-4</span>.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight subunit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs subunit">[root@tiny-centos7 nginx-quic-quic]# lsb_release -a<br>LSB Version:    :core<span class="hljs-string">-4</span>.1-amd64:core<span class="hljs-string">-4</span>.1-noarch:cxx<span class="hljs-string">-4</span>.1-amd64:cxx<span class="hljs-string">-4</span>.1-noarch:desktop<span class="hljs-string">-4</span>.1-amd64:desktop<span class="hljs-string">-4</span>.1-noarch:languages<span class="hljs-string">-4</span>.1-amd64:languages<span class="hljs-string">-4</span>.1-noarch:printing<span class="hljs-string">-4</span>.1-amd64:printing<span class="hljs-string">-4</span>.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br></code></pre></td></tr></table></figure>
 
 <p>首先我们在系统中使用yum安装基本的编译工具，注意此次使用的很多软件工具和依赖都是需要较新版本的，因此后面会进行大量的编译安装，<strong>请确保机器拥有足够的性能（可能需要编译gcc）和良好的网络</strong>。主要需要使用到的工具软件的安装步骤如下：</p>
 <h2 id="2-1-yum安装依赖"><a href="#2-1-yum安装依赖" class="headerlink" title="2.1 yum安装依赖"></a>2.1 yum安装依赖</h2><p>需要注意的是这里安装所需要的软件很多，这里并不能全部列出来，但是除了列出来的软件对新版本有要求外，别的都可以直接使用yum进行安装，当然也可以自己根据需要编译安装新版本。</p>
-<figure class="highlight crmsh"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs crmsh">sudo yum <span class="hljs-keyword">group</span> <span class="hljs-title">install</span> <span class="hljs-string">&quot;Development Tools&quot;</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">sudo yum <span class="hljs-keyword">group</span> <span class="hljs-title">install</span> <span class="hljs-string">&quot;Development Tools&quot;</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>需要注意的是网上有部分教程会让我们去安装<code>build-essential</code>，而这个套件在centos中是不存在的，我们直接安装Development Tools套件即可</p>
 </blockquote>
 <h2 id="2-2-编译安装cmake"><a href="#2-2-编译安装cmake" class="headerlink" title="2.2 编译安装cmake"></a>2.2 编译安装cmake</h2><p>cmake的版本必须要在3.0以上，cmake可以到这里下载<code>https://cmake.org/download/</code>。</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/Kitware/</span>CMake<span class="hljs-regexp">/releases/</span>download<span class="hljs-regexp">/v3.18.2/</span>cmake-<span class="hljs-number">3.18</span>.<span class="hljs-number">2</span>.tar.gz<br>tar -zxvf cmake-<span class="hljs-number">3.18</span>.<span class="hljs-number">2</span>.tar.gz<br>./bootstrap<br>gmake<br>make<br>make install<br><br>cmake --version<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/Kitware/</span>CMake<span class="hljs-regexp">/releases/</span>download<span class="hljs-regexp">/v3.18.2/</span>cmake-<span class="hljs-number">3.18</span>.<span class="hljs-number">2</span>.tar.gz<br>tar -zxvf cmake-<span class="hljs-number">3.18</span>.<span class="hljs-number">2</span>.tar.gz<br>./bootstrap<br>gmake<br>make<br>make install<br><br>cmake --version<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="2-3-编译安装perl"><a href="#2-3-编译安装perl" class="headerlink" title="2.3 编译安装perl"></a>2.3 编译安装perl</h2><p>perl的安装包可以从这里<code>www.cpan.org/src</code>下载。perl的版本需要尽可能新，否则可能会出现问题，这里使用的是5.32.0的稳定版本（截止2020-08-21）</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>www.cpan.org<span class="hljs-regexp">/src/</span><span class="hljs-number">5.0</span>/perl-<span class="hljs-number">5.32</span>.<span class="hljs-number">0</span>.tar.gz<br>tar -zxvf perl-<span class="hljs-number">5.32</span>.<span class="hljs-number">0</span>.tar.gz<br>cd perl-<span class="hljs-number">5.32</span>.<span class="hljs-number">0</span>/<br>.<span class="hljs-regexp">/Configure -des -Dprefix=/u</span>sr<span class="hljs-regexp">/local/</span>perl<br>make -j8<br>make test<br>make install<br><br><span class="hljs-comment"># 注意最后检查一下系统默认的perl是否为我们新安装的perl</span><br>perl -v<br><br><span class="hljs-comment"># 如果不是则需要进行修改</span><br><span class="hljs-comment"># 查看默认的perl</span><br>which perl | xargs file<br><br><span class="hljs-comment"># 替换新安装的perl和原来的perl</span><br>mv <span class="hljs-regexp">/usr/</span>bin<span class="hljs-regexp">/perl /u</span>sr<span class="hljs-regexp">/bin/</span>perl.<span class="hljs-number">5.16</span>.<span class="hljs-number">3</span><br><span class="hljs-comment"># 需要注意新安装的perl目录要根据前面编译的时候指定的目录来确定</span><br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/perl/</span>bin<span class="hljs-regexp">/perl /u</span>sr<span class="hljs-regexp">/bin/</span>perl<br><span class="hljs-comment"># 再次检查</span><br>perl -v<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>www.cpan.org<span class="hljs-regexp">/src/</span><span class="hljs-number">5.0</span>/perl-<span class="hljs-number">5.32</span>.<span class="hljs-number">0</span>.tar.gz<br>tar -zxvf perl-<span class="hljs-number">5.32</span>.<span class="hljs-number">0</span>.tar.gz<br>cd perl-<span class="hljs-number">5.32</span>.<span class="hljs-number">0</span>/<br>.<span class="hljs-regexp">/Configure -des -Dprefix=/u</span>sr<span class="hljs-regexp">/local/</span>perl<br>make -j8<br>make test<br>make install<br><br><span class="hljs-comment"># 注意最后检查一下系统默认的perl是否为我们新安装的perl</span><br>perl -v<br><br><span class="hljs-comment"># 如果不是则需要进行修改</span><br><span class="hljs-comment"># 查看默认的perl</span><br>which perl | xargs file<br><br><span class="hljs-comment"># 替换新安装的perl和原来的perl</span><br>mv <span class="hljs-regexp">/usr/</span>bin<span class="hljs-regexp">/perl /u</span>sr<span class="hljs-regexp">/bin/</span>perl.<span class="hljs-number">5.16</span>.<span class="hljs-number">3</span><br><span class="hljs-comment"># 需要注意新安装的perl目录要根据前面编译的时候指定的目录来确定</span><br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/perl/</span>bin<span class="hljs-regexp">/perl /u</span>sr<span class="hljs-regexp">/bin/</span>perl<br><span class="hljs-comment"># 再次检查</span><br>perl -v<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="2-4-安装golang"><a href="#2-4-安装golang" class="headerlink" title="2.4 安装golang"></a>2.4 安装golang</h2><p>golang的安装配置比较简单，我们从<code>https://golang.org/dl</code>直接下载最新的稳定版本即可。</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//g</span>olang.org<span class="hljs-regexp">/dl/g</span>o1.<span class="hljs-number">15</span>.linux-amd64.tar.gz<br>tar -zxvf go1.<span class="hljs-number">15</span>.linux-amd64.tar.gz -C <span class="hljs-regexp">/usr/</span>local<br><span class="hljs-comment"># 修改系统默认的go文件</span><br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/go/</span>bin<span class="hljs-regexp">/go /u</span>sr<span class="hljs-regexp">/bin/g</span>o<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//g</span>olang.org<span class="hljs-regexp">/dl/g</span>o1.<span class="hljs-number">15</span>.linux-amd64.tar.gz<br>tar -zxvf go1.<span class="hljs-number">15</span>.linux-amd64.tar.gz -C <span class="hljs-regexp">/usr/</span>local<br><span class="hljs-comment"># 修改系统默认的go文件</span><br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/go/</span>bin<span class="hljs-regexp">/go /u</span>sr<span class="hljs-regexp">/bin/g</span>o<br></code></pre></td></tr></table></figure>
 
 <p>接下来的go环境变量同学们可以根据自己的实际需求进行配置。对于我个人而言，我直接在<code>/etc/profile</code>中添加下面的配置然后source生效即可。</p>
-<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros"><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">GOROOT</span>=/usr/local/go<br><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">GOBIN</span>=<span class="hljs-variable">$GOROOT</span>/bin<br><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">PATH</span>=<span class="hljs-variable">$PATH</span>:$GOBIN<br><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">GOPATH</span>=/home/gopath<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">GOROOT</span>=/usr/local/go<br><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">GOBIN</span>=<span class="hljs-variable">$GOROOT</span>/bin<br><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">PATH</span>=<span class="hljs-variable">$PATH</span>:$GOBIN<br><span class="hljs-builtin-name">export</span> <span class="hljs-attribute">GOPATH</span>=/home/gopath<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="2-5-编译安装gcc"><a href="#2-5-编译安装gcc" class="headerlink" title="2.5 编译安装gcc"></a>2.5 编译安装gcc</h2><p>CentOS7默认的gcc的版本太旧了，编译boringssl的时候会报错，我们手动编译安装新版本的gcc，这里使用的是10.2.0的版本。gcc的版本可以在这里下载<code>http://ftp.gnu.org/gnu/gcc/</code>。</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget http:<span class="hljs-regexp">//</span>ftp.gnu.org<span class="hljs-regexp">/gnu/g</span>cc<span class="hljs-regexp">/gcc-10.2.0/g</span>cc-<span class="hljs-number">10.2</span>.<span class="hljs-number">0</span>.tar.gz<br>tar -zxvf gcc-<span class="hljs-number">10.2</span>.<span class="hljs-number">0</span>.tar.gz<br>cd gcc-<span class="hljs-number">10.2</span>.<span class="hljs-number">0</span>/<br><span class="hljs-comment"># 解压完成后需要下载四个依赖，我们执行脚本即可直接下载，服务器网络不好的同学也可以手动下载</span><br>.<span class="hljs-regexp">/contrib/</span>download_prerequisites<br><span class="hljs-comment"># 这里需要对c和c++进行支持，为了节省时间禁用掉了交叉编译</span><br>./configure -enable-checking=release -enable-languages=c,c++ -disable-multilib<br><span class="hljs-comment"># 接下来这里需要很久</span><br>make -j8<br>make install<br><br><span class="hljs-comment"># 安装完成之后我们需要替换原来的cc文件和c++文件，确保它们的版本都是最新的版本</span><br><span class="hljs-comment"># 一般来说原来系统的cc文件和c++文件都在/usr/bin/目录下，而我们编译安装的cc文件和c++文件在/usr/local/bin/</span><br>cd <span class="hljs-regexp">/usr/</span>bin/<br>mv <span class="hljs-regexp">/usr/</span>bin<span class="hljs-regexp">/cc /u</span>sr<span class="hljs-regexp">/bin/</span>cc.<span class="hljs-number">4.8</span>.<span class="hljs-number">5</span><br>mv <span class="hljs-regexp">/usr/</span>bin<span class="hljs-regexp">/c++ /u</span>sr<span class="hljs-regexp">/bin/</span>c++.<span class="hljs-number">4.8</span>.<span class="hljs-number">5</span><br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/g</span>cc <span class="hljs-regexp">/usr/</span>bin/cc<br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/</span>c++ <span class="hljs-regexp">/usr/</span>bin/c++<br><span class="hljs-comment"># 最后检查版本</span><br><span class="hljs-regexp">/usr/</span>bin/cc -v<br><span class="hljs-regexp">/usr/</span>bin/c++ -v<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget http:<span class="hljs-regexp">//</span>ftp.gnu.org<span class="hljs-regexp">/gnu/g</span>cc<span class="hljs-regexp">/gcc-10.2.0/g</span>cc-<span class="hljs-number">10.2</span>.<span class="hljs-number">0</span>.tar.gz<br>tar -zxvf gcc-<span class="hljs-number">10.2</span>.<span class="hljs-number">0</span>.tar.gz<br>cd gcc-<span class="hljs-number">10.2</span>.<span class="hljs-number">0</span>/<br><span class="hljs-comment"># 解压完成后需要下载四个依赖，我们执行脚本即可直接下载，服务器网络不好的同学也可以手动下载</span><br>.<span class="hljs-regexp">/contrib/</span>download_prerequisites<br><span class="hljs-comment"># 这里需要对c和c++进行支持，为了节省时间禁用掉了交叉编译</span><br>./configure -enable-checking=release -enable-languages=c,c++ -disable-multilib<br><span class="hljs-comment"># 接下来这里需要很久</span><br>make -j8<br>make install<br><br><span class="hljs-comment"># 安装完成之后我们需要替换原来的cc文件和c++文件，确保它们的版本都是最新的版本</span><br><span class="hljs-comment"># 一般来说原来系统的cc文件和c++文件都在/usr/bin/目录下，而我们编译安装的cc文件和c++文件在/usr/local/bin/</span><br>cd <span class="hljs-regexp">/usr/</span>bin/<br>mv <span class="hljs-regexp">/usr/</span>bin<span class="hljs-regexp">/cc /u</span>sr<span class="hljs-regexp">/bin/</span>cc.<span class="hljs-number">4.8</span>.<span class="hljs-number">5</span><br>mv <span class="hljs-regexp">/usr/</span>bin<span class="hljs-regexp">/c++ /u</span>sr<span class="hljs-regexp">/bin/</span>c++.<span class="hljs-number">4.8</span>.<span class="hljs-number">5</span><br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/g</span>cc <span class="hljs-regexp">/usr/</span>bin/cc<br>ln -s <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/</span>c++ <span class="hljs-regexp">/usr/</span>bin/c++<br><span class="hljs-comment"># 最后检查版本</span><br><span class="hljs-regexp">/usr/</span>bin/cc -v<br><span class="hljs-regexp">/usr/</span>bin/c++ -v<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>gcc下载的依赖内容如下，有需要的同学自取</p>
-<figure class="highlight elixir"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs elixir">[root<span class="hljs-variable">@TINY</span>-DESKTOP /home/gcc<span class="hljs-number">-10.2</span>.0]<span class="hljs-comment"># ./contrib/download_prerequisites</span><br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">24</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/gmp-6.1.0.tar.bz2 [2383840/</span><span class="hljs-number">2383840</span>] -&gt; <span class="hljs-string">&quot;./gmp-6.1.0.tar.bz2&quot;</span> [<span class="hljs-number">1</span>]<br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">26</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/mpfr-3.1.4.tar.bz2 [1279284/</span><span class="hljs-number">1279284</span>] -&gt; <span class="hljs-string">&quot;./mpfr-3.1.4.tar.bz2&quot;</span> [<span class="hljs-number">1</span>]<br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/mpc-1.0.3.tar.gz [669925/</span><span class="hljs-number">669925</span>] -&gt; <span class="hljs-string">&quot;./mpc-1.0.3.tar.gz&quot;</span> [<span class="hljs-number">1</span>]<br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">30</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/isl-0.18.tar.bz2 [1658291/</span><span class="hljs-number">1658291</span>] -&gt; <span class="hljs-string">&quot;./isl-0.18.tar.bz2&quot;</span> [<span class="hljs-number">1</span>]<br>gmp<span class="hljs-number">-6.1</span>.0.<span class="hljs-symbol">tar.bz2:</span> OK<br>mpfr<span class="hljs-number">-3.1</span>.<span class="hljs-number">4</span>.<span class="hljs-symbol">tar.bz2:</span> OK<br>mpc<span class="hljs-number">-1.0</span>.<span class="hljs-number">3</span>.<span class="hljs-symbol">tar.gz:</span> OK<br>isl-0.<span class="hljs-number">18</span>.<span class="hljs-symbol">tar.bz2:</span> OK<br>All prerequisites downloaded successfully.<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs elixir">[root<span class="hljs-variable">@TINY</span>-DESKTOP /home/gcc<span class="hljs-number">-10.2</span>.0]<span class="hljs-comment"># ./contrib/download_prerequisites</span><br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">24</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/gmp-6.1.0.tar.bz2 [2383840/</span><span class="hljs-number">2383840</span>] -&gt; <span class="hljs-string">&quot;./gmp-6.1.0.tar.bz2&quot;</span> [<span class="hljs-number">1</span>]<br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">26</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/mpfr-3.1.4.tar.bz2 [1279284/</span><span class="hljs-number">1279284</span>] -&gt; <span class="hljs-string">&quot;./mpfr-3.1.4.tar.bz2&quot;</span> [<span class="hljs-number">1</span>]<br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/mpc-1.0.3.tar.gz [669925/</span><span class="hljs-number">669925</span>] -&gt; <span class="hljs-string">&quot;./mpc-1.0.3.tar.gz&quot;</span> [<span class="hljs-number">1</span>]<br><span class="hljs-number">2020</span>-08<span class="hljs-number">-21</span> <span class="hljs-number">21</span><span class="hljs-symbol">:</span><span class="hljs-number">28</span><span class="hljs-symbol">:</span><span class="hljs-number">30</span> <span class="hljs-symbol">URL:</span><span class="hljs-symbol">http:</span>/<span class="hljs-regexp">/gcc.gnu.org/pub</span><span class="hljs-regexp">/gcc/infrastructure</span><span class="hljs-regexp">/isl-0.18.tar.bz2 [1658291/</span><span class="hljs-number">1658291</span>] -&gt; <span class="hljs-string">&quot;./isl-0.18.tar.bz2&quot;</span> [<span class="hljs-number">1</span>]<br>gmp<span class="hljs-number">-6.1</span>.0.<span class="hljs-symbol">tar.bz2:</span> OK<br>mpfr<span class="hljs-number">-3.1</span>.<span class="hljs-number">4</span>.<span class="hljs-symbol">tar.bz2:</span> OK<br>mpc<span class="hljs-number">-1.0</span>.<span class="hljs-number">3</span>.<span class="hljs-symbol">tar.gz:</span> OK<br>isl-0.<span class="hljs-number">18</span>.<span class="hljs-symbol">tar.bz2:</span> OK<br>All prerequisites downloaded successfully.<br></code></pre></td></tr></table></figure>
 </blockquote>
 <h2 id="2-6-编译安装boringssl"><a href="#2-6-编译安装boringssl" class="headerlink" title="2.6 编译安装boringssl"></a>2.6 编译安装boringssl</h2><p>谷歌官方建议我们使用<code>ninja</code>来编译安装boringssl，因此我们需要先安装一个<code>ninja</code>。</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/ninja-build/</span>ninja<span class="hljs-regexp">/releases/</span>download<span class="hljs-regexp">/v1.10.2/</span>ninja-linux.zip<br>unzip ninja-linux.zip<br>cp -r ninja <span class="hljs-regexp">/usr/</span>bin/<br>which ninja<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/ninja-build/</span>ninja<span class="hljs-regexp">/releases/</span>download<span class="hljs-regexp">/v1.10.2/</span>ninja-linux.zip<br>unzip ninja-linux.zip<br>cp -r ninja <span class="hljs-regexp">/usr/</span>bin/<br>which ninja<br></code></pre></td></tr></table></figure>
 
 
 
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> boringssl 需要 libunwind-generic 这个module的支持</span><br>yum install libunwind-devel libunwind<br><span class="hljs-meta">#</span><span class="bash"> 注意这里的git仓库很大，大概在250MB左右，请确保编译安装服务器的网络良好</span><br>git clone https://github.com/google/boringssl.git<br>cd boringssl/<br><span class="hljs-meta">#</span><span class="bash"> 建立一个专门用于编译的文件夹</span><br>mkdir build<br>cd build<br>cmake -GNinja ..<br>ninja<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> boringssl 需要 libunwind-generic 这个module的支持</span><br>yum install libunwind-devel libunwind<br><span class="hljs-meta">#</span><span class="bash"> 注意这里的git仓库很大，大概在250MB左右，请确保编译安装服务器的网络良好</span><br>git clone https://github.com/google/boringssl.git<br>cd boringssl/<br><span class="hljs-meta">#</span><span class="bash"> 建立一个专门用于编译的文件夹</span><br>mkdir build<br>cd build<br>cmake -GNinja ..<br>ninja<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>注意在执行cmake这一步的时候正常情况下检测到的gcc文件和perl库版本应该是我们之前编译安装好的新版本，如果不对的话需要再次检查</p>
-<figure class="highlight ada"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ada"># cmake -GNinja ..<br><span class="hljs-comment">-- The C compiler identification is GNU 10.2.0</span><br><span class="hljs-comment">-- Detecting C compiler ABI info</span><br><span class="hljs-comment">-- Detecting C compiler ABI info - done</span><br><span class="hljs-comment">-- Check for working C compiler: /usr/bin/cc - skipped</span><br><span class="hljs-comment">-- Detecting C compile features</span><br><span class="hljs-comment">-- Detecting C compile features - done</span><br><span class="hljs-comment">-- The CXX compiler identification is GNU 10.2.0</span><br><span class="hljs-comment">-- Detecting CXX compiler ABI info</span><br><span class="hljs-comment">-- Detecting CXX compiler ABI info - done</span><br><span class="hljs-comment">-- Check for working CXX compiler: /usr/bin/c++ - skipped</span><br><span class="hljs-comment">-- Detecting CXX compile features</span><br><span class="hljs-comment">-- Detecting CXX compile features - done</span><br><span class="hljs-comment">-- Found Perl: /usr/bin/perl (found version &quot;5.32.0&quot;)</span><br><span class="hljs-comment">-- Checking for module &#x27;libunwind-generic&#x27;</span><br><span class="hljs-comment">-- Checking for module &#x27;libunwind-generic&#x27;</span><br><span class="hljs-comment">--   Found libunwind-generic, version 1.2</span><br><span class="hljs-comment">-- The ASM compiler identification is GNU</span><br><span class="hljs-comment">-- Found assembler: /usr/bin/cc</span><br><span class="hljs-comment">-- Configuring done</span><br><span class="hljs-comment">-- Generating done</span><br><span class="hljs-comment">-- Build files have been written to: /root/boringssl/build</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs ada"># cmake -GNinja ..<br><span class="hljs-comment">-- The C compiler identification is GNU 10.2.0</span><br><span class="hljs-comment">-- Detecting C compiler ABI info</span><br><span class="hljs-comment">-- Detecting C compiler ABI info - done</span><br><span class="hljs-comment">-- Check for working C compiler: /usr/bin/cc - skipped</span><br><span class="hljs-comment">-- Detecting C compile features</span><br><span class="hljs-comment">-- Detecting C compile features - done</span><br><span class="hljs-comment">-- The CXX compiler identification is GNU 10.2.0</span><br><span class="hljs-comment">-- Detecting CXX compiler ABI info</span><br><span class="hljs-comment">-- Detecting CXX compiler ABI info - done</span><br><span class="hljs-comment">-- Check for working CXX compiler: /usr/bin/c++ - skipped</span><br><span class="hljs-comment">-- Detecting CXX compile features</span><br><span class="hljs-comment">-- Detecting CXX compile features - done</span><br><span class="hljs-comment">-- Found Perl: /usr/bin/perl (found version &quot;5.32.0&quot;)</span><br><span class="hljs-comment">-- Checking for module &#x27;libunwind-generic&#x27;</span><br><span class="hljs-comment">-- Checking for module &#x27;libunwind-generic&#x27;</span><br><span class="hljs-comment">--   Found libunwind-generic, version 1.2</span><br><span class="hljs-comment">-- The ASM compiler identification is GNU</span><br><span class="hljs-comment">-- Found assembler: /usr/bin/cc</span><br><span class="hljs-comment">-- Configuring done</span><br><span class="hljs-comment">-- Generating done</span><br><span class="hljs-comment">-- Build files have been written to: /root/boringssl/build</span><br></code></pre></td></tr></table></figure>
 
 
 </blockquote>
 <h2 id="2-7-编译nginx"><a href="#2-7-编译nginx" class="headerlink" title="2.7 编译nginx"></a>2.7 编译nginx</h2><p>剩下的nginx的编译安装步骤就和正常的nginx编译安装一致，这里不再赘述，模块可以根据自己的需求进行安装，开启HTTP/3模块需要使用<code>--with-http_v3_module --with-cc-opt=&quot;-I../boringssl-master/include&quot; --with-ld-opt=&quot;-L../boringssl-master/build/ssl -L../boringssl-master/build/crypto&quot;</code>参数。</p>
-<figure class="highlight jboss-cli"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs jboss-cli"><span class="hljs-keyword">cd</span> nginx-quic/<br><span class="hljs-string">./auto/configure</span> <span class="hljs-params">--prefix=/home/nginx</span> <span class="hljs-params">--with-http_ssl_module</span> <span class="hljs-params">--with-http_v2_module</span> <span class="hljs-params">--with-debug</span> <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-cc-opt=</span><span class="hljs-string">&quot;-I../boringssl/include&quot;</span> <span class="hljs-params">--with-ld-opt=</span><span class="hljs-string">&quot;-L../boringssl/build/ssl -L../boringssl/build/crypto&quot;</span> <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-http_quic_module</span> <span class="hljs-params">--with-stream_quic_module</span> <span class="hljs-params">--build=ngx-quic-tinychen20211103</span><br>make <br>make install<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-keyword">cd</span> nginx-quic/<br><span class="hljs-string">./auto/configure</span> <span class="hljs-params">--prefix=/home/nginx</span> <span class="hljs-params">--with-http_ssl_module</span> <span class="hljs-params">--with-http_v2_module</span> <span class="hljs-params">--with-debug</span> <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-cc-opt=</span><span class="hljs-string">&quot;-I../boringssl/include&quot;</span> <span class="hljs-params">--with-ld-opt=</span><span class="hljs-string">&quot;-L../boringssl/build/ssl -L../boringssl/build/crypto&quot;</span> <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-http_quic_module</span> <span class="hljs-params">--with-stream_quic_module</span> <span class="hljs-params">--build=ngx-quic-tinychen20211103</span><br>make <br>make install<br></code></pre></td></tr></table></figure>
 
 <p>安装完成后我们检测nginx的参数：</p>
-<figure class="highlight jboss-cli"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs jboss-cli">[root@tiny-centos7 nginx-quic-quic]<span class="hljs-comment"># /home/nginx/sbin/nginx -V</span><br>nginx <span class="hljs-keyword">version</span>: nginx/1.21.3 <span class="hljs-params">(ngx-quic-tinychen20211103)</span><br>built by gcc 11.2.0 <span class="hljs-params">(GCC)</span><br>built with OpenSSL 1.1.1 <span class="hljs-params">(compatible; BoringSSL)</span> <span class="hljs-params">(running with BoringSSL)</span><br>TLS SNI support enabled<br>configure arguments: <span class="hljs-params">--prefix=/home/nginx</span> <span class="hljs-params">--with-http_ssl_module</span> <span class="hljs-params">--with-http_v2_module</span> <span class="hljs-params">--with-debug</span> <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-cc-opt=-I</span>.<span class="hljs-string">./boringssl/include</span> <span class="hljs-params">--with-ld-opt=</span>&#x27;-L.<span class="hljs-string">./boringssl/build/ssl</span> -L.<span class="hljs-string">./boringssl/build/crypto</span>&#x27; <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-http_quic_module</span> <span class="hljs-params">--with-stream_quic_module</span> <span class="hljs-params">--build=ngx-quic-tinychen20211103</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">[root@tiny-centos7 nginx-quic-quic]<span class="hljs-comment"># /home/nginx/sbin/nginx -V</span><br>nginx <span class="hljs-keyword">version</span>: nginx/1.21.3 <span class="hljs-params">(ngx-quic-tinychen20211103)</span><br>built by gcc 11.2.0 <span class="hljs-params">(GCC)</span><br>built with OpenSSL 1.1.1 <span class="hljs-params">(compatible; BoringSSL)</span> <span class="hljs-params">(running with BoringSSL)</span><br>TLS SNI support enabled<br>configure arguments: <span class="hljs-params">--prefix=/home/nginx</span> <span class="hljs-params">--with-http_ssl_module</span> <span class="hljs-params">--with-http_v2_module</span> <span class="hljs-params">--with-debug</span> <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-cc-opt=-I</span>.<span class="hljs-string">./boringssl/include</span> <span class="hljs-params">--with-ld-opt=</span>&#x27;-L.<span class="hljs-string">./boringssl/build/ssl</span> -L.<span class="hljs-string">./boringssl/build/crypto</span>&#x27; <span class="hljs-params">--with-http_v3_module</span> <span class="hljs-params">--with-http_quic_module</span> <span class="hljs-params">--with-stream_quic_module</span> <span class="hljs-params">--build=ngx-quic-tinychen20211103</span><br></code></pre></td></tr></table></figure>
 
 <h1 id="3、配置nginx-quic"><a href="#3、配置nginx-quic" class="headerlink" title="3、配置nginx-quic"></a>3、配置nginx-quic</h1><ul>
 <li>由于HTTP/3需要使用udp协议端口，请注意开放对应的防火墙</li>
@@ -327,10 +368,10 @@
 <li>如果有多个server_name，在不指定IP的情况下，只需要在任意一个配置了<code>listen 443 http3 quic reuseport;</code>那么其他所有server_name都会开启HTTP3，并且不需要再添加该配置否则会报错（不知道后续会不会把报错去掉），如果需要部分server_name开启HTTP/3，请指定监听IP。</li>
 <li>http3增加了<code>http3_max_field_size</code>、<code>http3_max_table_capacity</code>、<code>http3_max_blocked_streams</code>、<code>http3_max_concurrent_pushes</code>、 <code>http3_push</code>、<code>http3_push_preload</code>这六个变量来控制http3的性能</li>
 </ul>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx">    <span class="hljs-section">server</span> &#123;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> ssl http2;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> http3 quic reuseport;<br>        <span class="hljs-comment"># UDP listener for QUIC+HTTP/3</span><br><br>        <span class="hljs-attribute">server_name</span> tinychen.com www.tinychen.com;<br><br>        <span class="hljs-attribute">add_header</span> Strict-Transport-Security <span class="hljs-string">&quot;max-age=63072000; includeSubDomains; preload&quot;</span>;<br><br>        <span class="hljs-attribute">resolver</span> <span class="hljs-number">127.0.0.1</span>;<br>        <br>        <span class="hljs-attribute">ssl_protocols</span> TLSv1.<span class="hljs-number">2</span> TLSv1.<span class="hljs-number">3</span>;<br>        <span class="hljs-attribute">ssl_ecdh_curve</span> X25519:P-<span class="hljs-number">256</span>:P-<span class="hljs-number">384</span>;<br>        <span class="hljs-attribute">ssl_ciphers</span> TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-<span class="hljs-number">256</span>-GCM-SHA384:TLS13-AES-<span class="hljs-number">128</span>-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-CHACHA20-POLY1305:EECDH+CHACHA20:EECDH+AES128;<br><br>        <span class="hljs-comment"># 该选项用于开启address validation，但是会和0-RTT冲突</span><br>        <span class="hljs-comment">#quic_retry on;</span><br><br>        <span class="hljs-comment"># 开启 TLS 1.3 0-RTT</span><br>        <span class="hljs-attribute">ssl_early_data</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-comment"># 添加 Early-Data 头告知后端, 防止重放攻击</span><br>        <span class="hljs-attribute">proxy_set_header</span> Early-Data $ssl_early_data;<br><br>        <span class="hljs-comment"># 参考nginx官方目前支持的http3版本，我们添加对应的header</span><br>        <span class="hljs-attribute">add_header</span> Alt-Svc <span class="hljs-string">&#x27;h3-27=&quot;:443&quot;; h3-28=&quot;:443&quot;; h3-29=&quot;:443&quot;; ma=86400; quic=&quot;:443&quot;&#x27;</span>;<br><br>		......<br>		<br>&#125;<br><br><br>    <span class="hljs-section">server</span> &#123;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> ssl http2;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> http3 quic reuseport;<br>		<span class="hljs-comment"># UDP listener for QUIC+HTTP/3</span><br>    <br>        <span class="hljs-attribute">server_name</span> tinychen.com;<br><br>        <span class="hljs-comment">#ssl_stapling on;</span><br>        <span class="hljs-attribute">ssl_stapling_verify</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-attribute">ssl_prefer_server_ciphers</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-attribute">ssl_session_cache</span> shared:SSL:<span class="hljs-number">1m</span>;<br>        <span class="hljs-attribute">ssl_verify_depth</span> <span class="hljs-number">10</span>;<br>        <span class="hljs-attribute">ssl_session_timeout</span> <span class="hljs-number">30m</span>;<br><br>        <span class="hljs-attribute">ssl_protocols</span> TLSv1.<span class="hljs-number">2</span> TLSv1.<span class="hljs-number">3</span>;<br>        <span class="hljs-attribute">ssl_ecdh_curve</span> X25519:P-<span class="hljs-number">256</span>:P-<span class="hljs-number">384</span>;<br>        <span class="hljs-attribute">ssl_ciphers</span> ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256;<br><br>        <span class="hljs-comment"># 添加HSTS配置</span><br>        <span class="hljs-attribute">add_header</span> Strict-Transport-Security <span class="hljs-string">&quot;max-age=63072000; includeSubDomains; preload&quot;</span>;<br>        <span class="hljs-comment"># 添加header告知浏览器支持http3，注意这里不再需要像之前的草稿版本http3那样指定如h3-27 h3-28 h3-29等版本</span><br>        <span class="hljs-attribute">add_header</span> Alt-Svc <span class="hljs-string">&#x27;h3=&quot;:443&quot;; ma=86400&#x27;</span>;<br><br>        <span class="hljs-comment"># 开启 TLS 1.3 0-RTT</span><br>        <span class="hljs-attribute">ssl_early_data</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-comment"># 添加 Early-Data 头告知后端, 防止重放攻击</span><br>        <span class="hljs-attribute">proxy_set_header</span> Early-Data $ssl_early_data;<br><br>		......<br>        <br>        <span class="hljs-attribute">location</span> <span class="hljs-regexp">~ ^/</span> &#123;<br>            <span class="hljs-attribute">root</span> html/;<br>            <span class="hljs-attribute">index</span> index.html index.htm;<br>            <span class="hljs-attribute">http2_push_preload</span> <span class="hljs-literal">on</span>;<br>            <span class="hljs-attribute">http3_push_preload</span> <span class="hljs-literal">on</span>;<br>        &#125;<br><br>    &#125;<br><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><code class="hljs nginx">    <span class="hljs-section">server</span> &#123;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> ssl http2;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> http3 quic reuseport;<br>        <span class="hljs-comment"># UDP listener for QUIC+HTTP/3</span><br><br>        <span class="hljs-attribute">server_name</span> tinychen.com www.tinychen.com;<br><br>        <span class="hljs-attribute">add_header</span> Strict-Transport-Security <span class="hljs-string">&quot;max-age=63072000; includeSubDomains; preload&quot;</span>;<br><br>        <span class="hljs-attribute">resolver</span> <span class="hljs-number">127.0.0.1</span>;<br>        <br>        <span class="hljs-attribute">ssl_protocols</span> TLSv1.<span class="hljs-number">2</span> TLSv1.<span class="hljs-number">3</span>;<br>        <span class="hljs-attribute">ssl_ecdh_curve</span> X25519:P-<span class="hljs-number">256</span>:P-<span class="hljs-number">384</span>;<br>        <span class="hljs-attribute">ssl_ciphers</span> TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-<span class="hljs-number">256</span>-GCM-SHA384:TLS13-AES-<span class="hljs-number">128</span>-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-CHACHA20-POLY1305:EECDH+CHACHA20:EECDH+AES128;<br><br>        <span class="hljs-comment"># 该选项用于开启address validation，但是会和0-RTT冲突</span><br>        <span class="hljs-comment">#quic_retry on;</span><br><br>        <span class="hljs-comment"># 开启 TLS 1.3 0-RTT</span><br>        <span class="hljs-attribute">ssl_early_data</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-comment"># 添加 Early-Data 头告知后端, 防止重放攻击</span><br>        <span class="hljs-attribute">proxy_set_header</span> Early-Data $ssl_early_data;<br><br>        <span class="hljs-comment"># 参考nginx官方目前支持的http3版本，我们添加对应的header</span><br>        <span class="hljs-attribute">add_header</span> Alt-Svc <span class="hljs-string">&#x27;h3-27=&quot;:443&quot;; h3-28=&quot;:443&quot;; h3-29=&quot;:443&quot;; ma=86400; quic=&quot;:443&quot;&#x27;</span>;<br><br>		......<br>		<br>&#125;<br><br><br>    <span class="hljs-section">server</span> &#123;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> ssl http2;<br>        <span class="hljs-attribute">listen</span> <span class="hljs-number">443</span> http3 quic reuseport;<br>		<span class="hljs-comment"># UDP listener for QUIC+HTTP/3</span><br>    <br>        <span class="hljs-attribute">server_name</span> tinychen.com;<br><br>        <span class="hljs-comment">#ssl_stapling on;</span><br>        <span class="hljs-attribute">ssl_stapling_verify</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-attribute">ssl_prefer_server_ciphers</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-attribute">ssl_session_cache</span> shared:SSL:<span class="hljs-number">1m</span>;<br>        <span class="hljs-attribute">ssl_verify_depth</span> <span class="hljs-number">10</span>;<br>        <span class="hljs-attribute">ssl_session_timeout</span> <span class="hljs-number">30m</span>;<br><br>        <span class="hljs-attribute">ssl_protocols</span> TLSv1.<span class="hljs-number">2</span> TLSv1.<span class="hljs-number">3</span>;<br>        <span class="hljs-attribute">ssl_ecdh_curve</span> X25519:P-<span class="hljs-number">256</span>:P-<span class="hljs-number">384</span>;<br>        <span class="hljs-attribute">ssl_ciphers</span> ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256;<br><br>        <span class="hljs-comment"># 添加HSTS配置</span><br>        <span class="hljs-attribute">add_header</span> Strict-Transport-Security <span class="hljs-string">&quot;max-age=63072000; includeSubDomains; preload&quot;</span>;<br>        <span class="hljs-comment"># 添加header告知浏览器支持http3，注意这里不再需要像之前的草稿版本http3那样指定如h3-27 h3-28 h3-29等版本</span><br>        <span class="hljs-attribute">add_header</span> Alt-Svc <span class="hljs-string">&#x27;h3=&quot;:443&quot;; ma=86400&#x27;</span>;<br><br>        <span class="hljs-comment"># 开启 TLS 1.3 0-RTT</span><br>        <span class="hljs-attribute">ssl_early_data</span> <span class="hljs-literal">on</span>;<br>        <span class="hljs-comment"># 添加 Early-Data 头告知后端, 防止重放攻击</span><br>        <span class="hljs-attribute">proxy_set_header</span> Early-Data $ssl_early_data;<br><br>		......<br>        <br>        <span class="hljs-attribute">location</span> <span class="hljs-regexp">~ ^/</span> &#123;<br>            <span class="hljs-attribute">root</span> html/;<br>            <span class="hljs-attribute">index</span> index.html index.htm;<br>            <span class="hljs-attribute">http2_push_preload</span> <span class="hljs-literal">on</span>;<br>            <span class="hljs-attribute">http3_push_preload</span> <span class="hljs-literal">on</span>;<br>        &#125;<br><br>    &#125;<br><br></code></pre></td></tr></table></figure>
 
 <p>修改配置运行之后应该能看到udp的443端口被nginx进程监听</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@tiny-cloud /home/nginx]# netstat -ntulp | grep 443<br>tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      9730/nginx: master<br>udp        0      0 0.0.0.0:443             0.0.0.0:*                           9730/nginx: master<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@tiny-cloud /home/nginx]# netstat -ntulp | grep 443<br>tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      9730/nginx: master<br>udp        0      0 0.0.0.0:443             0.0.0.0:*                           9730/nginx: master<br></code></pre></td></tr></table></figure>
 
 
 
@@ -343,10 +384,10 @@
 <p><img src="https://resource.tinychen.com/20200824172009.png" srcset="/img/loading.gif" lazyload></p>
 <p>再次访问tinychen.com就可以看到使用了HTTP/3协议进行访问，在后台的日志中也能看到对应的请求使用了<code>quic</code>和<code>h3-27</code>。（日志中的IP地址已做脱敏处理）。</p>
 <p><img src="https://resource.tinychen.com/20200824172003.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight gherkin"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs gherkin">0.0.0.0 |<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET / HTTP/3 </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /css/main.css HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/font-awesome/css/font-awesome.min.css HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/pace/pace-theme-material.min.css HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/pace/pace.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/canvas-nest/canvas-nest.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/anime.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/velocity/velocity.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/velocity/velocity.ui.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/utils.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/motion.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/schemes/pisces.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/next-boot.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/local-search.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.011 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0 HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/lib/font-awesome/css/font-awesome.min.css </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.014 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs gherkin">0.0.0.0 |<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET / HTTP/3 </span>|<span class="hljs-string"> - </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /css/main.css HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/font-awesome/css/font-awesome.min.css HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/pace/pace-theme-material.min.css HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/pace/pace.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/canvas-nest/canvas-nest.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/anime.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/velocity/velocity.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/velocity/velocity.ui.min.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/utils.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/motion.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/schemes/pisces.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/next-boot.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.000 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /js/local-search.js HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/ </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.011 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br><span class="hljs-string">0.0.0.0 </span>|<span class="hljs-string"> [24/Aug/2020:14:40:47 +0800] </span>|<span class="hljs-string"> 200 </span>|<span class="hljs-string"> tinychen.com </span>|<span class="hljs-string"> GET /lib/font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0 HTTP/3 </span>|<span class="hljs-string"> https://tinychen.com/lib/font-awesome/css/font-awesome.min.css </span>|<span class="hljs-string"> Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:79.0) Gecko/20100101 Firefox/79.0 </span>|<span class="hljs-string"> 0.014 </span>|<span class="hljs-string"> TLSv1.3 </span>|<span class="hljs-string"> TLS_AES_128_GCM_SHA256 </span>|<span class="hljs-string"> quic </span>|<span class="hljs-string"> h3-27</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="4-3-Chrome开启HTTP-3"><a href="#4-3-Chrome开启HTTP-3" class="headerlink" title="4.3 Chrome开启HTTP/3"></a>4.3 Chrome开启HTTP/3</h2><p>nginx的官网提示说Chrome需要<strong>83+版本</strong>才支持HTTP/3，实测在部分网站（如<code>google.com</code>）确实可以使用HTTP/3的某些草案版本，但是Chrome目前来说默认还是不支持<code>h3-27协议</code>，我们需要手动开启。对于windows系统而言，我们使用命令行+指定参数的方式开启<code>h3-27</code>的支持：</p>
-<figure class="highlight taggerscript"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs taggerscript">PS C:<span class="hljs-symbol">\P</span>rogram Files (x86)<span class="hljs-symbol">\G</span>oogle<span class="hljs-symbol">\C</span>hrome<span class="hljs-symbol">\A</span>pplication&gt; .<span class="hljs-symbol">\c</span>hrome.exe --enable-quic --quic-version=h3-27<br>PS C:<span class="hljs-symbol">\P</span>rogram Files (x86)<span class="hljs-symbol">\G</span>oogle<span class="hljs-symbol">\C</span>hrome<span class="hljs-symbol">\A</span>pplication&gt; .<span class="hljs-symbol">\c</span>hrome.exe --enable-quic --quic-version=h3-27 --origin-to-force-quic-on=tinychen.com:443<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight taggerscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs taggerscript">PS C:<span class="hljs-symbol">\P</span>rogram Files (x86)<span class="hljs-symbol">\G</span>oogle<span class="hljs-symbol">\C</span>hrome<span class="hljs-symbol">\A</span>pplication&gt; .<span class="hljs-symbol">\c</span>hrome.exe --enable-quic --quic-version=h3-27<br>PS C:<span class="hljs-symbol">\P</span>rogram Files (x86)<span class="hljs-symbol">\G</span>oogle<span class="hljs-symbol">\C</span>hrome<span class="hljs-symbol">\A</span>pplication&gt; .<span class="hljs-symbol">\c</span>hrome.exe --enable-quic --quic-version=h3-27 --origin-to-force-quic-on=tinychen.com:443<br></code></pre></td></tr></table></figure>
 
 <p>上面使用了powershell来启动chrome，为了保证效果，还使用了<code>--origin-to-force-quic-on</code>来强行指定域名和端口。</p>
 <p>本次测试的chrome版本如下：</p>
@@ -355,41 +396,59 @@
 <p><img src="https://resource.tinychen.com/20200824171950.png" srcset="/img/loading.gif" lazyload></p>
 <p>除了本次的测试网站tinychen.com外，我们还可以看到谷歌的大部分网站也都开启了HTTP/3。</p>
 <p>同样的我们在后台日志中也能看到对应的访问日志（日志中的IP地址已做脱敏处理）：</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk"><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/ HTTP/</span><span class="hljs-number">3</span> | - | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/css/m</span>ain.css HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>font-awesome<span class="hljs-regexp">/css/</span>font-awesome.min.css HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>pace<span class="hljs-regexp">/pace-theme-material.min.css HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>pace<span class="hljs-regexp">/pace.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>canvas-nest<span class="hljs-regexp">/canvas-nest.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>anime.min.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>velocity<span class="hljs-regexp">/velocity.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>velocity<span class="hljs-regexp">/velocity.ui.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/u</span>tils.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/m</span>otion.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/</span>schemes<span class="hljs-regexp">/pisces.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/</span><span class="hljs-keyword">next</span>-boot.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/</span>local-search.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>font-awesome<span class="hljs-regexp">/fonts/</span>fontawesome-webfont.woff2?v=<span class="hljs-number">4.7</span>.<span class="hljs-number">0</span> HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span>lib<span class="hljs-regexp">/font-awesome/</span>css<span class="hljs-regexp">/font-awesome.min.css | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.015</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">26</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/ HTTP/</span><span class="hljs-number">3</span> | - | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/css/m</span>ain.css HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>font-awesome<span class="hljs-regexp">/css/</span>font-awesome.min.css HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>pace<span class="hljs-regexp">/pace-theme-material.min.css HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>pace<span class="hljs-regexp">/pace.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>canvas-nest<span class="hljs-regexp">/canvas-nest.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>anime.min.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>velocity<span class="hljs-regexp">/velocity.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>velocity<span class="hljs-regexp">/velocity.ui.min.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/u</span>tils.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/m</span>otion.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/</span>schemes<span class="hljs-regexp">/pisces.js HTTP/</span><span class="hljs-number">3</span> | https:<span class="hljs-regexp">//</span>tinychen.com<span class="hljs-regexp">/ | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/</span><span class="hljs-keyword">next</span>-boot.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/js/</span>local-search.js HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span> | Mozilla<span class="hljs-regexp">/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/</span><span class="hljs-number">537.36</span> (KHTML, like Gecko) Chrome<span class="hljs-regexp">/84.0.4147.135 Safari/</span><span class="hljs-number">537.36</span> | <span class="hljs-number">0.000</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br><span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span> | [<span class="hljs-number">24</span><span class="hljs-regexp">/Aug/</span><span class="hljs-number">2020</span>:<span class="hljs-number">15</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span> +<span class="hljs-number">0800</span>] | <span class="hljs-number">200</span> | tinychen.com | GET <span class="hljs-regexp">/lib/</span>font-awesome<span class="hljs-regexp">/fonts/</span>fontawesome-webfont.woff2?v=<span class="hljs-number">4.7</span>.<span class="hljs-number">0</span> HTTP<span class="hljs-regexp">/3 | https:/</span><span class="hljs-regexp">/tinychen.com/</span>lib<span class="hljs-regexp">/font-awesome/</span>css<span class="hljs-regexp">/font-awesome.min.css | Mozilla/</span><span class="hljs-number">5.0</span> (Windows NT <span class="hljs-number">10.0</span>; Win64; x64) AppleWebKit<span class="hljs-regexp">/537.36 (KHTML, like Gecko) Chrome/</span><span class="hljs-number">84.0</span>.<span class="hljs-number">4147.135</span> Safari/<span class="hljs-number">537.36</span> | <span class="hljs-number">0.015</span> | TLSv1.<span class="hljs-number">3</span> | TLS_AES_128_GCM_SHA256 | quic | h3-<span class="hljs-number">27</span><br></code></pre></td></tr></table></figure>
 
 <h2 id="4-4-edge开启HTTP-3"><a href="#4-4-edge开启HTTP-3" class="headerlink" title="4.4 edge开启HTTP/3"></a>4.4 edge开启HTTP/3</h2><p>2021年11月3日后续更新，使用<code>Microsoft EdgeVersion 95.0.1020.40 (Official build) (64-bit)</code>进行测试发现默认已经支持http3。</p>
 <p><img src="https://resource.tinychen.com/202111031734304.png" srcset="/img/loading.gif" lazyload></p>
 
+              
             </div>
-            <hr>
+            <hr/>
             <div>
-              <div class="post-metas mb-3">
-                
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/network/">network</a>
-                    
-                  </div>
-                
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/http/">http</a>
-                    
-                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
-                    
-                  </div>
-                
-              </div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/network/" class="category-chain-item">network</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/http/">#http</a>
+      
+        <a href="/tags/nginx/">#nginx</a>
+      
+    </div>
+  
+</div>
+
+
               
+
               
-                <div class="post-prevnext">
+                <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20200902-megacli-command-introduction/">
+                      <a href="/20200902-megacli-command-introduction/" title="Megacli常用命令整理">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Megacli常用命令整理</span>
                         <span class="visible-mobile">Previous</span>
@@ -399,7 +458,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20200718-wsl-access-is-denied/">
+                      <a href="/20200718-wsl-access-is-denied/" title="wsl access is denied">
                         <span class="hidden-mobile">wsl access is denied</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -415,25 +474,55 @@
         </div>
       </div>
     </div>
-    
-      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
-        <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-      </div>
-    
+
+
+  </aside>
+
+
+    </div>
   </div>
 </div>
 
-<!-- Custom -->
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
 
 
     
 
     
-      <a id="scroll-top-button" href="#" role="button">
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
         <i class="iconfont icon-arrowup" aria-hidden="true"></i>
       </a>
     
@@ -452,45 +541,48 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v"
-                 for="local-search-input">keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
+
     
 
     
   </main>
 
-  <footer class="text-center mt-5 py-3">
-  <div class="footer-content">
-     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-  </div>
+  <footer>
+    <div class="footer-inner">
   
+    <div class="footer-content">
+       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      粤ICP备18140640号
+    </a>
+  </span>
+  
+</div>
 
   
-  <!-- 备案信息 -->
-  <div class="beian">
-    <span>
-      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-        粤ICP备18140640号
-      </a>
-    </span>
-    
-  </div>
-
-
   
-</footer>
+</div>
 
+  </footer>
 
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   
-  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -501,12 +593,70 @@
   </script>
 
 
-<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
-<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-<!-- Plugins -->
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
+          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
+          ga.l = +new Date;
+          ga('create', 'UA-166769908-1', 'auto');
+          ga('send', 'pageview');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
 
 
   
@@ -515,105 +665,153 @@
 
 
 
+
   
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
 
 
-
-  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
-
-
-
-  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
-
-
-
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
   <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var title = document.getElementById('subtitle').title;
-      
-      typing(title)
-      
-    })(window, document);
-  </script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
 
 
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
-  <script>
-    (function () {
-      var path = "/local-search.xml";
-      $('#local-search-input').on('click', function() {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      });
-      $('#modalSearch').on('shown.bs.modal', function() {
-        $('#local-search-input').focus();
-      });
-    })()
-  </script>
 
 
 
 
 
-
-
-
-
-
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
-      ga.l = +new Date;
-      ga('create', 'UA-166769908-1', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  
-
-  
-
-  
-
-  
-
-  
-
-
-
-
-
-<!-- 主题的启动项 保持在最底部 -->
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
 <script  src="/js/boot.js" ></script>
 
 
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
 </body>
 </html>

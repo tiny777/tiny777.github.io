@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -9,69 +9,99 @@
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
   <link rel="icon" href="https://resource.tinychen.com/logos.png">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
+    <meta name="description" content="在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在CentOS7上部署单Master节点k8s集群(v1.15)">
+<meta property="og:url" content="https://tinychen.com/20190716-centos7-install-k8s/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210617170556.jpg">
+<meta property="article:published_time" content="2019-07-16T09:00:00.000Z">
+<meta property="article:modified_time" content="2019-07-16T09:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="graduation">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210617170556.jpg">
+  
+  
   <title>在CentOS7上部署单Master节点k8s集群(v1.15) - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
-  
-    
-    
-      
-      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
-    
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
 
-  
-    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
 
 
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-<!-- 自定义样式保持在最底部 -->
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"shell"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
+
+  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  <header style="height: 70vh;">
-    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand"
-       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -145,13 +175,15 @@
         
         
           <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
-                class="iconfont icon-search"></i>&nbsp;</a>
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
           </li>
+          
         
         
           <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self">&nbsp;<i
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
                 class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
           </li>
         
@@ -160,65 +192,69 @@
   </div>
 </nav>
 
-    <div class="banner" id="banner" parallax=true
-         style="background: url('https://resource.tinychen.com/20210617170556.jpg') no-repeat center center;
-           background-size: cover;">
-      <div class="full-bg-img">
-        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-          <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="在CentOS7上部署单Master节点k8s集群(v1.15)">
-              
-            </span>
-
-            
-              <div class="mt-3">
-  
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-author" aria-hidden="true"></i>
-      TinyChen
-    </span>
-  
-  
-    <span class="post-meta">
-      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2019-07-16 17:00" pubdate>
-        July 16, 2019 pm
-      </time>
-    </span>
-  
-</div>
-
-<div class="mt-1">
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-chart"></i>
-      2.9k 字
-    </span>
   
 
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-clock-fill"></i>
-      
-      
-      19
-       分钟
-    </span>
-  
-
-  
-  
-</div>
-
-            
-          </div>
-
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://resource.tinychen.com/20210617170556.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="在CentOS7上部署单Master节点k8s集群(v1.15)"></span>
           
         </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-07-16 17:00" pubdate>
+          July 16, 2019 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          9.2k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          77 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
       </div>
+
+      
     </div>
+  </div>
+</div>
+
+</div>
+
   </header>
 
   <main>
@@ -227,21 +263,28 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div class="py-5" id="board">
+        <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">在CentOS7上部署单Master节点k8s集群(v1.15)</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：July 16, 2019 pm
+                  
+                    Last updated on July 16, 2019 pm
+                  
                 
               </p>
             
             <div class="markdown-body">
+              
               <p>在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。</p>
 <span id="more"></span>
 
@@ -269,26 +312,26 @@
 <h2 id="1-2-安装docker-ce"><a href="#1-2-安装docker-ce" class="headerlink" title="1.2 安装docker-ce"></a>1.2 安装docker-ce</h2><p>centos版本的decker-ce官方安装指导：</p>
 <p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a></p>
 <p>这里我们主要是通过yum的方式来安装，如果出现无法连接docker官网的情况，建议检查一下网络，或者使用rpm的方式进行安装。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 导入官网提供的repo</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 安装docker及其相关组件</span><br>sudo yum install docker-ce docker-ce-cli containerd.io<br><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 导入官网提供的repo</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 安装docker及其相关组件</span><br>sudo yum install docker-ce docker-ce-cli containerd.io<br><br></code></pre></td></tr></table></figure>
 
 
 
 <p>注意这里我们需要校对一下密钥，确保和官网提供的无误。</p>
 <p><img src="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20190712/Je1FaoVF0MN5.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 启动docker</span><br>sudo systemctl start docker<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 跑个helloworld看看</span><br>sudo docker run hello-world<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 最后我们还要设置一下开机启动</span><br>sudo systemctl enable docker<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 启动docker</span><br>sudo systemctl start docker<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 跑个helloworld看看</span><br>sudo docker run hello-world<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 最后我们还要设置一下开机启动</span><br>sudo systemctl enable docker<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190712/R2uWM3SndVT0.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、准备工作"><a href="#2、准备工作" class="headerlink" title="2、准备工作"></a>2、准备工作</h1><h2 id="2-1-修改host文件-所有机器"><a href="#2-1-修改host文件-所有机器" class="headerlink" title="2.1 修改host文件(所有机器)"></a>2.1 修改host文件(所有机器)</h2><p>为了保证通信方便，<strong>每台主机</strong>上的<code>/etc/hosts</code>文件都需要进行修改，添加节点的<code>IP地址</code>和<code>hostname</code></p>
 <p><img src="https://resource.tinychen.com/blog/20190712/hJQG4vsWGvdv.png" srcset="/img/loading.gif" lazyload></p>
 <p><strong>同时最好把每台主机的hostname也修改成和上面的host文件一样。</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 可以直接编辑文件</span><br>vim /etc/hostname<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 或者使用命令</span><br>hostnamectl set-hostname<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 可以直接编辑文件</span><br>vim /etc/hostname<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 或者使用命令</span><br>hostnamectl set-hostname<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="2-2-关闭防火墙-所有机器"><a href="#2-2-关闭防火墙-所有机器" class="headerlink" title="2.2 关闭防火墙(所有机器)"></a>2.2 关闭防火墙(所有机器)</h2><p>因为k8s涉及的端口非常多，我们先把防火墙关了，如果安装了iptable也先关掉。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 关闭centos7自带的firewall防火墙</span><br>systemctl disable firewalld.service <br>systemctl stop firewalld.service <br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 关闭centos7自带的firewall防火墙</span><br>systemctl disable firewalld.service <br>systemctl stop firewalld.service <br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190712/XK1VTkSOoj8S.png" srcset="/img/loading.gif" lazyload></p>
@@ -373,11 +416,11 @@
 <p>如果对安全性有要求，不放心关闭防火墙的话，最好还是修改一下防火墙的配置，放行这些端口。</p>
 </blockquote>
 <h2 id="2-3-同步时间-所有机器"><a href="#2-3-同步时间-所有机器" class="headerlink" title="2.3 同步时间(所有机器)"></a>2.3 同步时间(所有机器)</h2><p>这里我们使用ntpdate来进行时间同步</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-comment"># 使用阿里云的源同步时间</span><br>ntpdate ntp1.aliyun.com<br><br><span class="hljs-comment"># 最后查看一下时间</span><br>hwclock<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-comment"># 使用阿里云的源同步时间</span><br>ntpdate ntp1.aliyun.com<br><br><span class="hljs-comment"># 最后查看一下时间</span><br>hwclock<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>我们也可以在<code>/etc/cron.hourly/</code>下面直接新建一个文件，将<code>ntpdate ntp1.aliyun.com</code>这条命令写进去，这样cron就会每小时执行一次这个同步时间操作。<a href="https://tinychen.com/20190710-rhel7-cron/">关于cron可以点击这里了解。</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">ntpdate ntp1.aliyun.com</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">ntpdate ntp1.aliyun.com</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 
 
 </blockquote>
@@ -385,7 +428,7 @@
 <blockquote>
 <p>通过命令 <code>setenforce 0</code> 和 <code>sed ...</code> 可以将 SELinux 设置为 permissive 模式(将其禁用)。 只有执行这一操作之后，容器才能访问宿主的文件系统，进而能够正常使用 Pod 网络。您必须这么做，直到 kubelet 做出升级支持 SELinux 为止。</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setenforce 0<br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">setenforce 0<br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>关于SELinux的简单介绍，可以<a href="https://tinychen.com/20190707-rhel7-selinux/">点击这里</a>查看之前的博客。</p>
@@ -398,28 +441,28 @@
 </ul>
 <p>kubeadm <strong>不能</strong> 帮我们安装或管理 <code>kubelet</code> 或 <code>kubectl</code> ，所以我们需要保证他们满足通过 kubeadm 安装的 Kubernetes 控制层对版本的要求。然而控制层与 kubelet 间的 <em>小版本号</em> 不一致无伤大雅，不过请记住 kubelet 的版本不可以超过 API server 的版本。<strong>例如 1.8.0 的 API server 可以适配 1.7.0 的 kubelet，反之就不行了。</strong></p>
 <h2 id="3-2-添加yum仓库-所有机器"><a href="#3-2-添加yum仓库-所有机器" class="headerlink" title="3.2 添加yum仓库(所有机器)"></a>3.2 添加yum仓库(所有机器)</h2><p>由于众所周知的原因，k8s官网提供的yum源并不能在国内正常使用，好在我们还可以使用阿里的镜像源。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个yum源</span><br>vim /etc/yum.repos.d/kubernetes.repo<br><br><span class="hljs-comment"># 添加下列内容到repo中</span><br>[kubernetes]<br>name=Kubernetes<br>baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/<br>enabled=1<br>gpgcheck=1<br>repo_gpgcheck=1<br>gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg<br>exclude=kube*<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个yum源</span><br>vim /etc/yum.repos.d/kubernetes.repo<br><br><span class="hljs-comment"># 添加下列内容到repo中</span><br>[kubernetes]<br>name=Kubernetes<br>baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/<br>enabled=1<br>gpgcheck=1<br>repo_gpgcheck=1<br>gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg<br>exclude=kube*<br></code></pre></td></tr></table></figure>
 
 <p>使用yum安装kubeadm, kubelet 和 kubectl</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum clean all<br>yum repolist<br><br>yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><span class="hljs-comment"># 启动kubelet并设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum clean all<br>yum repolist<br><br>yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><span class="hljs-comment"># 启动kubelet并设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet<br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="3-3-修改cgroup相关配置-所有机器"><a href="#3-3-修改cgroup相关配置-所有机器" class="headerlink" title="3.3 修改cgroup相关配置(所有机器)"></a>3.3 修改cgroup相关配置(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br>mkdir /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br>cat &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>mkdir -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></div></td></tr></table></figure>
+<h2 id="3-3-修改cgroup相关配置-所有机器"><a href="#3-3-修改cgroup相关配置-所有机器" class="headerlink" title="3.3 修改cgroup相关配置(所有机器)"></a>3.3 修改cgroup相关配置(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br>mkdir /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br>cat &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br>mkdir -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></td></tr></table></figure>
 
-<h2 id="3-4-编辑环境变量-所有机器"><a href="#3-4-编辑环境变量-所有机器" class="headerlink" title="3.4 编辑环境变量(所有机器)"></a>3.4 编辑环境变量(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/sysctl.conf<br><span class="hljs-comment"># 添加两行</span><br>net.bridge.bridge-nf-call-ip6tables = 1<br>net.bridge.bridge-nf-call-iptables = 1<br><br>sysctl -p<br>systemctl daemon-reload<br><br></code></pre></div></td></tr></table></figure>
+<h2 id="3-4-编辑环境变量-所有机器"><a href="#3-4-编辑环境变量-所有机器" class="headerlink" title="3.4 编辑环境变量(所有机器)"></a>3.4 编辑环境变量(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /etc/sysctl.conf<br><span class="hljs-comment"># 添加两行</span><br>net.bridge.bridge-nf-call-ip6tables = 1<br>net.bridge.bridge-nf-call-iptables = 1<br><br>sysctl -p<br>systemctl daemon-reload<br><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/RjGz0wYLLfz8.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="3-5-关闭swap分区-所有机器"><a href="#3-5-关闭swap分区-所有机器" class="headerlink" title="3.5 关闭swap分区(所有机器)"></a>3.5 关闭swap分区(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">swapoff -a<br><br>vim /etc/fstab<br><span class="hljs-comment"># 注释掉swap分区启动挂载的那一行</span><br><br><span class="hljs-comment"># 重启机器</span><br>reboot<br></code></pre></div></td></tr></table></figure>
+<h2 id="3-5-关闭swap分区-所有机器"><a href="#3-5-关闭swap分区-所有机器" class="headerlink" title="3.5 关闭swap分区(所有机器)"></a>3.5 关闭swap分区(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">swapoff -a<br><br>vim /etc/fstab<br><span class="hljs-comment"># 注释掉swap分区启动挂载的那一行</span><br><br><span class="hljs-comment"># 重启机器</span><br>reboot<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="3-6-拉取镜像"><a href="#3-6-拉取镜像" class="headerlink" title="3.6 拉取镜像"></a>3.6 拉取镜像</h2><p>我们可以使用<code>kubeadm config images pull</code>看看需要拉取哪些镜像版本，然后根据错误提示来对下面的版本进行修改。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash"><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br></code></pre></td></tr></table></figure>
 
 <p>由于国内不能访问k8s官网，所以我们需要先使用docker拉取镜像，然后使用tag对其更改名称。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 拉取docker上的镜像到本地</span><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br><br><br><span class="hljs-comment"># 使用tag对其改名，方便kubeadm直接拉取使用</span><br>docker tag mirrorgooglecontainers/kube-apiserver:v1.15.0 k8s.gcr.io/kube-apiserver:v1.15.0<br>docker tag mirrorgooglecontainers/kube-proxy:v1.15.0 k8s.gcr.io/kube-proxy:v1.15.0<br>docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.0 k8s.gcr.io/kube-controller-manager:v1.15.0<br>docker tag mirrorgooglecontainers/kube-scheduler:v1.15.0 k8s.gcr.io/kube-scheduler:v1.15.0<br>docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10<br>docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1<br>docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1<br>docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1<br><br><br><span class="hljs-comment"># 删除掉多余的images</span><br>docker rmi mirrorgooglecontainers/kube-apiserver:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-proxy:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-controller-manager:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-scheduler:v1.15.0<br>docker rmi mirrorgooglecontainers/etcd:3.3.10<br>docker rmi mirrorgooglecontainers/pause:3.1<br>docker rmi mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br>docker rmi coredns/coredns:1.3.1<br><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 拉取docker上的镜像到本地</span><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br><br><br><span class="hljs-comment"># 使用tag对其改名，方便kubeadm直接拉取使用</span><br>docker tag mirrorgooglecontainers/kube-apiserver:v1.15.0 k8s.gcr.io/kube-apiserver:v1.15.0<br>docker tag mirrorgooglecontainers/kube-proxy:v1.15.0 k8s.gcr.io/kube-proxy:v1.15.0<br>docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.0 k8s.gcr.io/kube-controller-manager:v1.15.0<br>docker tag mirrorgooglecontainers/kube-scheduler:v1.15.0 k8s.gcr.io/kube-scheduler:v1.15.0<br>docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10<br>docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1<br>docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1<br>docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1<br><br><br><span class="hljs-comment"># 删除掉多余的images</span><br>docker rmi mirrorgooglecontainers/kube-apiserver:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-proxy:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-controller-manager:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-scheduler:v1.15.0<br>docker rmi mirrorgooglecontainers/etcd:3.3.10<br>docker rmi mirrorgooglecontainers/pause:3.1<br>docker rmi mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br>docker rmi coredns/coredns:1.3.1<br><br></code></pre></td></tr></table></figure>
 
 <p>最后效果如下</p>
 <p><img src="https://resource.tinychen.com/blog/20190715/UFeKeu1f2ExI.png" srcset="/img/loading.gif" lazyload></p>
@@ -431,7 +474,7 @@
 <li><p><code>--pod-network-cidr</code> 指定Pod网络的范围。Kubernetes支持多种网络方案，而且不同网络方案对–pod-network-cidr有自己的要求，这里设置为10.244.0.0/16是因为我们将使用flannel网络方案，必须设置成这个CIDR</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubeadm init --kubernetes-version=v1.15.0 --apiserver-advertise-address 192.168.100.50 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">kubeadm init --kubernetes-version=v1.15.0 --apiserver-advertise-address 192.168.100.50 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/SUFO45fFoCFu.png" srcset="/img/loading.gif" lazyload></p>
@@ -439,29 +482,29 @@
 <h2 id="3-8在master上配置kubectl"><a href="#3-8在master上配置kubectl" class="headerlink" title="3.8在master上配置kubectl"></a>3.8在master上配置kubectl</h2><p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 多加一个kubectl的自动补全动能方便我们使用</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 多加一个kubectl的自动补全动能方便我们使用</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></td></tr></table></figure>
 
 
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/I8fH62Yw0lGO.png" srcset="/img/loading.gif" lazyload></p>
 <p>到这里我们检查一下是否安装顺利</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 获取集群状态</span><br>kubectl get cs<br><span class="hljs-comment"># 获取集群节点信息</span><br>kubectl get nodes<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 获取集群状态</span><br>kubectl get cs<br><span class="hljs-comment"># 获取集群节点信息</span><br>kubectl get nodes<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/aKGUvuJIU440.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="4、安装flannel网络-Master"><a href="#4、安装flannel网络-Master" class="headerlink" title="4、安装flannel网络(Master)"></a>4、安装flannel网络(Master)</h1><p>安装flannel</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/coreos/</span>flannel<span class="hljs-regexp">/master/</span>Documentation/kube-flannel.yml -O kube-flannel.yml<br>kubectl apply -f kube-flannel.yml<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/coreos/</span>flannel<span class="hljs-regexp">/master/</span>Documentation/kube-flannel.yml -O kube-flannel.yml<br>kubectl apply -f kube-flannel.yml<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/txGwdrFwgVbw.png" srcset="/img/loading.gif" lazyload></p>
 <p>到这里master节点上面的操作就算是完成了</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看pod运行情况</span><br>kubectl get pods -n kube-system<br><span class="hljs-comment"># 查看并验证节点信息是否成功</span><br>kubectl get nodes<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看pod运行情况</span><br>kubectl get pods -n kube-system<br><span class="hljs-comment"># 查看并验证节点信息是否成功</span><br>kubectl get nodes<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/sC3ASl1YgTcS.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="5、添加node"><a href="#5、添加node" class="headerlink" title="5、添加node"></a>5、添加node</h1><p>在node节点上使用root用户运行下列命令将node节点加入到集群中，下面的密钥就是刚刚前面生成的密钥，而这个<code>192.168.100.50:6443</code>就是master节点的IP地址和对应端口。</p>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">kubeadm</span> join --token <span class="hljs-number">3</span>pyvba.siol<span class="hljs-number">4</span>xy<span class="hljs-number">1</span>rvf<span class="hljs-number">2</span>om<span class="hljs-number">8</span>k --discovery-token-ca-cert-hash sha<span class="hljs-number">256</span>:c<span class="hljs-number">61</span>cdd<span class="hljs-number">8</span>b<span class="hljs-number">8</span>ad<span class="hljs-number">5</span>d<span class="hljs-number">34</span>faece<span class="hljs-number">61867</span>e<span class="hljs-number">76</span>d<span class="hljs-number">539</span>dbc<span class="hljs-number">243</span>c<span class="hljs-number">1</span>f<span class="hljs-number">206</span>eacbab<span class="hljs-number">163895777</span>c<span class="hljs-number">099</span>e <span class="hljs-number">192.168.100.50:6443</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">kubeadm</span> join --token <span class="hljs-number">3</span>pyvba.siol<span class="hljs-number">4</span>xy<span class="hljs-number">1</span>rvf<span class="hljs-number">2</span>om<span class="hljs-number">8</span>k --discovery-token-ca-cert-hash sha<span class="hljs-number">256</span>:c<span class="hljs-number">61</span>cdd<span class="hljs-number">8</span>b<span class="hljs-number">8</span>ad<span class="hljs-number">5</span>d<span class="hljs-number">34</span>faece<span class="hljs-number">61867</span>e<span class="hljs-number">76</span>d<span class="hljs-number">539</span>dbc<span class="hljs-number">243</span>c<span class="hljs-number">1</span>f<span class="hljs-number">206</span>eacbab<span class="hljs-number">163895777</span>c<span class="hljs-number">099</span>e <span class="hljs-number">192.168.100.50:6443</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190715/ANXz4UKJdrPP.png" srcset="/img/loading.gif" lazyload></p>
@@ -472,47 +515,65 @@
 <p><strong>如果node节点上没有顺利出现running的话，很有可能是因为镜像被墙了无法顺利拉取镜像，这时我们需要按照步骤3.6中的操作来手动拉取镜像。</strong></p>
 </blockquote>
 <p>查看pod运行情况的命令</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs actionscript">kubectl describe pod &lt;PodName&gt; --<span class="hljs-keyword">namespace</span>=&lt;<span class="hljs-keyword">namespace</span>&gt;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs actionscript">kubectl describe pod &lt;PodName&gt; --<span class="hljs-keyword">namespace</span>=&lt;<span class="hljs-keyword">namespace</span>&gt;<br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>输出内容太长了，这里只截取一部分。</p>
 </blockquote>
 <p><img src="https://resource.tinychen.com/blog/20190715/ysakuW2dsKJF.png" srcset="/img/loading.gif" lazyload></p>
 
+              
             </div>
-            <hr>
+            <hr/>
             <div>
-              <div class="post-metas mb-3">
-                
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/cloudnative/">cloudnative</a>
-                    
-                  </div>
-                
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
-                    
-                      <a class="hover-with-bg" href="/tags/graduation/">graduation</a>
-                    
-                      <a class="hover-with-bg" href="/tags/k8s/">k8s</a>
-                    
-                      <a class="hover-with-bg" href="/tags/docker/">docker</a>
-                    
-                  </div>
-                
-              </div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/cloudnative/" class="category-chain-item">cloudnative</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/centos/">#centos</a>
+      
+        <a href="/tags/graduation/">#graduation</a>
+      
+        <a href="/tags/k8s/">#k8s</a>
+      
+        <a href="/tags/docker/">#docker</a>
+      
+    </div>
+  
+</div>
+
+
               
+
               
-                <div class="post-prevnext">
+                <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20190718-centos7-install-k8s-ha/">
+                      <a href="/20190718-centos7-install-k8s-ha/" title="在CentOS7上部署高可用的k8s集群(v1.15)">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">在CentOS7上部署高可用的k8s集群(v1.15)</span>
                         <span class="visible-mobile">Previous</span>
@@ -522,7 +583,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20190715-k8s-concepts-intro/">
+                      <a href="/20190715-k8s-concepts-intro/" title="k8s重要概念及各组件简介">
                         <span class="hidden-mobile">k8s重要概念及各组件简介</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -538,25 +599,55 @@
         </div>
       </div>
     </div>
-    
-      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
-        <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-      </div>
-    
+
+
+  </aside>
+
+
+    </div>
   </div>
 </div>
 
-<!-- Custom -->
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
 
 
     
 
     
-      <a id="scroll-top-button" href="#" role="button">
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
         <i class="iconfont icon-arrowup" aria-hidden="true"></i>
       </a>
     
@@ -575,45 +666,48 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v"
-                 for="local-search-input">keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
+
     
 
     
   </main>
 
-  <footer class="text-center mt-5 py-3">
-  <div class="footer-content">
-     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-  </div>
+  <footer>
+    <div class="footer-inner">
   
+    <div class="footer-content">
+       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      粤ICP备18140640号
+    </a>
+  </span>
+  
+</div>
 
   
-  <!-- 备案信息 -->
-  <div class="beian">
-    <span>
-      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-        粤ICP备18140640号
-      </a>
-    </span>
-    
-  </div>
-
-
   
-</footer>
+</div>
 
+  </footer>
 
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   
-  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -624,12 +718,70 @@
   </script>
 
 
-<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
-<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-<!-- Plugins -->
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
+          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
+          ga.l = +new Date;
+          ga('create', 'UA-166769908-1', 'auto');
+          ga('send', 'pageview');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
 
 
   
@@ -638,105 +790,153 @@
 
 
 
+
   
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
 
 
-
-  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
-
-
-
-  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
-
-
-
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
   <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var title = document.getElementById('subtitle').title;
-      
-      typing(title)
-      
-    })(window, document);
-  </script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
 
 
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
-  <script>
-    (function () {
-      var path = "/local-search.xml";
-      $('#local-search-input').on('click', function() {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      });
-      $('#modalSearch').on('shown.bs.modal', function() {
-        $('#local-search-input').focus();
-      });
-    })()
-  </script>
 
 
 
 
 
-
-
-
-
-
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
-      ga.l = +new Date;
-      ga('create', 'UA-166769908-1', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  
-
-  
-
-  
-
-  
-
-  
-
-
-
-
-
-<!-- 主题的启动项 保持在最底部 -->
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
 <script  src="/js/boot.js" ></script>
 
 
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
 </body>
 </html>

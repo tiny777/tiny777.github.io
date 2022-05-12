@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -9,69 +9,97 @@
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
   <link rel="icon" href="https://resource.tinychen.com/logos.png">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="nginx的编译安装、添加模块、yum安装、简单配置、默认目录作用和静态页面配置。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
+    <meta name="description" content="nginx的编译安装、添加模块、yum安装、简单配置、默认目录作用和静态页面配置。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx篇01-基本安装配置和静态页面设置">
+<meta property="og:url" content="https://tinychen.com/20200317-nginx-01-base-conf-static-web/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="nginx的编译安装、添加模块、yum安装、简单配置、默认目录作用和静态页面配置。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210110180324s.jpg">
+<meta property="article:published_time" content="2020-03-17T03:00:00.000Z">
+<meta property="article:modified_time" content="2020-03-17T03:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="http">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210110180324s.jpg">
+  
+  
   <title>Nginx篇01-基本安装配置和静态页面设置 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
-  
-    
-    
-      
-      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
-    
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
 
-  
-    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
 
 
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-<!-- 自定义样式保持在最底部 -->
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"shell"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
+
+  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  <header style="height: 70vh;">
-    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand"
-       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -145,13 +173,15 @@
         
         
           <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
-                class="iconfont icon-search"></i>&nbsp;</a>
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
           </li>
+          
         
         
           <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self">&nbsp;<i
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
                 class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
           </li>
         
@@ -160,65 +190,69 @@
   </div>
 </nav>
 
-    <div class="banner" id="banner" parallax=true
-         style="background: url('https://resource.tinychen.com/20210110180324.jpg') no-repeat center center;
-           background-size: cover;">
-      <div class="full-bg-img">
-        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-          <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="Nginx篇01-基本安装配置和静态页面设置">
-              
-            </span>
-
-            
-              <div class="mt-3">
-  
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-author" aria-hidden="true"></i>
-      TinyChen
-    </span>
-  
-  
-    <span class="post-meta">
-      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2020-03-17 11:00" pubdate>
-        March 17, 2020 am
-      </time>
-    </span>
-  
-</div>
-
-<div class="mt-1">
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-chart"></i>
-      3.6k 字
-    </span>
   
 
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-clock-fill"></i>
-      
-      
-      22
-       分钟
-    </span>
-  
-
-  
-  
-</div>
-
-            
-          </div>
-
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://resource.tinychen.com/20210110180324.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Nginx篇01-基本安装配置和静态页面设置"></span>
           
         </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-03-17 11:00" pubdate>
+          March 17, 2020 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.3k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          70 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
       </div>
+
+      
     </div>
+  </div>
+</div>
+
+</div>
+
   </header>
 
   <main>
@@ -227,27 +261,34 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div class="py-5" id="board">
+        <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">Nginx篇01-基本安装配置和静态页面设置</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：March 17, 2020 am
+                  
+                    Last updated on March 17, 2020 am
+                  
                 
               </p>
             
             <div class="markdown-body">
+              
               <p>nginx的编译安装、添加模块、yum安装、简单配置、默认目录作用和静态页面配置。</p>
 <span id="more"></span>
 
 <h1 id="0、编译安装nginx"><a href="#0、编译安装nginx" class="headerlink" title="0、编译安装nginx"></a>0、编译安装nginx</h1><h2 id="0-1-准备工作"><a href="#0-1-准备工作" class="headerlink" title="0.1 准备工作"></a>0.1 准备工作</h2><p>这里我们使用nginx的mainline版本的1.17.9来进行编译安装，nginx各版本的官网下载地址：<a target="_blank" rel="noopener" href="http://nginx.org/en/download.html">http://nginx.org/en/download.html</a></p>
 <p>首先我们下载并解压nginx源码</p>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">wget</span> http://nginx.org/download/nginx-<span class="hljs-number">1</span>.<span class="hljs-number">17</span>.<span class="hljs-number">9</span>.tar.gz<br><span class="hljs-attribute">tar</span> -zxvf nginx-<span class="hljs-number">1</span>.<span class="hljs-number">17</span>.<span class="hljs-number">9</span>.tar.gz<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">wget</span> http://nginx.org/download/nginx-<span class="hljs-number">1</span>.<span class="hljs-number">17</span>.<span class="hljs-number">9</span>.tar.gz<br><span class="hljs-attribute">tar</span> -zxvf nginx-<span class="hljs-number">1</span>.<span class="hljs-number">17</span>.<span class="hljs-number">9</span>.tar.gz<br></code></pre></td></tr></table></figure>
 
 <p>在编译安装之前我们还需要先安装几个别的软件：</p>
 <ul>
@@ -261,70 +302,70 @@
 <p>上面提到的库我们都可以使用yum来进行安装：</p>
 </li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">yum install gcc gcc-c++ pcre pcre-devel zlib zlib-devel openssl openssl-devel<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> pcre-devel是使用PCRE做二次开发时所需要的开发库，包括头文件等，这也是编译Nginx所必须使用的。</span><br><span class="hljs-meta">#</span><span class="bash"> 同理，zlib是直接使用的库，zlib-devel是二次开发所需要的库。</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum install gcc gcc-c++ pcre pcre-devel zlib zlib-devel openssl openssl-devel<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> pcre-devel是使用PCRE做二次开发时所需要的开发库，包括头文件等，这也是编译Nginx所必须使用的。</span><br><span class="hljs-meta">#</span><span class="bash"> 同理，zlib是直接使用的库，zlib-devel是二次开发所需要的库。</span><br></code></pre></td></tr></table></figure>
 
 <p>Nginx是高度自由化的Web服务器，它的功能是由许多模块来支持的。而这些模块可根据我们的使用需求来定制，如果某些模块不需要使用则完全不必理会它。同样，如果使用了某个模块，而这个模块使用了一些类似zlib或OpenSSL等的第三方库，那么就必须先安装这些软件。</p>
 <h2 id="0-2-编译安装"><a href="#0-2-编译安装" class="headerlink" title="0.2 编译安装"></a>0.2 编译安装</h2><p>我们进入nginx的目录，输入下面的指令可以查看各类的编译参数，或者在<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/configure.html">官网</a>也可以看到：</p>
-<figure class="highlight jboss-cli"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs jboss-cli"><span class="hljs-string">./configure</span> <span class="hljs-params">--help</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli"><span class="hljs-string">./configure</span> <span class="hljs-params">--help</span><br></code></pre></td></tr></table></figure>
 
 <p>我们这里使用的参数是：</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">.<span class="hljs-regexp">/configure --sbin-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx --conf-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx.conf --pid-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx/nginx.pid --with-http_ssl_module<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">.<span class="hljs-regexp">/configure --sbin-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx --conf-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx.conf --pid-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx/nginx.pid --with-http_ssl_module<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200324/XBFWbitOjxxu.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到，我们在参数里面并没有指定上面提到的几个库的目录，configure文件会默认系统已经安装的库版本和目录，当然我们也可以手动指定某个库的目录来指定版本。</p>
 <p>接下来进行make安装：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">make<br>make install<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">make<br>make install<br></code></pre></td></tr></table></figure>
 
 <p>如无意外此时应该已经正常安装好了，我们到前面指定的安装目录看一下</p>
 <p><img src="https://resource.tinychen.com/blog/20200324/yCV4ewKcJh8E.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意这个时候我们如果需要使用nginx需要指定这个安装目录，想要全局使用我们可以创建一个软链接：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">ln -s /usr/local/nginx/nginx /usr/sbin/nginx<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ln -s /usr/local/nginx/nginx /usr/sbin/nginx<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="0-3-添加模块"><a href="#0-3-添加模块" class="headerlink" title="0.3 添加模块"></a>0.3 添加模块</h2><p>同时，如果之后有需要用到的模块而在编译安装的时候忘了安装也没关系，我们可以继续编译添加新模块</p>
 <p>首先我们需要查看已经编译的参数:</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@localhost ~]# nginx -V<br>nginx version: nginx/1.17.9<br>built by gcc 4.4.7 20120313 (Red Hat 4.4.7-23) (GCC) <br>built with OpenSSL 1.0.1e-fips 11 Feb 2013<br>TLS SNI support enabled<br>configure arguments: --sbin-path=/usr/local/nginx/nginx --conf-path=/usr/local/nginx/nginx.conf --pid-path=/usr/local/nginx/nginx.pid --with-http_ssl_module<br><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost ~]# nginx -V<br>nginx version: nginx/1.17.9<br>built by gcc 4.4.7 20120313 (Red Hat 4.4.7-23) (GCC) <br>built with OpenSSL 1.0.1e-fips 11 Feb 2013<br>TLS SNI support enabled<br>configure arguments: --sbin-path=/usr/local/nginx/nginx --conf-path=/usr/local/nginx/nginx.conf --pid-path=/usr/local/nginx/nginx.pid --with-http_ssl_module<br><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>需要注意上面的V是大写的V</p>
 </blockquote>
 <p>在<code>configure arguments:</code> 这一栏里面我们就可以看到之前编译的时候的参数，对比上面的记录我们可以看到是一模一样的，然后我们会到之前下载的源码目录，<strong>注意是源码的目录不是安装的目录</strong>，然后添加上之前的编译参数，再添加新的模块，</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">.<span class="hljs-regexp">/configure --sbin-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx --conf-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx.conf --pid-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx/nginx.pid --with-http_ssl_module --with-http_v2_module --with-mail --with-mail_ssl_module<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">.<span class="hljs-regexp">/configure --sbin-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx --conf-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx<span class="hljs-regexp">/nginx.conf --pid-path=/u</span>sr<span class="hljs-regexp">/local/</span>nginx/nginx.pid --with-http_ssl_module --with-http_v2_module --with-mail --with-mail_ssl_module<br></code></pre></td></tr></table></figure>
 
 <p>比如这里我们添加了<code>http_v2</code>、<code>mail</code>、<code>mail_ssl</code>三个模块</p>
 <p>如果想要添加第三方模块的话，只需要使用<code>--add-module=</code>然后加上第三方模块的路径即可。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">--add-module=/home/echo-nginx-module-0.61<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">--add-module=/home/echo-nginx-module-0.61<br></code></pre></td></tr></table></figure>
 
 <p>最后我们的编译参数是：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">./configure \<br>--sbin-path=/usr/local/nginx/nginx \<br>--conf-path=/usr/local/nginx/nginx.conf \<br>--pid-path=/usr/local/nginx/nginx.pid \<br>--with-http_ssl_module \<br>--with-http_v2_module \<br>--with-mail \<br>--with-mail_ssl_module \<br>--add-module=/home/echo-nginx-module-0.61<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">./configure \<br>--sbin-path=/usr/local/nginx/nginx \<br>--conf-path=/usr/local/nginx/nginx.conf \<br>--pid-path=/usr/local/nginx/nginx.pid \<br>--with-http_ssl_module \<br>--with-http_v2_module \<br>--with-mail \<br>--with-mail_ssl_module \<br>--add-module=/home/echo-nginx-module-0.61<br></code></pre></td></tr></table></figure>
 
 <p>接着我们使用make安装，再查看目录会发现原来的文件已经被替换成<code>*.default</code>了</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">make<br>make install<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">make<br>make install<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200324/0wsDPdjxSyL6.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后我们再确定一下是否安装成功：</p>
 <p><img src="https://resource.tinychen.com/blog/20200324/K86pzHvKgi61.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="1、yum安装nginx"><a href="#1、yum安装nginx" class="headerlink" title="1、yum安装nginx"></a>1、yum安装nginx</h1><h2 id="1-1-yum仓库建立和安装配置"><a href="#1-1-yum仓库建立和安装配置" class="headerlink" title="1.1 yum仓库建立和安装配置"></a>1.1 yum仓库建立和安装配置</h2><p>centos自带的repo中就有nginx，可以直接安装，但是版本比较旧，想要使用yum进行安装最新的稳定版本，我们需要自行配置yum仓库。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[nginx-stable]<br>name=nginx stable repo<br>baseurl=http://nginx.org/packages/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/<br>gpgcheck=1<br>enabled=1<br>gpgkey=https://nginx.org/keys/nginx_signing.key<br>module_hotfixes=<span class="hljs-literal">true</span><br><br>[nginx-mainline]<br>name=nginx mainline repo<br>baseurl=http://nginx.org/packages/mainline/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/<br>gpgcheck=1<br>enabled=0<br>gpgkey=https://nginx.org/keys/nginx_signing.key<br>module_hotfixes=<span class="hljs-literal">true</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">[nginx-stable]<br>name=nginx stable repo<br>baseurl=http://nginx.org/packages/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/<br>gpgcheck=1<br>enabled=1<br>gpgkey=https://nginx.org/keys/nginx_signing.key<br>module_hotfixes=<span class="hljs-literal">true</span><br><br>[nginx-mainline]<br>name=nginx mainline repo<br>baseurl=http://nginx.org/packages/mainline/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/<br>gpgcheck=1<br>enabled=0<br>gpgkey=https://nginx.org/keys/nginx_signing.key<br>module_hotfixes=<span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
 
 <p>默认情况下mainline版本是不会启用的，因此我们如果需要安装mainline版本的nginx则需要手动启用这个repo。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install yum-utils<br>yum-config-manager --<span class="hljs-built_in">enable</span> nginx-mainline<br>yum clean all<br>yum repolist<br>yum install nginx<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install yum-utils<br>yum-config-manager --<span class="hljs-built_in">enable</span> nginx-mainline<br>yum clean all<br>yum repolist<br>yum install nginx<br></code></pre></td></tr></table></figure>
 
 <p>安装的时候需要注意这个列出信息中的repo应该是我们刚刚新建的repo。</p>
 <p><img src="https://resource.tinychen.com/blog/20200317/oVhLjc6gtrUu.png" srcset="/img/loading.gif" lazyload></p>
 <p>安装完成之后需要设置开机启动和防火墙放行80端口，如果使用https还需要放行443端口。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">systemctl <span class="hljs-built_in">enable</span> nginx <br>systemctl start nginx <br>firewall-cmd --permanent --zone=public --add-port=80/tcp<br>firewall-cmd --permanent --zone=public --add-port=443/tcp<br>firewall-cmd --reload <br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">systemctl <span class="hljs-built_in">enable</span> nginx <br>systemctl start nginx <br>firewall-cmd --permanent --zone=public --add-port=80/tcp<br>firewall-cmd --permanent --zone=public --add-port=443/tcp<br>firewall-cmd --reload <br></code></pre></td></tr></table></figure>
 
 <p>接下来我们可以测试一下安装和启动是否成功。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">nginx -v<br>curl 127.0.0.1<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">nginx -v<br>curl 127.0.0.1<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200317/3f4pVwyJKKz8.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="1-2-master和worker进程"><a href="#1-2-master和worker进程" class="headerlink" title="1.2 master和worker进程"></a>1.2 master和worker进程</h2><p>使用ps命令查看进程，我们可以看到有一个master进程和一个worker进程，默认情况下，worker的进程数量为1，实际上我们可以根据具体需要对其进行修改。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ps -ef | grep nginx<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ps -ef | grep nginx<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200317/vrTFVgW4tsi4.png" srcset="/img/loading.gif" lazyload></p>
@@ -339,7 +380,7 @@
 <h2 id="2-2-nginx命令"><a href="#2-2-nginx命令" class="headerlink" title="2.2 nginx命令"></a>2.2 nginx命令</h2><p>输入<code>nginx -h</code>即可查看所有指令，不需要特意去记忆，用多了就自然记住了。</p>
 <p><img src="https://resource.tinychen.com/blog/20200317/vJhEEkDYRGVw.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、nginx-conf文件"><a href="#3、nginx-conf文件" class="headerlink" title="3、nginx.conf文件"></a>3、nginx.conf文件</h1><p>我们把整个全局配置文件拿出来分析一下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">user  nginx;<br>worker_processes  16;<br><br>error_log  /var/<span class="hljs-built_in">log</span>/nginx/error.log warn;<br>pid        /var/run/nginx.pid;<br><br><br>events &#123;<br>    worker_connections  1024;<br>&#125;<br><br><br>http &#123;<br>    include       /etc/nginx/mime.types;<br>    default_type  application/octet-stream;<br><br>    log_format  main  <span class="hljs-string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;<br><br>    access_log  /var/<span class="hljs-built_in">log</span>/nginx/access.log  main;<br><br>    sendfile        on;<br>    <span class="hljs-comment">#tcp_nopush     on;</span><br><br>    keepalive_timeout  65;<br><br>    <span class="hljs-comment">#gzip  on;</span><br><br>    include /etc/nginx/conf.d/*.conf;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs bash">user  nginx;<br>worker_processes  16;<br><br>error_log  /var/<span class="hljs-built_in">log</span>/nginx/error.log warn;<br>pid        /var/run/nginx.pid;<br><br><br>events &#123;<br>    worker_connections  1024;<br>&#125;<br><br><br>http &#123;<br>    include       /etc/nginx/mime.types;<br>    default_type  application/octet-stream;<br><br>    log_format  main  <span class="hljs-string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;<br><br>    access_log  /var/<span class="hljs-built_in">log</span>/nginx/access.log  main;<br><br>    sendfile        on;<br>    <span class="hljs-comment">#tcp_nopush     on;</span><br><br>    keepalive_timeout  65;<br><br>    <span class="hljs-comment">#gzip  on;</span><br><br>    include /etc/nginx/conf.d/*.conf;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h2 id="3-1-user"><a href="#3-1-user" class="headerlink" title="3.1 user"></a>3.1 user</h2><p><code>user</code>指的是以哪个用户来创建nginx的<strong>worker进程</strong>，master进程一般都是使用root用户启动，权限较大。</p>
 <h2 id="3-2-worker-processes"><a href="#3-2-worker-processes" class="headerlink" title="3.2 worker_processes"></a>3.2 worker_processes</h2><p><code>worker_processes</code>则是nginx的worker进程数量，一般与CPU的核心数量一致，这里我们设置为16。</p>
@@ -358,7 +399,7 @@
 <li>注释部分使用井号<code>＃</code></li>
 </ul>
 <p>比如上面的<code>log_format</code>这个配置项，变量需要在前面加上美刀符号<code>$</code>，如果变量之间有空格，需要使用单引号或者双引号避免语法错误，同时引号可以嵌套使用。同时需要注意的是，并不是所有的模块都支持使用变量。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">log_format  main  <span class="hljs-string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br>                  <span class="hljs-string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br>                  <span class="hljs-string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">log_format  main  <span class="hljs-string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br>                  <span class="hljs-string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br>                  <span class="hljs-string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;<br></code></pre></td></tr></table></figure>
 
 
 
@@ -382,14 +423,14 @@
 <p>配置项后的值究竟是否可以使用这些单位，取决于解析该配置项的模块。如果这个模块使用了Nginx框架提供的相应解析配置项方法，那么配置项值才可以携带单位。</p>
 <h1 id="4、nginx配置静态页面"><a href="#4、nginx配置静态页面" class="headerlink" title="4、nginx配置静态页面"></a>4、nginx配置静态页面</h1><p>接下来我们尝试配置一个简单的静态页面，使用vim对<code>/etc/nginx/conf.d/default.conf</code>进行修改，需要注意的是默认情况下<code>/etc/nginx/conf.d/</code>下面的配置文件只要是<code>.conf</code>即可生效，前面的名称并没有特殊限制，所以最好根据文件的实际用途进行命名方便记忆和管理。</p>
 <p>接下来我们在<code>/etc/hosts</code>中将 <code>www.example.com www.example.org www.example.net example.com example.org example.net</code>的DNS解析手动指定为本机IP地址，方便后面使用域名进行配置页面</p>
-<h2 id="4-1-default-server"><a href="#4-1-default-server" class="headerlink" title="4.1 default_server"></a>4.1 default_server</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[root@localhost conf.d]<span class="hljs-comment"># ll</span><br>总用量 16<br>-rw-r--r-- 1 root root 1093 3月   4 00:20 default.conf.bak<br>-rw-r--r-- 1 root root  158 3月  18 00:08 example.com.conf<br>-rw-r--r-- 1 root root  158 3月  18 00:09 example.net.conf<br>-rw-r--r-- 1 root root  173 3月  18 00:11 example.org.conf<br>[root@localhost conf.d]<span class="hljs-comment"># cat example.*</span><br>server &#123;<br>    listen 80;<br>    server_name example.com www.example.com;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.com.html;<br>    &#125;<br>&#125;<br>server &#123;<br>    listen 80;<br>    server_name example.net www.example.net;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.net.html;<br>    &#125;<br>&#125;<br>server &#123;<br>    listen 80 default_server;<br>    server_name example.org www.example.org;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.org.html;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<h2 id="4-1-default-server"><a href="#4-1-default-server" class="headerlink" title="4.1 default_server"></a>4.1 default_server</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@localhost conf.d]<span class="hljs-comment"># ll</span><br>总用量 16<br>-rw-r--r-- 1 root root 1093 3月   4 00:20 default.conf.bak<br>-rw-r--r-- 1 root root  158 3月  18 00:08 example.com.conf<br>-rw-r--r-- 1 root root  158 3月  18 00:09 example.net.conf<br>-rw-r--r-- 1 root root  173 3月  18 00:11 example.org.conf<br>[root@localhost conf.d]<span class="hljs-comment"># cat example.*</span><br>server &#123;<br>    listen 80;<br>    server_name example.com www.example.com;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.com.html;<br>    &#125;<br>&#125;<br>server &#123;<br>    listen 80;<br>    server_name example.net www.example.net;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.net.html;<br>    &#125;<br>&#125;<br>server &#123;<br>    listen 80 default_server;<br>    server_name example.org www.example.org;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.org.html;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>这里我们可以看到上面配置了三个server块，分别对应三组域名，三组域名都是指向本机的IP地址，同样都是监听的80端口，其中我们在第三个server块中指定了<code>default_server</code>参数，此时我们访问本机IP，返回的页面就是我们指定了<code>default_server</code>参数的这个页面。</p>
 <p><img src="https://resource.tinychen.com/blog/20200317/V9SN9w4cYpqG.png" srcset="/img/loading.gif" lazyload></p>
 <p>如果我们不指定<code>default_server</code>参数，返回的则是默认的第一个页面。</p>
 <p><img src="https://resource.tinychen.com/blog/20200317/nrgXs9YImesb.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="4-2-location"><a href="#4-2-location" class="headerlink" title="4.2 location"></a>4.2 location</h2><p>location块的默认语法如下，<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#location">官网文档点这里</a>。</p>
-<figure class="highlight crmsh"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs crmsh">Syntax:	<span class="hljs-keyword">location</span> <span class="hljs-title">[ = | ~ | ~* | ^~ ] uri</span> &#123; ... &#125;<br><span class="hljs-keyword">location</span> <span class="hljs-title">@name</span> &#123; ... &#125;<br>Default: —<br>Context: server, location<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">Syntax:	<span class="hljs-keyword">location</span> <span class="hljs-title">[ = | ~ | ~* | ^~ ] uri</span> &#123; ... &#125;<br><span class="hljs-keyword">location</span> <span class="hljs-title">@name</span> &#123; ... &#125;<br>Default: —<br>Context: server, location<br></code></pre></td></tr></table></figure>
 
 <p>主要作用是根据请求URI设置配置，location可以由前缀字符串或正则表达式定义。</p>
 <ul>
@@ -400,7 +441,7 @@
 <li>如果未找到与正则表达式匹配的内容，则使用前面记住的前缀位置的配置。</li>
 </ul>
 <p>我们来看一下实例：</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">server_name</span> example.com www.example.com;<br><br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">root</span>   /var/www/html;<br>        <span class="hljs-attribute">index</span>  example.com.html;<br>    &#125;<br>    <br>    <span class="hljs-attribute">location</span> /images &#123;<br>        <span class="hljs-attribute">root</span>  /var/www;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">server_name</span> example.com www.example.com;<br><br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">root</span>   /var/www/html;<br>        <span class="hljs-attribute">index</span>  example.com.html;<br>    &#125;<br>    <br>    <span class="hljs-attribute">location</span> /images &#123;<br>        <span class="hljs-attribute">root</span>  /var/www;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>我们先来看一个<code>server</code>块，这里我们可以看到里面包含了两个<code>location</code>块，在<code>/var/www/html</code>和<code>/var/www</code>这两个目录下均有一个<code>images</code>文件夹，但是在<code>www</code>目录下的<code>images</code>文件夹没有<code>images2.html</code>这个文件。</p>
 <p><img src="https://resource.tinychen.com/blog/20200317/NDKJhkhoG0vG.png" srcset="/img/loading.gif" lazyload></p>
@@ -409,36 +450,54 @@
 <p>可以看到因为我们在<code>www</code>目录下的<code>images</code>文件夹没有<code>images2.html</code>这个文件，所以在执行<code>curl example.com/images/images2.html</code>的时候返回了404请求。</p>
 <p>所以我们可以得到结论，当访问域名后面的目录（如这里的<code>/images/</code>），如果在<code>server</code>块里面单独定义了一个相关的<code>location</code>块，则只会在这个<code>/images/</code>目录相关<code>location</code>块定义的目录中去查找，不存在则返回404，并不会再去根目录<code>/</code>的<code>location</code>块中的目录中查找。</p>
 
+              
             </div>
-            <hr>
+            <hr/>
             <div>
-              <div class="post-metas mb-3">
-                
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/network/">network</a>
-                    
-                  </div>
-                
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/http/">http</a>
-                    
-                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
-                    
-                  </div>
-                
-              </div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/network/" class="category-chain-item">network</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/http/">#http</a>
+      
+        <a href="/tags/nginx/">#nginx</a>
+      
+    </div>
+  
+</div>
+
+
               
+
               
-                <div class="post-prevnext">
+                <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20200318-nginx-02-smooth-weighted-round-robin-balancing/">
+                      <a href="/20200318-nginx-02-smooth-weighted-round-robin-balancing/" title="Nginx篇02-upstream模块中的加权轮询负载均衡">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Nginx篇02-upstream模块中的加权轮询负载均衡</span>
                         <span class="visible-mobile">Previous</span>
@@ -448,7 +507,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20200301-virtualization-intro-kvm-intro/">
+                      <a href="/20200301-virtualization-intro-kvm-intro/" title="虚拟化技术的演变过程和KVM虚拟化的简介">
                         <span class="hidden-mobile">虚拟化技术的演变过程和KVM虚拟化的简介</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -464,25 +523,55 @@
         </div>
       </div>
     </div>
-    
-      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
-        <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-      </div>
-    
+
+
+  </aside>
+
+
+    </div>
   </div>
 </div>
 
-<!-- Custom -->
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
 
 
     
 
     
-      <a id="scroll-top-button" href="#" role="button">
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
         <i class="iconfont icon-arrowup" aria-hidden="true"></i>
       </a>
     
@@ -501,45 +590,48 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v"
-                 for="local-search-input">keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
+
     
 
     
   </main>
 
-  <footer class="text-center mt-5 py-3">
-  <div class="footer-content">
-     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-  </div>
+  <footer>
+    <div class="footer-inner">
   
+    <div class="footer-content">
+       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      粤ICP备18140640号
+    </a>
+  </span>
+  
+</div>
 
   
-  <!-- 备案信息 -->
-  <div class="beian">
-    <span>
-      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-        粤ICP备18140640号
-      </a>
-    </span>
-    
-  </div>
-
-
   
-</footer>
+</div>
 
+  </footer>
 
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   
-  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -550,12 +642,70 @@
   </script>
 
 
-<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
-<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-<!-- Plugins -->
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
+          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
+          ga.l = +new Date;
+          ga('create', 'UA-166769908-1', 'auto');
+          ga('send', 'pageview');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
 
 
   
@@ -564,105 +714,153 @@
 
 
 
+
   
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
 
 
-
-  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
-
-
-
-  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
-
-
-
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
   <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var title = document.getElementById('subtitle').title;
-      
-      typing(title)
-      
-    })(window, document);
-  </script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
 
 
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
-  <script>
-    (function () {
-      var path = "/local-search.xml";
-      $('#local-search-input').on('click', function() {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      });
-      $('#modalSearch').on('shown.bs.modal', function() {
-        $('#local-search-input').focus();
-      });
-    })()
-  </script>
 
 
 
 
 
-
-
-
-
-
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
-      ga.l = +new Date;
-      ga('create', 'UA-166769908-1', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  
-
-  
-
-  
-
-  
-
-  
-
-
-
-
-
-<!-- 主题的启动项 保持在最底部 -->
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
 <script  src="/js/boot.js" ></script>
 
 
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
 </body>
 </html>

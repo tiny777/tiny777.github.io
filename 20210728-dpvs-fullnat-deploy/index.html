@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -9,69 +9,100 @@
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
   <link rel="icon" href="https://resource.tinychen.com/logos.png">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="本文主要介绍在CentOS7.9系统上部署DPVS的FullNAT模式和在RealServer上安装toa模块获取客户端的真实IP。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
+    <meta name="description" content="本文主要介绍在CentOS7.9系统上部署DPVS的FullNAT模式和在RealServer上安装toa模块获取客户端的真实IP。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DPVS-FullNAT模式部署篇">
+<meta property="og:url" content="https://tinychen.com/20210728-dpvs-fullnat-deploy/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要介绍在CentOS7.9系统上部署DPVS的FullNAT模式和在RealServer上安装toa模块获取客户端的真实IP。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210728174022.jpg">
+<meta property="article:published_time" content="2021-07-28T09:00:00.000Z">
+<meta property="article:modified_time" content="2021-07-28T09:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="loadbalance">
+<meta property="article:tag" content="nat">
+<meta property="article:tag" content="lvs">
+<meta property="article:tag" content="dpdk">
+<meta property="article:tag" content="dpvs">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210728174022.jpg">
+  
+  
   <title>DPVS-FullNAT模式部署篇 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
-  
-    
-    
-      
-      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
-    
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
 
-  
-    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
 
 
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-<!-- 自定义样式保持在最底部 -->
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"shell"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
+
+  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  <header style="height: 70vh;">
-    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand"
-       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -145,13 +176,15 @@
         
         
           <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
-                class="iconfont icon-search"></i>&nbsp;</a>
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
           </li>
+          
         
         
           <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self">&nbsp;<i
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
                 class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
           </li>
         
@@ -160,65 +193,69 @@
   </div>
 </nav>
 
-    <div class="banner" id="banner" parallax=true
-         style="background: url('https://resource.tinychen.com/20210728174006.jpg') no-repeat center center;
-           background-size: cover;">
-      <div class="full-bg-img">
-        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-          <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="DPVS-FullNAT模式部署篇">
-              
-            </span>
-
-            
-              <div class="mt-3">
-  
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-author" aria-hidden="true"></i>
-      TinyChen
-    </span>
-  
-  
-    <span class="post-meta">
-      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2021-07-28 17:00" pubdate>
-        July 28, 2021 pm
-      </time>
-    </span>
-  
-</div>
-
-<div class="mt-1">
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-chart"></i>
-      4.7k 字
-    </span>
   
 
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-clock-fill"></i>
-      
-      
-      35
-       分钟
-    </span>
-  
-
-  
-  
-</div>
-
-            
-          </div>
-
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://resource.tinychen.com/20210728174006.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="DPVS-FullNAT模式部署篇"></span>
           
         </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-07-28 17:00" pubdate>
+          July 28, 2021 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          14k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          120 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
       </div>
+
+      
     </div>
+  </div>
+</div>
+
+</div>
+
   </header>
 
   <main>
@@ -227,21 +264,28 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div class="py-5" id="board">
+        <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">DPVS-FullNAT模式部署篇</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：July 28, 2021 pm
+                  
+                    Last updated on July 28, 2021 pm
+                  
                 
               </p>
             
             <div class="markdown-body">
+              
               <p>本文主要介绍在<code>CentOS7.9</code>系统上部署DPVS的FullNAT模式和在RealServer上安装toa模块获取客户端的真实IP。</p>
 <span id="more"></span>
 
@@ -262,20 +306,20 @@
 <h3 id="1-1-2-BIOS设置"><a href="#1-1-2-BIOS设置" class="headerlink" title="1.1.2 BIOS设置"></a>1.1.2 BIOS设置</h3><p>开始之前，先进入BIOS中<strong>关闭超线程和启用NUMA策略</strong>。其中DPVS是非常典型的CPU繁忙型应用（进程所在的CPU使用率一直都是100%），为了保证性能，建议关闭CPU的超线程设置。同时因为DPVS使用的是我们手动分配的大页内存，为了保证CPU亲和性，最好在BIOS中直接打开NUMA策略。</p>
 <h3 id="1-1-3-网卡PCI-ID"><a href="#1-1-3-网卡PCI-ID" class="headerlink" title="1.1.3 网卡PCI ID"></a>1.1.3 网卡PCI ID</h3><p>使用<code>dpvs</code>的<code>PMD驱动</code>接管网卡之后，如果网卡的数量较多，容易搞混，最好提前记录下对应的<code>网卡名</code>、<code>MAC地址</code>和<code>PCI ID</code>，避免后面操作的时候搞混。</p>
 <p>使用<code>lspci</code>命令可以查看对应网卡的<code>PCI ID</code>，接着我们可以查看<code>/sys/class/net/</code>这个目录下对应网卡名目录下的<code>device</code>文件，就能够得知网卡对应的<code>PCI ID</code>。最后就可以把<code>网卡名-MAC地址-PCI ID</code>三个参数串起来。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> lspci | grep -i net</span><br>01:00.0 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)<br>01:00.1 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> file /sys/class/net/eth0/device</span><br>/sys/class/net/eth0/device: symbolic link to `../../../0000:01:00.0&#x27;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> lspci | grep -i net</span><br>01:00.0 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)<br>01:00.1 Ethernet controller: Intel Corporation 82599ES 10-Gigabit SFI/SFP+ Network Connection (rev 01)<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> file /sys/class/net/eth0/device</span><br>/sys/class/net/eth0/device: symbolic link to `../../../0000:01:00.0&#x27;<br></code></pre></td></tr></table></figure>
 
-<h2 id="1-2-软件部分"><a href="#1-2-软件部分" class="headerlink" title="1.2 软件部分"></a>1.2 软件部分</h2><h3 id="1-2-1-系统软件"><a href="#1-2-1-系统软件" class="headerlink" title="1.2.1 系统软件"></a>1.2.1 系统软件</h3><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 编译安装dpvs需要使用的工具以及查看CPU NUMA信息的工具</span><br><span class="hljs-meta">$</span><span class="bash"> yum group install <span class="hljs-string">&quot;Development Tools&quot;</span></span> <br><span class="hljs-meta">$</span><span class="bash"> yum install patch libnuma* numactl numactl-devel kernel-devel openssl* popt* libpcap-devel -y</span><br><span class="hljs-meta">#</span><span class="bash"> 如果需要ipvsadm支持ipv6需要安装libnl3-devel</span><br><span class="hljs-meta">$</span><span class="bash"> yum install libnl libnl-devel libnl3 libnl3-devel -y</span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 注意kernel以及相应的kernel组件的版本需要和现在使用的kernel版本相对应</span><br><span class="hljs-meta">$</span><span class="bash"> uname -r</span><br>3.10.0-1160.36.2.el7.x86_64<br><span class="hljs-meta">$</span><span class="bash"> rpm -qa | grep kernel | grep <span class="hljs-string">&quot;3.10.0-1160.36.2&quot;</span></span><br>kernel-3.10.0-1160.36.2.el7.x86_64<br>kernel-devel-3.10.0-1160.36.2.el7.x86_64<br>kernel-tools-libs-3.10.0-1160.36.2.el7.x86_64<br>kernel-debug-devel-3.10.0-1160.36.2.el7.x86_64<br>kernel-tools-3.10.0-1160.36.2.el7.x86_64<br>kernel-headers-3.10.0-1160.36.2.el7.x86_64<br></code></pre></div></td></tr></table></figure>
+<h2 id="1-2-软件部分"><a href="#1-2-软件部分" class="headerlink" title="1.2 软件部分"></a>1.2 软件部分</h2><h3 id="1-2-1-系统软件"><a href="#1-2-1-系统软件" class="headerlink" title="1.2.1 系统软件"></a>1.2.1 系统软件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 编译安装dpvs需要使用的工具以及查看CPU NUMA信息的工具</span><br><span class="hljs-meta">$</span><span class="bash"> yum group install <span class="hljs-string">&quot;Development Tools&quot;</span></span> <br><span class="hljs-meta">$</span><span class="bash"> yum install patch libnuma* numactl numactl-devel kernel-devel openssl* popt* libpcap-devel -y</span><br><span class="hljs-meta">#</span><span class="bash"> 如果需要ipvsadm支持ipv6需要安装libnl3-devel</span><br><span class="hljs-meta">$</span><span class="bash"> yum install libnl libnl-devel libnl3 libnl3-devel -y</span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 注意kernel以及相应的kernel组件的版本需要和现在使用的kernel版本相对应</span><br><span class="hljs-meta">$</span><span class="bash"> uname -r</span><br>3.10.0-1160.36.2.el7.x86_64<br><span class="hljs-meta">$</span><span class="bash"> rpm -qa | grep kernel | grep <span class="hljs-string">&quot;3.10.0-1160.36.2&quot;</span></span><br>kernel-3.10.0-1160.36.2.el7.x86_64<br>kernel-devel-3.10.0-1160.36.2.el7.x86_64<br>kernel-tools-libs-3.10.0-1160.36.2.el7.x86_64<br>kernel-debug-devel-3.10.0-1160.36.2.el7.x86_64<br>kernel-tools-3.10.0-1160.36.2.el7.x86_64<br>kernel-headers-3.10.0-1160.36.2.el7.x86_64<br></code></pre></td></tr></table></figure>
 
-<h3 id="1-2-2-dpvs和dpdk"><a href="#1-2-2-dpvs和dpdk" class="headerlink" title="1.2.2 dpvs和dpdk"></a>1.2.2 dpvs和dpdk</h3><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> dpvs我们直接使用git从github拉取最新的版本</span><br><span class="hljs-meta">$</span><span class="bash"> git <span class="hljs-built_in">clone</span> https://github.com/iqiyi/dpvs.git</span><br><span class="hljs-meta">#</span><span class="bash"> dpdk我们从官网下载18.11.2版本，放到dpvs目录下方便操作</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> dpvs/</span><br><span class="hljs-meta">$</span><span class="bash"> wget https://fast.dpdk.org/rel/dpdk-18.11.2.tar.xz</span><br><span class="hljs-meta">$</span><span class="bash"> tar -Jxvf dpdk-18.11.2.tar.xz</span><br></code></pre></div></td></tr></table></figure>
+<h3 id="1-2-2-dpvs和dpdk"><a href="#1-2-2-dpvs和dpdk" class="headerlink" title="1.2.2 dpvs和dpdk"></a>1.2.2 dpvs和dpdk</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> dpvs我们直接使用git从github拉取最新的版本</span><br><span class="hljs-meta">$</span><span class="bash"> git <span class="hljs-built_in">clone</span> https://github.com/iqiyi/dpvs.git</span><br><span class="hljs-meta">#</span><span class="bash"> dpdk我们从官网下载18.11.2版本，放到dpvs目录下方便操作</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> dpvs/</span><br><span class="hljs-meta">$</span><span class="bash"> wget https://fast.dpdk.org/rel/dpdk-18.11.2.tar.xz</span><br><span class="hljs-meta">$</span><span class="bash"> tar -Jxvf dpdk-18.11.2.tar.xz</span><br></code></pre></td></tr></table></figure>
 
 <p>完成上述步骤之后就可以开始下面的安装了。</p>
 <h1 id="2、安装步骤"><a href="#2、安装步骤" class="headerlink" title="2、安装步骤"></a>2、安装步骤</h1><h2 id="2-1-DPDK安装"><a href="#2-1-DPDK安装" class="headerlink" title="2.1 DPDK安装"></a>2.1 DPDK安装</h2><h3 id="2-1-1-安装dpdk-patch"><a href="#2-1-1-安装dpdk-patch" class="headerlink" title="2.1.1 安装dpdk-patch"></a>2.1.1 安装dpdk-patch</h3><p>在dpvs文件夹的patch目录下面有对应支持的dpdk版本的patch补丁，如果不清楚自己到底需要哪个补丁，官方的建议是全部安装</p>
-<figure class="highlight tap"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs tap">$ ll dpvs/patch/dpdk-stable-18.11.2<br>total 44<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 4185 </span>Jul<span class="hljs-number"> 22 </span>12:47 0001-kni-use-netlink-event-for-multicast-driver-part.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 1771 </span>Jul<span class="hljs-number"> 22 </span>12:47 0002-net-support-variable-IP-header-len-for-checksum-API.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 1130 </span>Jul<span class="hljs-number"> 22 </span>12:47 0003-driver-kni-enable-flow_item-type-comparsion-in-flow_.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 1706 </span>Jul<span class="hljs-number"> 22 </span>12:47 0004-rm-rte_experimental-attribute-of-rte_memseg_walk.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root<span class="hljs-number"> 16538 </span>Jul<span class="hljs-number"> 22 </span>12:47 0005-enable-pdump-and-change-dpdk-pdump-tool-for-dpvs.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 2189 </span>Jul<span class="hljs-number"> 22 </span>12:47 0006-enable-dpdk-eal-memory-debug.patch<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs tap">$ ll dpvs/patch/dpdk-stable-18.11.2<br>total 44<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 4185 </span>Jul<span class="hljs-number"> 22 </span>12:47 0001-kni-use-netlink-event-for-multicast-driver-part.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 1771 </span>Jul<span class="hljs-number"> 22 </span>12:47 0002-net-support-variable-IP-header-len-for-checksum-API.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 1130 </span>Jul<span class="hljs-number"> 22 </span>12:47 0003-driver-kni-enable-flow_item-type-comparsion-in-flow_.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 1706 </span>Jul<span class="hljs-number"> 22 </span>12:47 0004-rm-rte_experimental-attribute-of-rte_memseg_walk.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root<span class="hljs-number"> 16538 </span>Jul<span class="hljs-number"> 22 </span>12:47 0005-enable-pdump-and-change-dpdk-pdump-tool-for-dpvs.patch<br>-rw-r--r--<span class="hljs-number"> 1 </span>root root <span class="hljs-number"> 2189 </span>Jul<span class="hljs-number"> 22 </span>12:47 0006-enable-dpdk-eal-memory-debug.patch<br></code></pre></td></tr></table></figure>
 
 <p>安装patch的操作也非常的简单</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 我们首先把所有的patch复制到dpdk的根目录下面</span><br><span class="hljs-meta">$</span><span class="bash"> cp dpvs/patch/dpdk-stable-18.11.2/*patch dpvs/dpdk-stable-18.11.2/</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> dpvs/dpdk-stable-18.11.2/</span><br><span class="hljs-meta">#</span><span class="bash"> 然后我们按照patch的文件名顺序依次进行安装</span><br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0001-kni-use-netlink-event-for-multicast-driver-part.patch</span><br>patching file kernel/linux/kni/kni_net.c<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0002-net-support-variable-IP-header-len-for-checksum-API.patch</span><br>patching file lib/librte_net/rte_ip.h<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0003-driver-kni-enable-flow_item-type-comparsion-in-flow_.patch</span><br>patching file drivers/net/mlx5/mlx5_flow.c<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0004-rm-rte_experimental-attribute-of-rte_memseg_walk.patch</span><br>patching file lib/librte_eal/common/eal_common_memory.c<br>Hunk #1 succeeded at 606 (offset 5 lines).<br>patching file lib/librte_eal/common/include/rte_memory.h<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0005-enable-pdump-and-change-dpdk-pdump-tool-for-dpvs.patch</span><br>patching file app/pdump/main.c<br>patching file config/common_base<br>patching file lib/librte_pdump/rte_pdump.c<br>patching file lib/librte_pdump/rte_pdump.h<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0006-enable-dpdk-eal-memory-debug.patch</span><br>patching file config/common_base<br>patching file lib/librte_eal/common/include/rte_malloc.h<br>patching file lib/librte_eal/common/rte_malloc.c<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 我们首先把所有的patch复制到dpdk的根目录下面</span><br><span class="hljs-meta">$</span><span class="bash"> cp dpvs/patch/dpdk-stable-18.11.2/*patch dpvs/dpdk-stable-18.11.2/</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> dpvs/dpdk-stable-18.11.2/</span><br><span class="hljs-meta">#</span><span class="bash"> 然后我们按照patch的文件名顺序依次进行安装</span><br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0001-kni-use-netlink-event-for-multicast-driver-part.patch</span><br>patching file kernel/linux/kni/kni_net.c<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0002-net-support-variable-IP-header-len-for-checksum-API.patch</span><br>patching file lib/librte_net/rte_ip.h<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0003-driver-kni-enable-flow_item-type-comparsion-in-flow_.patch</span><br>patching file drivers/net/mlx5/mlx5_flow.c<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0004-rm-rte_experimental-attribute-of-rte_memseg_walk.patch</span><br>patching file lib/librte_eal/common/eal_common_memory.c<br>Hunk #1 succeeded at 606 (offset 5 lines).<br>patching file lib/librte_eal/common/include/rte_memory.h<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0005-enable-pdump-and-change-dpdk-pdump-tool-for-dpvs.patch</span><br>patching file app/pdump/main.c<br>patching file config/common_base<br>patching file lib/librte_pdump/rte_pdump.c<br>patching file lib/librte_pdump/rte_pdump.h<br><span class="hljs-meta">$</span><span class="bash"> patch -p 1 &lt; 0006-enable-dpdk-eal-memory-debug.patch</span><br>patching file config/common_base<br>patching file lib/librte_eal/common/include/rte_malloc.h<br>patching file lib/librte_eal/common/rte_malloc.c<br></code></pre></td></tr></table></figure>
 
-<h3 id="2-1-2-dpdk编译安装"><a href="#2-1-2-dpdk编译安装" class="headerlink" title="2.1.2 dpdk编译安装"></a>2.1.2 dpdk编译安装</h3><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> dpvs/dpdk-stable-18.11.2</span><br><span class="hljs-meta">$</span><span class="bash"> make config T=x86_64-native-linuxapp-gcc</span><br><span class="hljs-meta">$</span><span class="bash"> make</span> <br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 出现Build complete [x86_64-native-linuxapp-gcc]的字样就说明make成功</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">export</span> RTE_SDK=<span class="hljs-variable">$PWD</span></span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">export</span> RTE_TARGET=build</span><br></code></pre></div></td></tr></table></figure>
+<h3 id="2-1-2-dpdk编译安装"><a href="#2-1-2-dpdk编译安装" class="headerlink" title="2.1.2 dpdk编译安装"></a>2.1.2 dpdk编译安装</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> dpvs/dpdk-stable-18.11.2</span><br><span class="hljs-meta">$</span><span class="bash"> make config T=x86_64-native-linuxapp-gcc</span><br><span class="hljs-meta">$</span><span class="bash"> make</span> <br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 出现Build complete [x86_64-native-linuxapp-gcc]的字样就说明make成功</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">export</span> RTE_SDK=<span class="hljs-variable">$PWD</span></span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">export</span> RTE_TARGET=build</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>这里编译安装的过程中不会出现之前使用<code>dpdk17.11.2</code>版本出现的<code>ndo_change_mtu</code>问题</p>
@@ -284,42 +328,42 @@
 <blockquote>
 <p>单个CPU的系统可以参考dpdk的<a target="_blank" rel="noopener" href="https://doc.dpdk.org/guides/linux_gsg/sys_reqs.html">官方文档</a></p>
 </blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> <span class="hljs-keyword">for</span> NUMA machine</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> 28672 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> 28672 &gt; /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> mkdir /mnt/huge</span><br><span class="hljs-meta">$</span><span class="bash"> mount -t hugetlbfs nodev /mnt/huge</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 需要开机自动挂载的话可以在</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;nodev /mnt/huge hugetlbfs defaults 0 0&quot;</span> &gt;&gt; /etc/fstab</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 配置完成后我们可以看到内存的使用率立马上升了</span><br><span class="hljs-meta">$</span><span class="bash"> free -g	<span class="hljs-comment"># 配置前</span></span><br>              total        used        free      shared  buff/cache   available<br>Mem:            125           1         122           0           1         123<br><span class="hljs-meta">$</span><span class="bash"> free -g	<span class="hljs-comment"># 配置后</span></span><br>              total        used        free      shared  buff/cache   available<br>Mem:            125         113          10           0           1          11<br><span class="hljs-meta">#</span><span class="bash"> 使用numactl查看内存状态也可以看到确实是两边的CPU内存各分配了56G</span><br><span class="hljs-meta">$</span><span class="bash"> numactl -H</span><br>available: 2 nodes (0-1)<br>node 0 cpus: 0 2 4 6 8 10 12 14 16 18<br>node 0 size: 64184 MB<br>node 0 free: 4687 MB<br>node 1 cpus: 1 3 5 7 9 11 13 15 17 19<br>node 1 size: 64494 MB<br>node 1 free: 5759 MB<br>node distances:<br>node   0   1<br>  0:  10  21<br>  1:  21  10<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> <span class="hljs-keyword">for</span> NUMA machine</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> 28672 &gt; /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> 28672 &gt; /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> mkdir /mnt/huge</span><br><span class="hljs-meta">$</span><span class="bash"> mount -t hugetlbfs nodev /mnt/huge</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 需要开机自动挂载的话可以在</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;nodev /mnt/huge hugetlbfs defaults 0 0&quot;</span> &gt;&gt; /etc/fstab</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 配置完成后我们可以看到内存的使用率立马上升了</span><br><span class="hljs-meta">$</span><span class="bash"> free -g	<span class="hljs-comment"># 配置前</span></span><br>              total        used        free      shared  buff/cache   available<br>Mem:            125           1         122           0           1         123<br><span class="hljs-meta">$</span><span class="bash"> free -g	<span class="hljs-comment"># 配置后</span></span><br>              total        used        free      shared  buff/cache   available<br>Mem:            125         113          10           0           1          11<br><span class="hljs-meta">#</span><span class="bash"> 使用numactl查看内存状态也可以看到确实是两边的CPU内存各分配了56G</span><br><span class="hljs-meta">$</span><span class="bash"> numactl -H</span><br>available: 2 nodes (0-1)<br>node 0 cpus: 0 2 4 6 8 10 12 14 16 18<br>node 0 size: 64184 MB<br>node 0 free: 4687 MB<br>node 1 cpus: 1 3 5 7 9 11 13 15 17 19<br>node 1 size: 64494 MB<br>node 1 free: 5759 MB<br>node distances:<br>node   0   1<br>  0:  10  21<br>  1:  21  10<br></code></pre></td></tr></table></figure>
 
 <h3 id="2-1-4-配置ulimit"><a href="#2-1-4-配置ulimit" class="headerlink" title="2.1.4 配置ulimit"></a>2.1.4 配置ulimit</h3><p>默认情况下系统的<code>ulimit</code>限制打开的文件描述符数量如果太小会影响dpvs正常运行，因此我们将其调大一些：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">ulimit</span> -n 655350</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;ulimit -n 655350&quot;</span> &gt;&gt; /etc/rc.local</span><br><span class="hljs-meta">$</span><span class="bash"> chmod a+x /etc/rc.local</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">ulimit</span> -n 655350</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;ulimit -n 655350&quot;</span> &gt;&gt; /etc/rc.local</span><br><span class="hljs-meta">$</span><span class="bash"> chmod a+x /etc/rc.local</span><br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="2-2-挂载驱动模块"><a href="#2-2-挂载驱动模块" class="headerlink" title="2.2 挂载驱动模块"></a>2.2 挂载驱动模块</h2><p>首先我们需要让系统挂载我们已经编译好的dpdk驱动（PMD驱动），然后再将网卡使用的默认驱动换为我们这里编译好的PMD驱动</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> modprobe uio</span><br><span class="hljs-meta">$</span><span class="bash"> insmod /path/to/dpdk-stable-18.11.2/build/kmod/igb_uio.ko</span><br><span class="hljs-meta">$</span><span class="bash"> insmod /path/to/dpdk-stable-18.11.2/build/kmod/rte_kni.ko carrier=on</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> modprobe uio</span><br><span class="hljs-meta">$</span><span class="bash"> insmod /path/to/dpdk-stable-18.11.2/build/kmod/igb_uio.ko</span><br><span class="hljs-meta">$</span><span class="bash"> insmod /path/to/dpdk-stable-18.11.2/build/kmod/rte_kni.ko carrier=on</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>需要注意的是<code>carrier</code>参数是从DPDK v18.11版本开始新增的，默认值为<code>off</code>。我们需要在加载<code>rte_kni.ko</code>模块的时候带上<code>carrier=on</code>参数才能够使KNI设备工作正常。</p>
 </blockquote>
 <p>在<code>dpdk-stable-18.11.2/usertools</code>目录下有一些辅助我们安装使用dpdk的脚本，我们可以用它们来降低配置的复杂度，这里我们可以使用<code>dpdk-devbind.py</code>脚本来变更网卡的驱动</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 首先我们关闭我们需要加载PMD驱动的网卡</span><br><span class="hljs-meta">$</span><span class="bash"> ifdown eth&#123;2,3,4,5&#125;</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 查看网卡状态，注意要特别关注网卡对应的PCI ID，下面只截取部分有用的输出结果</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py --status</span><br>Network devices using kernel driver<br>===================================<br>0000:04:00.0 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; if=eth2 drv=ixgbe unused=igb_uio<br>0000:04:00.1 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; if=eth3 drv=ixgbe unused=igb_uio<br>0000:82:00.0 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; if=eth4 drv=ixgbe unused=igb_uio<br>0000:82:00.1 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; if=eth5 drv=ixgbe unused=igb_uio<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 首先我们关闭我们需要加载PMD驱动的网卡</span><br><span class="hljs-meta">$</span><span class="bash"> ifdown eth&#123;2,3,4,5&#125;</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 查看网卡状态，注意要特别关注网卡对应的PCI ID，下面只截取部分有用的输出结果</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py --status</span><br>Network devices using kernel driver<br>===================================<br>0000:04:00.0 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; if=eth2 drv=ixgbe unused=igb_uio<br>0000:04:00.1 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; if=eth3 drv=ixgbe unused=igb_uio<br>0000:82:00.0 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; if=eth4 drv=ixgbe unused=igb_uio<br>0000:82:00.1 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; if=eth5 drv=ixgbe unused=igb_uio<br></code></pre></td></tr></table></figure>
 
 <p>从上面的输出结果我们可以看到目前的网卡使用的是<code>ixgbe</code>驱动，而我们的目标是让其使用<code>igb_uio</code>驱动。注意如果这个时候系统的网卡太多，前面我们记录下来的<code>网卡名-MAC地址-PCI ID</code>三个参数就可以派上用场了。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 对需要使用dpvs的网卡加载特定的驱动</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:04:00.0</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:04:00.1</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:82:00.0</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:82:00.1</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 再次检查是否加载成功，下面只截取部分有用的输出结果</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py --status</span><br>Network devices using DPDK-compatible driver<br>============================================<br>0000:04:00.0 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; drv=igb_uio unused=ixgbe<br>0000:04:00.1 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; drv=igb_uio unused=ixgbe<br>0000:82:00.0 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; drv=igb_uio unused=ixgbe<br>0000:82:00.1 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; drv=igb_uio unused=ixgbe<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 对需要使用dpvs的网卡加载特定的驱动</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:04:00.0</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:04:00.1</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:82:00.0</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py -b igb_uio 0000:82:00.1</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 再次检查是否加载成功，下面只截取部分有用的输出结果</span><br><span class="hljs-meta">$</span><span class="bash"> ./usertools/dpdk-devbind.py --status</span><br>Network devices using DPDK-compatible driver<br>============================================<br>0000:04:00.0 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; drv=igb_uio unused=ixgbe<br>0000:04:00.1 &#x27;82599ES 10-Gigabit SFI/SFP+ Network Connection 10fb&#x27; drv=igb_uio unused=ixgbe<br>0000:82:00.0 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; drv=igb_uio unused=ixgbe<br>0000:82:00.1 &#x27;Ethernet 10G 2P X520 Adapter 154d&#x27; drv=igb_uio unused=ixgbe<br></code></pre></td></tr></table></figure>
 
-<h2 id="2-3-DPVS安装"><a href="#2-3-DPVS安装" class="headerlink" title="2.3 DPVS安装"></a>2.3 DPVS安装</h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> /path/to/dpdk-stable-18.11.2/</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">export</span> RTE_SDK=<span class="hljs-variable">$PWD</span></span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> /path/to/dpvs</span><br><span class="hljs-meta">$</span><span class="bash"> make</span> <br><span class="hljs-meta">$</span><span class="bash"> make install</span><br><span class="hljs-meta">#</span><span class="bash"> 查看bin目录下的二进制文件</span><br><span class="hljs-meta">$</span><span class="bash"> ls /path/to/dpvs/bin/</span><br>dpip  dpvs  ipvsadm  keepalived<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 注意查看make过程中的提示信息，尤其是keepalived部分，如果出现下面的部分则表示IPVS支持IPv6</span><br>Keepalived configuration<br>------------------------<br>Keepalived version       : 2.0.19<br>Compiler                 : gcc<br>Preprocessor flags       : -D_GNU_SOURCE -I/usr/include/libnl3<br>Compiler flags           : -g -g -O2 -fPIE -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -O2<br>Linker flags             : -pie -Wl,-z,relro -Wl,-z,now<br>Extra Lib                : -lm -lcrypto -lssl -lnl-genl-3 -lnl-3<br>Use IPVS Framework       : Yes<br>IPVS use libnl           : Yes<br>IPVS syncd attributes    : No<br>IPVS 64 bit stats        : No<br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 为了方便管理可以将相关的操作命令软链接到/sbin下方便全局执行</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/dpvs /sbin/dpvs</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/dpip /sbin/dpip</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/ipvsadm /sbin/ipvsadm</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/keepalived /sbin/keepalived</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 检查dpvs相关命令能否正常工作,注意其他命令要在dpvs进程启动后才能正常使用</span><br><span class="hljs-meta">$</span><span class="bash"> dpvs -v</span><br>dpvs version: 1.8-10, build on 2021.07.26.15:34:26<br></code></pre></div></td></tr></table></figure>
+<h2 id="2-3-DPVS安装"><a href="#2-3-DPVS安装" class="headerlink" title="2.3 DPVS安装"></a>2.3 DPVS安装</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> /path/to/dpdk-stable-18.11.2/</span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">export</span> RTE_SDK=<span class="hljs-variable">$PWD</span></span><br><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> /path/to/dpvs</span><br><span class="hljs-meta">$</span><span class="bash"> make</span> <br><span class="hljs-meta">$</span><span class="bash"> make install</span><br><span class="hljs-meta">#</span><span class="bash"> 查看bin目录下的二进制文件</span><br><span class="hljs-meta">$</span><span class="bash"> ls /path/to/dpvs/bin/</span><br>dpip  dpvs  ipvsadm  keepalived<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 注意查看make过程中的提示信息，尤其是keepalived部分，如果出现下面的部分则表示IPVS支持IPv6</span><br>Keepalived configuration<br>------------------------<br>Keepalived version       : 2.0.19<br>Compiler                 : gcc<br>Preprocessor flags       : -D_GNU_SOURCE -I/usr/include/libnl3<br>Compiler flags           : -g -g -O2 -fPIE -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -O2<br>Linker flags             : -pie -Wl,-z,relro -Wl,-z,now<br>Extra Lib                : -lm -lcrypto -lssl -lnl-genl-3 -lnl-3<br>Use IPVS Framework       : Yes<br>IPVS use libnl           : Yes<br>IPVS syncd attributes    : No<br>IPVS 64 bit stats        : No<br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 为了方便管理可以将相关的操作命令软链接到/sbin下方便全局执行</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/dpvs /sbin/dpvs</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/dpip /sbin/dpip</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/ipvsadm /sbin/ipvsadm</span><br><span class="hljs-meta">$</span><span class="bash"> ln -s /path/to/dpvs/bin/keepalived /sbin/keepalived</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 检查dpvs相关命令能否正常工作,注意其他命令要在dpvs进程启动后才能正常使用</span><br><span class="hljs-meta">$</span><span class="bash"> dpvs -v</span><br>dpvs version: 1.8-10, build on 2021.07.26.15:34:26<br></code></pre></td></tr></table></figure>
 
 <h2 id="2-4-配置dpvs-conf"><a href="#2-4-配置dpvs-conf" class="headerlink" title="2.4 配置dpvs.conf"></a>2.4 配置dpvs.conf</h2><p>在<code>dpvs/conf</code>目录下面有着各种配置方式的dpvs配置文件范例，同时在<code>dpvs.conf.items</code>文件中记录了所有的参数，建议同学们全部阅读一遍了解了基本语法之后再进行配置。默认的dpvs启动的配置文件的是<code>/etc/dpvs.conf</code>。</p>
 <p>这里简单摘几个部分出来说一下（<code>!</code>为注释符号）：</p>
 <ul>
 <li><p>日志的格式可以手动调成DEBUG并且修改日志输出的位置方便定位问题</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">global_defs &#123;<br>    log_level   DEBUG<br>    log_file    <span class="hljs-regexp">/path/</span>to<span class="hljs-regexp">/dpvs/</span>logs/dpvs.log<br>&#125;<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">global_defs &#123;<br>    log_level   DEBUG<br>    log_file    <span class="hljs-regexp">/path/</span>to<span class="hljs-regexp">/dpvs/</span>logs/dpvs.log<br>&#125;<br></code></pre></td></tr></table></figure></li>
 <li><p>如果需要定义多个网卡，可以参考这个配置</p>
-<figure class="highlight puppet"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs puppet"><span class="hljs-keyword">netif_defs</span> &#123;<br>    &lt;init&gt; pktpool_size     <span class="hljs-number">1048575</span><br>    &lt;init&gt; pktpool_cache    <span class="hljs-number">256</span><br><br>    &lt;init&gt; <span class="hljs-literal">device</span> dpdk<span class="hljs-number">0</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk0</span>.kni<br>    &#125;<br><br>    &lt;init&gt; device <span class="hljs-keyword">dpdk1</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk1</span>.kni<br>    &#125;<br><br>    &lt;init&gt; device <span class="hljs-keyword">dpdk2</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk2</span>.kni<br>    &#125;<br><br>    &lt;init&gt; device <span class="hljs-keyword">dpdk3</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk3</span>.kni<br>    &#125;<br><br>&#125;<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight puppet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs puppet"><span class="hljs-keyword">netif_defs</span> &#123;<br>    &lt;init&gt; pktpool_size     <span class="hljs-number">1048575</span><br>    &lt;init&gt; pktpool_cache    <span class="hljs-number">256</span><br><br>    &lt;init&gt; <span class="hljs-literal">device</span> dpdk<span class="hljs-number">0</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk0</span>.kni<br>    &#125;<br><br>    &lt;init&gt; device <span class="hljs-keyword">dpdk1</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk1</span>.kni<br>    &#125;<br><br>    &lt;init&gt; device <span class="hljs-keyword">dpdk2</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk2</span>.kni<br>    &#125;<br><br>    &lt;init&gt; device <span class="hljs-keyword">dpdk3</span> &#123;<br>        rx &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>            rss                 all<br>        &#125;<br>        <span class="hljs-keyword">tx</span> &#123;<br>            queue_number        <span class="hljs-number">16</span><br>            descriptor_number   <span class="hljs-number">1024</span><br>        &#125;<br>        <span class="hljs-keyword">fdir</span> &#123;<br>            <span class="hljs-literal">mode</span>                perfect<br>            pballoc             <span class="hljs-number">64</span>k<br>            <span class="hljs-literal">status</span>              matched<br>        &#125;<br>        <span class="hljs-keyword">kni_name</span>                <span class="hljs-keyword">dpdk3</span>.kni<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure></li>
 <li><p>多个网卡的同一个收发队列共用同一个CPU</p>
-<figure class="highlight puppet"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs puppet">&lt;init&gt; worker <span class="hljs-keyword">cpu1</span> &#123;<br>    <span class="hljs-built_in">type</span>    slave<br>    cpu_id  <span class="hljs-number">1</span><br>    port    dpdk<span class="hljs-number">0</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>    <span class="hljs-keyword">port</span>    <span class="hljs-keyword">dpdk1</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>    <span class="hljs-keyword">port</span>    <span class="hljs-keyword">dpdk2</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>    <span class="hljs-keyword">port</span>    <span class="hljs-keyword">dpdk3</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight puppet"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs puppet">&lt;init&gt; worker <span class="hljs-keyword">cpu1</span> &#123;<br>    <span class="hljs-built_in">type</span>    slave<br>    cpu_id  <span class="hljs-number">1</span><br>    port    dpdk<span class="hljs-number">0</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>    <span class="hljs-keyword">port</span>    <span class="hljs-keyword">dpdk1</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>    <span class="hljs-keyword">port</span>    <span class="hljs-keyword">dpdk2</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>    <span class="hljs-keyword">port</span>    <span class="hljs-keyword">dpdk3</span> &#123;<br>        rx_queue_ids     <span class="hljs-number">0</span><br>        tx_queue_ids     <span class="hljs-number">0</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
 <li><p>如果需要单独指定某个CPU来处理<code>ICMP</code>数据包，可以在该worker的参数中添加<code>icmp_redirect_core</code></p>
-<figure class="highlight dts"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dts"><span class="hljs-params">&lt;init&gt;</span> worker <span class="hljs-class">cpu16 </span>&#123;<br>    type    slave<br>    cpu_id  <span class="hljs-number">16</span><br>    icmp_redirect_core<br>    port    <span class="hljs-class">dpdk0 </span>&#123;<br>        rx_queue_ids     <span class="hljs-number">15</span><br>        tx_queue_ids     <span class="hljs-number">15</span><br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs dts"><span class="hljs-params">&lt;init&gt;</span> worker <span class="hljs-class">cpu16 </span>&#123;<br>    type    slave<br>    cpu_id  <span class="hljs-number">16</span><br>    icmp_redirect_core<br>    port    <span class="hljs-class">dpdk0 </span>&#123;<br>        rx_queue_ids     <span class="hljs-number">15</span><br>        tx_queue_ids     <span class="hljs-number">15</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
 </ul>
 <p>DPVS进程启动后可以直接在Linux系统的网络配置文件中对相应的网卡进行配置，使用起来和其他的eth0之类的网卡是完全一样的。</p>
 <p>运行成功之后，使用<code>dpip</code>命令和正常的<code>ip</code>、<code>ifconfig</code>命令都能够看到对应的<code>dpdk</code>网卡，IPv4和IPv6网络都能够正常使用。下图只截取部分信息，IP和MAC信息已脱敏，IPv6信息已摘除。</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> dpip link show</span><br>1: dpdk0: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 10000 Mbps full-duplex auto-nego<br>    addr AA:BB:CC:23:33:33 OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> ip a</span><br>67: dpdk0.kni: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000<br>    link/ether AA:BB:CC:23:33:33 brd ff:ff:ff:ff:ff:ff<br>    inet 1.1.1.1/24 brd 1.1.1.255 scope global dpdk0.kni<br>       valid_lft forever preferred_lft forever<br>       <br><span class="hljs-meta">$</span><span class="bash"> ifconfig dpdk0.kni</span><br>dpdk0.kni: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500<br>        inet 1.1.1.1  netmask 255.255.254.0  broadcast 1.1.1.255<br>        ether AA:BB:CC:23:33:33  txqueuelen 1000  (Ethernet)<br>        RX packets 1790  bytes 136602 (133.4 KiB)<br>        RX errors 0  dropped 52  overruns 0  frame 0<br>        TX packets 115  bytes 24290 (23.7 KiB)<br>        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> dpip link show</span><br>1: dpdk0: socket 0 mtu 1500 rx-queue 16 tx-queue 16<br>    UP 10000 Mbps full-duplex auto-nego<br>    addr AA:BB:CC:23:33:33 OF_RX_IP_CSUM OF_TX_IP_CSUM OF_TX_TCP_CSUM OF_TX_UDP_CSUM<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> ip a</span><br>67: dpdk0.kni: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000<br>    link/ether AA:BB:CC:23:33:33 brd ff:ff:ff:ff:ff:ff<br>    inet 1.1.1.1/24 brd 1.1.1.255 scope global dpdk0.kni<br>       valid_lft forever preferred_lft forever<br>       <br><span class="hljs-meta">$</span><span class="bash"> ifconfig dpdk0.kni</span><br>dpdk0.kni: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500<br>        inet 1.1.1.1  netmask 255.255.254.0  broadcast 1.1.1.255<br>        ether AA:BB:CC:23:33:33  txqueuelen 1000  (Ethernet)<br>        RX packets 1790  bytes 136602 (133.4 KiB)<br>        RX errors 0  dropped 52  overruns 0  frame 0<br>        TX packets 115  bytes 24290 (23.7 KiB)<br>        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0<br></code></pre></td></tr></table></figure>
 
 <h1 id="3、配置FullNat"><a href="#3、配置FullNat" class="headerlink" title="3、配置FullNat"></a>3、配置FullNat</h1><p>为了校验我们的DPVS能够正常工作，这里我们参考官方的<a target="_blank" rel="noopener" href="https://github.com/iqiyi/dpvs/blob/master/doc/tutorial.md#simple-fnat">配置文档</a>，先配置一个最简单的双臂模式的FNAT。参考官方的架构图并修改其中的IP地址信息我们可以得到下面的简单架构图。</p>
 <blockquote>
@@ -327,13 +371,13 @@
 </blockquote>
 <p><img src="https://resource.tinychen.com/20210728123202.svg" srcset="/img/loading.gif" lazyload alt="dpvs-fnat-two-arm-sample"></p>
 <p>这里我们使用dpdk2网卡作为wan口，dpdk0网卡作为lan口</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 首先我们把VIP 10.0.96.204 加到dpdk2网卡（wan）上</span><br><span class="hljs-meta">$</span><span class="bash"> dpip addr add 10.0.96.204/32 dev dpdk2</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 接着我们需要添加两条路由，分为是wan口网段的路由和到RS机器网段的路由</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route add 10.0.96.0/24 dev dpdk2</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route add 192.168.229.0/24 dev dpdk0</span><br><span class="hljs-meta">#</span><span class="bash"> 最好再加一条到网关的默认路由保证ICMP数据包的回包能跑通</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route add default via 10.0.96.254 dev dpdk2</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用RR算法建立转发规则</span><br><span class="hljs-meta">#</span><span class="bash"> add service &lt;VIP:vport&gt; to forwarding, scheduling mode is RR.</span><br><span class="hljs-meta">#</span><span class="bash"> use ipvsadm --<span class="hljs-built_in">help</span> <span class="hljs-keyword">for</span> more info.</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm -A -t 10.0.96.204:80 -s rr</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 这里为了方便测试我们只添加一台RS</span><br><span class="hljs-meta">#</span><span class="bash"> add two RS <span class="hljs-keyword">for</span> service, forwarding mode is FNAT (-b)</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm -a -t 10.0.96.204:80 -r 192.168.229.1 -b</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 添加LocalIP到网络中，FNAT模式这里需要</span><br><span class="hljs-meta">#</span><span class="bash"> add at least one Local-IP (LIP) <span class="hljs-keyword">for</span> FNAT on LAN interface</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm --add-laddr -z 192.168.229.204 -t 10.0.96.204:80 -F dpdk0</span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 然后我们查看一下效果</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route show</span><br>inet 192.168.229.204/32 via 0.0.0.0 src 0.0.0.0 dev dpdk0 mtu 1500 tos 0 scope host metric 0 proto auto<br>inet 10.0.96.204/32 via 0.0.0.0 src 0.0.0.0 dev dpdk2 mtu 1500 tos 0 scope host metric 0 proto auto<br>inet 10.0.96.0/24 via 0.0.0.0 src 0.0.0.0 dev dpdk2 mtu 1500 tos 0 scope link metric 0 proto auto<br>inet 192.168.229.0/24 via 0.0.0.0 src 0.0.0.0 dev dpdk0 mtu 1500 tos 0 scope link metric 0 proto auto<br>inet 0.0.0.0/0 via 10.0.96.254 src 0.0.0.0 dev dpdk2 mtu 1500 tos 0 scope global metric 0 proto auto<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> dpip addr show</span><br>inet 10.0.96.204/32 scope global dpdk2<br>     valid_lft forever preferred_lft forever<br>inet 192.168.229.204/32 scope global dpdk0<br>     valid_lft forever preferred_lft forever<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm  -ln</span><br>IP Virtual Server version 0.0.0 (size=0)<br>Prot LocalAddress:Port Scheduler Flags<br><span class="hljs-meta">  -&gt;</span><span class="bash"> RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br>TCP  10.0.96.204:80 rr<br><span class="hljs-meta">  -&gt;</span><span class="bash"> 192.168.229.1:80              FullNat 1      0          0</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm  -G</span><br>VIP:VPORT            TOTAL    SNAT_IP              CONFLICTS  CONNS<br>10.0.96.204:80    1<br>                              192.168.229.204       0          0<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 首先我们把VIP 10.0.96.204 加到dpdk2网卡（wan）上</span><br><span class="hljs-meta">$</span><span class="bash"> dpip addr add 10.0.96.204/32 dev dpdk2</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 接着我们需要添加两条路由，分为是wan口网段的路由和到RS机器网段的路由</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route add 10.0.96.0/24 dev dpdk2</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route add 192.168.229.0/24 dev dpdk0</span><br><span class="hljs-meta">#</span><span class="bash"> 最好再加一条到网关的默认路由保证ICMP数据包的回包能跑通</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route add default via 10.0.96.254 dev dpdk2</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 使用RR算法建立转发规则</span><br><span class="hljs-meta">#</span><span class="bash"> add service &lt;VIP:vport&gt; to forwarding, scheduling mode is RR.</span><br><span class="hljs-meta">#</span><span class="bash"> use ipvsadm --<span class="hljs-built_in">help</span> <span class="hljs-keyword">for</span> more info.</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm -A -t 10.0.96.204:80 -s rr</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 这里为了方便测试我们只添加一台RS</span><br><span class="hljs-meta">#</span><span class="bash"> add two RS <span class="hljs-keyword">for</span> service, forwarding mode is FNAT (-b)</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm -a -t 10.0.96.204:80 -r 192.168.229.1 -b</span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 添加LocalIP到网络中，FNAT模式这里需要</span><br><span class="hljs-meta">#</span><span class="bash"> add at least one Local-IP (LIP) <span class="hljs-keyword">for</span> FNAT on LAN interface</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm --add-laddr -z 192.168.229.204 -t 10.0.96.204:80 -F dpdk0</span><br><span class="hljs-meta"></span><br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 然后我们查看一下效果</span><br><span class="hljs-meta">$</span><span class="bash"> dpip route show</span><br>inet 192.168.229.204/32 via 0.0.0.0 src 0.0.0.0 dev dpdk0 mtu 1500 tos 0 scope host metric 0 proto auto<br>inet 10.0.96.204/32 via 0.0.0.0 src 0.0.0.0 dev dpdk2 mtu 1500 tos 0 scope host metric 0 proto auto<br>inet 10.0.96.0/24 via 0.0.0.0 src 0.0.0.0 dev dpdk2 mtu 1500 tos 0 scope link metric 0 proto auto<br>inet 192.168.229.0/24 via 0.0.0.0 src 0.0.0.0 dev dpdk0 mtu 1500 tos 0 scope link metric 0 proto auto<br>inet 0.0.0.0/0 via 10.0.96.254 src 0.0.0.0 dev dpdk2 mtu 1500 tos 0 scope global metric 0 proto auto<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> dpip addr show</span><br>inet 10.0.96.204/32 scope global dpdk2<br>     valid_lft forever preferred_lft forever<br>inet 192.168.229.204/32 scope global dpdk0<br>     valid_lft forever preferred_lft forever<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm  -ln</span><br>IP Virtual Server version 0.0.0 (size=0)<br>Prot LocalAddress:Port Scheduler Flags<br><span class="hljs-meta">  -&gt;</span><span class="bash"> RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br>TCP  10.0.96.204:80 rr<br><span class="hljs-meta">  -&gt;</span><span class="bash"> 192.168.229.1:80              FullNat 1      0          0</span><br><span class="hljs-meta">$</span><span class="bash"> ipvsadm  -G</span><br>VIP:VPORT            TOTAL    SNAT_IP              CONFLICTS  CONNS<br>10.0.96.204:80    1<br>                              192.168.229.204       0          0<br></code></pre></td></tr></table></figure>
 
 <p>然后我们在RS上面启动一个nginx，设置返回IP和端口号，看看效果：</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span> default;<br><br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">default_type</span> text/plain;<br>        <span class="hljs-attribute">return</span> <span class="hljs-number">200</span> <span class="hljs-string">&quot;Your IP and port is $remote_addr:$remote_port\n&quot;</span>;<br>    &#125;<br><br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span> default;<br><br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">default_type</span> text/plain;<br>        <span class="hljs-attribute">return</span> <span class="hljs-number">200</span> <span class="hljs-string">&quot;Your IP and port is $remote_addr:$remote_port\n&quot;</span>;<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>直接对VIP使用ping和curl命令进行测试：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> ping -c4 10.0.96.204</span><br>PING 10.0.96.204 (10.0.96.204) 56(84) bytes of data.<br>64 bytes from 10.0.96.204: icmp_seq=1 ttl=54 time=47.2 ms<br>64 bytes from 10.0.96.204: icmp_seq=2 ttl=54 time=48.10 ms<br>64 bytes from 10.0.96.204: icmp_seq=3 ttl=54 time=48.5 ms<br>64 bytes from 10.0.96.204: icmp_seq=4 ttl=54 time=48.5 ms<br><br>--- 10.0.96.204 ping statistics ---<br>4 packets transmitted, 4 received, 0% packet loss, time 8ms<br>rtt min/avg/max/mdev = 47.235/48.311/48.969/0.684 ms<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> curl 10.0.96.204</span><br>Your IP and port is 192.168.229.204:1033<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> ping -c4 10.0.96.204</span><br>PING 10.0.96.204 (10.0.96.204) 56(84) bytes of data.<br>64 bytes from 10.0.96.204: icmp_seq=1 ttl=54 time=47.2 ms<br>64 bytes from 10.0.96.204: icmp_seq=2 ttl=54 time=48.10 ms<br>64 bytes from 10.0.96.204: icmp_seq=3 ttl=54 time=48.5 ms<br>64 bytes from 10.0.96.204: icmp_seq=4 ttl=54 time=48.5 ms<br><br>--- 10.0.96.204 ping statistics ---<br>4 packets transmitted, 4 received, 0% packet loss, time 8ms<br>rtt min/avg/max/mdev = 47.235/48.311/48.969/0.684 ms<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> curl 10.0.96.204</span><br>Your IP and port is 192.168.229.204:1033<br></code></pre></td></tr></table></figure>
 
 <p>可以发现不管在什么机器上面都只会返回LIP的IP和端口号，如果需要获取用户的真实IP，那么就需要安装TOA模块</p>
 <h1 id="4、RS安装TOA模块"><a href="#4、RS安装TOA模块" class="headerlink" title="4、RS安装TOA模块"></a>4、RS安装TOA模块</h1><p>目前开源社区提供toa模块的版本比较多，这里我们为了保证兼容性，直接使用dpvs官方提供的<code>toa</code>和<code>uoa</code>模块，根据他们的官方描述，他们的<code>toa</code>模块是从<code>Alibaba TOA</code>中剥离出来</p>
@@ -341,56 +385,74 @@
 <p>TOA source code is included into DPVS project(in directory <a target="_blank" rel="noopener" href="https://github.com/iqiyi/dpvs/blob/master/kmod/toa">kmod/toa</a>) since v1.7 to support IPv6 and NAT64. It is derived from the Alibaba TOA. For IPv6 applications which need client’s real IP address, we suggest to use this TOA version.</p>
 </blockquote>
 <p>由于我们这里的RS机器和DPVS机器都是使用版本的CentOS7系统，因此我们可以直接在DPVS机器上面编译toa模块，再复制到各个RS机器上使用</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> /path/to/dpvs/kmod/toa/</span><br><span class="hljs-meta">$</span><span class="bash"> make</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> <span class="hljs-built_in">cd</span> /path/to/dpvs/kmod/toa/</span><br><span class="hljs-meta">$</span><span class="bash"> make</span><br></code></pre></td></tr></table></figure>
 
 <p>顺利编译完成之后会在当前目录下生成一个<code>toa.ko</code>模块文件，这就是我们需要的文件，直接使用<code>insmod</code>命令加载模块然后检查</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> insmod toa.ko</span><br><span class="hljs-meta">$</span><span class="bash"> lsmod  | grep toa</span><br>toa                   279641  0<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> insmod toa.ko</span><br><span class="hljs-meta">$</span><span class="bash"> lsmod  | grep toa</span><br>toa                   279641  0<br></code></pre></td></tr></table></figure>
 
 <p>确保开机加载模块，可以在<code>rc.local</code>文件中加入下面的指令</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">/usr/sbin/insmod /path/to/toa.ko<br><span class="hljs-meta">#</span><span class="bash"> <span class="hljs-keyword">for</span> example：</span><br><span class="hljs-meta">#</span><span class="bash"> /usr/sbin/insmod /home/dpvs/kmod/toa/toa.ko</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">/usr/sbin/insmod /path/to/toa.ko<br><span class="hljs-meta">#</span><span class="bash"> <span class="hljs-keyword">for</span> example：</span><br><span class="hljs-meta">#</span><span class="bash"> /usr/sbin/insmod /home/dpvs/kmod/toa/toa.ko</span><br></code></pre></td></tr></table></figure>
 
 <p>除了toa模块之外，还有针对UDP协议的uoa模块，和上面的toa模块编译安装过程完全一致，这里不再赘述。</p>
 <p>在RS机器上面加载了toa模块后我们再次使用curl测试效果：</p>
-<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> curl 10.0.96.204</span><br>Your IP and port is 172.16.0.1:62844<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> curl 10.0.96.204</span><br>Your IP and port is 172.16.0.1:62844<br></code></pre></td></tr></table></figure>
 
 <p>至此，整个DPVS的FullNat模式就算是部署完成并且能够正常工作了。由于DPVS支持非常多的配置组合，后面会再专门写一篇关于IPv6、nat64、keepalived、bonding、Master/Backup模式的配置。</p>
 
+              
             </div>
-            <hr>
+            <hr/>
             <div>
-              <div class="post-metas mb-3">
-                
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/network/">network</a>
-                    
-                  </div>
-                
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/loadbalance/">loadbalance</a>
-                    
-                      <a class="hover-with-bg" href="/tags/lvs/">lvs</a>
-                    
-                      <a class="hover-with-bg" href="/tags/nat/">nat</a>
-                    
-                      <a class="hover-with-bg" href="/tags/dpdk/">dpdk</a>
-                    
-                      <a class="hover-with-bg" href="/tags/dpvs/">dpvs</a>
-                    
-                  </div>
-                
-              </div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/network/" class="category-chain-item">network</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/loadbalance/">#loadbalance</a>
+      
+        <a href="/tags/nat/">#nat</a>
+      
+        <a href="/tags/lvs/">#lvs</a>
+      
+        <a href="/tags/dpdk/">#dpdk</a>
+      
+        <a href="/tags/dpvs/">#dpvs</a>
+      
+    </div>
+  
+</div>
+
+
               
+
               
-                <div class="post-prevnext">
+                <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20210810-dpvs-fullnat-management/">
+                      <a href="/20210810-dpvs-fullnat-management/" title="DPVS-FullNAT模式管理篇">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">DPVS-FullNAT模式管理篇</span>
                         <span class="visible-mobile">Previous</span>
@@ -400,7 +462,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20210713-dns-07-coredns-04-unbound/">
+                      <a href="/20210713-dns-07-coredns-04-unbound/" title="CoreDNS篇4-编译安装unbound">
                         <span class="hidden-mobile">CoreDNS篇4-编译安装unbound</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -416,25 +478,55 @@
         </div>
       </div>
     </div>
-    
-      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
-        <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-      </div>
-    
+
+
+  </aside>
+
+
+    </div>
   </div>
 </div>
 
-<!-- Custom -->
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
 
 
     
 
     
-      <a id="scroll-top-button" href="#" role="button">
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
         <i class="iconfont icon-arrowup" aria-hidden="true"></i>
       </a>
     
@@ -453,45 +545,48 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v"
-                 for="local-search-input">keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
+
     
 
     
   </main>
 
-  <footer class="text-center mt-5 py-3">
-  <div class="footer-content">
-     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-  </div>
+  <footer>
+    <div class="footer-inner">
   
+    <div class="footer-content">
+       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      粤ICP备18140640号
+    </a>
+  </span>
+  
+</div>
 
   
-  <!-- 备案信息 -->
-  <div class="beian">
-    <span>
-      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-        粤ICP备18140640号
-      </a>
-    </span>
-    
-  </div>
-
-
   
-</footer>
+</div>
 
+  </footer>
 
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   
-  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -502,12 +597,70 @@
   </script>
 
 
-<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
-<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-<!-- Plugins -->
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
+          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
+          ga.l = +new Date;
+          ga('create', 'UA-166769908-1', 'auto');
+          ga('send', 'pageview');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
 
 
   
@@ -516,105 +669,153 @@
 
 
 
+
   
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
 
 
-
-  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
-
-
-
-  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
-
-
-
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
   <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var title = document.getElementById('subtitle').title;
-      
-      typing(title)
-      
-    })(window, document);
-  </script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
 
 
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
-  <script>
-    (function () {
-      var path = "/local-search.xml";
-      $('#local-search-input').on('click', function() {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      });
-      $('#modalSearch').on('shown.bs.modal', function() {
-        $('#local-search-input').focus();
-      });
-    })()
-  </script>
 
 
 
 
 
-
-
-
-
-
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
-      ga.l = +new Date;
-      ga('create', 'UA-166769908-1', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  
-
-  
-
-  
-
-  
-
-  
-
-
-
-
-
-<!-- 主题的启动项 保持在最底部 -->
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
 <script  src="/js/boot.js" ></script>
 
 
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
 </body>
 </html>

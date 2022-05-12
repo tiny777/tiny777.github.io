@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=&#34;auto&#34;>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -9,69 +9,97 @@
   <meta charset="UTF-8">
   <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
   <link rel="icon" href="https://resource.tinychen.com/logos.png">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="description" content="本文主要是对nginx官方limit_req相关模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGINX and NGINX Plus和nginx的ngx_http_limit_req_module的详细说明。">
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
+    <meta name="description" content="本文主要是对nginx官方limit_req相关模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGINX and NGINX Plus和nginx的ngx_http_limit_req_module的详细说明。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx篇10-限速三剑客之limit_req">
+<meta property="og:url" content="https://tinychen.com/20210616-nginx-10-triple-rate-limiting-limit-req/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio">
+<meta property="og:description" content="本文主要是对nginx官方limit_req相关模块的限速原理的解释和一些个人理解，主要参考的文章为Rate Limiting with NGINX and NGINX Plus和nginx的ngx_http_limit_req_module的详细说明。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/20210617162423.jpg">
+<meta property="article:published_time" content="2021-06-16T04:00:00.000Z">
+<meta property="article:modified_time" content="2021-06-16T04:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="http">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/20210617162423.jpg">
+  
+  
   <title>nginx篇10-限速三剑客之limit_req - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
 
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
-  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
 
-  
-    
-    
-      
-      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.6.0/styles/dracula.min.css" />
-    
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
 
-  
-    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
-  
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
 
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
 
 
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
 
 
 <link  rel="stylesheet" href="/css/main.css" />
 
-<!-- 自定义样式保持在最底部 -->
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.10","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"shell"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
+
+  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  <header style="height: 70vh;">
-    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
-    <a class="navbar-brand"
-       href="/">&nbsp;<strong>TinyChen</strong>&nbsp;</a>
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
             data-target="#navbarSupportedContent"
@@ -145,13 +173,15 @@
         
         
           <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
-                class="iconfont icon-search"></i>&nbsp;</a>
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
           </li>
+          
         
         
           <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self">&nbsp;<i
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
                 class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
           </li>
         
@@ -160,65 +190,69 @@
   </div>
 </nav>
 
-    <div class="banner" id="banner" parallax=true
-         style="background: url('https://resource.tinychen.com/20210617162423.jpg') no-repeat center center;
-           background-size: cover;">
-      <div class="full-bg-img">
-        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-          <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="nginx篇10-限速三剑客之limit_req">
-              
-            </span>
-
-            
-              <div class="mt-3">
-  
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-author" aria-hidden="true"></i>
-      TinyChen
-    </span>
-  
-  
-    <span class="post-meta">
-      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2021-06-16 12:00" pubdate>
-        June 16, 2021 pm
-      </time>
-    </span>
-  
-</div>
-
-<div class="mt-1">
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-chart"></i>
-      4.9k 字
-    </span>
   
 
-  
-    
-    <span class="post-meta mr-2">
-      <i class="iconfont icon-clock-fill"></i>
-      
-      
-      33
-       分钟
-    </span>
-  
-
-  
-  
-</div>
-
-            
-          </div>
-
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://resource.tinychen.com/20210617162423.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="nginx篇10-限速三剑客之limit_req"></span>
           
         </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-06-16 12:00" pubdate>
+          June 16, 2021 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          12k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          98 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
       </div>
+
+      
     </div>
+  </div>
+</div>
+
+</div>
+
   </header>
 
   <main>
@@ -227,21 +261,28 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div class="py-5" id="board">
+        <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">nginx篇10-限速三剑客之limit_req</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：June 16, 2021 pm
+                  
+                    Last updated on June 16, 2021 pm
+                  
                 
               </p>
             
             <div class="markdown-body">
+              
               <p>本文主要是对nginx官方<code>limit_req</code>相关模块的限速原理的解释和一些个人理解，主要参考的文章为<a target="_blank" rel="noopener" href="https://www.nginx.com/blog/rate-limiting-nginx/"><code>Rate Limiting with NGINX and NGINX Plus</code></a>和nginx的<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html"><code>ngx_http_limit_req_module</code></a>的详细说明。</p>
 <span id="more"></span>
 
@@ -261,7 +302,7 @@
 </ul>
 <p>漏桶在一定程度上可以代表服务器的处理能力，请求根据<strong>先进先出（FIFO）</strong>调度算法等待处理。如果倒入水的速度小于漏水的速度，可以理解为服务器能够处理完所有的请求，此时整体服务表现正常。如果倒入水的速度大于漏水的速度，那么水桶内的水会不断增加直到最后溢出，这种情况下在水桶中的水可以理解为在队列中等待的请求，而溢出的水则表示直接被丢弃不处理的请求。</p>
 <h1 id="3、基础配置"><a href="#3、基础配置" class="headerlink" title="3、基础配置"></a>3、基础配置</h1><p>下面这里我们列举一个简单的nginx限速配置：</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">limit_req_zone</span> $binary_remote_addr zone=mylimit:<span class="hljs-number">10m</span> rate=10r/s;<br> <br><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">location</span> /login/ &#123;<br>        <span class="hljs-attribute">limit_req</span> zone=mylimit;<br>        <br>        <span class="hljs-attribute">proxy_pass</span> http://my_upstream;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">limit_req_zone</span> $binary_remote_addr zone=mylimit:<span class="hljs-number">10m</span> rate=10r/s;<br> <br><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">location</span> /login/ &#123;<br>        <span class="hljs-attribute">limit_req</span> zone=mylimit;<br>        <br>        <span class="hljs-attribute">proxy_pass</span> http://my_upstream;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>这里首先使用了<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req_zone"><code>limit_req_zone</code>指令</a>定义了一个限速zone，名为<code>mylimit</code>，大小为10MB，对应的变量是<code>$binary_remote_addr</code>，限制的请求速率是每秒限制10个请求（10requests/secends），在<code>login</code>这个<code>location</code>中使用<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req"><code>limit_req</code>指令</a>指定了限制的<code>zone</code>。接下来我们详细解析一下整个限速的过程：</p>
 <p>首先是<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req_zone"><code>limit_req_zone</code>指令</a>主要用于<strong>定义速度限制相关的参数</strong>，而<a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req"><code>limit_req</code>指令</a>则是用于<strong>启用定义的限速参数</strong>（如这里是在login中启用）</p>
@@ -284,12 +325,12 @@
 </ul>
 <p><code>limit_req_zone</code>指令设置了速率限制和共享内存区域的参数，但它实际上并不限制请求速率。因此我们需要通过在<code>contexts</code>中使用<code>limit_req</code>指令来将其限制应用于特定<code>location</code>或<code>server</code>块。在上面的例子里，我们将请求速率限制在<code>/login/</code>这个<code>location</code>块中。因此现在每个唯一的 IP 地址被限制为每秒 10 个**/login/**请求，或者更准确地说，不能在前一个 URL 请求的 100 毫秒内发出对该 URL 的第二次请求。</p>
 <h1 id="4、突发请求处理-Bursts"><a href="#4、突发请求处理-Bursts" class="headerlink" title="4、突发请求处理(Bursts)"></a>4、突发请求处理(Bursts)</h1><p>上面的基础配置只能处理最简单的理想情况，但是如果服务器在100毫秒内收到了2个及以上的请求，那么在上面的配置中，nginx就会向第1个请求之后的所有客户端返回503代码。考虑到并发是程序的天然属性，大多数情况下都是同一时间内涌入大量的请求，因此这显然并不是我们想要的处理方案，我们想要的应该是<strong>尽可能“均匀平滑”地处理所有的请求而不是直接拒绝掉它们</strong>。因此在这种情况下我们可以使用<code>burst</code>参数设置突发阈值，允许并发情况的处理。</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> /login/ &#123;<br>    <span class="hljs-attribute">limit_req</span> zone=mylimit burst=<span class="hljs-number">20</span>;<br>    <span class="hljs-attribute">proxy_pass</span> http://my_upstream;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> /login/ &#123;<br>    <span class="hljs-attribute">limit_req</span> zone=mylimit burst=<span class="hljs-number">20</span>;<br>    <span class="hljs-attribute">proxy_pass</span> http://my_upstream;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>上面这段配置中我们设置了<code>burst=20</code>，该配置定义了客户端可以超过区域指定速率的请求数（对于我们前面定义的<code>mylimit</code>区域，请求速率限制为每秒 10 个请求即每 100 毫秒 1 个）。在前一个请求之后 100 毫秒内到达的请求会被放入到队列中，这里我们将队列大小设置为 20。</p>
 <p>也就是说如果有22个请求同时发送过来，那么NGINX会马上把<strong>第1个</strong>请求根据相关规则转发给upstream服务器，然后把接下来的<strong>第2到21共计20个请求</strong>放入队列中，接着直接返回<code>503代码</code>给<strong>第22个请求</strong>，随后的2秒时间内，每100毫秒从队列中取出一个请求发送给upstream服务器进行处理。</p>
 <h1 id="5、无延迟队列-Queueing-with-No-Delay"><a href="#5、无延迟队列-Queueing-with-No-Delay" class="headerlink" title="5、无延迟队列(Queueing with No Delay)"></a>5、无延迟队列(Queueing with No Delay)</h1><p>上面的方法虽然使得请求的流量变得<strong>“均匀平滑”</strong>，但是确很大程度上增加了响应时间，排在队列越后面的请求的等待时间越长，这就导致了它们的响应时间平白无故地增加了许多，过长的响应时间甚至可能会导致客户端认为请求异常或者直接导致请求超时。为了解决这种情况，我们可以在<code>brust</code>参数后面加上<code>nodelay</code>参数。</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> /login/ &#123;<br>    <span class="hljs-attribute">limit_req</span> zone=mylimit burst=<span class="hljs-number">20</span> nodelay;<br>    <span class="hljs-attribute">proxy_pass</span> http://my_upstream;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> /login/ &#123;<br>    <span class="hljs-attribute">limit_req</span> zone=mylimit burst=<span class="hljs-number">20</span> nodelay;<br>    <span class="hljs-attribute">proxy_pass</span> http://my_upstream;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>加上了<code>nodelay</code>参数之后，nginx的处理方式和上面基本相同，唯一的区别在于：当nginx接受了<strong>第2到21共计20个请求</strong>之后，不会把它们放入队列中，而是直接将它们转发给upstream服务器，同时标记队列中的这20个插槽(slot)为已使用，然后把剩下的全部请求都503拒绝掉，接着每过100毫秒再释放一个新的slot让新的请求进来。</p>
 <p>With the <code>nodelay</code> parameter, NGINX still allocates slots in the queue according to the <code>burst</code> parameter and imposes the configured rate limit, but not by spacing out the forwarding of queued requests. </p>
@@ -301,7 +342,7 @@
 <h1 id="6、两段限速-Two-Stage-Rate-Limiting"><a href="#6、两段限速-Two-Stage-Rate-Limiting" class="headerlink" title="6、两段限速(Two-Stage Rate Limiting)"></a>6、两段限速(Two-Stage Rate Limiting)</h1><h2 id="6-1-原理解析"><a href="#6-1-原理解析" class="headerlink" title="6.1 原理解析"></a>6.1 原理解析</h2><p><strong>简单来说，所谓的分段限速就是允许客户端在刚开始的时候有一定的突发请求，后面再进入到平稳的限速中。</strong></p>
 <p>我们可以在<code>NGINX Plus R17</code>或者是<code>NGINX 1.15.7</code>使用<code>limit_req</code> 指令和<code>delay参数</code>来实现两段限速，<code>delay参数</code>将nginx配置为允许突发请求以适应典型的 Web 浏览器请求模式，然后将额外的过度请求限制到一定程度，超过该点的额外过度请求将被拒绝。</p>
 <p>这里我们以5r/s的限制速率为例，一般来说网站通常每个页面有 4 到 6 个资源，并且永远不会超过 12 个资源。该配置允许最多 12 个请求的突发，其中前 8 个请求会被直接转发给upstream处理。在达到5r/s的请求限制之后，第6到第13个请求会被添加到延迟(delay)中，再之后的任何请求都会被拒绝。</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-attribute">limit_req_zone</span> $binary_remote_addr zone=ip:<span class="hljs-number">10m</span> rate=5r/s;<br><br><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">limit_req</span> zone=ip burst=<span class="hljs-number">12</span> delay=<span class="hljs-number">8</span>;<br>        <span class="hljs-attribute">proxy_pass</span> http://website;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">limit_req_zone</span> $binary_remote_addr zone=ip:<span class="hljs-number">10m</span> rate=5r/s;<br><br><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">limit_req</span> zone=ip burst=<span class="hljs-number">12</span> delay=<span class="hljs-number">8</span>;<br>        <span class="hljs-attribute">proxy_pass</span> http://website;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>下面假设有一个客户端不断地向我们的限速服务器发出请求，根据上面的配置，nginx的处理情况如下：</p>
 <p><img src="https://resource.tinychen.com/20210616155840.png" srcset="/img/loading.gif" lazyload></p>
@@ -312,40 +353,58 @@
 <li>再进入下一秒的时间，这里的请求就和之前设定的一样，全部按照<code>rate=5r/s</code>来进行处理，同样是这一秒内的其他请求都会被返回503代码拒绝掉</li>
 </ul>
 <h2 id="6-2-实测"><a href="#6-2-实测" class="headerlink" title="6.2 实测"></a>6.2 实测</h2><p>这里我们使用jmeter来进行实测查看不同的配置对应的效果，这里我们尝试5秒内发送100次请求，然后查看测试结果，由于nginx的日志写入有延迟，和这里的精确到毫秒级别的测试会有误差，这里我们以秒为单位来查看日志。</p>
-<figure class="highlight accesslog"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs accesslog"><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><code class="hljs accesslog"><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:45 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:46 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:47 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:48 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:49 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">503</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br><span class="hljs-number">1.1.1.1</span> | <span class="hljs-string">[16/Jun/2021:15:24:50 +0800]</span> | <span class="hljs-number">200</span> | test.tiny777.com<br></code></pre></td></tr></table></figure>
 
 <p>这里的效果就非常明显了，由于15:24:45内刚好只有12个请求，因此全部都能够正常处理，而之后的每一秒的请求处理都超过5个，但是由于我们限定了rate=5r/s，因此每秒只有5个成功的请求，其余均被503.</p>
 
+              
             </div>
-            <hr>
+            <hr/>
             <div>
-              <div class="post-metas mb-3">
-                
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/network/">network</a>
-                    
-                  </div>
-                
-                
-                  <div class="post-meta">
-                    <i class="iconfont icon-tags"></i>
-                    
-                      <a class="hover-with-bg" href="/tags/http/">http</a>
-                    
-                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
-                    
-                  </div>
-                
-              </div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/network/" class="category-chain-item">network</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/http/">#http</a>
+      
+        <a href="/tags/nginx/">#nginx</a>
+      
+    </div>
+  
+</div>
+
+
               
+
               
-                <div class="post-prevnext">
+                <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20210623-dns-06-coredns-03-prometheus/">
+                      <a href="/20210623-dns-06-coredns-03-prometheus/" title="CoreDNS篇3-接入prometheus监控">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">CoreDNS篇3-接入prometheus监控</span>
                         <span class="visible-mobile">Previous</span>
@@ -355,7 +414,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20210527-nginx-09-if-is-evil-in-location/">
+                      <a href="/20210527-nginx-09-if-is-evil-in-location/" title="nginx篇09-location中的if指令是魔鬼吧">
                         <span class="hidden-mobile">nginx篇09-location中的if指令是魔鬼吧</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -371,25 +430,55 @@
         </div>
       </div>
     </div>
-    
-      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
-        <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-      </div>
-    
+
+
+  </aside>
+
+
+    </div>
   </div>
 </div>
 
-<!-- Custom -->
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
 
 
     
 
     
-      <a id="scroll-top-button" href="#" role="button">
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
         <i class="iconfont icon-arrowup" aria-hidden="true"></i>
       </a>
     
@@ -408,45 +497,48 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v"
-                 for="local-search-input">keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
+
     
 
     
   </main>
 
-  <footer class="text-center mt-5 py-3">
-  <div class="footer-content">
-     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-  </div>
+  <footer>
+    <div class="footer-inner">
   
+    <div class="footer-content">
+       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+    </div>
+  
+  
+  
+    <!-- 备案信息 ICP for China -->
+    <div class="beian">
+  <span>
+    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+      粤ICP备18140640号
+    </a>
+  </span>
+  
+</div>
 
   
-  <!-- 备案信息 -->
-  <div class="beian">
-    <span>
-      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-        粤ICP备18140640号
-      </a>
-    </span>
-    
-  </div>
-
-
   
-</footer>
+</div>
 
+  </footer>
 
-  <!-- SCRIPTS -->
+  <!-- Scripts -->
   
-  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -457,12 +549,70 @@
   </script>
 
 
-<script  src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" ></script>
-<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-<!-- Plugins -->
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      }
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
+          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
+          ga.l = +new Date;
+          ga('create', 'UA-166769908-1', 'auto');
+          ga('send', 'pageview');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
 
 
   
@@ -471,105 +621,153 @@
 
 
 
+
   
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
 
 
-
-  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.2/dist/tocbot.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
-
-
-
-  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js" ></script>
-
-
-
-
-
-
-  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
   <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var title = document.getElementById('subtitle').title;
-      
-      typing(title)
-      
-    })(window, document);
-  </script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
 
 
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
 
   <script  src="/js/local-search.js" ></script>
-  <script>
-    (function () {
-      var path = "/local-search.xml";
-      $('#local-search-input').on('click', function() {
-        searchFunc(path, 'local-search-input', 'local-search-result');
-      });
-      $('#modalSearch').on('shown.bs.modal', function() {
-        $('#local-search-input').focus();
-      });
-    })()
-  </script>
 
 
 
 
 
-
-
-
-
-
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      var _hmt = _hmt || [];
-      (function () {
-        var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(hm, s);
-      })();
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
-      ga.l = +new Date;
-      ga('create', 'UA-166769908-1', 'auto');
-      ga('send', 'pageview');
-    </script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
-  
-
-  
-
-  
-
-  
-
-  
-
-
-
-
-
-<!-- 主题的启动项 保持在最底部 -->
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
 <script  src="/js/boot.js" ></script>
 
 
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
 </body>
 </html>
