@@ -295,14 +295,14 @@
 
 <p><strong>其中lvs81对应为LB，lvs82和lvs83为RS，RS上部署nginx分别监听本机对应ipv4和ipv6地址的80端口用于测试。</strong></p>
 <h2 id="1-1-LB配置"><a href="#1-1-LB配置" class="headerlink" title="1.1 LB配置"></a>1.1 LB配置</h2><p>此处略去ipvs模块的加载和ipvsadm的安装。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">ifconfig eth1:1 192.168.100.80 broadcast 192.168.100.81 netmask 255.255.255.255 up<br>ipvsadm -A -t 192.168.100.80:80 -s rr <br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.82 -g<br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.83 -g   <br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig eth1:1 192.168.100.80 broadcast 192.168.100.81 netmask 255.255.255.255 up<br>ipvsadm -A -t 192.168.100.80:80 -s rr <br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.82 -g<br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.83 -g   <br></code></pre></td></tr></table></figure>
 
 <p>修改ip_vs模块对应的哈希表的大小</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">echo &#x27;options ip_vs conn_tab_bits=20&#x27; &gt;/etc/modprobe.d/ipvs.conf<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;options ip_vs conn_tab_bits=20&#x27;</span> &gt;/etc/modprobe.d/ipvs.conf<br></code></pre></td></tr></table></figure>
 
 
 
-<h2 id="1-2-RS配置"><a href="#1-2-RS配置" class="headerlink" title="1.2 RS配置"></a>1.2 RS配置</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ifconfig lo:1 192.168.100.80 broadcast 192.168.100.80 netmask 255.255.255.255 up<br></code></pre></td></tr></table></figure>
+<h2 id="1-2-RS配置"><a href="#1-2-RS配置" class="headerlink" title="1.2 RS配置"></a>1.2 RS配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig lo:1 192.168.100.80 broadcast 192.168.100.80 netmask 255.255.255.255 up<br></code></pre></td></tr></table></figure>
 
 <p>同时需要修改内核参数，修改ARP请求对应的响应限制</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs vim">[root@lvs82 ~]# <span class="hljs-keyword">cat</span> /etc/sysctl.<span class="hljs-keyword">conf</span> | <span class="hljs-keyword">grep</span> arp<br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_announce=<span class="hljs-number">2</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_announce=<span class="hljs-number">2</span><br></code></pre></td></tr></table></figure>
@@ -384,10 +384,10 @@
 <p>IPv6模式下还使用了elrepo库中的lt版本的4.4.219-1内核进行测试，两者结果一致。均可直接正常工作。</p>
 </blockquote>
 <h2 id="3-1-LB配置"><a href="#3-1-LB配置" class="headerlink" title="3.1 LB配置"></a>3.1 LB配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">ifconfig eth2 inet6 add 240e:c331:dead:beef::3c80/128<br>ipvsadm -A -t [240e:c331:dead:beef::3c80]:80 -s rr<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c82]:80 -g<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c83]:80 -g<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig eth2 inet6 add 240e:c331:dead:beef::3c80/128<br>ipvsadm -A -t [240e:c331:dead:beef::3c80]:80 -s rr<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c82]:80 -g<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c83]:80 -g<br></code></pre></td></tr></table></figure>
 
 <h2 id="3-2-RS配置"><a href="#3-2-RS配置" class="headerlink" title="3.2 RS配置"></a>3.2 RS配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ifconfig lo inet6 add 240e:c331:dead:beef::3c80/128<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ifconfig lo inet6 add 240e:c331:dead:beef::3c80/128<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/20200427143253.png" srcset="/img/loading.gif" lazyload></p>

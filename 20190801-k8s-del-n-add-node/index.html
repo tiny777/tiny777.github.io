@@ -288,7 +288,7 @@
 <span id="more"></span>
 
 <h1 id="1、删除节点"><a href="#1、删除节点" class="headerlink" title="1、删除节点"></a>1、删除节点</h1><p>如果需要在k8s集群中删除节点，首先需要在master节点上删除该节点的相关数据，再删除该节点，接着在该节点上进行reset操作，接着删除相关文件。</p>
-<h2 id="在master节点上"><a href="#在master节点上" class="headerlink" title="在master节点上"></a>在master节点上</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 其中&lt; node name &gt;是在k8s集群中使用&lt; kubectl get nodes &gt;查询到的节点名称</span><br>kubectl drain &lt;node name&gt; --delete-local-data --force --ignore-daemonsets<br>kubectl delete node &lt;node name&gt;<br></code></pre></td></tr></table></figure>
+<h2 id="在master节点上"><a href="#在master节点上" class="headerlink" title="在master节点上"></a>在master节点上</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 其中&lt; node name &gt;是在k8s集群中使用&lt; kubectl get nodes &gt;查询到的节点名称</span><br>kubectl drain &lt;node name&gt; --delete-local-data --force --ignore-daemonsets<br>kubectl delete node &lt;node name&gt;<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/EORre3VEGpKk.png" srcset="/img/loading.gif" lazyload></p>
@@ -296,17 +296,17 @@
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/dWqs7mrdCIB8.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 删除残留的文件</span><br>sudo rm -rf /etc/kubernetes/<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 清除iptables或者ipvs的配置</span><br>sudo iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X<br>sudo ipvsadm --clear<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 删除残留的文件</span><br>sudo rm -rf /etc/kubernetes/<br><br><span class="hljs-comment"># 清除iptables或者ipvs的配置</span><br>sudo iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X<br>sudo ipvsadm --clear<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/HnuNsnOApNKD.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>如果删除的是master节点，还需要删除用户目录下的<code>.kube</code>文件</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">rm -rf ~/.kube<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">rm -rf ~/.kube<br></code></pre></td></tr></table></figure>
 </blockquote>
 <p><strong>最后重启设备完成操作。</strong></p>
 <h1 id="2、添加节点"><a href="#2、添加节点" class="headerlink" title="2、添加节点"></a>2、添加节点</h1><h2 id="生成token"><a href="#生成token" class="headerlink" title="生成token"></a>生成token</h2><p>一般来说在k8s集群初始化完成的时候，会输出一条<code>token</code>来让我们添加其他的节点，但是这个<code>token</code>的有效时间只有24小时。我们可以这样查询<code>token</code>。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 查询token</span><br>kubeadm token list<br><span class="hljs-meta">#</span><span class="bash"> 创建一个token</span><br>kubeadm token create<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查询token</span><br>kubeadm token list<br><span class="hljs-comment"># 创建一个token</span><br>kubeadm token create<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/sbjkRzBJGqrv.png" srcset="/img/loading.gif" lazyload></p>
@@ -314,7 +314,7 @@
 <p>这里我们可以看到ttl值就是这个token对应的有效时间了</p>
 </blockquote>
 <h2 id="生成sha256加密字符串"><a href="#生成sha256加密字符串" class="headerlink" title="生成sha256加密字符串"></a>生成sha256加密字符串</h2><p>除了<code>token</code>之外，我们还需要一个<code>sha256</code>的加密字符串，这个我们可以这样获得</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed &#x27;s/^.* //&#x27;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">openssl x509 -pubkey -<span class="hljs-keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed <span class="hljs-string">&#x27;s/^.* //&#x27;</span><br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190820/yqHmvgaXDult.png" srcset="/img/loading.gif" lazyload></p>

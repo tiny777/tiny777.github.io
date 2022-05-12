@@ -302,7 +302,7 @@
 <p>上面提到的库我们都可以使用yum来进行安装：</p>
 </li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum install gcc gcc-c++ pcre pcre-devel zlib zlib-devel openssl openssl-devel<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> pcre-devel是使用PCRE做二次开发时所需要的开发库，包括头文件等，这也是编译Nginx所必须使用的。</span><br><span class="hljs-meta">#</span><span class="bash"> 同理，zlib是直接使用的库，zlib-devel是二次开发所需要的库。</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install gcc gcc-c++ pcre pcre-devel zlib zlib-devel openssl openssl-devel<br><br><span class="hljs-comment"># pcre-devel是使用PCRE做二次开发时所需要的开发库，包括头文件等，这也是编译Nginx所必须使用的。</span><br><span class="hljs-comment"># 同理，zlib是直接使用的库，zlib-devel是二次开发所需要的库。</span><br></code></pre></td></tr></table></figure>
 
 <p>Nginx是高度自由化的Web服务器，它的功能是由许多模块来支持的。而这些模块可根据我们的使用需求来定制，如果某些模块不需要使用则完全不必理会它。同样，如果使用了某个模块，而这个模块使用了一些类似zlib或OpenSSL等的第三方库，那么就必须先安装这些软件。</p>
 <h2 id="0-2-编译安装"><a href="#0-2-编译安装" class="headerlink" title="0.2 编译安装"></a>0.2 编译安装</h2><p>我们进入nginx的目录，输入下面的指令可以查看各类的编译参数，或者在<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/configure.html">官网</a>也可以看到：</p>
@@ -315,18 +315,18 @@
 <p><img src="https://resource.tinychen.com/blog/20200324/XBFWbitOjxxu.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到，我们在参数里面并没有指定上面提到的几个库的目录，configure文件会默认系统已经安装的库版本和目录，当然我们也可以手动指定某个库的目录来指定版本。</p>
 <p>接下来进行make安装：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">make<br>make install<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">make<br>make install<br></code></pre></td></tr></table></figure>
 
 <p>如无意外此时应该已经正常安装好了，我们到前面指定的安装目录看一下</p>
 <p><img src="https://resource.tinychen.com/blog/20200324/yCV4ewKcJh8E.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意这个时候我们如果需要使用nginx需要指定这个安装目录，想要全局使用我们可以创建一个软链接：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ln -s /usr/local/nginx/nginx /usr/sbin/nginx<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ln -s /usr/<span class="hljs-built_in">local</span>/nginx/nginx /usr/sbin/nginx<br></code></pre></td></tr></table></figure>
 
 
 
 <h2 id="0-3-添加模块"><a href="#0-3-添加模块" class="headerlink" title="0.3 添加模块"></a>0.3 添加模块</h2><p>同时，如果之后有需要用到的模块而在编译安装的时候忘了安装也没关系，我们可以继续编译添加新模块</p>
 <p>首先我们需要查看已经编译的参数:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@localhost ~]# nginx -V<br>nginx version: nginx/1.17.9<br>built by gcc 4.4.7 20120313 (Red Hat 4.4.7-23) (GCC) <br>built with OpenSSL 1.0.1e-fips 11 Feb 2013<br>TLS SNI support enabled<br>configure arguments: --sbin-path=/usr/local/nginx/nginx --conf-path=/usr/local/nginx/nginx.conf --pid-path=/usr/local/nginx/nginx.pid --with-http_ssl_module<br><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@localhost ~]<span class="hljs-comment"># nginx -V</span><br>nginx version: nginx/1.17.9<br>built by gcc 4.4.7 20120313 (Red Hat 4.4.7-23) (GCC) <br>built with OpenSSL 1.0.1e-fips 11 Feb 2013<br>TLS SNI support enabled<br>configure arguments: --sbin-path=/usr/<span class="hljs-built_in">local</span>/nginx/nginx --conf-path=/usr/<span class="hljs-built_in">local</span>/nginx/nginx.conf --pid-path=/usr/<span class="hljs-built_in">local</span>/nginx/nginx.pid --with-http_ssl_module<br><br></code></pre></td></tr></table></figure>
 
 <blockquote>
 <p>需要注意上面的V是大写的V</p>
@@ -336,13 +336,13 @@
 
 <p>比如这里我们添加了<code>http_v2</code>、<code>mail</code>、<code>mail_ssl</code>三个模块</p>
 <p>如果想要添加第三方模块的话，只需要使用<code>--add-module=</code>然后加上第三方模块的路径即可。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">--add-module=/home/echo-nginx-module-0.61<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">--add-module=/home/echo-nginx-module-0.61<br></code></pre></td></tr></table></figure>
 
 <p>最后我们的编译参数是：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">./configure \<br>--sbin-path=/usr/local/nginx/nginx \<br>--conf-path=/usr/local/nginx/nginx.conf \<br>--pid-path=/usr/local/nginx/nginx.pid \<br>--with-http_ssl_module \<br>--with-http_v2_module \<br>--with-mail \<br>--with-mail_ssl_module \<br>--add-module=/home/echo-nginx-module-0.61<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">./configure \<br>--sbin-path=/usr/<span class="hljs-built_in">local</span>/nginx/nginx \<br>--conf-path=/usr/<span class="hljs-built_in">local</span>/nginx/nginx.conf \<br>--pid-path=/usr/<span class="hljs-built_in">local</span>/nginx/nginx.pid \<br>--with-http_ssl_module \<br>--with-http_v2_module \<br>--with-mail \<br>--with-mail_ssl_module \<br>--add-module=/home/echo-nginx-module-0.61<br></code></pre></td></tr></table></figure>
 
 <p>接着我们使用make安装，再查看目录会发现原来的文件已经被替换成<code>*.default</code>了</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">make<br>make install<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">make<br>make install<br></code></pre></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200324/0wsDPdjxSyL6.png" srcset="/img/loading.gif" lazyload></p>

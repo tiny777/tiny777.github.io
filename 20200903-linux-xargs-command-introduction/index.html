@@ -288,10 +288,10 @@
 <span id="more"></span>
 
 <p>使用Linux命令的时候，我们经常使用管道符号<code>|</code>来进行命令之间的输入输出的传递，例如</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat example.txt | grep uuid | sort<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat example.txt | grep uuid | sort<br></code></pre></td></tr></table></figure>
 
 <p>这一条命令就可以将example.txt这个文件的内容全部打印到屏幕上，然后使用grep来查找带有uuid字符的行，接着使用sort命令来进行排序，当然我们也可以直接这样：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">grep uuid example.txt | sort<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">grep uuid example.txt | sort<br></code></pre></td></tr></table></figure>
 
 <p>两者的效果是一样的，但是对于很多命令来说管道符号<code>|</code>却不一定能用</p>
 <p>例如我们需要查找所有进程中带有nginx关键字的进程并且将其全部kill掉，我们可以这样获取到对应的进程ID信息</p>
@@ -329,11 +329,11 @@
 </tbody></table>
 <p>对于<code>-i</code>参数的使用可能不太能理解，我们举例进行说明：</p>
 <p>假设我们需要对当前目录下的所有txt文件进行查找，对于文件中含有tinychen关键字的文件名全部添加一个own的后缀</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">grep tinychen *.log 2&gt;/dev/null | awk -F : &#x27;&#123;print $1&#125;&#x27; | sort | uniq | xargs -t -i mv &#123;&#125; &#123;&#125;.own<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">grep tinychen *.<span class="hljs-built_in">log</span> 2&gt;/dev/null | awk -F : <span class="hljs-string">&#x27;&#123;print $1&#125;&#x27;</span> | sort | uniq | xargs -t -i mv &#123;&#125; &#123;&#125;.own<br></code></pre></td></tr></table></figure>
 
 <p>对于上面的这个命令中使用了<code>-i</code>参数之后，会将前面读取到的输入与<code>&#123;&#125;</code>相关联，对于使用像mv这样的需要输入不止一个变量的命令的时候特别有用。</p>
 <p>再举个例子，假设我们需要查找当前目录下面的txt文件，将所有带有<code>192.168.192.168</code>字段的行注释掉</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat *.txt 2&gt;/dev/null | grep 192.168.192.168 | xargs -t -i sed -i &#x27;s/&#123;&#125;/#&#123;&#125;/g&#x27; *.txt<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cat *.txt 2&gt;/dev/null | grep 192.168.192.168 | xargs -t -i sed -i <span class="hljs-string">&#x27;s/&#123;&#125;/#&#123;&#125;/g&#x27;</span> *.txt<br></code></pre></td></tr></table></figure>
 
 
               
