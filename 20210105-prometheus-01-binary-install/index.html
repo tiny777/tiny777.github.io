@@ -37,22 +37,28 @@
   
   <title>Prometheus系列01-单机版二进制部署 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -61,41 +67,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -177,7 +168,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -190,53 +180,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106152355.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Prometheus系列01-单机版二进制部署">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-01-05 11:00" pubdate>
+        January 5, 2021 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210106152355.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="Prometheus系列01-单机版二进制部署"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-01-05 11:00" pubdate>
-          January 5, 2021 am
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -245,107 +227,21 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="sre"
-        id="heading-b665f2b4ec4803aac65a110a3c57efdc" role="tab" data-toggle="collapse" href="#collapse-b665f2b4ec4803aac65a110a3c57efdc"
-        aria-expanded="true"
-      >
-        sre
-        <span class="list-group-count">(4)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-b665f2b4ec4803aac65a110a3c57efdc"
-           role="tabpanel" aria-labelledby="heading-b665f2b4ec4803aac65a110a3c57efdc">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20210105-prometheus-01-binary-install/" title="Prometheus系列01-单机版二进制部署"
-           class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">Prometheus系列01-单机版二进制部署</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200102-centos7-rdo-install-openstack/" title="在CentOS7中使用RDO安装OpenStack-Stein-AIO"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">在CentOS7中使用RDO安装OpenStack-Stein-AIO</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190823-ansible-intro/" title="Ansible入门初试"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Ansible入门初试</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190712-centos7-install-zabbix42/" title="在CentOS7上安装Zabbix4.2监控系统"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">在CentOS7上安装Zabbix4.2监控系统</span>
-        </a>
-      
-    
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">Prometheus系列01-单机版二进制部署</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on January 5, 2021 am
-                  
+                  本文最后更新于：January 5, 2021 am
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>作为 CNCF 中最成功的开源项目之一，<code>Prometheus</code> 已经成为了云原生监控的代名词，被广泛应用在 <code>Kubernetes</code>和<code>OpenShift</code> 等项目中，同时有很多第三方解决方案也会集成 <code>Prometheus</code>。随着 <code>Kubernetes</code> 在容器调度和管理上确定领头羊的地位，<code>Prometheus</code> 也成为<code>Kubernetes</code>容器监控的标配。</p>
 <p>考虑到k8s系统的复杂性和上手难度较高，本文将从最简单最基础的部分开始循序渐进，主要介绍如何在CentOS8系统上直接使用二进制文件和<code>systemd</code>进行<code>Prometheus server</code>的单机版本部署，本文只涉及到最基础的<code>Prometheus server</code>、<code>node_exporter</code>和<code>Grafana</code>三个模块，暂未涉及<code>Pushgateway</code>和<code>Alertmanager</code>两个模块。</p>
 <p>一般来说，<code>Prometheus server</code>是用于作为服务端来存储各类<code>exporter</code>在被监控节点上面采集的数据，而<code>Grafana</code>则负责将<code>Prometheus server</code>上的数据可视化，因此<code>Prometheus server</code>和<code>Grafana</code>不一定要部署在同一台机器上面，只需要部署两者的机器能够互相通信即可，同理，各类<code>exporter</code>应该部署在需要被监控的节点机器上。这里由于机器数量有限且只作为测试，会将三者都部署在同一台机器上。</p>
@@ -355,33 +251,33 @@
 <p>Prometheus的基本原理是通过 HTTP周期性抓取被监控组件的状态，任意组件只要提供对应的 HTTP 接口并且符合 Prometheus 定义的数据格式，就可以接入Prometheus监控。此外，使用Grafana 的Prometheus的数据可视化程度非常高，告警规则也十分多样，还支持传统服务器监控以及云原生监控，可以称为是监控系统中的“瑞士军刀”。</p>
 <p><img src="https://resource.tinychen.com/20210106101153.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="1、部署prometheus"><a href="#1、部署prometheus" class="headerlink" title="1、部署prometheus"></a>1、部署prometheus</h1><p>我们去<a target="_blank" rel="noopener" href="https://prometheus.io/download/">官网</a>选择合适的二进制版本进行下载并解压</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz<br>tar -zxvf prometheus-2.23.0.linux-amd64.tar.gz<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">wget https://github.com/prometheus/prometheus/releases/download/v2.23.0/prometheus-2.23.0.linux-amd64.tar.gz<br>tar -zxvf prometheus-2.23.0.linux-amd64.tar.gz<br></code></pre></div></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210105113202.png" srcset="/img/loading.gif" lazyload></p>
 <p>为了方便管理，我们需要创建一个单独的<code>prometheus</code>用户来运行<code>prometheus</code>，同时要保证安全，创建的用户只用来运行<code>prometheus</code>而不能使用<code>shell</code>登录。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">groupadd prometheus<br>useradd -g prometheus -s /sbin/nologin prometheus<br>chown -R prometheus.prometheus /home/prometheus<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">groupadd prometheus<br>useradd -g prometheus -s /sbin/nologin prometheus<br>chown -R prometheus.prometheus /home/prometheus<br></code></pre></div></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210105113159.png" srcset="/img/loading.gif" lazyload></p>
 <p>为了方便管理，我们可以配置使用<code>systemd</code>对进程进行管理</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /usr/lib/systemd/system/prometheus.service<br><br>[Unit]<br>Description=Prometheus<br>Documentation=https://prometheus.io/<br>After=network.target<br><br>[Service]<br><span class="hljs-comment"># Type设置为notify时，服务会不断重启</span><br>Type=simple<br>User=prometheus<br><span class="hljs-comment"># --storage.tsdb.path是可选项，默认数据目录在运行目录的./dada目录中</span><br>ExecStart=/home/prometheus/prometheus --config.file=/home/prometheus/prometheus.yml --storage.tsdb.path=/home/prometheus<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br><br><br>chown prometheus.prometheus /usr/lib/systemd/system/prometheus.service<br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> prometheus.service<br>systemctl start prometheus.service<br>systemctl status prometheus.service<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /usr/lib/systemd/system/prometheus.service<br><br>[Unit]<br>Description=Prometheus<br>Documentation=https://prometheus.io/<br>After=network.target<br><br>[Service]<br><span class="hljs-comment"># Type设置为notify时，服务会不断重启</span><br>Type=simple<br>User=prometheus<br><span class="hljs-comment"># --storage.tsdb.path是可选项，默认数据目录在运行目录的./dada目录中</span><br>ExecStart=/home/prometheus/prometheus --config.file=/home/prometheus/prometheus.yml --storage.tsdb.path=/home/prometheus<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br><br><br>chown prometheus.prometheus /usr/lib/systemd/system/prometheus.service<br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> prometheus.service<br>systemctl start prometheus.service<br>systemctl status prometheus.service<br></code></pre></div></td></tr></table></figure>
 
 <p>如无意外应该已经可以正常运行了，同时访问服务器的<code>9090</code>端口可以查看到简单的UI界面</p>
 <p><img src="https://resource.tinychen.com/20210105141141.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/20210105141138.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、部署node-exporter"><a href="#2、部署node-exporter" class="headerlink" title="2、部署node_exporter"></a>2、部署node_exporter</h1><p>我们去<a target="_blank" rel="noopener" href="https://prometheus.io/download/">官网</a>选择合适的二进制版本进行下载并解压</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz<br>tar -zxvf node_exporter-1.0.1.linux-amd64.tar.gz<br>mv node_exporter-1.0.1.linux-amd64 node_exporter<br>chown -R prometheus.prometheus /home/node_exporter<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">wget https://github.com/prometheus/node_exporter/releases/download/v1.0.1/node_exporter-1.0.1.linux-amd64.tar.gz<br>tar -zxvf node_exporter-1.0.1.linux-amd64.tar.gz<br>mv node_exporter-1.0.1.linux-amd64 node_exporter<br>chown -R prometheus.prometheus /home/node_exporter<br></code></pre></div></td></tr></table></figure>
 
 <p>同样的我们使用<code>systemd</code>进行管理</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /usr/lib/systemd/system/node_exporter.service<br><br>[Unit]<br>Description=Prometheus-node_exporter<br>Documentation=https://prometheus.io/<br>After=network.target<br><span class="hljs-comment"># 注意下面这两项参数是CentOS8的systemd才支持的</span><br>StartLimitBurst=1<br>StartLimitIntervalSec=15s<br><br>[Service]<br>Type=simple<br>User=prometheus<br>ExecStart=/home/node_exporter/node_exporter<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br><br>chown prometheus.prometheus /usr/lib/systemd/system/node_exporter.service<br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> node_exporter.service<br>systemctl start node_exporter.service<br>systemctl status node_exporter.service<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /usr/lib/systemd/system/node_exporter.service<br><br>[Unit]<br>Description=Prometheus-node_exporter<br>Documentation=https://prometheus.io/<br>After=network.target<br><span class="hljs-comment"># 注意下面这两项参数是CentOS8的systemd才支持的</span><br>StartLimitBurst=1<br>StartLimitIntervalSec=15s<br><br>[Service]<br>Type=simple<br>User=prometheus<br>ExecStart=/home/node_exporter/node_exporter<br>Restart=on-failure<br><br>[Install]<br>WantedBy=multi-user.target<br><br>chown prometheus.prometheus /usr/lib/systemd/system/node_exporter.service<br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> node_exporter.service<br>systemctl start node_exporter.service<br>systemctl status node_exporter.service<br></code></pre></div></td></tr></table></figure>
 
 <p>如果顺利的话，<code>node_exporter</code>应该就正常运行在默认的<code>9100</code>端口了，再查看<code>9090</code>端口的<code>prometheus</code>的web页面种的<code>Status</code>里面的<code>Targets</code>应该就能够看到已经运行起来的监控了。</p>
 <p><img src="https://resource.tinychen.com/20210105143839.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们需要修改<code>Prometheus</code>的配置文件<code>/home/prometheus/prometheus.yml</code>，添加对应的<code>job</code>，使其监听对应IP的<code>9100</code>端口获取信息并重启<code>Prometheus</code>。</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">scrape_configs:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;prometheus&#x27;</span><br>    <span class="hljs-attr">static_configs:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">targets:</span> [<span class="hljs-string">&#x27;192.168.100.100:9090&#x27;</span>]<br><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;tiny-server&#x27;</span><br>    <span class="hljs-attr">static_configs:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">targets:</span> [<span class="hljs-string">&#x27;192.168.100.100:9100&#x27;</span>]<br></code></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">scrape_configs:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;prometheus&#x27;</span><br>    <span class="hljs-attr">static_configs:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">targets:</span> [<span class="hljs-string">&#x27;192.168.100.100:9090&#x27;</span>]<br><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">job_name:</span> <span class="hljs-string">&#x27;tiny-server&#x27;</span><br>    <span class="hljs-attr">static_configs:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">targets:</span> [<span class="hljs-string">&#x27;192.168.100.100:9100&#x27;</span>]<br></code></pre></div></td></tr></table></figure>
 
 <p><img src="https://resource.tinychen.com/20210105172732.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、部署grafana"><a href="#3、部署grafana" class="headerlink" title="3、部署grafana"></a>3、部署grafana</h1><p>官网给出了多种版本系统的<a target="_blank" rel="noopener" href="https://grafana.com/grafana/download">安装教程</a>，我们这里使用的是CentOS，可以直接下载对应的RPM包然后直接安装，对应的操作如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">wget https://dl.grafana.com/oss/release/grafana-7.3.6-1.x86_64.rpm<br>sudo yum install grafana-7.3.6-1.x86_64.rpm<br><br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> grafana-server.service<br>systemctl start grafana-server.service<br>systemctl status grafana-server.service<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">wget https://dl.grafana.com/oss/release/grafana-7.3.6-1.x86_64.rpm<br>sudo yum install grafana-7.3.6-1.x86_64.rpm<br><br>systemctl daemon-reload<br>systemctl <span class="hljs-built_in">enable</span> grafana-server.service<br>systemctl start grafana-server.service<br>systemctl status grafana-server.service<br></code></pre></div></td></tr></table></figure>
 
 <p>对应的配置文件位于<code>/etc/grafana/grafana.ini</code>，如果有需要可以进行更改，然后重启服务。</p>
 <p>默认情况下我们直接访问对应服务器的<code>3000</code>端口，然后使用初始的用户名和密码<code>admin/admin</code>进行登录并且修改初始密码。</p>
@@ -396,54 +292,36 @@
 <p>部分效果展示如下：</p>
 <p><img src="https://resource.tinychen.com/20210107093532.png" srcset="/img/loading.gif" lazyload></p>
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/sre/" class="category-chain-item">sre</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/centos/">#centos</a>
-      
-        <a href="/tags/prometheus/">#prometheus</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/sre/">sre</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/prometheus/">prometheus</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20210224-dns-02-pdns01-pdns-auth-and-rec-introduction/" title="PowerDNS篇1-简介和安装">
+                      <a href="/20210224-dns-02-pdns01-pdns-auth-and-rec-introduction/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">PowerDNS篇1-简介和安装</span>
                         <span class="visible-mobile">Previous</span>
@@ -453,7 +331,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20201222-centos8-install-fail2ban/" title="给ssh服务添加fail2ban安全认证">
+                      <a href="/20201222-centos8-install-fail2ban/">
                         <span class="hidden-mobile">给ssh服务添加fail2ban安全认证</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -469,49 +347,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -536,48 +384,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -588,69 +433,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -660,153 +451,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

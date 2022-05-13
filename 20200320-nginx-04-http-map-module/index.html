@@ -37,22 +37,28 @@
   
   <title>Nginx篇04-map模块 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -61,41 +67,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -177,7 +168,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -190,53 +180,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210110180420.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Nginx篇04-map模块">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-03-20 10:00" pubdate>
+        March 20, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210110180420.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="Nginx篇04-map模块"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2020-03-20 10:00" pubdate>
-          March 20, 2020 am
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -245,266 +227,30 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="network"
-        id="heading-91e02cd2b8621d0c05197f645668c5c4" role="tab" data-toggle="collapse" href="#collapse-91e02cd2b8621d0c05197f645668c5c4"
-        aria-expanded="true"
-      >
-        network
-        <span class="list-group-count">(48)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-91e02cd2b8621d0c05197f645668c5c4"
-           role="tabpanel" aria-labelledby="heading-91e02cd2b8621d0c05197f645668c5c4">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20220221-dns-10-coredns-07-queryperf-performance-testing/" title="CoreDNS篇7-性能压测"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇7-性能压测</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20220220-dns-09-coredns-06-recursive-dns/" title="CoreDNS篇6-递归服务器"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇6-递归服务器</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20220114-dns-08-coredns-05-log/" title="CoreDNS篇5-日志处理"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇5-日志处理</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20211203-dpvs-fullnat-keepalived/" title="DPVS-FullNAT模式keepalived篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式keepalived篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210810-dpvs-fullnat-management/" title="DPVS-FullNAT模式管理篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式管理篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210728-dpvs-fullnat-deploy/" title="DPVS-FullNAT模式部署篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式部署篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210713-dns-07-coredns-04-unbound/" title="CoreDNS篇4-编译安装unbound"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇4-编译安装unbound</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210712-nginx-12-triple-rate-limiting-limit-rate/" title="nginx篇12-限速三剑客之limit_rate"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇12-限速三剑客之limit_rate</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210708-nginx-11-triple-rate-limiting-limit-conn/" title="nginx篇11-限速三剑客之limit_conn"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇11-限速三剑客之limit_conn</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210623-dns-06-coredns-03-prometheus/" title="CoreDNS篇3-接入prometheus监控"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇3-接入prometheus监控</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210616-nginx-10-triple-rate-limiting-limit-req/" title="nginx篇10-限速三剑客之limit_req"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇10-限速三剑客之limit_req</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210527-nginx-09-if-is-evil-in-location/" title="nginx篇09-location中的if指令是魔鬼吧"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇09-location中的if指令是魔鬼吧</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210520-dns-05-bind9-keepalived-ha-installation/" title="bind篇01-Bind+Keepalived安装高可用DNS集群"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">bind篇01-Bind+Keepalived安装高可用DNS集群</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210516-dns-04-coredns-02--install-external-plugins/" title="CoreDNS篇2-编译安装External Plugins"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇2-编译安装External Plugins</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210509-dns-03-coredns-01-introduction/" title="CoreDNS篇1-简介和安装"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇1-简介和安装</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210317-openresty-01-introduction-and-installation/" title="OpenResty篇01-入门简介和安装配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">OpenResty篇01-入门简介和安装配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210304-nginx-08-ssl-client-certificate/" title="nginx篇08-添加客户端证书认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇08-添加客户端证书认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210224-dns-02-pdns01-pdns-auth-and-rec-introduction/" title="PowerDNS篇1-简介和安装"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">PowerDNS篇1-简介和安装</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201112-dpdk-in-dpvs-principle-analysis/" title="DPDK在DPVS中的应用及原理分析"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPDK在DPVS中的应用及原理分析</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201103-dpvs-deploy-in-centos7/" title="DPVS简介与部署"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS简介与部署</span>
-        </a>
-      
-    
-      
-      
-        <a href="/categories/network/" class="list-group-item list-group-item-action">
-          <span class="category-post">More...</span>
-        </a>
-        
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">Nginx篇04-map模块</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on March 20, 2020 am
-                  
+                  本文最后更新于：March 20, 2020 am
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>nginx的map模块配置语法。</p>
 <span id="more"></span>
 
 <p>map模块是由<code>ngx_http_map_module</code>模块提供的，<strong>只能在<code>http模块</code>下使用</strong>，nginx默认自带安装。<strong>map 的主要作用简单来说就和编程语言中的赋值语句有点像，只不过这里称为映射（map）。</strong>具体来说是创建一个自定义变量，去匹配某些指定的字符串或者是正则表达式，如果匹配成功则将该匹配值赋值给该自定义变量，然后该自定义变量可以作其他用途。</p>
 <h1 id="1、语法格式"><a href="#1、语法格式" class="headerlink" title="1、语法格式"></a>1、语法格式</h1><p>我们先来看一下<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_map_module.html">官网</a>给出的语法格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">Syntax:	map string <span class="hljs-variable">$variable</span> &#123; ... &#125;<br>Default:	—<br>Context:	http<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Syntax:	map string <span class="hljs-variable">$variable</span> &#123; ... &#125;<br>Default:	—<br>Context:	http<br></code></pre></div></td></tr></table></figure>
 
 <p>实际上现在的版本中map指令后面的第一个参数也就是源变量可以是字符串、正则表达式或者是另一个变量。因此这样表示会更容易理解一些。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">Syntax:	map <span class="hljs-variable">$source_var</span> <span class="hljs-variable">$result_var</span> &#123; ... &#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Syntax:	map <span class="hljs-variable">$source_var</span> <span class="hljs-variable">$result_var</span> &#123; ... &#125;<br></code></pre></div></td></tr></table></figure>
 
 <p>此外，map模块内还有<code>default</code>、<code>hostnames</code>、<code>include</code>、<code>volatile</code>这四个关键字可以使用</p>
 <ul>
@@ -514,13 +260,13 @@
 <li><code>volatile</code>：指明该变量不可缓存</li>
 </ul>
 <p>我们来看一个复杂一点的配置文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">map <span class="hljs-variable">$http_host</span> <span class="hljs-variable">$name</span> &#123;<br>    default 0;<br>    hostnames;<br>    volatile;<br>    *.example.com 1;<br>    *.example.org 2;<br>    *.example.net 3;<br>    mail.* 4;<br>    mail.example.com 5;<br>    include /var/www/html/host.list;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">map <span class="hljs-variable">$http_host</span> <span class="hljs-variable">$name</span> &#123;<br>    default 0;<br>    hostnames;<br>    volatile;<br>    *.example.com 1;<br>    *.example.org 2;<br>    *.example.net 3;<br>    mail.* 4;<br>    mail.example.com 5;<br>    include /var/www/html/host.list;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 <p>需要注意这里的include使用的文件格式应该如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-variable">$source_var0</span> <span class="hljs-variable">$result_var0</span>;<br><span class="hljs-variable">$source_var1</span> <span class="hljs-variable">$result_var1</span>;<br>...<br><span class="hljs-variable">$source_varN</span> <span class="hljs-variable">$result_varN</span>;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-variable">$source_var0</span> <span class="hljs-variable">$result_var0</span>;<br><span class="hljs-variable">$source_var1</span> <span class="hljs-variable">$result_var1</span>;<br>...<br><span class="hljs-variable">$source_varN</span> <span class="hljs-variable">$result_varN</span>;<br></code></pre></div></td></tr></table></figure>
 
 <p>例如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">nginx.example.com 7;<br>awesome.example.com 8;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">nginx.example.com 7;<br>awesome.example.com 8;<br></code></pre></div></td></tr></table></figure>
 
 <h1 id="2、注意事项"><a href="#2、注意事项" class="headerlink" title="2、注意事项"></a>2、注意事项</h1><p>这里有几点需要注意：</p>
 <ul>
@@ -545,54 +291,36 @@
 <p>个人记忆口诀：先整再缺，先前再后；先长再短，先实再虚；无则默认，不行查表。</p>
 </blockquote>
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/network/" class="category-chain-item">network</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/http/">#http</a>
-      
-        <a href="/tags/nginx/">#nginx</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/network/">network</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/http/">http</a>
+                    
+                      <a class="hover-with-bg" href="/tags/nginx/">nginx</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20200320-nginx-05-upstream-keepalive/" title="Nginx篇05-http长连接和keeplive">
+                      <a href="/20200320-nginx-05-upstream-keepalive/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Nginx篇05-http长连接和keeplive</span>
                         <span class="visible-mobile">Previous</span>
@@ -602,7 +330,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20200319-nginx-03-load-balancing/" title="Nginx篇03-负载均衡简单配置和算法原理">
+                      <a href="/20200319-nginx-03-load-balancing/">
                         <span class="hidden-mobile">Nginx篇03-负载均衡简单配置和算法原理</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -618,49 +346,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -685,48 +383,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -737,69 +432,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -809,153 +450,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

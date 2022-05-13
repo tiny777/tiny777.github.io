@@ -37,22 +37,28 @@
   
   <title>bind篇01-Bind+Keepalived安装高可用DNS集群 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -61,41 +67,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -177,7 +168,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -190,53 +180,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210524162049.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="bind篇01-Bind+Keepalived安装高可用DNS集群">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-05-20 17:00" pubdate>
+        May 20, 2021 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210524162049.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="bind篇01-Bind+Keepalived安装高可用DNS集群"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2021-05-20 17:00" pubdate>
-          May 20, 2021 pm
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -245,305 +227,69 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="network"
-        id="heading-91e02cd2b8621d0c05197f645668c5c4" role="tab" data-toggle="collapse" href="#collapse-91e02cd2b8621d0c05197f645668c5c4"
-        aria-expanded="true"
-      >
-        network
-        <span class="list-group-count">(48)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-91e02cd2b8621d0c05197f645668c5c4"
-           role="tabpanel" aria-labelledby="heading-91e02cd2b8621d0c05197f645668c5c4">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20220221-dns-10-coredns-07-queryperf-performance-testing/" title="CoreDNS篇7-性能压测"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇7-性能压测</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20220220-dns-09-coredns-06-recursive-dns/" title="CoreDNS篇6-递归服务器"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇6-递归服务器</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20220114-dns-08-coredns-05-log/" title="CoreDNS篇5-日志处理"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇5-日志处理</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20211203-dpvs-fullnat-keepalived/" title="DPVS-FullNAT模式keepalived篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式keepalived篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210810-dpvs-fullnat-management/" title="DPVS-FullNAT模式管理篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式管理篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210728-dpvs-fullnat-deploy/" title="DPVS-FullNAT模式部署篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式部署篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210713-dns-07-coredns-04-unbound/" title="CoreDNS篇4-编译安装unbound"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇4-编译安装unbound</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210712-nginx-12-triple-rate-limiting-limit-rate/" title="nginx篇12-限速三剑客之limit_rate"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇12-限速三剑客之limit_rate</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210708-nginx-11-triple-rate-limiting-limit-conn/" title="nginx篇11-限速三剑客之limit_conn"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇11-限速三剑客之limit_conn</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210623-dns-06-coredns-03-prometheus/" title="CoreDNS篇3-接入prometheus监控"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇3-接入prometheus监控</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210616-nginx-10-triple-rate-limiting-limit-req/" title="nginx篇10-限速三剑客之limit_req"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇10-限速三剑客之limit_req</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210527-nginx-09-if-is-evil-in-location/" title="nginx篇09-location中的if指令是魔鬼吧"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇09-location中的if指令是魔鬼吧</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210520-dns-05-bind9-keepalived-ha-installation/" title="bind篇01-Bind+Keepalived安装高可用DNS集群"
-           class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">bind篇01-Bind+Keepalived安装高可用DNS集群</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210516-dns-04-coredns-02--install-external-plugins/" title="CoreDNS篇2-编译安装External Plugins"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇2-编译安装External Plugins</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210509-dns-03-coredns-01-introduction/" title="CoreDNS篇1-简介和安装"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇1-简介和安装</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210317-openresty-01-introduction-and-installation/" title="OpenResty篇01-入门简介和安装配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">OpenResty篇01-入门简介和安装配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210304-nginx-08-ssl-client-certificate/" title="nginx篇08-添加客户端证书认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇08-添加客户端证书认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210224-dns-02-pdns01-pdns-auth-and-rec-introduction/" title="PowerDNS篇1-简介和安装"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">PowerDNS篇1-简介和安装</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201112-dpdk-in-dpvs-principle-analysis/" title="DPDK在DPVS中的应用及原理分析"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPDK在DPVS中的应用及原理分析</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201103-dpvs-deploy-in-centos7/" title="DPVS简介与部署"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS简介与部署</span>
-        </a>
-      
-    
-      
-      
-        <a href="/categories/network/" class="list-group-item list-group-item-action">
-          <span class="category-post">More...</span>
-        </a>
-        
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">bind篇01-Bind+Keepalived安装高可用DNS集群</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on May 20, 2021 pm
-                  
+                  本文最后更新于：May 20, 2021 pm
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>本文主要对bind进行安装配置，并且搭配keepalived实现高可用。</p>
 <span id="more"></span>
 
 <h1 id="1、系统环境准备"><a href="#1、系统环境准备" class="headerlink" title="1、系统环境准备"></a>1、系统环境准备</h1><p>这里我们使用的是centos7的操作系统，默认使用yum安装的情况下，<code>bind</code>的程序<code>named</code>会安装到<code>/var/named</code>目录下，注意保证分区的大小，当然也可以使用chroot包来修改目录，这里使用默认目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ lsb_release -a<br>LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ lsb_release -a<br>LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch<br>Distributor ID: CentOS<br>Description:    CentOS Linux release 7.9.2009 (Core)<br>Release:        7.9.2009<br>Codename:       Core<br></code></pre></div></td></tr></table></figure>
 
 <h1 id="2、bind安装"><a href="#2、bind安装" class="headerlink" title="2、bind安装"></a>2、bind安装</h1><p>bind的安装非常简单，默认的centos系统的yum源中就包含了其安装包，不同的系统版本对应的bind版本略有差异但是不大。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ yum list | egrep ^bind.x86_64<br>bind.x86_64                                               32:9.11.20-5.el8_3.1                              appstream<br>$ cat /etc/redhat-release<br>CentOS Linux release 8.3.2011<br><br>[root@tiny-cloud ~]<span class="hljs-comment"># yum list | egrep ^bind.x86_64</span><br>bind.x86_64                                 32:9.11.4-26.P2.el7_9.5    updates<br>[root@tiny-cloud ~]<span class="hljs-comment"># cat /etc/redhat-release</span><br>CentOS Linux release 7.9.2009 (Core)<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ yum list | egrep ^bind.x86_64<br>bind.x86_64                                               32:9.11.20-5.el8_3.1                              appstream<br>$ cat /etc/redhat-release<br>CentOS Linux release 8.3.2011<br><br>[root@tiny-cloud ~]<span class="hljs-comment"># yum list | egrep ^bind.x86_64</span><br>bind.x86_64                                 32:9.11.4-26.P2.el7_9.5    updates<br>[root@tiny-cloud ~]<span class="hljs-comment"># cat /etc/redhat-release</span><br>CentOS Linux release 7.9.2009 (Core)<br></code></pre></div></td></tr></table></figure>
 
 <p>一般我们只需要安装bind和bind-utils这两个包，前者是bind的主要程序named和控制工具rndc等，后者则是一些常用工具如dig命令等。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ yum install <span class="hljs-built_in">bind</span> bind-utils<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ yum install <span class="hljs-built_in">bind</span> bind-utils<br></code></pre></div></td></tr></table></figure>
 
 <p>安装完成之后我们就会发现系统主要新增了<code>/var/named</code>、<code>/etc/named</code>和<code>/etc/named*</code>一系列文件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ ll /var/named/<br>total 28K<br>drwxrwx--- 2 named named 4.0K Apr 29 22:05 data<br>drwxrwx--- 2 named named 4.0K Apr 29 22:05 dynamic<br>-rw-r----- 1 root  named 2.3K Apr  5  2018 named.ca<br>-rw-r----- 1 root  named  152 Dec 15  2009 named.empty<br>-rw-r----- 1 root  named  152 Jun 21  2007 named.localhost<br>-rw-r----- 1 root  named  168 Dec 15  2009 named.loopback<br>drwxrwx--- 2 named named 4.0K Apr 29 22:05 slaves<br>$ ll /etc/named*<br>-rw-r----- 1 root named 1.8K Apr 29 22:06 /etc/named.conf<br>-rw-r--r-- 1 root named 3.9K Apr 29 22:06 /etc/named.iscdlv.key<br>-rw-r----- 1 root named  931 Jun 21  2007 /etc/named.rfc1912.zones<br>-rw-r--r-- 1 root named 1.9K Apr 13  2017 /etc/named.root.key<br><br>/etc/named:<br>total 0<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ ll /var/named/<br>total 28K<br>drwxrwx--- 2 named named 4.0K Apr 29 22:05 data<br>drwxrwx--- 2 named named 4.0K Apr 29 22:05 dynamic<br>-rw-r----- 1 root  named 2.3K Apr  5  2018 named.ca<br>-rw-r----- 1 root  named  152 Dec 15  2009 named.empty<br>-rw-r----- 1 root  named  152 Jun 21  2007 named.localhost<br>-rw-r----- 1 root  named  168 Dec 15  2009 named.loopback<br>drwxrwx--- 2 named named 4.0K Apr 29 22:05 slaves<br>$ ll /etc/named*<br>-rw-r----- 1 root named 1.8K Apr 29 22:06 /etc/named.conf<br>-rw-r--r-- 1 root named 3.9K Apr 29 22:06 /etc/named.iscdlv.key<br>-rw-r----- 1 root named  931 Jun 21  2007 /etc/named.rfc1912.zones<br>-rw-r--r-- 1 root named 1.9K Apr 13  2017 /etc/named.root.key<br><br>/etc/named:<br>total 0<br></code></pre></div></td></tr></table></figure>
 
 <p>同时我们可以使用systemd来对named服务进行管理：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ systemctl <span class="hljs-built_in">enable</span> named.service<br>Created symlink from /etc/systemd/system/multi-user.target.wants/named.service to /usr/lib/systemd/system/named.service.<br>$ systemctl start named.service<br>$ systemctl status named.service<br>● named.service - Berkeley Internet Name Domain (DNS)<br>   Loaded: loaded (/usr/lib/systemd/system/named.service; enabled; vendor preset: disabled)<br>   Active: active (running) since Thu 2021-05-20 16:26:36 CST; 10min ago<br> Main PID: 28777 (named)<br>    Tasks: 4<br>   Memory: 58.6M<br>   CGroup: /system.slice/named.service<br>           └─28777 /usr/sbin/named -u named -c /etc/named.conf<br><br>May 20 16:31:49 tiny-cloud named[28777]:   validating net/SOA: got insecure response; parent indicates it should be secure<br>May 20 16:31:49 tiny-cloud named[28777]: no valid RRSIG resolving <span class="hljs-string">&#x27;edgekey.net/DS/IN&#x27;</span>: 192.12.94.30<span class="hljs-comment">#53</span><br>May 20 16:31:49 tiny-cloud named[28777]:   validating net/SOA: got insecure response; parent indicates it should be secure<br>May 20 16:31:49 tiny-cloud named[28777]: no valid RRSIG resolving <span class="hljs-string">&#x27;edgekey.net/DS/IN&#x27;</span>: 192.31.80.30<span class="hljs-comment">#53</span><br>May 20 16:31:49 tiny-cloud named[28777]: validating net/DNSKEY: got insecure response; parent indicates it should be secure<br>May 20 16:31:49 tiny-cloud named[28777]: insecurity proof failed resolving <span class="hljs-string">&#x27;net/DNSKEY/IN&#x27;</span>: 192.12.94.30<span class="hljs-comment">#53</span><br>May 20 16:31:50 tiny-cloud named[28777]: validating net/DNSKEY: got insecure response; parent indicates it should be secure<br>May 20 16:31:50 tiny-cloud named[28777]: insecurity proof failed resolving <span class="hljs-string">&#x27;net/DNSKEY/IN&#x27;</span>: 192.31.80.30<span class="hljs-comment">#53</span><br>May 20 16:31:51 tiny-cloud named[28777]:   validating net/SOA: got insecure response; parent indicates it should be secure<br>May 20 16:31:51 tiny-cloud named[28777]: no valid RRSIG resolving <span class="hljs-string">&#x27;akamaiedge.net/DS/IN&#x27;</span>: 192.31.80.30<span class="hljs-comment">#53</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ systemctl <span class="hljs-built_in">enable</span> named.service<br>Created symlink from /etc/systemd/system/multi-user.target.wants/named.service to /usr/lib/systemd/system/named.service.<br>$ systemctl start named.service<br>$ systemctl status named.service<br>● named.service - Berkeley Internet Name Domain (DNS)<br>   Loaded: loaded (/usr/lib/systemd/system/named.service; enabled; vendor preset: disabled)<br>   Active: active (running) since Thu 2021-05-20 16:26:36 CST; 10min ago<br> Main PID: 28777 (named)<br>    Tasks: 4<br>   Memory: 58.6M<br>   CGroup: /system.slice/named.service<br>           └─28777 /usr/sbin/named -u named -c /etc/named.conf<br><br>May 20 16:31:49 tiny-cloud named[28777]:   validating net/SOA: got insecure response; parent indicates it should be secure<br>May 20 16:31:49 tiny-cloud named[28777]: no valid RRSIG resolving <span class="hljs-string">&#x27;edgekey.net/DS/IN&#x27;</span>: 192.12.94.30<span class="hljs-comment">#53</span><br>May 20 16:31:49 tiny-cloud named[28777]:   validating net/SOA: got insecure response; parent indicates it should be secure<br>May 20 16:31:49 tiny-cloud named[28777]: no valid RRSIG resolving <span class="hljs-string">&#x27;edgekey.net/DS/IN&#x27;</span>: 192.31.80.30<span class="hljs-comment">#53</span><br>May 20 16:31:49 tiny-cloud named[28777]: validating net/DNSKEY: got insecure response; parent indicates it should be secure<br>May 20 16:31:49 tiny-cloud named[28777]: insecurity proof failed resolving <span class="hljs-string">&#x27;net/DNSKEY/IN&#x27;</span>: 192.12.94.30<span class="hljs-comment">#53</span><br>May 20 16:31:50 tiny-cloud named[28777]: validating net/DNSKEY: got insecure response; parent indicates it should be secure<br>May 20 16:31:50 tiny-cloud named[28777]: insecurity proof failed resolving <span class="hljs-string">&#x27;net/DNSKEY/IN&#x27;</span>: 192.31.80.30<span class="hljs-comment">#53</span><br>May 20 16:31:51 tiny-cloud named[28777]:   validating net/SOA: got insecure response; parent indicates it should be secure<br>May 20 16:31:51 tiny-cloud named[28777]: no valid RRSIG resolving <span class="hljs-string">&#x27;akamaiedge.net/DS/IN&#x27;</span>: 192.31.80.30<span class="hljs-comment">#53</span><br></code></pre></div></td></tr></table></figure>
 
 
 
 <h1 id="3、bind配置"><a href="#3、bind配置" class="headerlink" title="3、bind配置"></a>3、bind配置</h1><h2 id="3-1-IPv6相关配置"><a href="#3-1-IPv6相关配置" class="headerlink" title="3.1 IPv6相关配置"></a>3.1 IPv6相关配置</h2><p>无论是centos7还是centos8系统使用yum进行安装的bind都已经默认开启了IPv6的支持，如果我们的系统暂时还不支持IPv6网络，则最好把配置文件中的IPv6相关的配置去除</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">sed -i <span class="hljs-string">&#x27;s#listen-on-v6 port 53 &#123; ::1; &#125;;#//listen-on-v6 port 53 &#123; ::1; &#125;;#g&#x27;</span> /etc/named.conf<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sed -i <span class="hljs-string">&#x27;s#listen-on-v6 port 53 &#123; ::1; &#125;;#//listen-on-v6 port 53 &#123; ::1; &#125;;#g&#x27;</span> /etc/named.conf<br></code></pre></div></td></tr></table></figure>
 
 <p>同时如果是把bind当作递归查询服务器使用，默认情况下的bind是会自动启用了<code>hint</code>类型的解析</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs ini">zone &quot;.&quot; IN &#123;<br>        type hint<span class="hljs-comment">;</span><br>        file &quot;named.ca&quot;<span class="hljs-comment">;</span><br>&#125;<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini">zone &quot;.&quot; IN &#123;<br>        type hint<span class="hljs-comment">;</span><br>        file &quot;named.ca&quot;<span class="hljs-comment">;</span><br>&#125;<span class="hljs-comment">;</span><br></code></pre></div></td></tr></table></figure>
 
 <p>该配置会把所有匹配到这个zone的DNS查询请求转发到<code>/var/named/named.ca</code>文件中的<strong>13个根DNS服务器节点</strong>，为了减少不必要的干扰，我们可以把文件中的的<code>AAAA</code>记录注释掉。</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-comment">;; ADDITIONAL SECTION:</span><br>a.root-servers.net.     518400  IN      A       198.41.0.4<br>b.root-servers.net.     518400  IN      A       199.9.14.201<br>c.root-servers.net.     518400  IN      A       192.33.4.12<br>d.root-servers.net.     518400  IN      A       199.7.91.13<br>e.root-servers.net.     518400  IN      A       192.203.230.10<br>f.root-servers.net.     518400  IN      A       192.5.5.241<br>g.root-servers.net.     518400  IN      A       192.112.36.4<br>h.root-servers.net.     518400  IN      A       198.97.190.53<br>i.root-servers.net.     518400  IN      A       192.36.148.17<br>j.root-servers.net.     518400  IN      A       192.58.128.30<br>k.root-servers.net.     518400  IN      A       193.0.14.129<br>l.root-servers.net.     518400  IN      A       199.7.83.42<br>m.root-servers.net.     518400  IN      A       202.12.27.33<br>a.root-servers.net.     518400  IN      AAAA    2001:503:ba3e::2:30<br>b.root-servers.net.     518400  IN      AAAA    2001:500:200::b<br>c.root-servers.net.     518400  IN      AAAA    2001:500:2::c<br>d.root-servers.net.     518400  IN      AAAA    2001:500:2d::d<br>e.root-servers.net.     518400  IN      AAAA    2001:500:a8::e<br>f.root-servers.net.     518400  IN      AAAA    2001:500:2f::f<br>g.root-servers.net.     518400  IN      AAAA    2001:500:12::d0d<br>h.root-servers.net.     518400  IN      AAAA    2001:500:1::53<br>i.root-servers.net.     518400  IN      AAAA    2001:7fe::53<br>j.root-servers.net.     518400  IN      AAAA    2001:503:c27::2:30<br>k.root-servers.net.     518400  IN      AAAA    2001:7fd::1<br>l.root-servers.net.     518400  IN      AAAA    2001:500:9f::42<br>m.root-servers.net.     518400  IN      AAAA    2001:dc3::35<br></code></pre></td></tr></table></figure>
+<figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-comment">;; ADDITIONAL SECTION:</span><br>a.root-servers.net.     518400  IN      A       198.41.0.4<br>b.root-servers.net.     518400  IN      A       199.9.14.201<br>c.root-servers.net.     518400  IN      A       192.33.4.12<br>d.root-servers.net.     518400  IN      A       199.7.91.13<br>e.root-servers.net.     518400  IN      A       192.203.230.10<br>f.root-servers.net.     518400  IN      A       192.5.5.241<br>g.root-servers.net.     518400  IN      A       192.112.36.4<br>h.root-servers.net.     518400  IN      A       198.97.190.53<br>i.root-servers.net.     518400  IN      A       192.36.148.17<br>j.root-servers.net.     518400  IN      A       192.58.128.30<br>k.root-servers.net.     518400  IN      A       193.0.14.129<br>l.root-servers.net.     518400  IN      A       199.7.83.42<br>m.root-servers.net.     518400  IN      A       202.12.27.33<br>a.root-servers.net.     518400  IN      AAAA    2001:503:ba3e::2:30<br>b.root-servers.net.     518400  IN      AAAA    2001:500:200::b<br>c.root-servers.net.     518400  IN      AAAA    2001:500:2::c<br>d.root-servers.net.     518400  IN      AAAA    2001:500:2d::d<br>e.root-servers.net.     518400  IN      AAAA    2001:500:a8::e<br>f.root-servers.net.     518400  IN      AAAA    2001:500:2f::f<br>g.root-servers.net.     518400  IN      AAAA    2001:500:12::d0d<br>h.root-servers.net.     518400  IN      AAAA    2001:500:1::53<br>i.root-servers.net.     518400  IN      AAAA    2001:7fe::53<br>j.root-servers.net.     518400  IN      AAAA    2001:503:c27::2:30<br>k.root-servers.net.     518400  IN      AAAA    2001:7fd::1<br>l.root-servers.net.     518400  IN      AAAA    2001:500:9f::42<br>m.root-servers.net.     518400  IN      AAAA    2001:dc3::35<br></code></pre></div></td></tr></table></figure>
 
 <h2 id="3-2-named-conf配置rndc"><a href="#3-2-named-conf配置rndc" class="headerlink" title="3.2 named.conf配置rndc"></a>3.2 named.conf配置rndc</h2><p><code>rndc</code>可以简单视为是一个用来控制或者查看<code>named</code>系统的命令行工具。它不仅可以在服务器本地使用，还可以远程控制其他的<code>bind</code>服务器上面的<code>named</code>服务。但是在默认情况下的配置文件中并没有对其进行显示配置，所以<code>named</code>程序默认情况下只会监听本机<code>127.0.0.1</code>的<code>953</code>端口</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ netstat -ntulp | grep named<br>tcp        0      0 127.0.0.1:953           0.0.0.0:*               LISTEN      12737/named<br>tcp        0      0 127.0.0.1:53            0.0.0.0:*               LISTEN      12737/named<br>udp        0      0 127.0.0.1:53            0.0.0.0:*                           12737/named<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ netstat -ntulp | grep named<br>tcp        0      0 127.0.0.1:953           0.0.0.0:*               LISTEN      12737/named<br>tcp        0      0 127.0.0.1:53            0.0.0.0:*               LISTEN      12737/named<br>udp        0      0 127.0.0.1:53            0.0.0.0:*                           12737/named<br></code></pre></div></td></tr></table></figure>
 
 <p>在<code>named.conf</code>文件中对<code>rndc</code>进行配置，主要涉及到三个选项：**监听网卡（<code>inet</code>）、允许IP（<code>allow</code>）和认证使用的<code>keys</code>**：</p>
 <ul>
 <li><p>这样子就是设为监听机器上的所有网卡并允许所有的来源IP进行访问，不过限制了需要使用keys</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 这样子就是设为监听机器上的所有网卡并允许所有的来源IP进行访问，不过限制了需要使用keys</span><br>controls &#123;<br>    inet * allow &#123; any; &#125; keys &#123; <span class="hljs-string">&quot;rndc-key&quot;</span>; &#125;;<br>&#125;;<br></code></pre></td></tr></table></figure>
+  <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 这样子就是设为监听机器上的所有网卡并允许所有的来源IP进行访问，不过限制了需要使用keys</span><br>controls &#123;<br>    inet * allow &#123; any; &#125; keys &#123; <span class="hljs-string">&quot;rndc-key&quot;</span>; &#125;;<br>&#125;;<br></code></pre></div></td></tr></table></figure>
 </li>
 <li><p>这种限制了只能在本机上使用rndc  </p>
-  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 这种限制了只能在本机上使用rndc</span>    <br>controls &#123;<br>    inet 127.0.0.1 allow &#123; localhost; &#125; keys &#123; &quot;rndc-key&quot;; &#125;;<br>&#125;;<br></code></pre></td></tr></table></figure></li>
+  <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 这种限制了只能在本机上使用rndc</span>    <br>controls &#123;<br>    inet 127.0.0.1 allow &#123; localhost; &#125; keys &#123; &quot;rndc-key&quot;; &#125;;<br>&#125;;<br></code></pre></div></td></tr></table></figure></li>
 <li><p>这种限制了在局域网和本机上使用rndc，如果有多个inet需要指定监听则需要分开多条配置，并且可以添加port参数来指定端口</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 这种限制了在局域网和本机上使用rndc，如果有多个inet需要指定监听则需要分开多条配置  </span><br>controls &#123;<br>        inet 127.0.0.1 allow &#123; localhost; &#125; keys &#123; rndckey; &#125;;<br>        inet 192.168.1.1 port 1953 allow &#123; 192.168.1.1; 192.168.1.2; 192.168.1.0/24;&#125; keys &#123; rndckey; &#125;;<br>&#125;;<br></code></pre></td></tr></table></figure></li>
+  <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 这种限制了在局域网和本机上使用rndc，如果有多个inet需要指定监听则需要分开多条配置  </span><br>controls &#123;<br>        inet 127.0.0.1 allow &#123; localhost; &#125; keys &#123; rndckey; &#125;;<br>        inet 192.168.1.1 port 1953 allow &#123; 192.168.1.1; 192.168.1.2; 192.168.1.0/24;&#125; keys &#123; rndckey; &#125;;<br>&#125;;<br></code></pre></div></td></tr></table></figure></li>
 </ul>
 <h2 id="3-3-rndc-key配置"><a href="#3-3-rndc-key配置" class="headerlink" title="3.3 rndc-key配置"></a>3.3 rndc-key配置</h2><p>keys在这里的作用主要是鉴权，效果相当于ssh程序中的ssh-key，因此如果需要远程操作，需要保证客户端和服务端的keys一致。</p>
 <p><code>rndc-key</code>只是keys这个参数的一个值，相当于一个<code>key-value</code>，这里只是用来指代，实际上换成<code>tinycehn-key</code>之类的其他名字也是没问题的，本质上它们都是一个<code>HMAC-MD5</code>的key，因此首先我们需要生成一个<code>rndc-key</code>。在bind9里面，一般情况下我们可以使用<code>dnssec-keygen</code>命令生成或者是<code>rndc-confgen -a</code>命令直接生成。这里个人推荐直接使用后者。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ rndc-confgen -a<br>wrote key file <span class="hljs-string">&quot;/etc/rndc.key&quot;</span><br>$ cat /etc/rndc.key<br>key <span class="hljs-string">&quot;rndc-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;0JqEwIF4kihHEcAbgC4t1w==&quot;</span>;<br>&#125;;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ rndc-confgen -a<br>wrote key file <span class="hljs-string">&quot;/etc/rndc.key&quot;</span><br>$ cat /etc/rndc.key<br>key <span class="hljs-string">&quot;rndc-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;0JqEwIF4kihHEcAbgC4t1w==&quot;</span>;<br>&#125;;<br></code></pre></div></td></tr></table></figure>
 
 <p>使用dnssec-keygen命令的时候会生成一个key和一个private文件，private文件里面记录着详细信息，同时这样我们需要手动将格式修改为rndc支持的格式并放置在<code>/etc/rndc.key</code>文件中。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ dnssec-keygen -a hmac-md5 -b 256 -n HOST tinychen-key<br>Ktinychen-key.+157+42293<br>$ ll<br>total 8<br>-rw------- 1 root root  76 May 20 15:37 Ktinychen-key.+157+42293.key<br>-rw------- 1 root root 185 May 20 15:37 Ktinychen-key.+157+42293.private<br>$ cat Ktinychen-key.+157+42293.key<br>tinychen-key. IN KEY 512 3 157 uEICksjZ53OlSXPpHrAmS1s/FhRy5g26+KUCtGqmflM=<br>$ cat Ktinychen-key.+157+42293.private<br>Private-key-format: v1.3<br>Algorithm: 157 (HMAC_MD5)<br>Key: uEICksjZ53OlSXPpHrAmS1s/FhRy5g26+KUCtGqmflM=<br>Bits: AAA=<br>Created: 20210520073748<br>Publish: 20210520073748<br>Activate: 20210520073748<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ dnssec-keygen -a hmac-md5 -b 256 -n HOST tinychen-key<br>Ktinychen-key.+157+42293<br>$ ll<br>total 8<br>-rw------- 1 root root  76 May 20 15:37 Ktinychen-key.+157+42293.key<br>-rw------- 1 root root 185 May 20 15:37 Ktinychen-key.+157+42293.private<br>$ cat Ktinychen-key.+157+42293.key<br>tinychen-key. IN KEY 512 3 157 uEICksjZ53OlSXPpHrAmS1s/FhRy5g26+KUCtGqmflM=<br>$ cat Ktinychen-key.+157+42293.private<br>Private-key-format: v1.3<br>Algorithm: 157 (HMAC_MD5)<br>Key: uEICksjZ53OlSXPpHrAmS1s/FhRy5g26+KUCtGqmflM=<br>Bits: AAA=<br>Created: 20210520073748<br>Publish: 20210520073748<br>Activate: 20210520073748<br></code></pre></div></td></tr></table></figure>
 
 <blockquote>
 <p>In this case, the <key-value> is a HMAC-MD5 key. You can generate your own HMAC-MD5 keys with the following command:</p>
@@ -551,25 +297,25 @@
 <p>The name of the key used in /etc/named.conf should be something other than key.</p>
 </blockquote>
 <h2 id="3-4-rndc-conf配置"><a href="#3-4-rndc-conf配置" class="headerlink" title="3.4 rndc.conf配置"></a>3.4 rndc.conf配置</h2><p>默认情况下并不会生成<code>rndc.conf</code>文件，因此我们需要自己手动生成一个。使用<code>rndc-confgen</code>命令可以快速地生成一个配置模板并且打印到终端窗口上（注意执行命令之后并不会生成<code>rndc.conf</code>文件，需要我们手动将生成的配置写入文件<code>/etc/rndc.conf</code>）</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ rndc-confgen<br><span class="hljs-comment"># Start of rndc.conf</span><br>key <span class="hljs-string">&quot;rndc-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;h0Pmn9ueo1Uk9Cv6cpPE2w==&quot;</span>;<br>&#125;;<br><br>options &#123;<br>        default-key <span class="hljs-string">&quot;rndc-key&quot;</span>;<br>        default-server 127.0.0.1;<br>        default-port 953;<br>&#125;;<br><span class="hljs-comment"># End of rndc.conf</span><br><br><span class="hljs-comment"># Use with the following in named.conf, adjusting the allow list as needed:</span><br><span class="hljs-comment"># key &quot;rndc-key&quot; &#123;</span><br><span class="hljs-comment">#       algorithm hmac-md5;</span><br><span class="hljs-comment">#       secret &quot;h0Pmn9ueo1Uk9Cv6cpPE2w==&quot;;</span><br><span class="hljs-comment"># &#125;;</span><br><span class="hljs-comment">#</span><br><span class="hljs-comment"># controls &#123;</span><br><span class="hljs-comment">#       inet 127.0.0.1 port 953</span><br><span class="hljs-comment">#               allow &#123; 127.0.0.1; &#125; keys &#123; &quot;rndc-key&quot;; &#125;;</span><br><span class="hljs-comment"># &#125;;</span><br><span class="hljs-comment"># End of named.conf</span><br><br><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ rndc-confgen<br><span class="hljs-comment"># Start of rndc.conf</span><br>key <span class="hljs-string">&quot;rndc-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;h0Pmn9ueo1Uk9Cv6cpPE2w==&quot;</span>;<br>&#125;;<br><br>options &#123;<br>        default-key <span class="hljs-string">&quot;rndc-key&quot;</span>;<br>        default-server 127.0.0.1;<br>        default-port 953;<br>&#125;;<br><span class="hljs-comment"># End of rndc.conf</span><br><br><span class="hljs-comment"># Use with the following in named.conf, adjusting the allow list as needed:</span><br><span class="hljs-comment"># key &quot;rndc-key&quot; &#123;</span><br><span class="hljs-comment">#       algorithm hmac-md5;</span><br><span class="hljs-comment">#       secret &quot;h0Pmn9ueo1Uk9Cv6cpPE2w==&quot;;</span><br><span class="hljs-comment"># &#125;;</span><br><span class="hljs-comment">#</span><br><span class="hljs-comment"># controls &#123;</span><br><span class="hljs-comment">#       inet 127.0.0.1 port 953</span><br><span class="hljs-comment">#               allow &#123; 127.0.0.1; &#125; keys &#123; &quot;rndc-key&quot;; &#125;;</span><br><span class="hljs-comment"># &#125;;</span><br><span class="hljs-comment"># End of named.conf</span><br><br><br></code></pre></div></td></tr></table></figure>
 
 <p>需要注意的是，当同时存在<code>rndc.conf</code>文件和<code>rndc.key</code>文件的时候，默认是优先读取<code>rndc.conf</code>，如果我们需要指定不同的key来访问不同的server，可以在命令中指定参数，如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ cat /etc/rndc.conf<br>key <span class="hljs-string">&quot;rndc-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;h0Pmn9ueo1Uk9Cv6cpPE2w==&quot;</span>;<br>&#125;;<br><br>key <span class="hljs-string">&quot;rndc-conf-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;uEICksjZ53OlSXPpHrAmS1s/FhRy5g26+KUCtGqmflM=&quot;</span>;<br>&#125;;<br><br>options &#123;<br>        default-key <span class="hljs-string">&quot;rndc-key&quot;</span>;<br>        default-server 127.0.0.1;<br>        default-port 953;<br>&#125;;<br><br><span class="hljs-comment"># -s参数用来指定不同的服务器，这里可以是域名也可以是IP</span><br><span class="hljs-comment"># -k参数用来指定key，但是后面跟着的是一个类似rndc.key的文件</span><br><span class="hljs-comment"># -y参数也是用来指定key，但是后面跟着的参数需要是在rndc.conf文件中已经写明的key的key-value</span><br>$ rndc -s localhost -k /etc/rndc.key status<br>$ rndc -s 192.168.1.1 -y rndc-conf-key status<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ cat /etc/rndc.conf<br>key <span class="hljs-string">&quot;rndc-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;h0Pmn9ueo1Uk9Cv6cpPE2w==&quot;</span>;<br>&#125;;<br><br>key <span class="hljs-string">&quot;rndc-conf-key&quot;</span> &#123;<br>        algorithm hmac-md5;<br>        secret <span class="hljs-string">&quot;uEICksjZ53OlSXPpHrAmS1s/FhRy5g26+KUCtGqmflM=&quot;</span>;<br>&#125;;<br><br>options &#123;<br>        default-key <span class="hljs-string">&quot;rndc-key&quot;</span>;<br>        default-server 127.0.0.1;<br>        default-port 953;<br>&#125;;<br><br><span class="hljs-comment"># -s参数用来指定不同的服务器，这里可以是域名也可以是IP</span><br><span class="hljs-comment"># -k参数用来指定key，但是后面跟着的是一个类似rndc.key的文件</span><br><span class="hljs-comment"># -y参数也是用来指定key，但是后面跟着的参数需要是在rndc.conf文件中已经写明的key的key-value</span><br>$ rndc -s localhost -k /etc/rndc.key status<br>$ rndc -s 192.168.1.1 -y rndc-conf-key status<br></code></pre></div></td></tr></table></figure>
 
 
 
 <h1 id="4、keepalived安装"><a href="#4、keepalived安装" class="headerlink" title="4、keepalived安装"></a>4、keepalived安装</h1><p>由于这里只需要支持IPv4网络的keepalived程序，因此我们可以直接使用yum源来安装keepalived，如果有较高的版本要求或者特殊需要，可以考虑自行下载源码编译安装。</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">$ yum <span class="hljs-keyword">install</span> keepalived<br></code></pre></td></tr></table></figure>
+<figure class="highlight cmake"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs cmake">$ yum <span class="hljs-keyword">install</span> keepalived<br></code></pre></div></td></tr></table></figure>
 
 <p>同时为了方便我们debug，这里再将keepalived的日志额外重定向到单独的目录文件中</p>
 <p>首先我们需要修改keepalived的默认启动参数</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ sed -i <span class="hljs-string">&#x27;s#KEEPALIVED_OPTIONS=&quot;-D&quot;#KEEPALIVED_OPTIONS=&quot;-D -d -S 0&quot;#g&#x27;</span> /etc/sysconfig/keepalived<br>$ cat /etc/sysconfig/keepalived<br><span class="hljs-comment"># Options for keepalived. See `keepalived --help&#x27; output and keepalived(8) and</span><br><span class="hljs-comment"># keepalived.conf(5) man pages for a list of all options. Here are the most</span><br><span class="hljs-comment"># common ones :</span><br><span class="hljs-comment">#</span><br><span class="hljs-comment"># --vrrp               -P    Only run with VRRP subsystem.</span><br><span class="hljs-comment"># --check              -C    Only run with Health-checker subsystem.</span><br><span class="hljs-comment"># --dont-release-vrrp  -V    Dont remove VRRP VIPs &amp; VROUTEs on daemon stop.</span><br><span class="hljs-comment"># --dont-release-ipvs  -I    Dont remove IPVS topology on daemon stop.</span><br><span class="hljs-comment"># --dump-conf          -d    Dump the configuration data.</span><br><span class="hljs-comment"># --log-detail         -D    Detailed log messages.</span><br><span class="hljs-comment"># --log-facility       -S    0-7 Set local syslog facility (default=LOG_DAEMON)</span><br><span class="hljs-comment">#</span><br><br>KEEPALIVED_OPTIONS=<span class="hljs-string">&quot;-D -d -S 0&quot;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ sed -i <span class="hljs-string">&#x27;s#KEEPALIVED_OPTIONS=&quot;-D&quot;#KEEPALIVED_OPTIONS=&quot;-D -d -S 0&quot;#g&#x27;</span> /etc/sysconfig/keepalived<br>$ cat /etc/sysconfig/keepalived<br><span class="hljs-comment"># Options for keepalived. See `keepalived --help&#x27; output and keepalived(8) and</span><br><span class="hljs-comment"># keepalived.conf(5) man pages for a list of all options. Here are the most</span><br><span class="hljs-comment"># common ones :</span><br><span class="hljs-comment">#</span><br><span class="hljs-comment"># --vrrp               -P    Only run with VRRP subsystem.</span><br><span class="hljs-comment"># --check              -C    Only run with Health-checker subsystem.</span><br><span class="hljs-comment"># --dont-release-vrrp  -V    Dont remove VRRP VIPs &amp; VROUTEs on daemon stop.</span><br><span class="hljs-comment"># --dont-release-ipvs  -I    Dont remove IPVS topology on daemon stop.</span><br><span class="hljs-comment"># --dump-conf          -d    Dump the configuration data.</span><br><span class="hljs-comment"># --log-detail         -D    Detailed log messages.</span><br><span class="hljs-comment"># --log-facility       -S    0-7 Set local syslog facility (default=LOG_DAEMON)</span><br><span class="hljs-comment">#</span><br><br>KEEPALIVED_OPTIONS=<span class="hljs-string">&quot;-D -d -S 0&quot;</span><br></code></pre></div></td></tr></table></figure>
 
 <p>修改syslog的配置，将日志输出到指定的目录</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs gradle"># 对于系统使用rsyslog服务来管理日志的，可以修改 <span class="hljs-regexp">/etc/</span>rsyslog.conf 加入下列的配置<br>local0.*                                                <span class="hljs-regexp">/path/</span>to/keepalived.log<br></code></pre></td></tr></table></figure>
+<figure class="highlight gradle"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs gradle"># 对于系统使用rsyslog服务来管理日志的，可以修改 <span class="hljs-regexp">/etc/</span>rsyslog.conf 加入下列的配置<br>local0.*                                                <span class="hljs-regexp">/path/</span>to/keepalived.log<br></code></pre></div></td></tr></table></figure>
 
 <p>最后重启rsyslog服务和keepalived服务即可</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> systemctl <span class="hljs-built_in">enable</span> rsyslog.service</span><br><span class="hljs-meta">$</span><span class="bash"> systemctl restart rsyslog.service</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">$</span><span class="bash"> systemctl <span class="hljs-built_in">enable</span> rsyslog.service</span><br><span class="hljs-meta">$</span><span class="bash"> systemctl restart rsyslog.service</span><br></code></pre></div></td></tr></table></figure>
 
 <h1 id="5、bind主从安装"><a href="#5、bind主从安装" class="headerlink" title="5、bind主从安装"></a>5、bind主从安装</h1><p>主从两个节点的安装理论上应该完全一致。需要注意的是：</p>
 <ul>
@@ -586,67 +332,49 @@
 <p>这里主要是为了避免当主节点本身DNS服务就有问题，而它的检测脚本又是检测VIP的rndc状态时，VIP切到从节点后可以正常提供服务，然后主节点脚本检测正常，将VIP抢了回来，但是这时候主节点自己是无法正常提供服务的，随后从节点检测到服务不正常，又将VIP抢了过去，然后继续循环导致VIP不断偏移。</p>
 </blockquote>
 <h1 id="7、keepalived配置"><a href="#7、keepalived配置" class="headerlink" title="7、keepalived配置"></a>7、keepalived配置</h1><p>keepalived的配置比较简单，注意这里的<code>interval</code>、<code>interface</code>、<code>router_id</code>、<code>virtual_router_id</code>等参数可以根据实际情况进行调整。</p>
-<h2 id="7-1-keepalived-conf（master）"><a href="#7-1-keepalived-conf（master）" class="headerlink" title="7.1 keepalived.conf（master）"></a>7.1 keepalived.conf（master）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs bash">! Configuration File <span class="hljs-keyword">for</span> keepalived<br><br>global_defs &#123;<br>   router_id HA_DNS<br>&#125;<br><br>vrrp_script chk_dns &#123;<br>	<span class="hljs-comment"># 定义检测的脚本和执行参数</span><br>    script <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh check 主机器的IP&quot;</span><br>    <span class="hljs-comment"># 定义脚本的执行时间间隔为2秒</span><br>    interval 2	<br>    <span class="hljs-comment"># 执行失败的时候weight-20</span><br>    weight -20<br>    <span class="hljs-comment"># 检测到脚本执行两次失败才算失败</span><br>    fall 2<br>    <span class="hljs-comment"># 检测到脚本执行成功一次就算成功</span><br>    rise 1<br>&#125;<br><br>vrrp_instance VIRT_DNS &#123;<br>    state MASTER<br>    interface eth0<br>    virtual_router_id 201 <br>    priority 100<br>    advert_int 1<br>    authentication &#123;<br>        auth_type PASS<br>        auth_pass 7777@tinychen<br>    &#125;<br>    track_script &#123;<br>        chk_dns<br>    &#125;<br><br>    virtual_ipaddress &#123;<br>        需要配置的VIP(e.g. 1.1.1.1) dev VIP所在的网卡(e.g. eth0)<br>    &#125;<br>    <br>    notify_master <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify master&quot;</span><br>    notify_backup <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify backup&quot;</span><br>    notify_fault  <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify fault&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="7-1-keepalived-conf（master）"><a href="#7-1-keepalived-conf（master）" class="headerlink" title="7.1 keepalived.conf（master）"></a>7.1 keepalived.conf（master）</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">! Configuration File <span class="hljs-keyword">for</span> keepalived<br><br>global_defs &#123;<br>   router_id HA_DNS<br>&#125;<br><br>vrrp_script chk_dns &#123;<br>	<span class="hljs-comment"># 定义检测的脚本和执行参数</span><br>    script <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh check 主机器的IP&quot;</span><br>    <span class="hljs-comment"># 定义脚本的执行时间间隔为2秒</span><br>    interval 2	<br>    <span class="hljs-comment"># 执行失败的时候weight-20</span><br>    weight -20<br>    <span class="hljs-comment"># 检测到脚本执行两次失败才算失败</span><br>    fall 2<br>    <span class="hljs-comment"># 检测到脚本执行成功一次就算成功</span><br>    rise 1<br>&#125;<br><br>vrrp_instance VIRT_DNS &#123;<br>    state MASTER<br>    interface eth0<br>    virtual_router_id 201 <br>    priority 100<br>    advert_int 1<br>    authentication &#123;<br>        auth_type PASS<br>        auth_pass 7777@tinychen<br>    &#125;<br>    track_script &#123;<br>        chk_dns<br>    &#125;<br><br>    virtual_ipaddress &#123;<br>        需要配置的VIP(e.g. 1.1.1.1) dev VIP所在的网卡(e.g. eth0)<br>    &#125;<br>    <br>    notify_master <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify master&quot;</span><br>    notify_backup <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify backup&quot;</span><br>    notify_fault  <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify fault&quot;</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 
 
-<h2 id="7-2-keepalived-conf（backup）"><a href="#7-2-keepalived-conf（backup）" class="headerlink" title="7.2 keepalived.conf（backup）"></a>7.2 keepalived.conf（backup）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs bash">! Configuration File <span class="hljs-keyword">for</span> keepalived<br><br>global_defs &#123;<br>   router_id HA_DNS<br>&#125;<br><br>vrrp_script chk_dns &#123;<br>    script <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh check 用来做高可用的VIP&quot;</span><br>    <span class="hljs-comment"># 定义脚本的执行时间间隔为2秒</span><br>    interval 2	<br>    <span class="hljs-comment"># 执行失败的时候weight-20</span><br>    weight -20<br>    <span class="hljs-comment"># 检测到脚本执行两次失败才算失败</span><br>    fall 2<br>    <span class="hljs-comment"># 检测到脚本执行成功一次就算成功</span><br>    rise 1<br>&#125;<br><br>vrrp_instance VIRT_DNS &#123;<br>    state BACKUP<br>    interface eth0<br>    virtual_router_id 201 <br>    priority 90<br>    advert_int 1<br>    authentication &#123;<br>        auth_type PASS<br>        auth_pass 7777@tinychen<br>    &#125;<br>    track_script &#123;<br>        chk_dns<br>    &#125;<br><br>    virtual_ipaddress &#123;<br>        需要配置的VIP(e.g. 1.1.1.1) dev VIP所在的网卡(e.g. eth0)<br>    &#125;<br>    <br>    notify_master <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify master&quot;</span><br>    notify_backup <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify backup&quot;</span><br>    notify_fault  <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify fault&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="7-2-keepalived-conf（backup）"><a href="#7-2-keepalived-conf（backup）" class="headerlink" title="7.2 keepalived.conf（backup）"></a>7.2 keepalived.conf（backup）</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">! Configuration File <span class="hljs-keyword">for</span> keepalived<br><br>global_defs &#123;<br>   router_id HA_DNS<br>&#125;<br><br>vrrp_script chk_dns &#123;<br>    script <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh check 用来做高可用的VIP&quot;</span><br>    <span class="hljs-comment"># 定义脚本的执行时间间隔为2秒</span><br>    interval 2	<br>    <span class="hljs-comment"># 执行失败的时候weight-20</span><br>    weight -20<br>    <span class="hljs-comment"># 检测到脚本执行两次失败才算失败</span><br>    fall 2<br>    <span class="hljs-comment"># 检测到脚本执行成功一次就算成功</span><br>    rise 1<br>&#125;<br><br>vrrp_instance VIRT_DNS &#123;<br>    state BACKUP<br>    interface eth0<br>    virtual_router_id 201 <br>    priority 90<br>    advert_int 1<br>    authentication &#123;<br>        auth_type PASS<br>        auth_pass 7777@tinychen<br>    &#125;<br>    track_script &#123;<br>        chk_dns<br>    &#125;<br><br>    virtual_ipaddress &#123;<br>        需要配置的VIP(e.g. 1.1.1.1) dev VIP所在的网卡(e.g. eth0)<br>    &#125;<br>    <br>    notify_master <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify master&quot;</span><br>    notify_backup <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify backup&quot;</span><br>    notify_fault  <span class="hljs-string">&quot;/etc/keepalived/dns_status.sh notify fault&quot;</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 
 
 <h2 id="7-3-dns-status-sh"><a href="#7-3-dns-status-sh" class="headerlink" title="7.3 dns_status.sh"></a>7.3 dns_status.sh</h2><p>这里脚本的放置目录要和上面的</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># vim /etc/keepalived/dns_status.sh</span><br><br><span class="hljs-comment">#!/bin/bash</span><br>LOGFILE=<span class="hljs-string">&quot;/home/named/keepalived/keepalived.log&quot;</span><br><span class="hljs-keyword">case</span> <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> <span class="hljs-keyword">in</span><br>check)<br>    ALIVE=$(/usr/sbin/rndc -s <span class="hljs-variable">$2</span> status | grep <span class="hljs-string">&quot;server is up and running&quot;</span>)<br>    <span class="hljs-keyword">if</span> [ $? == 0 ]; <span class="hljs-keyword">then</span><br>        <span class="hljs-built_in">exit</span> 0<br>    <span class="hljs-keyword">else</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        date <span class="hljs-string">&quot;+%Y-%m-%d %H:%M:%S&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Using rndc status check failed&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        <span class="hljs-built_in">exit</span> 1<br>    <span class="hljs-keyword">fi</span><br>    ;;<br>notify)<br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    date <span class="hljs-string">&quot;+%Y-%m-%d %H:%M:%S&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Enter status: <span class="hljs-variable">$2</span>&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    <span class="hljs-keyword">if</span> [ <span class="hljs-variable">$2</span> == <span class="hljs-string">&quot;master&quot;</span> ]; <span class="hljs-keyword">then</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Begin running systemctl restart cmd &quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        systemctl restart named.service &gt;&gt;<span class="hljs-variable">$LOGFILE</span> 2&gt;&amp;1<br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Running reload cmd done ! &quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        date <span class="hljs-string">&quot;+%Y-%m-%d %H:%M:%S&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    <span class="hljs-keyword">fi</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    ;;<br>*)<br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Usage: sh <span class="hljs-variable">$0</span> check ipaddr | notify status&quot;</span><br>    ;;<br><span class="hljs-keyword">esac</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># vim /etc/keepalived/dns_status.sh</span><br><br><span class="hljs-comment">#!/bin/bash</span><br>LOGFILE=<span class="hljs-string">&quot;/home/named/keepalived/keepalived.log&quot;</span><br><span class="hljs-keyword">case</span> <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> <span class="hljs-keyword">in</span><br>check)<br>    ALIVE=$(/usr/sbin/rndc -s <span class="hljs-variable">$2</span> status | grep <span class="hljs-string">&quot;server is up and running&quot;</span>)<br>    <span class="hljs-keyword">if</span> [ $? == 0 ]; <span class="hljs-keyword">then</span><br>        <span class="hljs-built_in">exit</span> 0<br>    <span class="hljs-keyword">else</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        date <span class="hljs-string">&quot;+%Y-%m-%d %H:%M:%S&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Using rndc status check failed&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        <span class="hljs-built_in">exit</span> 1<br>    <span class="hljs-keyword">fi</span><br>    ;;<br>notify)<br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    date <span class="hljs-string">&quot;+%Y-%m-%d %H:%M:%S&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Enter status: <span class="hljs-variable">$2</span>&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    <span class="hljs-keyword">if</span> [ <span class="hljs-variable">$2</span> == <span class="hljs-string">&quot;master&quot;</span> ]; <span class="hljs-keyword">then</span><br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Begin running systemctl restart cmd &quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        systemctl restart named.service &gt;&gt;<span class="hljs-variable">$LOGFILE</span> 2&gt;&amp;1<br>        <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Running reload cmd done ! &quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>        date <span class="hljs-string">&quot;+%Y-%m-%d %H:%M:%S&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    <span class="hljs-keyword">fi</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;---------------------------------------&quot;</span> &gt;&gt;<span class="hljs-variable">$LOGFILE</span><br>    ;;<br>*)<br>    <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Usage: sh <span class="hljs-variable">$0</span> check ipaddr | notify status&quot;</span><br>    ;;<br><span class="hljs-keyword">esac</span><br></code></pre></div></td></tr></table></figure>
 
 <h1 id="8、效果检测"><a href="#8、效果检测" class="headerlink" title="8、效果检测"></a>8、效果检测</h1><p>最后我们关闭主节点上面的named服务，然后查看日志和从节点的状态确定VIP能否顺利切换，之后再重启主节点上面的named服务，保证服务能够正常运行即可。</p>
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/network/" class="category-chain-item">network</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/dns/">#dns</a>
-      
-        <a href="/tags/bind/">#bind</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/network/">network</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/dns/">dns</a>
+                    
+                      <a class="hover-with-bg" href="/tags/bind/">bind</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20210527-nginx-09-if-is-evil-in-location/" title="nginx篇09-location中的if指令是魔鬼吧">
+                      <a href="/20210527-nginx-09-if-is-evil-in-location/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">nginx篇09-location中的if指令是魔鬼吧</span>
                         <span class="visible-mobile">Previous</span>
@@ -656,7 +384,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20210516-dns-04-coredns-02--install-external-plugins/" title="CoreDNS篇2-编译安装External Plugins">
+                      <a href="/20210516-dns-04-coredns-02--install-external-plugins/">
                         <span class="hidden-mobile">CoreDNS篇2-编译安装External Plugins</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -672,49 +400,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -739,48 +437,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -791,69 +486,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -863,153 +504,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

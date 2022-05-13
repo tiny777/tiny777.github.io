@@ -39,22 +39,28 @@
   
   <title>DPDK在DPVS中的应用及原理分析 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -63,41 +69,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -179,7 +170,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -192,53 +182,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106164619.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="DPDK在DPVS中的应用及原理分析">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-11-12 15:00" pubdate>
+        November 12, 2020 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210106164619.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="DPDK在DPVS中的应用及原理分析"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2020-11-12 15:00" pubdate>
-          November 12, 2020 pm
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -247,257 +229,21 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="network"
-        id="heading-91e02cd2b8621d0c05197f645668c5c4" role="tab" data-toggle="collapse" href="#collapse-91e02cd2b8621d0c05197f645668c5c4"
-        aria-expanded="true"
-      >
-        network
-        <span class="list-group-count">(48)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-91e02cd2b8621d0c05197f645668c5c4"
-           role="tabpanel" aria-labelledby="heading-91e02cd2b8621d0c05197f645668c5c4">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20220221-dns-10-coredns-07-queryperf-performance-testing/" title="CoreDNS篇7-性能压测"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇7-性能压测</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20220220-dns-09-coredns-06-recursive-dns/" title="CoreDNS篇6-递归服务器"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇6-递归服务器</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20220114-dns-08-coredns-05-log/" title="CoreDNS篇5-日志处理"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇5-日志处理</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20211203-dpvs-fullnat-keepalived/" title="DPVS-FullNAT模式keepalived篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式keepalived篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210810-dpvs-fullnat-management/" title="DPVS-FullNAT模式管理篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式管理篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210728-dpvs-fullnat-deploy/" title="DPVS-FullNAT模式部署篇"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS-FullNAT模式部署篇</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210713-dns-07-coredns-04-unbound/" title="CoreDNS篇4-编译安装unbound"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇4-编译安装unbound</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210712-nginx-12-triple-rate-limiting-limit-rate/" title="nginx篇12-限速三剑客之limit_rate"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇12-限速三剑客之limit_rate</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210708-nginx-11-triple-rate-limiting-limit-conn/" title="nginx篇11-限速三剑客之limit_conn"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇11-限速三剑客之limit_conn</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210623-dns-06-coredns-03-prometheus/" title="CoreDNS篇3-接入prometheus监控"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇3-接入prometheus监控</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210616-nginx-10-triple-rate-limiting-limit-req/" title="nginx篇10-限速三剑客之limit_req"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇10-限速三剑客之limit_req</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210527-nginx-09-if-is-evil-in-location/" title="nginx篇09-location中的if指令是魔鬼吧"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇09-location中的if指令是魔鬼吧</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210520-dns-05-bind9-keepalived-ha-installation/" title="bind篇01-Bind+Keepalived安装高可用DNS集群"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">bind篇01-Bind+Keepalived安装高可用DNS集群</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210516-dns-04-coredns-02--install-external-plugins/" title="CoreDNS篇2-编译安装External Plugins"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇2-编译安装External Plugins</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210509-dns-03-coredns-01-introduction/" title="CoreDNS篇1-简介和安装"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CoreDNS篇1-简介和安装</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210317-openresty-01-introduction-and-installation/" title="OpenResty篇01-入门简介和安装配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">OpenResty篇01-入门简介和安装配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210304-nginx-08-ssl-client-certificate/" title="nginx篇08-添加客户端证书认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">nginx篇08-添加客户端证书认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20210224-dns-02-pdns01-pdns-auth-and-rec-introduction/" title="PowerDNS篇1-简介和安装"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">PowerDNS篇1-简介和安装</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201112-dpdk-in-dpvs-principle-analysis/" title="DPDK在DPVS中的应用及原理分析"
-           class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">DPDK在DPVS中的应用及原理分析</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201103-dpvs-deploy-in-centos7/" title="DPVS简介与部署"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">DPVS简介与部署</span>
-        </a>
-      
-    
-      
-      
-        <a href="/categories/network/" class="list-group-item list-group-item-action">
-          <span class="category-post">More...</span>
-        </a>
-        
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">DPDK在DPVS中的应用及原理分析</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on November 12, 2020 pm
-                  
+                  本文最后更新于：November 12, 2020 pm
                 
               </p>
             
             <div class="markdown-body">
-              
               <p><a href="https://tinychen.com/20201103-dpvs-deploy-in-centos7/">上一篇文章</a>中我们已经介绍了DPVS的特点和部署方式，本文主要是用于介绍DPVS是如何实现前面所说的特点，或者说是如何提高性能的。</p>
 <p>下图是爱奇艺的DPVS开发团队给出的DPVS在提高性能方面的操作，我们这里换一个角度，自底向上，从底层的CPU、内存、网卡来看这些操作是如何实现的。</p>
 <blockquote>
@@ -512,7 +258,7 @@
 <h1 id="1、From-NIC-drivers"><a href="#1、From-NIC-drivers" class="headerlink" title="1、From NIC drivers"></a>1、From NIC drivers</h1><h2 id="PMD-（Poll-Mode-Driver）"><a href="#PMD-（Poll-Mode-Driver）" class="headerlink" title="PMD （Poll Mode Driver）"></a>PMD （Poll Mode Driver）</h2><p><img src="https://resource.tinychen.com/20201112135143.png" srcset="/img/loading.gif" lazyload></p>
 <p>使用top命令查看系统资源占用，我们会发现在dpvs中对网卡收发队列进行了一一绑定的CPU核心占用率会一直维持在100%，并且是用户态的100%占用，并且无论是否有流量在所属的dpdk网卡上经过，都会一直维持在100%的状态。这是dpdk的一个特性，称之为**<a target="_blank" rel="noopener" href="http://doc.dpdk.org/guides/prog_guide/poll_mode_drv.html">PMD（Poll Mode Driver）</a>**。前面在安装dpdk的时候，我们需要使用dpdk给对应的网卡来安装特定的网卡驱动，比如我们这里用于测试使用的82599网卡使用的是UIO驱动，这些都是属于PMD驱动。目前DPDK支持1G、10G、40G以及半虚拟化的virtio网卡的PMD驱动。</p>
 <p>对于运行着dpdk的机器，我们查看内核模块和对应的dpdk网卡驱动，可以发现uio模块和PMD驱动的踪迹，其中04:00.1是dpdk的网卡，而04:00.0则是普通状态下的网卡</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># lsmod | grep uio</span><br><span class="hljs-string">igb_uio</span>                <span class="hljs-number">13414</span>  <span class="hljs-number">1</span><br><span class="hljs-string">uio</span>                    <span class="hljs-number">19338</span>  <span class="hljs-number">3</span> <span class="hljs-string">igb_uio</span><br><br><span class="hljs-number">04</span><span class="hljs-string">:00.0</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">ixgbe</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br><span class="hljs-number">04</span><span class="hljs-string">:00.1</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">igb_uio</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># lsmod | grep uio</span><br><span class="hljs-string">igb_uio</span>                <span class="hljs-number">13414</span>  <span class="hljs-number">1</span><br><span class="hljs-string">uio</span>                    <span class="hljs-number">19338</span>  <span class="hljs-number">3</span> <span class="hljs-string">igb_uio</span><br><br><span class="hljs-number">04</span><span class="hljs-string">:00.0</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">ixgbe</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br><span class="hljs-number">04</span><span class="hljs-string">:00.1</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">igb_uio</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br></code></pre></div></td></tr></table></figure>
 
 <p>PMD驱动包含了各种API，并且提供了在用户态运行的BSD驱动，用于配置网卡和网卡的收发队列。此外，PWD驱动最大的优势就是无需任何中断操作就可以直接访问网卡队列中的RX/TX描述符（除了网卡的链接状态变化），借助这个优势，就可以绕过内核和同样运行在用户态的应用程序快速地进行数据传输。我们可以通过下图来对比传统的应用程序和网卡通信的方式以及使用PMD驱动后和网卡通信的方式。</p>
 <p><img src="https://resource.tinychen.com/20201112135138.jpeg" srcset="/img/loading.gif" lazyload></p>
@@ -555,7 +301,7 @@
 <li><p>NUMA node表示这块PCIe网卡插在的插槽是哪一颗CPU对应的PCIe总线</p>
 </li>
 </ul>
-<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">04</span>:<span class="hljs-number">00</span>.<span class="hljs-number">1</span> Ethernet controller: Intel Corporation <span class="hljs-number">82599</span>ES <span class="hljs-number">10</span>-Gigabit SFI/SFP+ Network Connection (rev <span class="hljs-number">01</span>)<br>        <span class="hljs-attribute">Subsystem</span>: Intel Corporation Ethernet Server Adapter X<span class="hljs-number">520</span>-<span class="hljs-number">2</span><br>        <span class="hljs-attribute">NUMA</span> node: <span class="hljs-number">0</span><br>                <span class="hljs-attribute">LnkCap</span>: Port #<span class="hljs-number">0</span>, Speed <span class="hljs-number">5</span>GT/s, Width x<span class="hljs-number">8</span>, ASPM L<span class="hljs-number">0</span>s, Exit Latency L<span class="hljs-number">0</span>s &lt;<span class="hljs-number">1</span>us, L<span class="hljs-number">1</span> &lt;<span class="hljs-number">8</span>us<br>                        <span class="hljs-attribute">ClockPM</span>- Surprise- LLActRep- BwNot- ASPMOptComp-<br>        <span class="hljs-attribute">Kernel</span> driver in use: igb_uio<br>        <span class="hljs-attribute">Kernel</span> modules: ixgbe<br></code></pre></td></tr></table></figure>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">04</span>:<span class="hljs-number">00</span>.<span class="hljs-number">1</span> Ethernet controller: Intel Corporation <span class="hljs-number">82599</span>ES <span class="hljs-number">10</span>-Gigabit SFI/SFP+ Network Connection (rev <span class="hljs-number">01</span>)<br>        <span class="hljs-attribute">Subsystem</span>: Intel Corporation Ethernet Server Adapter X<span class="hljs-number">520</span>-<span class="hljs-number">2</span><br>        <span class="hljs-attribute">NUMA</span> node: <span class="hljs-number">0</span><br>                <span class="hljs-attribute">LnkCap</span>: Port #<span class="hljs-number">0</span>, Speed <span class="hljs-number">5</span>GT/s, Width x<span class="hljs-number">8</span>, ASPM L<span class="hljs-number">0</span>s, Exit Latency L<span class="hljs-number">0</span>s &lt;<span class="hljs-number">1</span>us, L<span class="hljs-number">1</span> &lt;<span class="hljs-number">8</span>us<br>                        <span class="hljs-attribute">ClockPM</span>- Surprise- LLActRep- BwNot- ASPMOptComp-<br>        <span class="hljs-attribute">Kernel</span> driver in use: igb_uio<br>        <span class="hljs-attribute">Kernel</span> modules: ixgbe<br></code></pre></div></td></tr></table></figure>
 
 <p>RSS（Receive Side Scaling）功能的实现其实和网卡以及CPU都有关系，但是这里放到CPU的部分来分析，主要是需要前面提及的技术作为支撑。关于RSS的一些说明我们可以参考Linux内核的<a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/networking/scaling.txt">官网文档</a>，此外微软的官方文档也有不错的图文解释。</p>
 <blockquote>
@@ -565,7 +311,7 @@
 <p>基于这些特性，DPVS可以在配置中设定worker进程、CPU核心和网卡收发队列的一一绑定，最好的情况下就是全部都是在一颗物理CPU上，这样带来的性能提升最明显。</p>
 <p>这是DPVS宣传的<code>NUMA Awareness</code>和<code>RX steering&amp;CPU</code>的技术原理。</p>
 <h1 id="3、From-memory"><a href="#3、From-memory" class="headerlink" title="3、From memory"></a>3、From memory</h1><h2 id="Huge-page大页内存"><a href="#Huge-page大页内存" class="headerlink" title="Huge page大页内存"></a>Huge page大页内存</h2><p>DPDK广泛使用了大页内存（2M或者1G）机制（对于DPVS来说，主要使用的是2MB的大页内存），以Linux系统为例，1G的大页一般不能在系统加载后动态分配，所以一般会在内核加载的时候设置好需要用到的大页。例如，增加内核启动参数<code>default_hugepagesz=1G hugepagesz=1G hugepages=8</code>来配置好8个1G的大页。在Linux系统上，可以通过命令<code>cat /proc/meminfo</code>来查看系统加载后的内存状况和大页内存的分配状况。</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-comment"># cat /proc/meminfo | grep Huge</span><br><span class="hljs-attr">AnonHugePages:</span>    <span class="hljs-number">243712</span> <span class="hljs-string">kB</span><br><span class="hljs-attr">HugePages_Total:</span>   <span class="hljs-number">16384</span><br><span class="hljs-attr">HugePages_Free:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">HugePages_Rsvd:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">HugePages_Surp:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">Hugepagesize:</span>       <span class="hljs-number">2048 </span><span class="hljs-string">kB</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># cat /proc/meminfo | grep Huge</span><br><span class="hljs-attr">AnonHugePages:</span>    <span class="hljs-number">243712</span> <span class="hljs-string">kB</span><br><span class="hljs-attr">HugePages_Total:</span>   <span class="hljs-number">16384</span><br><span class="hljs-attr">HugePages_Free:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">HugePages_Rsvd:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">HugePages_Surp:</span>        <span class="hljs-number">0</span><br><span class="hljs-attr">Hugepagesize:</span>       <span class="hljs-number">2048 </span><span class="hljs-string">kB</span><br></code></pre></div></td></tr></table></figure>
 
 <p>注意上面的<code>AnonHugePages</code>和我们这里要讲的<code>Hugepages</code>不是一类东西，建议忽略。同时<code>Hugepages</code>不会备注大小，上面的<code>Hugepagesize</code>表明使用的是2MB的大页内存，而<code>HugePages_Total</code>表明有<code>16384</code>个这么大的大页内存，所以这里一共是32GB的大页内存。</p>
 <p>在继续后面的内容之前我们需要了解一下TLB是什么。</p>
@@ -580,58 +326,40 @@
 <h1 id="4、总结"><a href="#4、总结" class="headerlink" title="4、总结"></a>4、总结</h1><p>稍加深入分析之后我们不难发现DPVS的高性能实现基本都是依靠特定硬件和DPDK来实现的，那么DPVS的优势在哪里呢？</p>
 <p>实际上DPDK作为一套开发套件，本身并不是特别的完善，由于它的PMD驱动绕过了内核的网络栈，因此想要实现DPDK+LVS的核心难度在于如何在用户态实现一套轻量级的网络协议栈（L4LB不需要完整的网络栈），这也是DPVS的最核心难点之一。</p>
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/network/" class="category-chain-item">network</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/loadbalance/">#loadbalance</a>
-      
-        <a href="/tags/lvs/">#lvs</a>
-      
-        <a href="/tags/dpdk/">#dpdk</a>
-      
-        <a href="/tags/dpvs/">#dpvs</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/network/">network</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/loadbalance/">loadbalance</a>
+                    
+                      <a class="hover-with-bg" href="/tags/lvs/">lvs</a>
+                    
+                      <a class="hover-with-bg" href="/tags/dpdk/">dpdk</a>
+                    
+                      <a class="hover-with-bg" href="/tags/dpvs/">dpvs</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20201116-linux-modify-ssh-login-banner/" title="linux中设置ssh登录时显示的banner">
+                      <a href="/20201116-linux-modify-ssh-login-banner/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">linux中设置ssh登录时显示的banner</span>
                         <span class="visible-mobile">Previous</span>
@@ -641,7 +369,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20201103-dpvs-deploy-in-centos7/" title="DPVS简介与部署">
+                      <a href="/20201103-dpvs-deploy-in-centos7/">
                         <span class="hidden-mobile">DPVS简介与部署</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -657,49 +385,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -724,48 +422,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -776,69 +471,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -848,153 +489,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

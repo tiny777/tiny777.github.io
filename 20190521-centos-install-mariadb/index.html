@@ -38,22 +38,28 @@
   
   <title>CentOS7安装MariaDB - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -62,41 +68,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -178,7 +169,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -191,53 +181,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210617170538.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="CentOS7安装MariaDB">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-05-21 15:00" pubdate>
+        May 21, 2019 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210617170538.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="CentOS7安装MariaDB"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2019-05-21 15:00" pubdate>
-          May 21, 2019 pm
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -246,195 +228,64 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="storage"
-        id="heading-ddecebdea58b5f264d27f1f7909bab74" role="tab" data-toggle="collapse" href="#collapse-ddecebdea58b5f264d27f1f7909bab74"
-        aria-expanded="true"
-      >
-        storage
-        <span class="list-group-count">(9)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-ddecebdea58b5f264d27f1f7909bab74"
-           role="tabpanel" aria-labelledby="heading-ddecebdea58b5f264d27f1f7909bab74">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20200424-nosql-base-introduction/" title="NoSQL数据库简介"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">NoSQL数据库简介</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200410-ceph-02-ceph-deploy-deploy-ceph/" title="Ceph系列02-使用ceph-deploy部署ceph集群"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Ceph系列02-使用ceph-deploy部署ceph集群</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200201-ceph-01-ceph-introduction/" title="Ceph系列01-Ceph简介"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Ceph系列01-Ceph简介</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20191122-mysql8-reset-passwd/" title="MySQL8重置root密码"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">MySQL8重置root密码</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190618-database-review/" title="数据库原理部分重点内容"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">数据库原理部分重点内容</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190521-centos-install-mariadb/" title="CentOS7安装MariaDB"
-           class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">CentOS7安装MariaDB</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190310-mysql-note-03/" title="MySQL学习笔记3-SQL基本操作"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">MySQL学习笔记3-SQL基本操作</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190310-centos-install-mysql/" title="CentOS7安装MySQL"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">CentOS7安装MySQL</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190309-mysql-base-know/" title="MySQL数据库基本概念"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">MySQL数据库基本概念</span>
-        </a>
-      
-    
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">CentOS7安装MariaDB</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on May 21, 2019 pm
-                  
+                  本文最后更新于：May 21, 2019 pm
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>主要是在CentOS7上安装MariaDB服务。</p>
 <span id="more"></span>
 
 <h1 id="1、为什么换用MariaDB？"><a href="#1、为什么换用MariaDB？" class="headerlink" title="1、为什么换用MariaDB？"></a>1、为什么换用MariaDB？</h1><p>之前写过一篇教程是把<a href="https://tinychen.com/20190310-centos-install-mysql/">内置的MariaDB卸载然后换用MySQL</a>，最近因为MySQL不支持Check子句，还有一次插入多条数据也不行，反正就是想用一下MariaDB，就又换回来了。</p>
 <h1 id="2、卸载MySQL"><a href="#2、卸载MySQL" class="headerlink" title="2、卸载MySQL"></a>2、卸载MySQL</h1><p><strong>注意，在卸载MySQL之前请先使用dump命令备份数据库。</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看系统中安装的MySQL服务</span><br>rpm -qa | grep mysql<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看系统中安装的MySQL服务</span><br>rpm -qa | grep mysql<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190523/aeGO7MB94uBm.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用rpm卸载掉对应的组件</span><br>rpm -e &lt;packege&gt;<br><span class="hljs-comment"># 如果出现提示依赖的问题，加上--nodeps</span><br>rpm -e --nodeps &lt;packege&gt;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用rpm卸载掉对应的组件</span><br>rpm -e &lt;packege&gt;<br><span class="hljs-comment"># 如果出现提示依赖的问题，加上--nodeps</span><br>rpm -e --nodeps &lt;packege&gt;<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190523/iRLHKs5GSwvh.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、新建yum源"><a href="#3、新建yum源" class="headerlink" title="3、新建yum源"></a>3、新建yum源</h1><p>MariaDB的yum安装官网链接：</p>
 <p><a target="_blank" rel="noopener" href="http://yum.mariadb.org/">http://yum.mariadb.org/</a></p>
 <p>进去可以看到目前最新的应该是10.4.5版本，于是我们就在<code>/etc/yum.repos.d</code>目录下面新建一个yum源文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /etc/yum.repos.d/MariaDB.repo<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/yum.repos.d/MariaDB.repo<br></code></pre></div></td></tr></table></figure>
 
 <p>在repo文件中写入下列内容，注意<code>baseurl</code>可以根据版本的更新而改变。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">[MariaDB]<br>name = MariaDB<br>baseurl = http://yum.mariadb.org/10.4.5/centos7-amd64/<br>gpgkey = http://yum.mariadb.org/RPM-GPG-KEY-MariaDB<br>gpgcheck = 1<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[MariaDB]<br>name = MariaDB<br>baseurl = http://yum.mariadb.org/10.4.5/centos7-amd64/<br>gpgkey = http://yum.mariadb.org/RPM-GPG-KEY-MariaDB<br>gpgcheck = 1<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190523/AaO0ChTlCCeb.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 输入下列命令清除并更新yum源</span><br>yum clean all -v<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 输入下列命令清除并更新yum源</span><br>yum clean all -v<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190523/EBfeojo0q0lv.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="4、安装MariaDB"><a href="#4、安装MariaDB" class="headerlink" title="4、安装MariaDB"></a>4、安装MariaDB</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看yum源中的Maria，注意字母的大小写要和上面写的yum源文件一样</span><br>yum list | grep Maria<br></code></pre></td></tr></table></figure>
+<h1 id="4、安装MariaDB"><a href="#4、安装MariaDB" class="headerlink" title="4、安装MariaDB"></a>4、安装MariaDB</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看yum源中的Maria，注意字母的大小写要和上面写的yum源文件一样</span><br>yum list | grep Maria<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190523/Iz1jFMiTk9Nj.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里应该是10.4.5，就说明是之前我们写的yum源。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 输入下面这条指令进行安装MariaDB，注意不要加-y选项，先确定一下版本是否正确</span><br>yum install MariaDB<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 输入下面这条指令进行安装MariaDB，注意不要加-y选项，先确定一下版本是否正确</span><br>yum install MariaDB<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190523/3JQoFyQA0Gdq.png" srcset="/img/loading.gif" lazyload></p>
 <p>确定版本无误后，按y确定安装。</p>
 <p><img src="https://resource.tinychen.com/blog/20190523/ykqByqkrMiSm.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> mariadb<br><br><span class="hljs-comment"># 开启mariadb服务</span><br>systemctl start mariadb<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> mariadb<br><br><span class="hljs-comment"># 开启mariadb服务</span><br>systemctl start mariadb<br></code></pre></div></td></tr></table></figure>
 
 
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 查看安装后的mysql版本</span><br>mysql --version<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看安装后的mysql版本</span><br>mysql --version<br></code></pre></div></td></tr></table></figure>
 
 <p>这里可以看到MariaDB，使用的方法还是和之前一样，账号也还是之前的Mysql的账号。</p>
 <p><img src="https://resource.tinychen.com/blog/20190523/SnG8Alx0uzrf.png" srcset="/img/loading.gif" lazyload></p>
@@ -443,60 +294,42 @@
 <p>使用<code>-l</code>参数查看详细状态</p>
 <p><img src="https://resource.tinychen.com/blog/20190523/bl8knrFMJfNM.png" srcset="/img/loading.gif" lazyload></p>
 <p>看到这里有两个ERROR，再按照提示输入下列命令升级mysql即可</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">mysql_upgrade -u root -p<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mysql_upgrade -u root -p<br></code></pre></div></td></tr></table></figure>
 
 <p>报错的原因应该是因为mysql换为mariadb之后配置信息的链接没有及时更新导致无法正常启动，因此需要upgrade。</p>
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/storage/" class="category-chain-item">storage</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/mysql/">#mysql</a>
-      
-        <a href="/tags/centos/">#centos</a>
-      
-        <a href="/tags/database/">#database</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/storage/">storage</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/mysql/">mysql</a>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/database/">database</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20190601-isp-upgrade-sdn/" title="Optimizing Gradual SDN Upgrades in ISP Networks">
+                      <a href="/20190601-isp-upgrade-sdn/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">Optimizing Gradual SDN Upgrades in ISP Networks</span>
                         <span class="visible-mobile">Previous</span>
@@ -506,7 +339,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20190413-centos-install-python/" title="CentOS配置Python3开发环境">
+                      <a href="/20190413-centos-install-python/">
                         <span class="hidden-mobile">CentOS配置Python3开发环境</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -522,49 +355,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -589,48 +392,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -641,69 +441,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -713,153 +459,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

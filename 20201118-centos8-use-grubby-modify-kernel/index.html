@@ -37,22 +37,28 @@
   
   <title>centos8使用grubby修改内核启动参数 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -61,41 +67,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -177,7 +168,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -190,53 +180,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106163702.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="centos8使用grubby修改内核启动参数">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-11-18 11:00" pubdate>
+        November 18, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210106163702.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="centos8使用grubby修改内核启动参数"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2020-11-18 11:00" pubdate>
-          November 18, 2020 am
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -245,328 +227,74 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="linux"
-        id="heading-e206a54e97690cce50cc872dd70ee896" role="tab" data-toggle="collapse" href="#collapse-e206a54e97690cce50cc872dd70ee896"
-        aria-expanded="true"
-      >
-        linux
-        <span class="list-group-count">(57)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-e206a54e97690cce50cc872dd70ee896"
-           role="tabpanel" aria-labelledby="heading-e206a54e97690cce50cc872dd70ee896">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20210705-rockylinux-quick-start-experience/" title="RockyLinux简单安装上手体验"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">RockyLinux简单安装上手体验</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201222-centos8-install-fail2ban/" title="给ssh服务添加fail2ban安全认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">给ssh服务添加fail2ban安全认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201220-ubuntu2004-init/" title="ubuntu20.04初始化的部分操作"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">ubuntu20.04初始化的部分操作</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201203-ssh-add-google-authenticator/" title="给ssh服务添加谷歌双重认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">给ssh服务添加谷歌双重认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201128-add-progess-bar-in-cp-mv/" title="给cp和mv命令添加进度条"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">给cp和mv命令添加进度条</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201127-use-acme-letsencrypt-ecc-certs/" title="使用acme.sh工具申请let&#39;s encrypt的泛域名证书"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">使用acme.sh工具申请let&#39;s encrypt的泛域名证书</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201118-centos8-use-grubby-modify-kernel/" title="centos8使用grubby修改内核启动参数"
-           class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">centos8使用grubby修改内核启动参数</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201116-linux-modify-ssh-login-banner/" title="linux中设置ssh登录时显示的banner"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">linux中设置ssh登录时显示的banner</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201024-centos8-modify-eth-name/" title="centos7/8修改网卡名称并持久化配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">centos7/8修改网卡名称并持久化配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200924-wsl2-limit-memory/" title="限制wsl2占用过多内存"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">限制wsl2占用过多内存</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200912-ssh-config-introduction/" title="ssh常用配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">ssh常用配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200903-linux-xargs-command-introduction/" title="xrags命令的常见用法"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">xrags命令的常见用法</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200902-megacli-command-introduction/" title="Megacli常用命令整理"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Megacli常用命令整理</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200718-wsl-access-is-denied/" title="wsl access is denied"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">wsl access is denied</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200713-gpg-check-file/" title="使用gpg来对下载的文件进行校验"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">使用gpg来对下载的文件进行校验</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200701-bash-show-pwd/" title="在bash中开启显示完整路径"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">在bash中开启显示完整路径</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200616-centos-modify-hostname/" title="RHEL/CentOS修改hostname"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">RHEL/CentOS修改hostname</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200602-encryption-intro/" title="SSL/TLS、对称加密和非对称加密和TLSv1.3"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">SSL/TLS、对称加密和非对称加密和TLSv1.3</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200120-linux-ntfsfix-ntfs/" title="使用ntfsfix解决Linux下无法挂载NTFS硬盘的问题"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">使用ntfsfix解决Linux下无法挂载NTFS硬盘的问题</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200110-gnome-extension-recommand/" title="常用的高效gnome插件以及主题的下载地址"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">常用的高效gnome插件以及主题的下载地址</span>
-        </a>
-      
-    
-      
-      
-        <a href="/categories/linux/" class="list-group-item list-group-item-action">
-          <span class="category-post">More...</span>
-        </a>
-        
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">centos8使用grubby修改内核启动参数</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on November 18, 2020 am
-                  
+                  本文最后更新于：November 18, 2020 am
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>grubby是一个用于更新和显示有关各种体系结构特定的引导程序的配置文件信息的命令行工具。 它主要设计用于安装新内核并需要查找有关当前引导环境的信息的脚本，同时也可以对启动内核的各项信息参数进行修改。</p>
 <p>本文主要介绍如何在centos8中使用grubby工具来对系统的内核启动参数和启动顺序进行调整。</p>
 <span id="more"></span>
 
 <p>使用yum或者dnf可以直接安装grubby工具。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ yum install grubby<br>Last metadata expiration check: 1:29:38 ago on Wed 18 Nov 2020 09:44:26 AM +08.<br>Package grubby-8.40-38.el8.x86_64 is already installed.<br>Dependencies resolved.<br>Nothing to <span class="hljs-keyword">do</span>.<br>Complete!<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ yum install grubby<br>Last metadata expiration check: 1:29:38 ago on Wed 18 Nov 2020 09:44:26 AM +08.<br>Package grubby-8.40-38.el8.x86_64 is already installed.<br>Dependencies resolved.<br>Nothing to <span class="hljs-keyword">do</span>.<br>Complete!<br></code></pre></div></td></tr></table></figure>
 
 <p>查看当前的默认启动内核：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ grubby --default-kernel<br>/boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ grubby --default-kernel<br>/boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64<br></code></pre></div></td></tr></table></figure>
 
 <p>查看系统安装的全部内核：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ grubby --info=ALL<br>index=0<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-5.9.1-1.el8.elrepo.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;Red Hat Enterprise Linux (5.9.1-1.el8.elrepo.x86_64) 8.2 (Ootpa)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-5.9.1-1.el8.elrepo.x86_64&quot;</span><br>index=1<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-4.18.0-193.28.1.el8_2.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (4.18.0-193.28.1.el8_2.x86_64) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.28.1.el8_2.x86_64&quot;</span><br>index=2<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-4.18.0-193.19.1.el8_2.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-4.18.0-193.19.1.el8_2.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (4.18.0-193.19.1.el8_2.x86_64) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.19.1.el8_2.x86_64&quot;</span><br>index=3<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-4.18.0-193.el8.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-4.18.0-193.el8.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (4.18.0-193.el8.x86_64) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.el8.x86_64&quot;</span><br>index=4<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-0-rescue-12ab47b22fef4c02bcdc88b340d5f706&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-0-rescue-12ab47b22fef4c02bcdc88b340d5f706.img&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (0-rescue-12ab47b22fef4c02bcdc88b340d5f706) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-0-rescue&quot;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ grubby --info=ALL<br>index=0<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-5.9.1-1.el8.elrepo.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;Red Hat Enterprise Linux (5.9.1-1.el8.elrepo.x86_64) 8.2 (Ootpa)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-5.9.1-1.el8.elrepo.x86_64&quot;</span><br>index=1<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-4.18.0-193.28.1.el8_2.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (4.18.0-193.28.1.el8_2.x86_64) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.28.1.el8_2.x86_64&quot;</span><br>index=2<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-4.18.0-193.19.1.el8_2.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-4.18.0-193.19.1.el8_2.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (4.18.0-193.19.1.el8_2.x86_64) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.19.1.el8_2.x86_64&quot;</span><br>index=3<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-4.18.0-193.el8.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-4.18.0-193.el8.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (4.18.0-193.el8.x86_64) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.el8.x86_64&quot;</span><br>index=4<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-0-rescue-12ab47b22fef4c02bcdc88b340d5f706&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-0-rescue-12ab47b22fef4c02bcdc88b340d5f706.img&quot;</span><br>title=<span class="hljs-string">&quot;CentOS Linux (0-rescue-12ab47b22fef4c02bcdc88b340d5f706) 8 (Core)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-0-rescue&quot;</span><br></code></pre></div></td></tr></table></figure>
 
 <p>设置新的默认启动内核：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 使用路径来指定内核，可以使用--set-default=kernel-path</span><br>$ grubby --set-default=/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br>The default is /boot/loader/entries/12ab47b22fef4c02bcdc88b340d5f706-5.9.1-1.el8.elrepo.x86_64.conf with index 0 and kernel /boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br>$ grubby --default-kernel<br>/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br><br><span class="hljs-comment"># 使用index来指定内核，则使用--set-default-index=entry-index</span><br>$ grubby --set-default-index=1<br>The default is /boot/loader/entries/12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.28.1.el8_2.x86_64.conf with index 1 and kernel /boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64<br>$ grubby --default-kernel<br>/boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用路径来指定内核，可以使用--set-default=kernel-path</span><br>$ grubby --set-default=/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br>The default is /boot/loader/entries/12ab47b22fef4c02bcdc88b340d5f706-5.9.1-1.el8.elrepo.x86_64.conf with index 0 and kernel /boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br>$ grubby --default-kernel<br>/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br><br><span class="hljs-comment"># 使用index来指定内核，则使用--set-default-index=entry-index</span><br>$ grubby --set-default-index=1<br>The default is /boot/loader/entries/12ab47b22fef4c02bcdc88b340d5f706-4.18.0-193.28.1.el8_2.x86_64.conf with index 1 and kernel /boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64<br>$ grubby --default-kernel<br>/boot/vmlinuz-4.18.0-193.28.1.el8_2.x86_64<br></code></pre></div></td></tr></table></figure>
 
 <p>添加/删除内核启动参数：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 对所有的内核都删除某个参数  </span><br>$ grubby --update-kernel=ALL --remove-args=intel_iommu=on<br><br><span class="hljs-comment"># 对所有的内核都添加某个参数  </span><br>$ grubby --update-kernel=ALL --args=intel_iommu=on<br><br><span class="hljs-comment"># 对某个的内核添加启动参数  </span><br>$ grubby --update-kernel=/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64 --args=intel_iommu=on<br><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 对所有的内核都删除某个参数  </span><br>$ grubby --update-kernel=ALL --remove-args=intel_iommu=on<br><br><span class="hljs-comment"># 对所有的内核都添加某个参数  </span><br>$ grubby --update-kernel=ALL --args=intel_iommu=on<br><br><span class="hljs-comment"># 对某个的内核添加启动参数  </span><br>$ grubby --update-kernel=/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64 --args=intel_iommu=on<br><br></code></pre></div></td></tr></table></figure>
 
 <p>查看特定内核的具体信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ grubby --info=/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br>index=0<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-5.9.1-1.el8.elrepo.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;Red Hat Enterprise Linux (5.9.1-1.el8.elrepo.x86_64) 8.2 (Ootpa)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-5.9.1-1.el8.elrepo.x86_64&quot;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ grubby --info=/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64<br>index=0<br>kernel=<span class="hljs-string">&quot;/boot/vmlinuz-5.9.1-1.el8.elrepo.x86_64&quot;</span><br>args=<span class="hljs-string">&quot;ro crashkernel=auto resume=/dev/mapper/cl-swap rd.lvm.lv=cl/root rd.lvm.lv=cl/swap net.ifnames=0 rhgb quiet intel_iommu=on <span class="hljs-variable">$tuned_params</span>&quot;</span><br>root=<span class="hljs-string">&quot;/dev/mapper/cl-root&quot;</span><br>initrd=<span class="hljs-string">&quot;/boot/initramfs-5.9.1-1.el8.elrepo.x86_64.img <span class="hljs-variable">$tuned_initrd</span>&quot;</span><br>title=<span class="hljs-string">&quot;Red Hat Enterprise Linux (5.9.1-1.el8.elrepo.x86_64) 8.2 (Ootpa)&quot;</span><br>id=<span class="hljs-string">&quot;12ab47b22fef4c02bcdc88b340d5f706-5.9.1-1.el8.elrepo.x86_64&quot;</span><br></code></pre></div></td></tr></table></figure>
 
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/linux/" class="category-chain-item">linux</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/centos/">#centos</a>
-      
-        <a href="/tags/grubby/">#grubby</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/grubby/">grubby</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20201120-k8s-01-what-is-kubernetes/" title="k8s系列01-什么是kubernetes？">
+                      <a href="/20201120-k8s-01-what-is-kubernetes/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">k8s系列01-什么是kubernetes？</span>
                         <span class="visible-mobile">Previous</span>
@@ -576,7 +304,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20201116-linux-modify-ssh-login-banner/" title="linux中设置ssh登录时显示的banner">
+                      <a href="/20201116-linux-modify-ssh-login-banner/">
                         <span class="hidden-mobile">linux中设置ssh登录时显示的banner</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -592,49 +320,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -659,48 +357,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -711,69 +406,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -783,153 +424,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

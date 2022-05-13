@@ -36,22 +36,28 @@
   
   <title>Tomcat篇04-部署和管理 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -60,41 +66,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -176,7 +167,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -189,53 +179,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210106171454.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Tomcat篇04-部署和管理">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-05-04 10:00" pubdate>
+        May 4, 2020 am
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210106171454.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="Tomcat篇04-部署和管理"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2020-05-04 10:00" pubdate>
-          May 4, 2020 am
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -244,179 +226,30 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="web"
-        id="heading-2567a5ec9705eb7ac2c984033e06189d" role="tab" data-toggle="collapse" href="#collapse-2567a5ec9705eb7ac2c984033e06189d"
-        aria-expanded="true"
-      >
-        web
-        <span class="list-group-count">(11)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-2567a5ec9705eb7ac2c984033e06189d"
-           role="tabpanel" aria-labelledby="heading-2567a5ec9705eb7ac2c984033e06189d">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20210303-tomcat-start-guide/" title="tomcat入门指北"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">tomcat入门指北</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200717-http-code-introduction/" title="常见的HTTP状态码"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">常见的HTTP状态码</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200608-http2-introduction/" title="HTTP2的特性解析"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">HTTP2的特性解析</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200504-tomcat-04-deploy-manager-serverxml/" title="Tomcat篇04-部署和管理"
-           class="list-group-item list-group-item-action
-           active">
-          <span class="category-post">Tomcat篇04-部署和管理</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200409-tomcat-03-jmeter-nio-nio2-apr/" title="Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Tomcat篇03-使用Jmeter对Tomcat9的三种IO模型进行持续压力测试</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200402-tomcat-02-structure-io-model/" title="Tomcat篇02-整体架构和I/O模型"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Tomcat篇02-整体架构和I/O模型</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200327-tomcat-01-brief-introduction-installation/" title="Tomcat篇01-概念简介和守护进程配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Tomcat篇01-概念简介和守护进程配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20191123-lnmp-install-wordpress/" title="搭建LNMP环境并配置wordpress网站"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">搭建LNMP环境并配置wordpress网站</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190829-http-to-nginx/" title="个人博客web服务器换用nginx"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">个人博客web服务器换用nginx</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20190407-aliyun-centos-apache-https/" title="阿里云轻量级应用服务器CentOS系统Apache配置Https"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">阿里云轻量级应用服务器CentOS系统Apache配置Https</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20181112-win-install-tomcat/" title="Windows上Apache Tomcat的安装配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Windows上Apache Tomcat的安装配置</span>
-        </a>
-      
-    
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">Tomcat篇04-部署和管理</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on May 4, 2020 am
-                  
+                  本文最后更新于：May 4, 2020 am
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>本文主要包括tomcat服务器的web应用部署和管理，以及<code>server.xml</code>的主要配置。</p>
 <span id="more"></span>
 
 <h1 id="1、manager应用"><a href="#1、manager应用" class="headerlink" title="1、manager应用"></a>1、manager应用</h1><p>tomcat本身内置了两个web应用，专门用来管理tomcat，它们分别是host-manager（管理virtual host）和manager（管理web应用）。</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">http:<span class="hljs-regexp">//</span>localhost:<span class="hljs-number">8080</span><span class="hljs-regexp">/host-manager/</span>html<br>http:<span class="hljs-regexp">//</span>localhost:<span class="hljs-number">8080</span><span class="hljs-regexp">/manager/</span>html<br></code></pre></td></tr></table></figure>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">http:<span class="hljs-regexp">//</span>localhost:<span class="hljs-number">8080</span><span class="hljs-regexp">/host-manager/</span>html<br>http:<span class="hljs-regexp">//</span>localhost:<span class="hljs-number">8080</span><span class="hljs-regexp">/manager/</span>html<br></code></pre></div></td></tr></table></figure>
 
 <p>在启动tomcat之后，我们访问上面的这两个网址可以发现被403了。因为我们还没有在配置文件中增加相关的用户，为了保证安全，这里的用户默认都是禁用的，我们需要自己创建。</p>
 <p>我们编辑tomcat目录下的conf子目录中的<code>tomcat-users.xml</code>，添加对应的配置即可：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--admin对应的是host-manager的用户--&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the HTML GUI--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;admin-gui&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the text interface--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;admin‐script&quot;</span>/&gt;</span><br><br><span class="hljs-comment">&lt;!--manager对应的是manager的用户--&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the HTML GUI and the status pages--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager-gui&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the text interface and the status pages--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager‐script&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the JMX proxy and the status pages--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager-jmx&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the status pages only--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager-status&quot;</span>/&gt;</span><br><br><span class="hljs-comment">&lt;!--我们这里添加一个用户，然后定义角色即可--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">user</span> <span class="hljs-attr">username</span>=<span class="hljs-string">&quot;tinychen&quot;</span> <span class="hljs-attr">password</span>=<span class="hljs-string">&quot;tinychen#321&quot;</span> <span class="hljs-attr">roles</span>=<span class="hljs-string">&quot;admin‐gui,manager-gui&quot;</span>/&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--admin对应的是host-manager的用户--&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the HTML GUI--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;admin-gui&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the text interface--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;admin‐script&quot;</span>/&gt;</span><br><br><span class="hljs-comment">&lt;!--manager对应的是manager的用户--&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the HTML GUI and the status pages--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager-gui&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the text interface and the status pages--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager‐script&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the JMX proxy and the status pages--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager-jmx&quot;</span>/&gt;</span><br><span class="hljs-comment">&lt;!--allows access to the status pages only--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">role</span> <span class="hljs-attr">rolename</span>=<span class="hljs-string">&quot;manager-status&quot;</span>/&gt;</span><br><br><span class="hljs-comment">&lt;!--我们这里添加一个用户，然后定义角色即可--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">user</span> <span class="hljs-attr">username</span>=<span class="hljs-string">&quot;tinychen&quot;</span> <span class="hljs-attr">password</span>=<span class="hljs-string">&quot;tinychen#321&quot;</span> <span class="hljs-attr">roles</span>=<span class="hljs-string">&quot;admin‐gui,manager-gui&quot;</span>/&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <blockquote>
 <p>Users with the <code>admin-gui</code> role should not be granted the <code>admin-script</code> role.</p>
@@ -425,10 +258,10 @@
 <p>注意被授予<code>manager-gui</code>权限的用户不应该授予<code>manager-script</code>或<code>manager-jmx</code>权限</p>
 </blockquote>
 <p>tomcat9中默认是只允许部署tomcat的机器访问manger和host-manager的页面的，因此我们需要修改tomcat目录下对应的web应用的配置文件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /home/tomcat9/webapps/host-manager/META-INF/context.xml <br>vim /home/tomcat9/webapps/manager/META-INF/context.xml<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /home/tomcat9/webapps/host-manager/META-INF/context.xml <br>vim /home/tomcat9/webapps/manager/META-INF/context.xml<br></code></pre></div></td></tr></table></figure>
 
 <p>然后修改里面限制的IP地址为全部或者自己的IP地址即可。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Context</span> <span class="hljs-attr">antiResourceLocking</span>=<span class="hljs-string">&quot;false&quot;</span> <span class="hljs-attr">privileged</span>=<span class="hljs-string">&quot;true&quot;</span> &gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Valve</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">allow</span>=<span class="hljs-string">&quot;127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1&quot;</span> /&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Manager</span> <span class="hljs-attr">sessionAttributeValueClassNameFilter</span>=<span class="hljs-string">&quot;java\.lang\.(?:Boolean|Integer|Long|Number|String)</span></span><br><span class="hljs-string"><span class="hljs-tag">|org\.apache\.catalina\.filters\.CsrfPreventionFilter\$LruCache(?:\$1)?|java\.util\.(?:Linked)?HashMap&quot;</span>/&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Context</span>&gt;</span><br><br># 将allow参数改为<br>  <span class="hljs-tag">&lt;<span class="hljs-name">Valve</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">allow</span>=<span class="hljs-string">&quot;^.*$&quot;</span> /&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Context</span> <span class="hljs-attr">antiResourceLocking</span>=<span class="hljs-string">&quot;false&quot;</span> <span class="hljs-attr">privileged</span>=<span class="hljs-string">&quot;true&quot;</span> &gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Valve</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">allow</span>=<span class="hljs-string">&quot;127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1&quot;</span> /&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Manager</span> <span class="hljs-attr">sessionAttributeValueClassNameFilter</span>=<span class="hljs-string">&quot;java\.lang\.(?:Boolean|Integer|Long|Number|String)</span></span><br><span class="hljs-string"><span class="hljs-tag">|org\.apache\.catalina\.filters\.CsrfPreventionFilter\$LruCache(?:\$1)?|java\.util\.(?:Linked)?HashMap&quot;</span>/&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Context</span>&gt;</span><br><br># 将allow参数改为<br>  <span class="hljs-tag">&lt;<span class="hljs-name">Valve</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.valves.RemoteAddrValve&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">allow</span>=<span class="hljs-string">&quot;^.*$&quot;</span> /&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <p>然后我们就可以访问web界面来查看tomcat服务器的运行状态了。</p>
 <ul>
@@ -460,10 +293,10 @@
 <li><strong>Nested Components</strong>：表示可以嵌套在<code>Container</code>元素内的元素。 注意一些元素可以嵌套在任何Container中，而另一些元素只能嵌套在<code>Context</code>中。</li>
 </ul>
 <h2 id="3-2-Top-Level-Elements"><a href="#3-2-Top-Level-Elements" class="headerlink" title="3.2 Top Level Elements"></a>3.2 Top Level Elements</h2><h3 id="3-2-1-Server块"><a href="#3-2-1-Server块" class="headerlink" title="3.2.1 Server块"></a>3.2.1 Server块</h3><p>Server块代表的是整个catalina servlet容器。因此，它必须是<code>conf/server.xml</code>配置文件中最外面的单个元素。它的属性代表了整个servlet容器的特征。Tomcat9中默认的配置文件中<code>Server</code>块内嵌的子元素为 <code>Listener</code>、<code>GlobalNamingResources</code>、<code>Service</code>（可以嵌套多个）。具体的每个属性参数我们可以查询<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/server.html">官网</a>，下面解释默认的参数配置。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Server</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8005&quot;</span> <span class="hljs-attr">shutdown</span>=<span class="hljs-string">&quot;SHUTDOWN&quot;</span>&gt;</span><br>    <span class="hljs-comment">&lt;!--</span><br><span class="hljs-comment">		port ： Tomcat监听的关闭服务器的端口 </span><br><span class="hljs-comment">		shutdown ： 关闭服务器的指令字符串</span><br><span class="hljs-comment"> 	--&gt;</span><br>    <br>    <span class="hljs-comment">&lt;!-- 以日志形式输出服务器、操作系统、JVM的版本信息 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.startup.VersionLoggerListener&quot;</span> /&gt;</span><br><br>    <span class="hljs-comment">&lt;!-- 启动和停止APR。如果找不到APR库会输出日志但并不影响tomcat正常启动 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.AprLifecycleListener&quot;</span> <span class="hljs-attr">SSLEngine</span>=<span class="hljs-string">&quot;off&quot;</span> /&gt;</span><br>    <span class="hljs-comment">&lt;!-- </span><br><span class="hljs-comment">        注意这里的SSLEngine默认是打开的（on）</span><br><span class="hljs-comment">        如果启用了apr作为连接器的协议</span><br><span class="hljs-comment">        但是只配置了http而没有配置https</span><br><span class="hljs-comment">        则会报错    </span><br><span class="hljs-comment">    --&gt;</span><br>  <br>    <span class="hljs-comment">&lt;!-- 用于避免JRE内存泄漏问题 --&gt;</span> <br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.JreMemoryLeakPreventionListener&quot;</span> /&gt;</span><br>  <br>    <span class="hljs-comment">&lt;!-- 用户加载（服务器启动）和销毁（服务器停止）全局命名服务 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.mbeans.GlobalResourcesLifecycleListener&quot;</span> /&gt;</span><br>  <br>    <span class="hljs-comment">&lt;!-- 用于在Context停止时重建Executor池中的线程， 以避免ThreadLocal相关的内</span><br><span class="hljs-comment">存泄漏 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.ThreadLocalLeakPreventionListener&quot;</span> /&gt;</span><br><br>    <span class="hljs-comment">&lt;!-- GlobalNamingResources中定义了全局命名服务： --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">GlobalNamingResources</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Resource</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;UserDatabase&quot;</span> <span class="hljs-attr">auth</span>=<span class="hljs-string">&quot;Container&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;org.apache.catalina.UserDatabase&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">description</span>=<span class="hljs-string">&quot;User database that can be updated and saved&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">factory</span>=<span class="hljs-string">&quot;org.apache.catalina.users.MemoryUserDatabaseFactory&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">pathname</span>=<span class="hljs-string">&quot;conf/tomcat-users.xml&quot;</span> /&gt;</span><br>              <span class="hljs-comment">&lt;!--这里定义的文件就是我们前面配置manager和host manager的用户的文件--&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">GlobalNamingResources</span>&gt;</span><br>  <br>  <span class="hljs-tag">&lt;<span class="hljs-name">Service</span>&gt;</span><br>    ...<br>  <span class="hljs-tag">&lt;/<span class="hljs-name">Service</span>&gt;</span><br> <br> <span class="hljs-tag">&lt;/<span class="hljs-name">Server</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Server</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8005&quot;</span> <span class="hljs-attr">shutdown</span>=<span class="hljs-string">&quot;SHUTDOWN&quot;</span>&gt;</span><br>    <span class="hljs-comment">&lt;!--</span><br><span class="hljs-comment">		port ： Tomcat监听的关闭服务器的端口 </span><br><span class="hljs-comment">		shutdown ： 关闭服务器的指令字符串</span><br><span class="hljs-comment"> 	--&gt;</span><br>    <br>    <span class="hljs-comment">&lt;!-- 以日志形式输出服务器、操作系统、JVM的版本信息 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.startup.VersionLoggerListener&quot;</span> /&gt;</span><br><br>    <span class="hljs-comment">&lt;!-- 启动和停止APR。如果找不到APR库会输出日志但并不影响tomcat正常启动 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.AprLifecycleListener&quot;</span> <span class="hljs-attr">SSLEngine</span>=<span class="hljs-string">&quot;off&quot;</span> /&gt;</span><br>    <span class="hljs-comment">&lt;!-- </span><br><span class="hljs-comment">        注意这里的SSLEngine默认是打开的（on）</span><br><span class="hljs-comment">        如果启用了apr作为连接器的协议</span><br><span class="hljs-comment">        但是只配置了http而没有配置https</span><br><span class="hljs-comment">        则会报错    </span><br><span class="hljs-comment">    --&gt;</span><br>  <br>    <span class="hljs-comment">&lt;!-- 用于避免JRE内存泄漏问题 --&gt;</span> <br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.JreMemoryLeakPreventionListener&quot;</span> /&gt;</span><br>  <br>    <span class="hljs-comment">&lt;!-- 用户加载（服务器启动）和销毁（服务器停止）全局命名服务 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.mbeans.GlobalResourcesLifecycleListener&quot;</span> /&gt;</span><br>  <br>    <span class="hljs-comment">&lt;!-- 用于在Context停止时重建Executor池中的线程， 以避免ThreadLocal相关的内</span><br><span class="hljs-comment">存泄漏 --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">Listener</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.ThreadLocalLeakPreventionListener&quot;</span> /&gt;</span><br><br>    <span class="hljs-comment">&lt;!-- GlobalNamingResources中定义了全局命名服务： --&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">GlobalNamingResources</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Resource</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;UserDatabase&quot;</span> <span class="hljs-attr">auth</span>=<span class="hljs-string">&quot;Container&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;org.apache.catalina.UserDatabase&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">description</span>=<span class="hljs-string">&quot;User database that can be updated and saved&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">factory</span>=<span class="hljs-string">&quot;org.apache.catalina.users.MemoryUserDatabaseFactory&quot;</span></span><br><span class="hljs-tag">              <span class="hljs-attr">pathname</span>=<span class="hljs-string">&quot;conf/tomcat-users.xml&quot;</span> /&gt;</span><br>              <span class="hljs-comment">&lt;!--这里定义的文件就是我们前面配置manager和host manager的用户的文件--&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">GlobalNamingResources</span>&gt;</span><br>  <br>  <span class="hljs-tag">&lt;<span class="hljs-name">Service</span>&gt;</span><br>    ...<br>  <span class="hljs-tag">&lt;/<span class="hljs-name">Service</span>&gt;</span><br> <br> <span class="hljs-tag">&lt;/<span class="hljs-name">Server</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <h3 id="3-2-2-Service块"><a href="#3-2-2-Service块" class="headerlink" title="3.2.2 Service块"></a>3.2.2 Service块</h3><p> Service元素用于创建 Service 实例，默认使用 <code>org.apache.catalina.core.StandardService</code>。 默认情况下，Tomcat9中默认仅指定了Service的名称为<code>Catalina</code>。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Service</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;Catalina&quot;</span>&gt;</span><br>...<br><span class="hljs-tag">&lt;/<span class="hljs-name">Service</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Service</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;Catalina&quot;</span>&gt;</span><br>...<br><span class="hljs-tag">&lt;/<span class="hljs-name">Service</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <p><code>Service</code> 可以内嵌的元素为 ： <code>Listener</code>、<code>Executor</code>、<code>Connector</code>、<code>Engine</code> ，详细的参数可以点击这里查看<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/service.html">官网</a></p>
 <ul>
@@ -473,7 +306,7 @@
 <li><code>Engine</code> 用于配置<code>Service</code>中连接器（<code>connector</code>）对应的Servlet 容器引擎</li>
 </ul>
 <h2 id="3-3-Executor"><a href="#3-3-Executor" class="headerlink" title="3.3 Executor"></a>3.3 Executor</h2><p><code>executor</code>表示可组件之间Tomcat中共享的线程池。默认情况下，<code>Service</code>并未添加共享线程池配置。<code>executor</code>实现了tomcat中的<code>org.apache.catalina.Executor</code>接口。 如果不配置共享线程池，那么Catalina 各组件在用到线程池时会独立创建。由于<code>executor</code>是<code>Service</code>元素的嵌套元素。为了使它能够被<code>Connector</code>使用，<code>Executor</code>元素必须出现在<code>server.xml</code>中的<code>Connector</code>元素之前。下面展示的是一个简单的executor的配置，具体的配置参数可以点这里查看<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/executor.html">官网</a>：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Executor</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;tomcatThreadPool&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">namePrefix</span>=<span class="hljs-string">&quot;catalina‐exec‐&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">maxThreads</span>=<span class="hljs-string">&quot;200&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">minSpareThreads</span>=<span class="hljs-string">&quot;100&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">maxIdleTime</span>=<span class="hljs-string">&quot;60000&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">maxQueueSize</span>=<span class="hljs-string">&quot;Integer.MAX_VALUE&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">prestartminSpareThreads</span>=<span class="hljs-string">&quot;false&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">threadPriority</span>=<span class="hljs-string">&quot;5&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.StandardThreadExecutor&quot;</span>/&gt;</span><br><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Executor</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;tomcatThreadPool&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">namePrefix</span>=<span class="hljs-string">&quot;catalina‐exec‐&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">maxThreads</span>=<span class="hljs-string">&quot;200&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">minSpareThreads</span>=<span class="hljs-string">&quot;100&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">maxIdleTime</span>=<span class="hljs-string">&quot;60000&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">maxQueueSize</span>=<span class="hljs-string">&quot;Integer.MAX_VALUE&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">prestartminSpareThreads</span>=<span class="hljs-string">&quot;false&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">threadPriority</span>=<span class="hljs-string">&quot;5&quot;</span></span><br><span class="hljs-tag">    <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.core.StandardThreadExecutor&quot;</span>/&gt;</span><br><br></code></pre></div></td></tr></table></figure>
 
 <table>
 <thead>
@@ -524,7 +357,7 @@
 </tr>
 </tbody></table>
 <h2 id="3-4-Connector"><a href="#3-4-Connector" class="headerlink" title="3.4 Connector"></a>3.4 Connector</h2><p>Connector 用于创建链接器实例。默认情况下，server.xml 配置了两个链接器，一个支 持HTTP协议，一个支持AJP协议。因此大多数情况下，我们并不需要新增链接器配置， 只是根据需要对已有链接器进行优化。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8080&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;HTTP/1.1&quot;</span> <span class="hljs-attr">connectionTimeout</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag"><span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8443&quot;</span> /&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8009&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;AJP/1.3&quot;</span> <span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8443&quot;</span> /&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8080&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;HTTP/1.1&quot;</span> <span class="hljs-attr">connectionTimeout</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag"><span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8443&quot;</span> /&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8009&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;AJP/1.3&quot;</span> <span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8443&quot;</span> /&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <ul>
 <li><code>port</code>为监听的端口，如果设置为0，Tomcat将会随机选择一个可用的端口号给当前Connector 使用</li>
@@ -535,7 +368,7 @@
 <li><code>URIEncoding</code> : 用于指定编码URI的字符编码， Tomcat8.x和Tomcat9.x版本默认的编码为 UTF-8 , Tomcat7.x版本默认为ISO-8859-1</li>
 </ul>
 <h2 id="3-5-engine"><a href="#3-5-engine" class="headerlink" title="3.5 engine"></a>3.5 engine</h2><p>Engine 作为Servlet 引擎的顶级元素，内部可以嵌入： Cluster、Listener、Realm、 Valve和Host。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Engine</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;Catalina&quot;</span> <span class="hljs-attr">defaultHost</span>=<span class="hljs-string">&quot;localhost&quot;</span>&gt;</span><br>    ……<br><span class="hljs-tag">&lt;/<span class="hljs-name">Engine</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Engine</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;Catalina&quot;</span> <span class="hljs-attr">defaultHost</span>=<span class="hljs-string">&quot;localhost&quot;</span>&gt;</span><br>    ……<br><span class="hljs-tag">&lt;/<span class="hljs-name">Engine</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <ul>
 <li><code>name</code>：用于指定Engine 的名称， 默认为Catalina </li>
@@ -544,7 +377,7 @@
 <h2 id="3-6-Host"><a href="#3-6-Host" class="headerlink" title="3.6 Host"></a>3.6 Host</h2><p>Host 元素用于配置一个虚拟主机，它支持以下嵌入元素：Alias、Cluster、Listener、 Valve、Realm、Context</p>
 <p>如果在Engine下配置Realm，那么此配置将在当前Engine下的所有Host中共享。 同样，如果在Host中配置Realm ，则在当前Host下的所有Context 中共享</p>
 <p><strong>Context中的Realm优先级 &gt; Host的Realm优先级 &gt; Engine中的Realm优先级</strong></p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Host</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;localhost&quot;</span>  <span class="hljs-attr">appBase</span>=<span class="hljs-string">&quot;webapps&quot;</span></span><br><span class="hljs-tag">      <span class="hljs-attr">unpackWARs</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">autoDeploy</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Valve</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.valves.AccessLogValve&quot;</span> <span class="hljs-attr">directory</span>=<span class="hljs-string">&quot;logs&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">prefix</span>=<span class="hljs-string">&quot;localhost_access_log&quot;</span> <span class="hljs-attr">suffix</span>=<span class="hljs-string">&quot;.txt&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">pattern</span>=<span class="hljs-string">&quot;%h %l %u %t <span class="hljs-symbol">&amp;quot;</span>%r<span class="hljs-symbol">&amp;quot;</span> %s %b&quot;</span> /&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">Alias</span>&gt;</span>www.example.com<span class="hljs-tag">&lt;/<span class="hljs-name">Alias</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Alias</span>&gt;</span>www.example2.com<span class="hljs-tag">&lt;/<span class="hljs-name">Alias</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Host</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Host</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;localhost&quot;</span>  <span class="hljs-attr">appBase</span>=<span class="hljs-string">&quot;webapps&quot;</span></span><br><span class="hljs-tag">      <span class="hljs-attr">unpackWARs</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">autoDeploy</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Valve</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;org.apache.catalina.valves.AccessLogValve&quot;</span> <span class="hljs-attr">directory</span>=<span class="hljs-string">&quot;logs&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">prefix</span>=<span class="hljs-string">&quot;localhost_access_log&quot;</span> <span class="hljs-attr">suffix</span>=<span class="hljs-string">&quot;.txt&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">pattern</span>=<span class="hljs-string">&quot;%h %l %u %t <span class="hljs-symbol">&amp;quot;</span>%r<span class="hljs-symbol">&amp;quot;</span> %s %b&quot;</span> /&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">Alias</span>&gt;</span>www.example.com<span class="hljs-tag">&lt;/<span class="hljs-name">Alias</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Alias</span>&gt;</span>www.example2.com<span class="hljs-tag">&lt;/<span class="hljs-name">Alias</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Host</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <blockquote>
 <p>上面这一段Host的配置文件中还额外添加了Valve配置来实现自定义的日志记录。其中一些参数的详细信息和配置方式可以查看<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/valve.html#Access_Logging">官网的说明</a><br>。</p>
@@ -557,7 +390,7 @@
 <li>autoDeploy： 控制tomcat是否在运行时定期检测并自动部署新增或变更的web应用</li>
 </ul>
 <h2 id="3-7-Context"><a href="#3-7-Context" class="headerlink" title="3.7 Context"></a>3.7 Context</h2><p><a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/context.html">Context的完整配置官网文档</a>，Context 用于配置一个Web应用，默认的配置如下。它支持的内嵌元素为：CookieProcessor，Loader，Manager，Realm，Resources，WatchedResource，JarScanner，Valve。</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Host</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;localhost&quot;</span>  <span class="hljs-attr">appBase</span>=<span class="hljs-string">&quot;webapps&quot;</span></span><br><span class="hljs-tag">      <span class="hljs-attr">unpackWARs</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">autoDeploy</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">Context</span> <span class="hljs-attr">docBase</span>=<span class="hljs-string">&quot;myAppDeploy&quot;</span> <span class="hljs-attr">path</span>=<span class="hljs-string">&quot;/myApp&quot;</span>&gt;</span><br>    ....<br>    <span class="hljs-tag">&lt;/<span class="hljs-name">Context</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Host</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Host</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;localhost&quot;</span>  <span class="hljs-attr">appBase</span>=<span class="hljs-string">&quot;webapps&quot;</span></span><br><span class="hljs-tag">      <span class="hljs-attr">unpackWARs</span>=<span class="hljs-string">&quot;true&quot;</span> <span class="hljs-attr">autoDeploy</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">Context</span> <span class="hljs-attr">docBase</span>=<span class="hljs-string">&quot;myAppDeploy&quot;</span> <span class="hljs-attr">path</span>=<span class="hljs-string">&quot;/myApp&quot;</span>&gt;</span><br>    ....<br>    <span class="hljs-tag">&lt;/<span class="hljs-name">Context</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Host</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
 
 <ul>
 <li>docBase：Web应用目录或者War包的部署路径。可以是绝对路径，也可以是相对于该Context所属的Host中的<code>appBase</code>的相对路径。</li>
@@ -565,52 +398,34 @@
 </ul>
 <p>假设tomcat的安装目录为<code>/home/tomcat9</code>，Host为默认的localhost， 则该web应用访问的根路径为： <code>http://localhost:8080/myApp</code>，对应的部署文件所存放的路径为：<code>/home/tomcat9/webapps/myAppDeploy</code>。</p>
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/web/" class="category-chain-item">web</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/tomcat/">#tomcat</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/web/">web</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/tomcat/">tomcat</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20200505-lvs-deploy-dr-mode-in-ipv6/" title="IPv6网络配置LVS的DR模式">
+                      <a href="/20200505-lvs-deploy-dr-mode-in-ipv6/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">IPv6网络配置LVS的DR模式</span>
                         <span class="visible-mobile">Previous</span>
@@ -620,7 +435,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20200427-lvs-principle-introduction/" title="LVS三种模式的工作原理">
+                      <a href="/20200427-lvs-principle-introduction/">
                         <span class="hidden-mobile">LVS三种模式的工作原理</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -636,49 +451,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -703,48 +488,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -755,69 +537,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -827,153 +555,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>

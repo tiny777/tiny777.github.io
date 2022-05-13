@@ -37,22 +37,28 @@
   
   <title>多主机间实现SSH免密登录 - TinyChen&#39;s Studio</title>
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
 
 
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
 
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
 
 
 <!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
 
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
 
 
 
@@ -61,41 +67,26 @@
 
 <link  rel="stylesheet" href="/css/main.css" />
 
+<!-- 自定义样式保持在最底部 -->
 
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
-  
-
+<link rel="stylesheet" href="/css/fluid-extention.css">
 
 
 
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"bash"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":1},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-
-  
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio" type="application/atom+xml">
 </head>
 
 
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
       <strong>TinyChen</strong>
@@ -177,7 +168,6 @@
               &nbsp;<i class="iconfont icon-search"></i>&nbsp;
             </a>
           </li>
-          
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -190,53 +180,45 @@
   </div>
 </nav>
 
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/20210617170551.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="多主机间实现SSH免密登录">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-07-09 15:30" pubdate>
+        July 9, 2019 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
   
 
-<div id="banner" class="banner" parallax=true
-     style="background: url('https://resource.tinychen.com/20210617170551.jpg') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="多主机间实现SSH免密登录"></span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
           
         </div>
-
-        
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2019-07-09 15:30" pubdate>
-          July 9, 2019 pm
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-
-    
-
-    
-    
-  </div>
-
-
-        
       </div>
-
-      
     </div>
-  </div>
-</div>
-
-</div>
-
   </header>
 
   <main>
@@ -245,257 +227,21 @@
 
 <div class="container-fluid nopadding-x">
   <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar category-bar" style="margin-right: -1rem">
-    
-
-
-
-
-
-<div class="category-list">
-  
-  
-    
-    
-    
-    <div class="category row nomargin-x">
-      <a class="category-item 
-          list-group-item category-item-action col-10 col-md-11 col-xm-11" title="linux"
-        id="heading-e206a54e97690cce50cc872dd70ee896" role="tab" data-toggle="collapse" href="#collapse-e206a54e97690cce50cc872dd70ee896"
-        aria-expanded="true"
-      >
-        linux
-        <span class="list-group-count">(57)</span>
-        <i class="iconfont icon-arrowright"></i>
-      </a>
-      
-      <div class="category-collapse collapse show" id="collapse-e206a54e97690cce50cc872dd70ee896"
-           role="tabpanel" aria-labelledby="heading-e206a54e97690cce50cc872dd70ee896">
-        
-        
-          
-  <div class="category-post-list">
-    
-    
-      
-      
-        <a href="/20210705-rockylinux-quick-start-experience/" title="RockyLinux简单安装上手体验"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">RockyLinux简单安装上手体验</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201222-centos8-install-fail2ban/" title="给ssh服务添加fail2ban安全认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">给ssh服务添加fail2ban安全认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201220-ubuntu2004-init/" title="ubuntu20.04初始化的部分操作"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">ubuntu20.04初始化的部分操作</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201203-ssh-add-google-authenticator/" title="给ssh服务添加谷歌双重认证"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">给ssh服务添加谷歌双重认证</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201128-add-progess-bar-in-cp-mv/" title="给cp和mv命令添加进度条"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">给cp和mv命令添加进度条</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201127-use-acme-letsencrypt-ecc-certs/" title="使用acme.sh工具申请let&#39;s encrypt的泛域名证书"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">使用acme.sh工具申请let&#39;s encrypt的泛域名证书</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201118-centos8-use-grubby-modify-kernel/" title="centos8使用grubby修改内核启动参数"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">centos8使用grubby修改内核启动参数</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201116-linux-modify-ssh-login-banner/" title="linux中设置ssh登录时显示的banner"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">linux中设置ssh登录时显示的banner</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20201024-centos8-modify-eth-name/" title="centos7/8修改网卡名称并持久化配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">centos7/8修改网卡名称并持久化配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200924-wsl2-limit-memory/" title="限制wsl2占用过多内存"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">限制wsl2占用过多内存</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200912-ssh-config-introduction/" title="ssh常用配置"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">ssh常用配置</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200903-linux-xargs-command-introduction/" title="xrags命令的常见用法"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">xrags命令的常见用法</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200902-megacli-command-introduction/" title="Megacli常用命令整理"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">Megacli常用命令整理</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200718-wsl-access-is-denied/" title="wsl access is denied"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">wsl access is denied</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200713-gpg-check-file/" title="使用gpg来对下载的文件进行校验"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">使用gpg来对下载的文件进行校验</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200701-bash-show-pwd/" title="在bash中开启显示完整路径"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">在bash中开启显示完整路径</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200616-centos-modify-hostname/" title="RHEL/CentOS修改hostname"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">RHEL/CentOS修改hostname</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200602-encryption-intro/" title="SSL/TLS、对称加密和非对称加密和TLSv1.3"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">SSL/TLS、对称加密和非对称加密和TLSv1.3</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200120-linux-ntfsfix-ntfs/" title="使用ntfsfix解决Linux下无法挂载NTFS硬盘的问题"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">使用ntfsfix解决Linux下无法挂载NTFS硬盘的问题</span>
-        </a>
-      
-    
-      
-      
-        <a href="/20200110-gnome-extension-recommand/" title="常用的高效gnome插件以及主题的下载地址"
-           class="list-group-item list-group-item-action
-           ">
-          <span class="category-post">常用的高效gnome插件以及主题的下载地址</span>
-        </a>
-      
-    
-      
-      
-        <a href="/categories/linux/" class="list-group-item list-group-item-action">
-          <span class="category-post">More...</span>
-        </a>
-        
-  </div>
-
-        
-      </div>
-    </div>
-  
-</div>
-
-
-  </aside>
-
-
-    </div>
-
+    <div class="d-none d-lg-block col-lg-2"></div>
     <div class="col-lg-8 nopadding-x-md">
       <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
+        <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
             <h1 style="display: none">多主机间实现SSH免密登录</h1>
             
               <p class="note note-info">
                 
-                  
-                    Last updated on July 9, 2019 pm
-                  
+                  本文最后更新于：July 9, 2019 pm
                 
               </p>
             
             <div class="markdown-body">
-              
               <p>K8S部署的前期准备工作，多台CentOS主机之间使用SSH免密登录。</p>
 <span id="more"></span>
 
@@ -503,86 +249,68 @@
 <h2 id="1-1-rsa密钥对"><a href="#1-1-rsa密钥对" class="headerlink" title="1.1 rsa密钥对"></a>1.1 rsa密钥对</h2><p>一般来说我们的SSH使用的是RSA类型的密钥对，使用<code>ssh-keygen</code>默认生成的也是RSA类型的密钥对。一般来说会产生两个文件，分别是<code>id_rsa</code>和<code>id_rsa.pub</code>,其中前者是私钥，后者是公钥。私钥不能泄露，而公钥是放置在目标主机的<code>authorized_keys</code>文件中，从而实现免密登录的效果。</p>
 <p>要实现五台CentOS主机之间任意两台之间都能使用ssh免密登录，只需要将这五台主机的<code>id_rsa.pub</code>都存放到一个<code>authorized_keys</code>文件中，然后再将这个文件复制到每一台主机上即可。</p>
 <h2 id="1-2-hosts文件"><a href="#1-2-hosts文件" class="headerlink" title="1.2 hosts文件"></a>1.2 hosts文件</h2><p>CentOS中的<code>/etc/hosts</code>文件中存放着主机名和对应的ip地址等信息，想要实现直接使用 <code>ssh hostname</code> 的方式登录的效果，只要在hosts文件中添加ip地址和对应hostname（主机名）即可。</p>
-<h1 id="2、操作步骤"><a href="#2、操作步骤" class="headerlink" title="2、操作步骤"></a>2、操作步骤</h1><h2 id="2-1-安装启用ssh"><a href="#2-1-安装启用ssh" class="headerlink" title="2.1 安装启用ssh"></a>2.1 安装启用ssh</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># master和每台node节点上安装ssh</span><br>sudo yum install -y openssl openssh-server<br><br><span class="hljs-comment"># master和每台node节点上启动ssh并设置开机自启</span><br>systemctl start sshd.service<br>systemctl <span class="hljs-built_in">enable</span> sshd.service<br></code></pre></td></tr></table></figure>
+<h1 id="2、操作步骤"><a href="#2、操作步骤" class="headerlink" title="2、操作步骤"></a>2、操作步骤</h1><h2 id="2-1-安装启用ssh"><a href="#2-1-安装启用ssh" class="headerlink" title="2.1 安装启用ssh"></a>2.1 安装启用ssh</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># master和每台node节点上安装ssh</span><br>sudo yum install -y openssl openssh-server<br><br><span class="hljs-comment"># master和每台node节点上启动ssh并设置开机自启</span><br>systemctl start sshd.service<br>systemctl <span class="hljs-built_in">enable</span> sshd.service<br></code></pre></div></td></tr></table></figure>
 
-<h2 id="2-2-生成密钥对"><a href="#2-2-生成密钥对" class="headerlink" title="2.2 生成密钥对"></a>2.2 生成密钥对</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># master和每台node节点上都生成ssh密钥,接下来一路回车</span><br>ssh-keygen<br></code></pre></td></tr></table></figure>
+<h2 id="2-2-生成密钥对"><a href="#2-2-生成密钥对" class="headerlink" title="2.2 生成密钥对"></a>2.2 生成密钥对</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># master和每台node节点上都生成ssh密钥,接下来一路回车</span><br>ssh-keygen<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190709/Wi2hKbDWk2QQ.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>需要注意的是，这里提示输入的<code>passphrase</code>相当于ssh密钥对的密码，不输入的话直接回车跳过即可，输入了之后，每次使用ssh免密登录的时候会再要求输入<code>passphrase</code>以保证安全。</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 将每台node节点的id_rsa.pub复制到master上面，注意要重新命名避免覆盖</span><br>scp /home/tinychen/.ssh/id_rsa.pub tinychen@192.168.100.50:/home/tinychen/.ssh/node5*<br><br><span class="hljs-comment"># 在master上使用cat命令将master和所有node节点的id_rsa.pub追加到authorized_keys中</span><br>cat id_rsa.pub &gt;&gt; authorized_keys<br>cat node51 &gt;&gt; authorized_keys<br>cat node52 &gt;&gt; authorized_keys<br>cat node53 &gt;&gt; authorized_keys<br>cat node54 &gt;&gt; authorized_keys<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将每台node节点的id_rsa.pub复制到master上面，注意要重新命名避免覆盖</span><br>scp /home/tinychen/.ssh/id_rsa.pub tinychen@192.168.100.50:/home/tinychen/.ssh/node5*<br><br><span class="hljs-comment"># 在master上使用cat命令将master和所有node节点的id_rsa.pub追加到authorized_keys中</span><br>cat id_rsa.pub &gt;&gt; authorized_keys<br>cat node51 &gt;&gt; authorized_keys<br>cat node52 &gt;&gt; authorized_keys<br>cat node53 &gt;&gt; authorized_keys<br>cat node54 &gt;&gt; authorized_keys<br></code></pre></div></td></tr></table></figure>
 
-<h2 id="2-3-配置sshd-config"><a href="#2-3-配置sshd-config" class="headerlink" title="2.3 配置sshd_config"></a>2.3 配置sshd_config</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 编辑master的ssh配置文件，去掉红圈中三项前面的#使其生效</span><br>sudo vim /etc/ssh/sshd_config<br></code></pre></td></tr></table></figure>
+<h2 id="2-3-配置sshd-config"><a href="#2-3-配置sshd-config" class="headerlink" title="2.3 配置sshd_config"></a>2.3 配置sshd_config</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 编辑master的ssh配置文件，去掉红圈中三项前面的#使其生效</span><br>sudo vim /etc/ssh/sshd_config<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190709/YgmqyRiquoNf.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-4-编辑hosts"><a href="#2-4-编辑hosts" class="headerlink" title="2.4 编辑hosts"></a>2.4 编辑hosts</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 编辑master节点的/etc/hosts文件，追加ip地址和对应的主机名，使得能够直接使用ssh+主机名的方式登录</span><br><br>sudo vim /etc/hosts<br><br>192.168.100.50  master50<br>192.168.100.51  node51<br>192.168.100.52  node52<br>192.168.100.53  node53<br>192.168.100.54  node54<br></code></pre></td></tr></table></figure>
+<h2 id="2-4-编辑hosts"><a href="#2-4-编辑hosts" class="headerlink" title="2.4 编辑hosts"></a>2.4 编辑hosts</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 编辑master节点的/etc/hosts文件，追加ip地址和对应的主机名，使得能够直接使用ssh+主机名的方式登录</span><br><br>sudo vim /etc/hosts<br><br>192.168.100.50  master50<br>192.168.100.51  node51<br>192.168.100.52  node52<br>192.168.100.53  node53<br>192.168.100.54  node54<br></code></pre></div></td></tr></table></figure>
 
-<h2 id="2-5-复制master的配置文件"><a href="#2-5-复制master的配置文件" class="headerlink" title="2.5 复制master的配置文件"></a>2.5 复制master的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 将master节点的ssh配置文件复制到每一个节点上</span><br><span class="hljs-comment"># 这里必须使用root账户，否则权限不足</span><br>sudo scp /etc/ssh/sshd_config root@192.168.100.51:/etc/ssh/sshd_config<br>sudo scp /etc/ssh/sshd_config root@192.168.100.52:/etc/ssh/sshd_config<br>sudo scp /etc/ssh/sshd_config root@192.168.100.53:/etc/ssh/sshd_config<br>sudo scp /etc/ssh/sshd_config root@192.168.100.54:/etc/ssh/sshd_config<br></code></pre></td></tr></table></figure>
+<h2 id="2-5-复制master的配置文件"><a href="#2-5-复制master的配置文件" class="headerlink" title="2.5 复制master的配置文件"></a>2.5 复制master的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将master节点的ssh配置文件复制到每一个节点上</span><br><span class="hljs-comment"># 这里必须使用root账户，否则权限不足</span><br>sudo scp /etc/ssh/sshd_config root@192.168.100.51:/etc/ssh/sshd_config<br>sudo scp /etc/ssh/sshd_config root@192.168.100.52:/etc/ssh/sshd_config<br>sudo scp /etc/ssh/sshd_config root@192.168.100.53:/etc/ssh/sshd_config<br>sudo scp /etc/ssh/sshd_config root@192.168.100.54:/etc/ssh/sshd_config<br></code></pre></div></td></tr></table></figure>
 
 
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 将master节点的authorized_keys文件复制到每一个节点上</span><br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.51:/home/tinychen/.ssh/authorized_keys<br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.52:/home/tinychen/.ssh/authorized_keys<br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.53:/home/tinychen/.ssh/authorized_keys<br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.54:/home/tinychen/.ssh/authorized_keys<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将master节点的authorized_keys文件复制到每一个节点上</span><br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.51:/home/tinychen/.ssh/authorized_keys<br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.52:/home/tinychen/.ssh/authorized_keys<br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.53:/home/tinychen/.ssh/authorized_keys<br>scp /home/tinychen/.ssh/authorized_keys tinychen@192.168.100.54:/home/tinychen/.ssh/authorized_keys<br></code></pre></div></td></tr></table></figure>
 
-<h2 id="2-6-修改ssh文件权限"><a href="#2-6-修改ssh文件权限" class="headerlink" title="2.6 修改ssh文件权限"></a>2.6 修改ssh文件权限</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 对master和每一个node节点都进行ssh相关文件权限的修改</span><br>sudo chmod 700 /home/tinychen/.ssh/<br>sudo chmod 600 /home/tinychen/.ssh/*<br></code></pre></td></tr></table></figure>
+<h2 id="2-6-修改ssh文件权限"><a href="#2-6-修改ssh文件权限" class="headerlink" title="2.6 修改ssh文件权限"></a>2.6 修改ssh文件权限</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 对master和每一个node节点都进行ssh相关文件权限的修改</span><br>sudo chmod 700 /home/tinychen/.ssh/<br>sudo chmod 600 /home/tinychen/.ssh/*<br></code></pre></div></td></tr></table></figure>
 
 <h1 id="3、验证效果"><a href="#3、验证效果" class="headerlink" title="3、验证效果"></a>3、验证效果</h1><p>需要注意的是，第一次ssh登录的时候，因为known_hosts文件里面没有保存这台主机的对应信息，我们需要输入yes才能登录，之后便不再需要。</p>
 <p><img src="https://resource.tinychen.com/blog/20190709/7G0yYSRqu8AG.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20190709/kyhDNqU8kreQ.png" srcset="/img/loading.gif" lazyload></p>
 <p>此外，如果使用ssh+主机名的方式登录，两台主机必须是使用的同一个用户，这里我使用的是tinychen用户，由于我已经在ssh的配置文件中修改了配置允许ssh使用root账户登录，因此这里我们使用管理员账户tinychen，如果有需要了再切换到root账户，保证安全性</p>
-<h1 id="4、补充"><a href="#4、补充" class="headerlink" title="4、补充"></a>4、补充</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 如果想要实现root账户之间的ssh免密登录，将.ssh文件夹整个复制过去即可</span><br>rm -rf /root/.ssh/<br>cp -r /home/tinychen/.ssh/ /root/<br>chmod 700 /root/.ssh/<br>chmod 600 /root/.ssh/*<br></code></pre></td></tr></table></figure>
+<h1 id="4、补充"><a href="#4、补充" class="headerlink" title="4、补充"></a>4、补充</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 如果想要实现root账户之间的ssh免密登录，将.ssh文件夹整个复制过去即可</span><br>rm -rf /root/.ssh/<br>cp -r /home/tinychen/.ssh/ /root/<br>chmod 700 /root/.ssh/<br>chmod 600 /root/.ssh/*<br></code></pre></div></td></tr></table></figure>
 
 
-              
             </div>
-            <hr/>
+            <hr>
             <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/linux/" class="category-chain-item">linux</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-    </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/centos/">#centos</a>
-      
-        <a href="/tags/ssh/">#ssh</a>
-      
-    </div>
-  
-</div>
-
-
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/ssh/">ssh</a>
+                    
+                  </div>
+                
+              </div>
               
-
               
-                <div class="post-prevnext my-3">
+                <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/20190710-rhel7-cron/" title="RHEL7中的CRON简介">
+                      <a href="/20190710-rhel7-cron/">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">RHEL7中的CRON简介</span>
                         <span class="visible-mobile">Previous</span>
@@ -592,7 +320,7 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/20190708-rhel7-change-init-level/" title="CentOS7修改默认启动级别">
+                      <a href="/20190708-rhel7-change-init-level/">
                         <span class="hidden-mobile">CentOS7修改默认启动级别</span>
                         <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
@@ -608,49 +336,19 @@
         </div>
       </div>
     </div>
-
-    <div class="side-col d-none d-lg-block col-lg-2">
-      
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
-
-
-  </aside>
-
-
-    </div>
+      </div>
+    
   </div>
 </div>
 
-
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-
-
+<!-- Custom -->
 
 
     
@@ -675,48 +373,45 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
     </div>
   </div>
 </div>
-
     
 
     
   </main>
 
-  <footer>
-    <div class="footer-inner">
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
   
-    <div class="footer-content">
-       <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
-    </div>
-  
-  
-  
-    <!-- 备案信息 ICP for China -->
-    <div class="beian">
-  <span>
-    <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
-      粤ICP备18140640号
-    </a>
-  </span>
-  
-</div>
 
   
-  
-</div>
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
 
-  </footer>
 
-  <!-- Scripts -->
   
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
 
   <script>
     NProgress.configure({"showSpinner":false,"trickleSpeed":100})
@@ -727,69 +422,15 @@
   </script>
 
 
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
 <script  src="/js/events.js" ></script>
 <script  src="/js/plugins.js" ></script>
 
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
+<!-- Plugins -->
 
 
-
-
-  
-    <!-- Baidu Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        var _hmt = _hmt || [];
-        (function() {
-          var hm = document.createElement("script");
-          hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
-          var s = document.getElementsByTagName("script")[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      }
-    </script>
-  
-
-  
-    <!-- Google Analytics -->
-    <script defer>
-      if (!Fluid.ctx.dnt) {
-        Fluid.utils.createScript('https://www.google-analytics.com/analytics.js', function() {
-          window.ga = window.ga || function() { (ga.q = ga.q || []).push(arguments) };
-          ga.l = +new Date;
-          ga('create', 'UA-166769908-1', 'auto');
-          ga('send', 'pageview');
-        });
-      }
-    </script>
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
+  <script  src="/js/local-search.js" ></script>
 
 
 
@@ -799,153 +440,89 @@
 
 
 
+  
+
+
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
 
 
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
   <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
 
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
 
-      var lang = '';
 
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
 
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
 
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
 
+  
 
-  <script>Fluid.plugins.imageCaption();</script>
+  
 
-  <script  src="/js/local-search.js" ></script>
+  
 
 
 
 
 
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
+<!-- 主题的启动项 保持在最底部 -->
 <script  src="/js/boot.js" ></script>
 
 
-  
-
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
 </body>
 </html>
