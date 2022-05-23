@@ -492,11 +492,13 @@
 <h2 id="5-3-OpenELB优缺点"><a href="#5-3-OpenELB优缺点" class="headerlink" title="5.3 OpenELB优缺点"></a>5.3 OpenELB优缺点</h2><p>这里尽量客观的总结概况一些客观事实，是否为优缺点可能会因人而异：</p>
 <ul>
 <li>OpenELB是国内的青云科技团队主导开发的产品（也是kubesphere的开发团队）</li>
-<li>OpenELB的部署方式并不是使用<code>daemonset</code>+<code>deployment</code>的方式，而是使用<code>deployment</code>+<code>jobs.batch</code>，并且<code>deployment</code>默认状态下并没有高可用部署，需要自己手动配置</li>
-<li>OpenELB的文档非常少，比MetalLB的还要少，仅有少数几篇必要的文档，建议先全部阅读完再开始上手</li>
-<li>OpenELB对IPv6的支持不完善（BGP模式下暂不支持IPv6）</li>
-<li>OpenELB可以通过注解来同时部署使用BGP模式和Layer2模式</li>
-<li>OpenELB使用了CRD来一定程度上改善了IPAM的问题，但是还不够足够方便，Layer2模式下无法快速定位当前的VIP所在节点</li>
+<li>OpenELB的部署方式并不是使用<code>daemonset</code>+<code>deployment</code>的方式，而是使用<code>deployment</code>+<code>jobs.batch</code>，</li>
+<li>OpenELB的<code>deployment</code>默认状态下并没有高可用部署，需要自己手动配置</li>
+<li>OpenELB的文档非常少，比MetalLB的还要少，仅有少数几篇必要的文档，<strong>建议先全部阅读完再开始上手</strong></li>
+<li>OpenELB对IPv6的支持不完善（<strong>BGP模式下暂不支持IPv6</strong>）</li>
+<li>OpenELB可以通过注解来<strong>同时部署使用</strong>BGP模式和Layer2模式</li>
+<li>OpenELB使用了CRD来一定程度上改善了IPAM的问题，<strong>可以通过查看EIP的状态来查看IP池的分配情况和对应服务</strong></li>
+<li>OpenELB在Layer2模式下<strong>无法快速定位当前的VIP所在节点</strong></li>
 <li>OpenELB官方表示已经有一定的数量的<a target="_blank" rel="noopener" href="https://github.com/openelb/openelb/blob/master/ADOPTERS.md">企业</a>采用（包括生产和测试环境），但是没有具体披露使用的模式和规模</li>
 </ul>
 <p>总的来说，OpenELB是一款不错的负载均衡器，在前人MetalLB的基础上做了一些改进，有一定的社区热度、有一定的专业团队进行维护；但是目前感觉还处于比较初级的阶段，有较多的功能还没有开发完善，使用起来偶尔会有些不大不小的问题。青云科技官方表示会在后面的kubesphere v3.3.0版本内置OpenELB用于服务暴露，届时应该会有更多的用户参与进来。</p>
