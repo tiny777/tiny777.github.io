@@ -27,7 +27,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://resource.tinychen.com/202205241511819.jpg">
 <meta property="article:published_time" content="2022-05-24T07:00:00.000Z">
-<meta property="article:modified_time" content="2022-05-24T07:00:00.000Z">
+<meta property="article:modified_time" content="2022-05-27T02:00:00.000Z">
 <meta property="article:author" content="TinyChen">
 <meta property="article:tag" content="k8s">
 <meta property="article:tag" content="loadbalance">
@@ -243,7 +243,7 @@
             
               <p class="note note-info">
                 
-                  本文最后更新于：May 24, 2022 pm
+                  本文最后更新于：May 27, 2022 am
                 
               </p>
             
@@ -417,6 +417,10 @@
 
 <blockquote>
 <p>默认情况下bird不会调度到master节点，这样可以保证master节点不参与到ECMP的负载均衡中，减少master节点上面的网络流量从而提高master的稳定性</p>
+<p>如果想让master也参与到ECMP中，可以在bird.yaml的daemonset配置中新增如下配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">tolerations:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">effect:</span> <span class="hljs-string">NoSchedule</span><br>  <span class="hljs-attr">key:</span> <span class="hljs-string">node-role.kubernetes.io/master</span><br></code></pre></div></td></tr></table></figure>
+
+
 </blockquote>
 <h2 id="3-3-配置路由器"><a href="#3-3-配置路由器" class="headerlink" title="3.3 配置路由器"></a>3.3 配置路由器</h2><p>路由器我们还是使用frr来进行配置</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">root@tiny-openwrt-plus:~<span class="hljs-comment"># cat /etc/frr/frr.conf</span><br>frr version 8.2.2<br>frr defaults traditional<br>hostname tiny-openwrt-plus<br><span class="hljs-built_in">log</span> file /home/frr/frr.log<br><span class="hljs-built_in">log</span> syslog<br>password zebra<br>!<br>router bgp 64512<br> bgp router-id 10.31.254.251<br> no bgp ebgp-requires-policy<br> !<br> neighbor 10.31.188.11 remote-as 64515<br> neighbor 10.31.188.11 description 10-31-188-11<br> neighbor 10.31.188.12 remote-as 64515<br> neighbor 10.31.188.12 description 10-31-188-12<br> !<br> !<br> address-family ipv4 unicast<br> !maximum-paths 3<br> exit-address-family<br><span class="hljs-built_in">exit</span><br>!<br>access-list vty seq 5 permit 127.0.0.0/8<br>access-list vty seq 10 deny any<br>!<br>line vty<br> access-class vty<br><span class="hljs-built_in">exit</span><br>!<br></code></pre></div></td></tr></table></figure>
@@ -501,7 +505,7 @@
 <li>PureLB的文档相对齐全，但是还是有些小纰漏</li>
 <li>PureLB的Layer2模式不存在单点流量瓶颈</li>
 </ul>
-<p>总得来说PureLB是一款非常不错的云原生负载均衡器，在软件本身的设计模式上面应该是参考了MetalLB等前辈的思路，同时又青出于蓝而胜于蓝。唯一美中不足的是社区热度不高，让人有些担心这个项目以后的发展情况。如果在三者中选一个使用layer2模式的话，个人推荐首选PureLB；如果是使用BGP模式，则建议结合自己的CNI组件和IPAM等情况综合考虑。</p>
+<p>总的来说PureLB是一款非常不错的云原生负载均衡器，在软件本身的设计模式上面应该是参考了MetalLB等前辈的思路，同时又青出于蓝而胜于蓝。唯一美中不足的是社区热度不高，让人有些担心这个项目以后的发展情况。如果在三者中选一个使用layer2模式的话，个人推荐首选PureLB；如果是使用BGP模式，则建议结合自己的CNI组件和IPAM等情况综合考虑。</p>
 
             </div>
             <hr>
@@ -543,6 +547,12 @@
                 <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/20220627-k8s-09-service-discovery-and-traffic-exposure/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">k8s系列09-服务发现与流量暴露</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
