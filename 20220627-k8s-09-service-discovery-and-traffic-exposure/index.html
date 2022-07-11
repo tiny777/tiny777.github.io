@@ -290,6 +290,7 @@
 <blockquote>
 <p>由于K8S集群内的Pod之间必然是路由可达的，因此这里探讨的是集群外的服务到集群内的Pod之间的路由可达。</p>
 </blockquote>
+<p><img src="https://resource.tinychen.com/202207111535721.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="路由不可达"><a href="#路由不可达" class="headerlink" title="路由不可达"></a>路由不可达</h3><p><strong>所谓路由不可达，即K8S集群外的机器没办法和集群内的Pod直接建立连接，集群外的服务器不知道如何将数据包路由到 Pod IP。</strong></p>
 <p>这种情况下<strong>当集群内的Pod需要主动和集群外的服务建立连接的时候</strong>，会通过K8S进行SNAT(Source Network Address Translation)。此时在集群外的服务器看到的连接对端IP是这个Pod所在的K8S集群节点的Node IP而不是Pod自身的IP，对于集群外的服务器发送返回数据的目的IP也永远都是这个K8S集群节点的Node IP，数据在Node IP上面再转换发送回Pod。这种情况下，集群外的服务器是无法得知Pod的IP，也无法直接获取真实的请求IP。</p>
 <p>反之则更复杂，因为集群外的服务器不知道如何将数据包路由到 Pod IP ，所以也没办法主动去请求这些Pod，<strong>此时只能通过K8S的services（NodePort、LoadBalancer、Ingress）来将服务暴露到集群外</strong>，此时集群外的服务器的访问对象是某个K8S的服务，而不是具体的某个Pod。</p>
