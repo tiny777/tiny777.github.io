@@ -372,11 +372,11 @@
 <p>这个配置项的主要作用就是让这类不正常的服务域名查询的时候能够返回NXDOMAIN响应码，从而触发配置的其他插件（如上面提到的<code>fallthrough</code>）进行组合操作。</p>
 </li>
 </ul>
-<h1 id="3、一些其他问题"><a href="#3、一些其他问题" class="headerlink" title="3、一些其他问题"></a>3、一些其他问题</h1><h2 id="延迟启动"><a href="#延迟启动" class="headerlink" title="延迟启动"></a>延迟启动</h2><p>当CoreDNS启用了kubernetes插件之后，CoreDNS实例在启动的时候<strong>会延迟5s的时间</strong>再对外提供服务，这5s内CoreDNS会尝试和K8S的apiserver建立连接并同步信息。</p>
+<h1 id="3、一些其他问题"><a href="#3、一些其他问题" class="headerlink" title="3、一些其他问题"></a>3、一些其他问题</h1><h2 id="3-1-延迟启动"><a href="#3-1-延迟启动" class="headerlink" title="3.1 延迟启动"></a>3.1 延迟启动</h2><p>当CoreDNS启用了kubernetes插件之后，CoreDNS实例在启动的时候<strong>会延迟5s的时间</strong>再对外提供服务，这5s内CoreDNS会尝试和K8S的apiserver建立连接并同步信息。</p>
 <p>如果5s内CoreDNS还是无法和k8s的apiserver完成信息同步工作，那么会开始对外提供服务，并且继续尝试同步信息，但是在成功和apiserver建立连接并同步信息之前，所有k8s相关的域名查询都会返回<code>SERVFAIL</code>。</p>
-<h2 id="连接中断"><a href="#连接中断" class="headerlink" title="连接中断"></a>连接中断</h2><p>如果在CoreDNS实例正常运行的时候，突然和k8s的apiserver断开连接，并且一直没有恢复，那么此时的CoreDNS实例是依旧正常运行的，对应的K8S集群域名也是能够正常解析的，但是解析出来的endpoint信息就有可能不是最新的。</p>
+<h2 id="3-2-连接中断"><a href="#3-2-连接中断" class="headerlink" title="3.2 连接中断"></a>3.2 连接中断</h2><p>如果在CoreDNS实例正常运行的时候，突然和k8s的apiserver断开连接，并且一直没有恢复，那么此时的CoreDNS实例是依旧正常运行的，对应的K8S集群域名也是能够正常解析的，但是解析出来的endpoint信息就有可能不是最新的。</p>
 <p>如果此时再对CoreDNS实例进行重启操作，那么具体的过程就和上面讲述的延迟启动一样，最后会导致所有k8s相关的域名查询都会返回<code>SERVFAIL</code>。</p>
-<h2 id="配置检查"><a href="#配置检查" class="headerlink" title="配置检查"></a>配置检查</h2><p>kubernetes的健康状态会暴露在ready插件中，如果出现配置错误可以通过请求ready插件暴露的接口发现，但是如果出现连接异常这种情况，ready接口是无法探测出来的。</p>
+<h2 id="3-3-配置检查"><a href="#3-3-配置检查" class="headerlink" title="3.3 配置检查"></a>3.3 配置检查</h2><p>kubernetes的健康状态会暴露在ready插件中，如果出现配置错误可以通过请求ready插件暴露的接口发现，但是如果出现连接异常这种情况，ready接口是无法探测出来的。</p>
 
             </div>
             <hr>
@@ -408,6 +408,12 @@
                 <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/20221209-k8s-10-deploy-ha-k8s-with-cilium-bgp/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">k8s系列10-使用kube-router和cilium部署BGP模式的k8s集群</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
