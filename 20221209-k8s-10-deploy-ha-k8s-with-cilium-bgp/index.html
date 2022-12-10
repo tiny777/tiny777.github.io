@@ -33,9 +33,9 @@
 <meta property="article:tag" content="k8s">
 <meta property="article:tag" content="docker">
 <meta property="article:tag" content="cilium">
-<meta property="article:tag" content="containerd">
 <meta property="article:tag" content="purelb">
 <meta property="article:tag" content="bgp">
+<meta property="article:tag" content="containerd">
 <meta property="article:tag" content="kube-router">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://resource.tinychen.com/202212092303054.jpg">
@@ -587,7 +587,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 我们先使用kubeadm命令查看一下主要的几个镜像版本</span><br>$ kubeadm config images list<br>registry.k8s.io/kube-apiserver:v1.25.4<br>registry.k8s.io/kube-controller-manager:v1.25.4<br>registry.k8s.io/kube-scheduler:v1.25.4<br>registry.k8s.io/kube-proxy:v1.25.4<br>registry.k8s.io/pause:3.8<br>registry.k8s.io/etcd:3.5.5-0<br>registry.k8s.io/coredns/coredns:v1.9.3<br><br><span class="hljs-comment"># 为了方便编辑和管理，我们还是把初始化参数导出成配置文件</span><br>$ kubeadm config <span class="hljs-built_in">print</span> init-defaults &gt; kubeadm-cilium-ha.conf<br><br></code></pre></div></td></tr></table></figure>
 
 <ul>
-<li>考虑到大多数情况下国内的网络无法使用谷歌的k8s.gcr.io镜像源，我们可以直接在配置文件中修改<code>imageRepository</code>参数为阿里的镜像源</li>
+<li>考虑到大多数情况下国内的网络无法使用谷歌的镜像源(1.25版本开始从<code>k8s.gcr.io</code>换为<code>registry.k8s.io</code>)，我们可以直接在配置文件中修改<code>imageRepository</code>参数为阿里的镜像源<code>registry.aliyuncs.com/google_containers</code></li>
 <li><code>kubernetesVersion</code>字段用来指定我们要安装的k8s版本</li>
 <li><code>localAPIEndpoint</code>参数需要修改为我们的master节点的IP和端口，初始化之后的k8s集群的apiserver地址就是这个</li>
 <li><code>criSocket</code>从1.24.0版本开始已经默认变成了<code>containerd</code></li>
@@ -824,11 +824,11 @@
                     
                       <a class="hover-with-bg" href="/tags/cilium/">cilium</a>
                     
-                      <a class="hover-with-bg" href="/tags/containerd/">containerd</a>
-                    
                       <a class="hover-with-bg" href="/tags/purelb/">purelb</a>
                     
                       <a class="hover-with-bg" href="/tags/bgp/">bgp</a>
+                    
+                      <a class="hover-with-bg" href="/tags/containerd/">containerd</a>
                     
                       <a class="hover-with-bg" href="/tags/kube-router/">kube-router</a>
                     
