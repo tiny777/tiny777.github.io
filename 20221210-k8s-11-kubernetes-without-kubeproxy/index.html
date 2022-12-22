@@ -1,0 +1,707 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文主要介绍在使用了Cilium的K8S集群中如何开启KubeProxyReplacement功能来替代K8S集群原生的kube-proxy组件，同时还会介绍Cilium的几个特色功能如Maglev一致性哈希、DSR模式、Socket旁路和XDP加速等。 关于本文实操使用的K8S集群的部署过程可以参考上一篇文章k8s系列10-使用kube-router和cilium部署BGP模式的k8s集群。此前">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s系列11-cilium部署KubeProxyReplacement模式">
+<meta property="og:url" content="https://tinychen.com/20221210-k8s-11-kubernetes-without-kubeproxy/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio - 互联网技术学习工作经验分享">
+<meta property="og:description" content="本文主要介绍在使用了Cilium的K8S集群中如何开启KubeProxyReplacement功能来替代K8S集群原生的kube-proxy组件，同时还会介绍Cilium的几个特色功能如Maglev一致性哈希、DSR模式、Socket旁路和XDP加速等。 关于本文实操使用的K8S集群的部署过程可以参考上一篇文章k8s系列10-使用kube-router和cilium部署BGP模式的k8s集群。此前">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/202212221548198.jpg">
+<meta property="article:published_time" content="2022-12-22T08:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-22T08:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="bgp">
+<meta property="article:tag" content="cilium">
+<meta property="article:tag" content="containerd">
+<meta property="article:tag" content="ebpf">
+<meta property="article:tag" content="xdp">
+<meta property="article:tag" content="kube-router">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/202212221548198.jpg">
+  
+  
+  <title>k8s系列11-cilium部署KubeProxyReplacement模式 - TinyChen&#39;s Studio - 互联网技术学习工作经验分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+  
+<link rel="stylesheet" href="/css/fluid-extention.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/202212221548863.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="k8s系列11-cilium部署KubeProxyReplacement模式">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2022-12-22 16:00" pubdate>
+        December 22, 2022 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">k8s系列11-cilium部署KubeProxyReplacement模式</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：December 22, 2022 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要介绍在使用了Cilium的K8S集群中如何开启<code>KubeProxyReplacement</code>功能来替代K8S集群原生的<code>kube-proxy</code>组件，同时还会介绍Cilium的几个特色功能如Maglev一致性哈希、DSR模式、Socket旁路和XDP加速等。</p>
+<p>关于本文实操使用的K8S集群的部署过程可以参考上一篇文章<a href="https://tinychen.com/20221209-k8s-10-deploy-ha-k8s-with-cilium-bgp/">k8s系列10-使用kube-router和cilium部署BGP模式的k8s集群</a>。此前写的一些关于k8s基础知识和集群搭建的一些<a href="https://tinychen.com/tags/k8s/">方案</a>，有需要的同学可以看一下。</p>
+<span id="more"></span>
+
+<h1 id="1、配置KubeProxyReplacement"><a href="#1、配置KubeProxyReplacement" class="headerlink" title="1、配置KubeProxyReplacement"></a>1、配置KubeProxyReplacement</h1><h2 id="1-1-检查集群状态"><a href="#1-1-检查集群状态" class="headerlink" title="1.1 检查集群状态"></a>1.1 检查集群状态</h2><p>关于使用cilium替代kube-proxy的官方文档可以参考<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/">这里</a>，需要注意的是我们这里是在已经部署好cilium和kube-proxy的K8S集群上面操作，因此会和官方的全新初始化安装稍有不同，但是大致原理类似。</p>
+<p>首先检查一下我们现在的cilium状态，可以看到<code>KubeProxyReplacement</code>参数默认是设置为<code>Disabled</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl -n kube-system <span class="hljs-built_in">exec</span> ds/cilium -- cilium status | grep KubeProxyReplacement<br>Defaulted container <span class="hljs-string">&quot;cilium-agent&quot;</span> out of: cilium-agent, mount-cgroup (init), apply-sysctl-overwrites (init), mount-bpf-fs (init), clean-cilium-state (init)<br>KubeProxyReplacement:    Disabled<br></code></pre></div></td></tr></table></figure>
+
+<p>再检查一下集群中的kube-proxy组件状态，可以看到各个组件都工作正常。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get pods -n kube-system | grep kube-proxy<br>kube-proxy-86g7b                                                   1/1     Running   1 (18h ago)    19h<br>kube-proxy-gqbd4                                                   1/1     Running   1 (18h ago)    19h<br>kube-proxy-gtcqc                                                   1/1     Running   1 (18h ago)    19h<br>kube-proxy-kdjr9                                                   1/1     Running   1 (18h ago)    19h<br>kube-proxy-pbj8s                                                   1/1     Running   1 (18h ago)    19h<br>kube-proxy-tvltv                                                   1/1     Running   1 (18h ago)    19h<br>$ kubectl get ds -n kube-system | grep kube-proxy<br>kube-proxy    6         6         6       6            6           kubernetes.io/os=linux   45h<br>$ kubectl get cm -n kube-system | grep kube-proxy<br>kube-proxy                           2      45h<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="1-2-删除kube-proxy"><a href="#1-2-删除kube-proxy" class="headerlink" title="1.2 删除kube-proxy"></a>1.2 删除kube-proxy</h2><p>在删除<code>kube-proxy</code>之前我们先备份一下相关的配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 在master节点上备份kube-proxy相关的配置</span><br>$ kubectl get ds -n kube-system kube-proxy -o yaml &gt; kube-proxy-ds.yaml<br>$ kubectl get cm -n kube-system kube-proxy -o yaml &gt; kube-proxy-cm.yaml<br><br><span class="hljs-comment"># 在每台机器上面使用root权限备份一下iptables规则</span><br>$ iptables-save &gt; kube-proxy-iptables-save.bak<br></code></pre></div></td></tr></table></figure>
+
+<p>接下来我们删除<code>kube-proxy</code>相关的<code>daemonset</code>、<code>configmap</code>、<code>iptables</code>规则和<code>ipvs</code>规则。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 删除掉kube-proxy这个daemonset</span><br>$ kubectl -n kube-system delete ds kube-proxy<br><br><span class="hljs-comment"># 删除掉kube-proxy的configmap，防止以后使用kubeadm升级K8S的时候重新安装了kube-proxy（1.19版本之后的K8S）</span><br>$ kubectl -n kube-system delete cm kube-proxy<br><br><span class="hljs-comment"># 在每台机器上面使用root权限清除掉iptables规则和ipvs规则</span><br>$ iptables-save | grep -v KUBE | iptables-restore<br>$ ipvsadm -C<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="1-3-配置cilium"><a href="#1-3-配置cilium" class="headerlink" title="1.3 配置cilium"></a>1.3 配置cilium</h2><p>删除<code>kube-proxy</code>之后此时的K8S集群应该会处于不正常工作的状态，不用紧张，现在我们开启<code>cilium</code>的<code>kube-proxy-replacement</code>功能来替代<code>kube-proxy</code>。</p>
+<p>因为我们集群已经部署了cililum，因此我们可以直接通过修改<code>configmap</code>的方式开启<code>kube-proxy-replacement</code>；修改<code>cilium-config</code>，将<code>kube-proxy-replacement: disabled</code>修改为<code>kube-proxy-replacement: strict</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl edit cm -n kube-system cilium-config<br>configmap/cilium-config edited<br><br>$ kubectl get cm -n kube-system cilium-config -o yaml | grep kube-proxy-replacement<br>  kube-proxy-replacement: strict<br>  <br>$ kubectl rollout restart ds/cilium deployment/cilium-operator -n kube-system<br></code></pre></div></td></tr></table></figure>
+
+<p>另外默认情况下cilium不会允许集群外的机器访问clusterip，需要开启这个功能的话可以在配置中添加<code>bpf-lb-external-clusterip: &quot;true&quot;</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get cm -n kube-system cilium-config -o yaml | grep bpf-lb-external-clusterip<br>  bpf-lb-external-clusterip: <span class="hljs-string">&quot;true&quot;</span><br></code></pre></div></td></tr></table></figure>
+
+<p>如果是使用helm来初始化安装或者是更新的话可以考虑添加下面的这两个参数，最后的效果应该是一致的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用helm来更新的话可以添加下面的这两个参数</span><br>--<span class="hljs-built_in">set</span> kubeProxyReplacement=strict \<br>--<span class="hljs-built_in">set</span> bpf.lbExternalClusterIP=<span class="hljs-literal">true</span> \<br><br><span class="hljs-comment"># 检查一下更新之后的configmap</span><br>$ kubectl get cm -n kube-system cilium-config -o yaml | egrep <span class="hljs-string">&quot;bpf-lb-external-clusterip|kube-proxy-replacement&quot;</span><br>  bpf-lb-external-clusterip: <span class="hljs-string">&quot;true&quot;</span><br>  kube-proxy-replacement: strict<br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>个人建议使用helm和configmap来管理cilium的配置这两种方式挑一种即可，不要两个方式混用，避免一些配置被覆盖</p>
+</blockquote>
+<h2 id="1-4-检测cilium"><a href="#1-4-检测cilium" class="headerlink" title="1.4 检测cilium"></a>1.4 检测cilium</h2><p>cilium重启完成之后检测相关的服务状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl -n kube-system <span class="hljs-built_in">exec</span> ds/cilium -- cilium status | grep KubeProxyReplacement<br>Defaulted container <span class="hljs-string">&quot;cilium-agent&quot;</span> out of: cilium-agent, mount-cgroup (init), apply-sysctl-overwrites (init), mount-bpf-fs (init), clean-cilium-state (init)<br>KubeProxyReplacement:    Strict   [eth0 10.31.80.4 (Direct Routing)]<br></code></pre></div></td></tr></table></figure>
+
+<p>注意这时候cilium里面能够看到的<code>Service Type</code>应该还包含了<code>LoadBalancer</code>和<code>NodePort</code>等类型</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl -n kube-system <span class="hljs-built_in">exec</span> ds/cilium -- cilium service list<br>Defaulted container <span class="hljs-string">&quot;cilium-agent&quot;</span> out of: cilium-agent, mount-cgroup (init), apply-sysctl-overwrites (init), mount-bpf-fs (init), clean-cilium-state (init)<br>ID   Frontend             Service Type   Backend<br>1    10.32.169.6:80       ClusterIP      1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>2    10.32.192.192:80     LoadBalancer   1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>3    10.32.176.164:8080   ClusterIP      1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>4    10.31.80.3:30088     NodePort       1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>5    0.0.0.0:30088        NodePort       1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>6    10.32.131.127:443    ClusterIP      1 =&gt; 10.31.80.6:4244 (active)<br>                                         2 =&gt; 10.31.80.3:4244 (active)<br>                                         3 =&gt; 10.31.80.1:4244 (active)<br>                                         4 =&gt; 10.31.80.5:4244 (active)<br>                                         5 =&gt; 10.31.80.4:4244 (active)<br>                                         6 =&gt; 10.31.80.2:4244 (active)<br>7    10.32.171.0:80       ClusterIP      1 =&gt; 10.32.4.114:4245 (active)<br>8    10.32.128.10:53      ClusterIP      1 =&gt; 10.32.5.239:53 (active)<br>                                         2 =&gt; 10.32.5.21:53 (active)<br>9    10.32.128.10:9153    ClusterIP      1 =&gt; 10.32.5.239:9153 (active)<br>                                         2 =&gt; 10.32.5.21:9153 (active)<br>10   10.32.184.206:80     ClusterIP      1 =&gt; 10.32.3.138:8081 (active)<br>11   10.31.80.3:30081     NodePort       1 =&gt; 10.32.3.138:8081 (active)<br>12   0.0.0.0:30081        NodePort       1 =&gt; 10.32.3.138:8081 (active)<br>13   10.32.172.208:80     ClusterIP      1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>14   10.32.192.0:80       LoadBalancer   1 =&gt; 10.32.3.93:80 (active)<br>                                         2 =&gt; 10.32.3.85:80 (active)<br>                                         3 =&gt; 10.32.5.204:80 (active)<br>                                         4 =&gt; 10.32.4.25:80 (active)<br>15   10.32.188.57:8080    ClusterIP      1 =&gt; 10.32.5.220:8080 (active)<br>16   10.31.80.3:31243     NodePort       1 =&gt; 10.32.5.220:8080 (active)<br>17   0.0.0.0:31243        NodePort       1 =&gt; 10.32.5.220:8080 (active)<br>18   10.32.142.224:8080   ClusterIP      1 =&gt; 10.32.4.248:8080 (active)<br>19   0.0.0.0:31578        NodePort       1 =&gt; 10.32.4.248:8080 (active)<br>20   10.31.80.3:31578     NodePort       1 =&gt; 10.32.4.248:8080 (active)<br>21   10.32.128.1:443      ClusterIP      1 =&gt; 10.31.80.1:6443 (active)<br>                                         2 =&gt; 10.31.80.2:6443 (active)<br>                                         3 =&gt; 10.31.80.3:6443 (active)<br></code></pre></div></td></tr></table></figure>
+
+<p>此时再查看ipvs规则可以看到为空，重启节点后对应的<code>kube-ipvs0</code>网卡也会消失，<code>iptables</code>中的相关规则也不会再生成。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ ipvsadm -ln<br>IP Virtual Server version 1.2.1 (size=4096)<br>Prot LocalAddress:Port Scheduler Flags<br>  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn<br>  <br>$ ip link show kube-ipvs0<br>Device <span class="hljs-string">&quot;kube-ipvs0&quot;</span> does not exist.<br><br><br>$ iptables-save | grep KUBE-SVC<br>[ empty line ]<br><br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>此前我们已经配置了该集群的podIP、clusterIP和loadbalancerIP均为集群外路由可达，即可ping通，可正常请求。此时已经开启了cilium的<code>kube-proxy-replacement</code>模式之后，只有pod IP是能正常ping通并请求的；<code>loadbalancerIP</code>和<code>clusterIP</code>都是无法ping通，但是能正常请求；主要原因是cilium本身的eBPF代码默认并没有对<code>loadbalancerIP</code>和<code>clusterIP</code>的icmp数据包进行处理，导致ping请求无法被响应。</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">kube-proxy + kube-router</th>
+<th align="center">without kube-proxy + kube-router</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">集群内：Pod IP</td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+</tr>
+<tr>
+<td align="center">集群内：Cluster IP</td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+<td align="center">ping测试：N<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+</tr>
+<tr>
+<td align="center">集群内：LoadBalancer IP</td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+<td align="center">ping测试：N<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+</tr>
+<tr>
+<td align="center">集群外：Pod IP</td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+</tr>
+<tr>
+<td align="center">集群外：Cluster IP</td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+<td align="center">ping测试：N<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+</tr>
+<tr>
+<td align="center">集群外：LoadBalancer IP</td>
+<td align="center">ping测试：Y<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+<td align="center">ping测试：N<br />TCP测试：Y<br />UDP测试：Y<br /></td>
+</tr>
+</tbody></table>
+<h1 id="2、一致性哈希"><a href="#2、一致性哈希" class="headerlink" title="2、一致性哈希"></a>2、一致性哈希</h1><p>Cilium官方声称已经实现了完整的四七层代理，因此在切换到它的<code>KubeProxyReplacement</code>模式之后我们可以使用一些cilium的特有功能，比如一致性哈希。</p>
+<p>在负载均衡算法中使用传统的哈希算法时，增减一个后端节点都会导致几乎所有的哈希规则进行重新映射，使得原先的客户端会被转发到新的后端节点，这对于缓存服务器来说是非常不友好的。因此在这种场景下一般会使用一致性哈希算法，其特点是当哈希表槽位数（大小）的改变平均只需要对<code>K/n</code> 个关键字重新映射，其中<code>K</code>是关键字的数量，<code>n</code>是槽位数量。也就是说使用了一致性哈希算法之后，可以大幅度减小后端节点变化带来的哈希映射关系变动，从而使得请求转发更加的均匀稳定。</p>
+<p>一致性哈希算法有很多种具体实现，而Cilium主要是通过实现<a target="_blank" rel="noopener" href="https://storage.googleapis.com/pub-tools-public-publication-data/pdf/44824.pdf">谷歌此前开源的Maglev</a>的一种变体来达到<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/#maglev-consistent-hashing-beta">一致性哈希</a>的效果，这提高了发生故障时的弹性并提供了更好的负载平衡属性。因为添加到集群的节点将在整个集群中为给定的 5 元组做出一致的后端选择，<strong>而无需与其他节点同步状态</strong>。Cilium声称可以在后端出现变动的时候将影响控制到<code>1%</code>以内。</p>
+<p>这里需要解释一下这两个特定于 Maglev 的参数：<code>maglev.tableSize</code> 和<code>maglev.hashSeed</code>。</p>
+<p><code>maglev.tableSize</code>用来指定maglev查找单个服务的表的大小，maglev建议该值(<code>M</code>) 应远大于实际的最大后端节点数量 (<code>N</code>)，实际上我们为了实现后端出现变动的时候将影响控制到<code>1%</code>以内的目标，需要将<code>M</code>的值设置成大于<code>N</code>的100倍才比较合理，另外<code>M</code>必须是一个质数，Cilium默认将<code>M</code>设置为<code>16381</code>（对应最大后端节点数量在160左右）。下表是cilium给出的一些可以使用的参考值，我们可以根据自己的实际业务进行调整：</p>
+<table>
+<thead>
+<tr>
+<th align="center"><code>maglev.tableSize</code> value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">251</td>
+</tr>
+<tr>
+<td align="center">509</td>
+</tr>
+<tr>
+<td align="center">1021</td>
+</tr>
+<tr>
+<td align="center">2039</td>
+</tr>
+<tr>
+<td align="center">4093</td>
+</tr>
+<tr>
+<td align="center">8191</td>
+</tr>
+<tr>
+<td align="center">16381</td>
+</tr>
+<tr>
+<td align="center">32749</td>
+</tr>
+<tr>
+<td align="center">65521</td>
+</tr>
+<tr>
+<td align="center">131071</td>
+</tr>
+</tbody></table>
+<p><code>maglev.hashSeed</code>则是用来设置maglev算法的seed值，官方推荐设置，这样就不需要依赖内置的seed值。该值每台机器需要一致，这样才能保证每台机器的哈希结果一致。<code>maglev.hashSeed</code>应该是一个base64编码的12位随机字符串，可以使用<code>head -c12 /dev/urandom | base64 -w0</code>命令生成。</p>
+<p>配置maglev算法和hash相关参数，主要配置三个值：</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先随机生成一个SEED值用于哈希算法</span><br>$ head -c12 /dev/urandom | base64 -w0<br>djthA7ezcQmtolON<br><br>$ kubectl get cm -n kube-system cilium-config -o yaml | egrep <span class="hljs-string">&quot;bpf-lb-algorithm|bpf-lb-maglev-hash-seed|bpf-lb-maglev-table-size&quot;</span><br>  bpf-lb-algorithm: maglev<br>  bpf-lb-maglev-hash-seed: djthA7ezcQmtolON<br>  bpf-lb-maglev-table-size: <span class="hljs-string">&quot;65521&quot;</span><br><br><br>SEED=$(head -c12 /dev/urandom | base64 -w0)<br><span class="hljs-comment"># 使用helm来更新的话可以添加下面的参数</span><br>--<span class="hljs-built_in">set</span> loadBalancer.algorithm=maglev \<br>--<span class="hljs-built_in">set</span> maglev.tableSize=65521 \<br>--<span class="hljs-built_in">set</span> maglev.hashSeed=<span class="hljs-variable">$SEED</span> \<br></code></pre></div></td></tr></table></figure>
+
+<p>注意开启了maglev一致性哈希之后，因为需要维护哈希表，所以cilium的ds进程会占用更多的内存；同时需要注意的是maglev一致性哈希<strong>只会对集群外部的流量生效</strong>（即通过nodeport、externalIP等方式进来的流量），因为对于集群内部的东西流量，往往都是直接转发到对应的pod上面，不需要经过中间的选择转发环节，也就没有maglev一致性哈希的工作环节了。当然，<strong>Cilium的一致性哈希支持XDP加速</strong>。</p>
+<h1 id="3、Direct-Server-Return-DSR"><a href="#3、Direct-Server-Return-DSR" class="headerlink" title="3、Direct Server Return (DSR)"></a>3、Direct Server Return (DSR)</h1><p>默认情况下，Cilium 的 eBPF NodePort转发是通过SNAT模式实现的，也就是说，当节点外部的流量通过诸如LoadBalancer、NodePort等方式进入集群内，并且需要转发到非本node的pod上面时，该node将通过执行SNAT转换将请求转发到对应的后端pod上面。这不需要对数据包的MTU进行变更，代价是后端pod回复数据包的时候需要再次经由node进行<code>reverse SNAT</code>再把请求发回给客户端。</p>
+<p>Cilium提供了一个<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/#direct-server-return-dsr">DSR模式</a>来对此场景进行优化，即当数据包转发给后端pod之后，由pod直接返回给客户端，而不再经由node进行转发回复，这样可以减少一跳的转发，并且减少了一次NAT转换。DSR模式需要cilium工作在<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/concepts/networking/routing/#arch-direct-routing">Native-Routing</a>模式，如果是使用了隧道模式，那么将无法正常工作。</p>
+<p>DSR模式相较于SNAT模式的另一个优势就是能够保留客户端的源IP，即后端服务能够根据客户端IP进行更灵活的控制策略。考虑到一个后端pod实际上可能会被多个SVC同时使用，Cilium会在<code>IPv4 Options/IPv6 Destination Option extension header</code>中编码特定的cilium信息，将对应的<code>service IP/port</code>信息传递给后端pod，对应的代价就是报文用来传递实际业务数据的MTU会减小。对于 TCP 服务，Cilium 只对 SYN 数据包的<code>service IP/port</code>进行编码，而不会对后续数据包进行编码。</p>
+<p>Cilium还支持<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/#hybrid-dsr-and-snat-mode">混合DSR和SNAT模式</a>，即对TCP连接进行DSR，对UDP连接进行SNAT。当workload主要使用TCP进行数据传输的时候，这可以有效地折中<strong>优化转发链路</strong>和<strong>减小MTU</strong>两者的影响。</p>
+<blockquote>
+<p>注意在某些公有云环境中DSR模式可能会不生效，因为底层网络可能会丢弃Cilium特定的IP数据包。如果处理请求的pod不在接受nodeport请求的node上面，那么出现连接问题的时候优先确定数据包是否转发到了对应pod所在的节点上。如果不是这种情况，则建议切换回默认 SNAT 模式作为解决方法。此外，在某些实施源/目标 IP 地址检查（例如 AWS）的公共云提供商环境中，必须禁用检查才能使 DSR 模式工作。</p>
+</blockquote>
+<p>设置<code>loadBalancer.mode</code>为<code>dsr</code>，将对所有服务（TCP+UDP）都使用DSR模式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get cm -n kube-system cilium-config -o yaml | grep bpf-lb-mode<br>  bpf-lb-mode: dsr<br>$ kubectl rollout restart ds/cilium deployment/cilium-operator -n kube-system<br><br><span class="hljs-comment"># 使用helm来更新的话可以添加下面的参数</span><br>--<span class="hljs-built_in">set</span> loadBalancer.mode=dsr<br></code></pre></div></td></tr></table></figure>
+
+<p>设置<code>loadBalancer.mode</code>为<code>hybrid</code>，将对TCP服务使用DSR模式，UDP服务使用SNT模式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get cm -n kube-system cilium-config -o yaml | grep bpf-lb-mode<br>  bpf-lb-mode: hybrid<br>$ kubectl rollout restart ds/cilium deployment/cilium-operator -n kube-system<br><br><span class="hljs-comment"># 使用helm来更新的话可以添加下面的参数</span><br>--<span class="hljs-built_in">set</span> loadBalancer.mode=hybrid <br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>设置完成之后我们部署一个测试服务，直接返回<code>remote_addr</code>和<code>remote_port</code>，用来验证DSR模式是否正常工作：</p>
+<table>
+<thead>
+<tr>
+<th align="center">key</th>
+<th align="center">value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">PodIP</td>
+<td align="center">10.32.3.126</td>
+</tr>
+<tr>
+<td align="center">LoadBalanceIP</td>
+<td align="center">10.32.192.80</td>
+</tr>
+<tr>
+<td align="center">ClientIP</td>
+<td align="center">10.31.88.1</td>
+</tr>
+<tr>
+<td align="center">NodeIP</td>
+<td align="center">10.31.80.1-6</td>
+</tr>
+</tbody></table>
+<p>首先我们查看snat模式下的情况：</p>
+<p>当在<strong>集群外</strong>通过LoadBalanceIP、ClusterIP、NodePort等方式访问的时候，转发路径如下：</p>
+<figure class="highlight xl"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xl">C<span class="hljs-function"><span class="hljs-title">lient</span> --&gt;</span> N<span class="hljs-function"><span class="hljs-title">ode</span> --&gt;</span> P<span class="hljs-function"><span class="hljs-title">od</span> --&gt;</span> N<span class="hljs-function"><span class="hljs-title">ode</span> --&gt;</span> Client<br></code></pre></div></td></tr></table></figure>
+
+<p>此时客户端和pod之间的通信来回都是需要经过Node进行NAT转换。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># bpf-lb-mode: snat</span><br><span class="hljs-comment"># 我们直接访问podIP，是可以返回客户端的真实IP和端口的</span><br>$ curl 10.32.3.126<br>10.31.88.1:49940<br><span class="hljs-comment"># bpf-lb-mode: snat</span><br><span class="hljs-comment"># 通过LoadBalancerIP访问，此时返回的IP和端口是node的，而不是真实访问的客户端的</span><br>$ curl 10.32.192.80<br>10.31.80.1:50066<br></code></pre></div></td></tr></table></figure>
+
+<p>开启了DSR模式之后的转发路径变成下面这样：</p>
+<figure class="highlight xl"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xl">C<span class="hljs-function"><span class="hljs-title">lient</span> --&gt;</span> N<span class="hljs-function"><span class="hljs-title">ode</span> --&gt;</span> P<span class="hljs-function"><span class="hljs-title">od</span> --&gt;</span> Client<br></code></pre></div></td></tr></table></figure>
+
+<p>此时Pod响应客户端的请求不需要再经由Node转发，而是由Pod直接返回给客户端。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># bpf-lb-mode: dsr</span><br><span class="hljs-comment"># 无论是通过LoadBalancerIP还是podIP访问，都是可以返回客户端的真实IP和端口的</span><br>$ curl 10.32.3.126<br>10.31.88.1:34220<br>$ curl 10.32.192.80<br>10.31.88.1:52650<br></code></pre></div></td></tr></table></figure>
+
+
+
+
+
+
+
+<h1 id="4、Socket-旁路-amp-XDP加速"><a href="#4、Socket-旁路-amp-XDP加速" class="headerlink" title="4、Socket 旁路&amp;XDP加速"></a>4、Socket 旁路&amp;XDP加速</h1><h2 id="4-1-Socket-LoadBalancer-Bypass-in-Pod-Namespace"><a href="#4-1-Socket-LoadBalancer-Bypass-in-Pod-Namespace" class="headerlink" title="4.1 Socket LoadBalancer Bypass in Pod Namespace"></a>4.1 Socket LoadBalancer Bypass in Pod Namespace</h2><p>Cilium对Scoket旁路的全称是<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/#socket-loadbalancer-bypass-in-pod-namespace">Socket LoadBalancer Bypass in Pod Namespace</a>，即对于同一个namspace下的服务，如果namespace中的某个pod通过LoadBalancer来访问同namespace下的另一个服务，实际上请求是会被转发到同namespace中的另一个pod，但是在底层的socket看来，还是由该客户端pod对LoadBalancerIP发起请求产生的socket连接，以及后续需要的NAT转换等操作。</p>
+<p>开启了旁路功能之后，可以绕过上述的流程，直接把请求转发给对应的后端pod，缩短转发链路从而提高性能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get cm -n kube-system cilium-config -o yaml | egrep <span class="hljs-string">&quot;bpf-lb-sock-hostns-only&quot;</span><br>  bpf-lb-sock-hostns-only: <span class="hljs-string">&quot;true&quot;</span><br>$ kubectl rollout restart ds/cilium deployment/cilium-operator -n kube-system<br><br><span class="hljs-comment"># 使用helm来更新的话可以添加下面的参数</span><br> --<span class="hljs-built_in">set</span> socketLB.hostNamespaceOnly=<span class="hljs-literal">true</span> <br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="4-2-LoadBalancer-amp-NodePort-XDP-Acceleration"><a href="#4-2-LoadBalancer-amp-NodePort-XDP-Acceleration" class="headerlink" title="4.2 LoadBalancer &amp; NodePort XDP Acceleration"></a>4.2 LoadBalancer &amp; NodePort XDP Acceleration</h2><p>Cilium还支持对外部流量（ExternalIP、NodePort等）服务<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/#loadbalancer-nodeport-xdp-acceleration">使用XDP加速</a>从而提高性能表现，由于XDP加速本身依赖Linux内核，同时也对网卡的型号和驱动有要求，因此最好先确定机器对应的网卡驱动（使用<code>ethtool -i eth0</code>查看）和内核版本是否符合需求。官方有给出一份<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/gettingstarted/kubeproxy-free/#loadbalancer-nodeport-xdp-acceleration">支持列表</a>，对于绝大部分高速网卡和大多数的虚拟机网卡驱动（virtio_net）都是支持的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get cm -n kube-system cilium-config -o yaml | egrep <span class="hljs-string">&quot;bpf-lb-sock-hostns-only&quot;</span><br>  bpf-lb-acceleration: native<br>$ kubectl rollout restart ds/cilium deployment/cilium-operator -n kube-system<br><br><span class="hljs-comment"># 使用helm来更新的话可以添加下面的参数</span><br> --<span class="hljs-built_in">set</span> loadBalancer.acceleration=native <br> <br><span class="hljs-comment"># 更新完成之后我们可以通过下面的命令来检查效果</span><br>$ kubectl -n kube-system <span class="hljs-built_in">exec</span> ds/cilium -- cilium status --verbose | grep XDP<br>Defaulted container <span class="hljs-string">&quot;cilium-agent&quot;</span> out of: cilium-agent, mount-cgroup (init), apply-sysctl-overwrites (init), mount-bpf-fs (init), clean-cilium-state (init)<br>  XDP Acceleration:       Native<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="5、Native-Routing-masquerade"><a href="#5、Native-Routing-masquerade" class="headerlink" title="5、Native-Routing-masquerade"></a>5、Native-Routing-masquerade</h1><p>注意该功能与是否开启<code>KubeProxyReplacement</code>模式无关，只需要集群开启了<a target="_blank" rel="noopener" href="https://docs.cilium.io/en/stable/concepts/networking/routing/#native-routing">Native-routing</a>模式，即确保podIP在集群外路由可达，即可配置该功能。</p>
+<p>默认情况下Cilium会开启IP伪装功能，即pod在访问集群外的服务时，源IP会被伪装成所在node节点的IP而不是本身的真实IP，我们可以根据实际需求来进行调整，通过调整<code>enable-ipv(4|6)-masquerade</code>参数可以分别控制IPv4/IPv6网络下的IP伪装功能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get cm -n kube-system cilium-config -o yaml | egrep <span class="hljs-string">&quot;enable-ipv(4|6)-masquerade&quot;</span><br>  enable-ipv4-masquerade: <span class="hljs-string">&quot;true&quot;</span><br>  enable-ipv6-masquerade: <span class="hljs-string">&quot;true&quot;</span><br><span class="hljs-comment"># 当集群内的pod访问集群外部的服务，会返回所在node的IP</span><br>$ kubectl -n nginx-quic <span class="hljs-built_in">exec</span> -it deployments/nginx-quic-deployment -- curl ipport.tinychen.com<br>10.31.80.6:44372<br><span class="hljs-comment"># 当集群内的pod访问集群内部的服务，则返回pod自身的真实IP</span><br>$ kubectl -n nginx-quic <span class="hljs-built_in">exec</span> -it deployments/nginx-quic-deployment -- curl 10.32.192.80<br>10.32.5.96:42688<br><br>$ kubectl get cm -n kube-system cilium-config -o yaml | egrep <span class="hljs-string">&quot;enable-ipv(4|6)-masquerade&quot;</span><br>  enable-ipv4-masquerade: <span class="hljs-string">&quot;false&quot;</span><br>  enable-ipv6-masquerade: <span class="hljs-string">&quot;false&quot;</span><br><span class="hljs-comment"># 关闭masquerade功能之后，访问集群内外部的服务均可以返回pod自身的IP</span><br>$ kubectl -n nginx-quic <span class="hljs-built_in">exec</span> -it deployments/nginx-quic-deployment -- curl ipport.tinychen.com<br>10.32.5.96:58512<br>$ kubectl -n nginx-quic <span class="hljs-built_in">exec</span> -it deployments/nginx-quic-deployment -- curl 10.32.192.80<br>10.32.5.96:36324<br></code></pre></div></td></tr></table></figure>
+
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/cloudnative/">cloudnative</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/k8s/">k8s</a>
+                    
+                      <a class="hover-with-bg" href="/tags/docker/">docker</a>
+                    
+                      <a class="hover-with-bg" href="/tags/bgp/">bgp</a>
+                    
+                      <a class="hover-with-bg" href="/tags/cilium/">cilium</a>
+                    
+                      <a class="hover-with-bg" href="/tags/containerd/">containerd</a>
+                    
+                      <a class="hover-with-bg" href="/tags/ebpf/">ebpf</a>
+                    
+                      <a class="hover-with-bg" href="/tags/xdp/">xdp</a>
+                    
+                      <a class="hover-with-bg" href="/tags/kube-router/">kube-router</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20221209-k8s-10-deploy-ha-k8s-with-cilium-bgp/">
+                        <span class="hidden-mobile">k8s系列10-使用kube-router和cilium部署BGP模式的k8s集群</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
