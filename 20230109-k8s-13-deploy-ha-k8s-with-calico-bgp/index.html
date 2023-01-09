@@ -1,0 +1,821 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="本文主要在centos7系统上基于containerd和v3.24.5版本的calico组件部署v1.26.0版本的堆叠ETCD高可用k8s原生集群，在LoadBalancer上选择了PureLB和calico结合bird实现BGP路由可达的K8S集群部署。 此前写的一些关于k8s基础知识和集群搭建的一些方案，有需要的同学可以看一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s系列13-calico部署BGP模式的高可用k8s集群">
+<meta property="og:url" content="https://tinychen.com/20230109-k8s-13-deploy-ha-k8s-with-calico-bgp/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio - 互联网技术学习工作经验分享">
+<meta property="og:description" content="本文主要在centos7系统上基于containerd和v3.24.5版本的calico组件部署v1.26.0版本的堆叠ETCD高可用k8s原生集群，在LoadBalancer上选择了PureLB和calico结合bird实现BGP路由可达的K8S集群部署。 此前写的一些关于k8s基础知识和集群搭建的一些方案，有需要的同学可以看一下。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/202301092014731.jpg">
+<meta property="article:published_time" content="2023-01-09T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-01-09T15:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="centos">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="calico">
+<meta property="article:tag" content="containerd">
+<meta property="article:tag" content="purelb">
+<meta property="article:tag" content="bgp">
+<meta property="article:tag" content="bird">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/202301092014731.jpg">
+  
+  
+  <title>k8s系列13-calico部署BGP模式的高可用k8s集群 - TinyChen&#39;s Studio - 互联网技术学习工作经验分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+  
+<link rel="stylesheet" href="/css/fluid-extention.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                Links
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/202301092014671.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="k8s系列13-calico部署BGP模式的高可用k8s集群">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2023-01-09 23:00" pubdate>
+        January 9, 2023 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">k8s系列13-calico部署BGP模式的高可用k8s集群</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：January 9, 2023 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>本文主要在centos7系统上基于<code>containerd</code>和<code>v3.24.5</code>版本的calico组件部署<code>v1.26.0</code>版本的堆叠ETCD高可用k8s原生集群，在<code>LoadBalancer</code>上选择了<code>PureLB</code>和<code>calico</code>结合<code>bird</code>实现<strong>BGP路由可达</strong>的K8S集群部署。</p>
+<p>此前写的一些关于k8s基础知识和集群搭建的一些<a href="https://tinychen.com/tags/k8s/">方案</a>，有需要的同学可以看一下。</p>
+<span id="more"></span>
+
+<h1 id="1、准备工作"><a href="#1、准备工作" class="headerlink" title="1、准备工作"></a>1、准备工作</h1><h2 id="1-1-集群信息"><a href="#1-1-集群信息" class="headerlink" title="1.1 集群信息"></a>1.1 集群信息</h2><p>机器均为16C16G的虚拟机，硬盘为100G。</p>
+<table>
+<thead>
+<tr>
+<th align="center">IP</th>
+<th align="center">Hostname</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">10.31.90.0</td>
+<td align="center">k8s-calico-apiserver.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.31.90.1</td>
+<td align="center">k8s-calico-master-10-31-90-1.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.31.90.2</td>
+<td align="center">k8s-calico-master-10-31-90-2.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.31.90.3</td>
+<td align="center">k8s-calico-master-10-31-90-3.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.31.90.4</td>
+<td align="center">k8s-calico-worker-10-31-90-4.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.31.90.5</td>
+<td align="center">k8s-calico-worker-10-31-90-5.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.31.90.6</td>
+<td align="center">k8s-calico-worker-10-31-90-6.tinychen.io</td>
+</tr>
+<tr>
+<td align="center">10.33.0.0/17</td>
+<td align="center">podSubnet</td>
+</tr>
+<tr>
+<td align="center">10.33.128.0/18</td>
+<td align="center">serviceSubnet</td>
+</tr>
+<tr>
+<td align="center">10.33.192.0/18</td>
+<td align="center">LoadBalancerSubnet</td>
+</tr>
+</tbody></table>
+<h2 id="1-2-检查mac和product-uuid"><a href="#1-2-检查mac和product-uuid" class="headerlink" title="1.2 检查mac和product_uuid"></a>1.2 检查mac和product_uuid</h2><p>同一个k8s集群内的所有节点需要确保<code>mac</code>地址和<code>product_uuid</code>均唯一，开始集群初始化之前需要检查相关信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 检查mac地址</span><br>ip link <br>ifconfig -a<br><br><span class="hljs-comment"># 检查product_uuid</span><br>sudo cat /sys/class/dmi/id/product_uuid<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-3-配置ssh免密登录（可选）"><a href="#1-3-配置ssh免密登录（可选）" class="headerlink" title="1.3 配置ssh免密登录（可选）"></a>1.3 配置ssh免密登录（可选）</h2><p>如果k8s集群的节点有多个网卡，确保每个节点能通过正确的网卡互联访问</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 在root用户下面生成一个公用的key，并配置可以使用该key免密登录</span><br>su root<br>ssh-keygen<br><span class="hljs-built_in">cd</span> /root/.ssh/<br>cat id_rsa.pub &gt;&gt; authorized_keys<br>chmod 600 authorized_keys<br><br><br>cat &gt;&gt; ~/.ssh/config &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">Host k8s-calico-master-10-31-90-1</span><br><span class="hljs-string">    HostName 10.31.90.1</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host k8s-calico-master-10-31-90-2</span><br><span class="hljs-string">    HostName 10.31.90.2</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host k8s-calico-master-10-31-90-3</span><br><span class="hljs-string">    HostName 10.31.90.3</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host k8s-calico-worker-10-31-90-4</span><br><span class="hljs-string">    HostName 10.31.90.4</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host k8s-calico-worker-10-31-90-5</span><br><span class="hljs-string">    HostName 10.31.90.5</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string"></span><br><span class="hljs-string">Host k8s-calico-worker-10-31-90-6</span><br><span class="hljs-string">    HostName 10.31.90.6</span><br><span class="hljs-string">    User root</span><br><span class="hljs-string">    Port 22</span><br><span class="hljs-string">    IdentityFile ~/.ssh/id_rsa</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-4-修改hosts文件"><a href="#1-4-修改hosts文件" class="headerlink" title="1.4 修改hosts文件"></a>1.4 修改hosts文件</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &gt;&gt; /etc/hosts &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">10.31.90.0 k8s-calico-apiserver k8s-calico-apiserver.tinychen.io</span><br><span class="hljs-string">10.31.90.1 k8s-calico-master-10-31-90-1 k8s-calico-master-10-31-90-1.tinychen.io</span><br><span class="hljs-string">10.31.90.2 k8s-calico-master-10-31-90-2 k8s-calico-master-10-31-90-2.tinychen.io</span><br><span class="hljs-string">10.31.90.3 k8s-calico-master-10-31-90-3 k8s-calico-master-10-31-90-3.tinychen.io</span><br><span class="hljs-string">10.31.90.4 k8s-calico-worker-10-31-90-4 k8s-calico-worker-10-31-90-4.tinychen.io</span><br><span class="hljs-string">10.31.90.5 k8s-calico-worker-10-31-90-5 k8s-calico-worker-10-31-90-5.tinychen.io</span><br><span class="hljs-string">10.31.90.6 k8s-calico-worker-10-31-90-6 k8s-calico-worker-10-31-90-6.tinychen.io</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-5-关闭swap内存"><a href="#1-5-关闭swap内存" class="headerlink" title="1.5 关闭swap内存"></a>1.5 关闭swap内存</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用命令直接关闭swap内存</span><br>swapoff -a<br><span class="hljs-comment"># 修改fstab文件禁止开机自动挂载swap分区</span><br>sed -i <span class="hljs-string">&#x27;/swap / s/^\(.*\)$/#\1/g&#x27;</span> /etc/fstab<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-6-配置时间同步"><a href="#1-6-配置时间同步" class="headerlink" title="1.6 配置时间同步"></a>1.6 配置时间同步</h2><p>这里可以根据自己的习惯选择ntp或者是chrony同步均可，同步的时间源服务器可以选择阿里云的<code>ntp1.aliyun.com</code>或者是国家时间中心的<code>ntp.ntsc.ac.cn</code>。</p>
+<h3 id="使用ntp同步"><a href="#使用ntp同步" class="headerlink" title="使用ntp同步"></a>使用ntp同步</h3><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-comment"># 使用国家时间中心的源同步时间</span><br>ntpdate ntp.ntsc.ac.cn<br><br><span class="hljs-comment"># 最后查看一下时间</span><br>hwclock<br></code></pre></div></td></tr></table></figure>
+
+<h3 id="使用chrony同步"><a href="#使用chrony同步" class="headerlink" title="使用chrony同步"></a>使用chrony同步</h3><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装chrony</span><br>yum install chrony -y<br><br><span class="hljs-comment"># 设置开机启动并开启chony并查看运行状态</span><br>systemctl <span class="hljs-built_in">enable</span> chronyd.service<br>systemctl start chronyd.service<br>systemctl status chronyd.service<br><br><span class="hljs-comment"># 当然也可以自定义时间服务器</span><br>vim /etc/chrony.conf<br><br><span class="hljs-comment"># 修改前</span><br>$ grep server /etc/chrony.conf<br><span class="hljs-comment"># Use public servers from the pool.ntp.org project.</span><br>server 0.centos.pool.ntp.org iburst<br>server 1.centos.pool.ntp.org iburst<br>server 2.centos.pool.ntp.org iburst<br>server 3.centos.pool.ntp.org iburst<br><br><span class="hljs-comment"># 修改后</span><br>$ grep server /etc/chrony.conf<br><span class="hljs-comment"># Use public servers from the pool.ntp.org project.</span><br>server ntp.ntsc.ac.cn iburst<br><br><span class="hljs-comment"># 重启服务使配置文件生效</span><br>systemctl restart chronyd.service<br><br><span class="hljs-comment"># 查看chrony的ntp服务器状态</span><br>chronyc sourcestats -v<br>chronyc sources -v<br><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-7-关闭selinux"><a href="#1-7-关闭selinux" class="headerlink" title="1.7 关闭selinux"></a>1.7 关闭selinux</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用命令直接关闭</span><br>setenforce 0<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=disabled/&#x27;</span> /etc/selinux/config<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-8-配置防火墙"><a href="#1-8-配置防火墙" class="headerlink" title="1.8 配置防火墙"></a>1.8 配置防火墙</h2><p>k8s集群之间通信和服务暴露需要使用较多端口，为了方便，直接禁用防火墙</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># centos7使用systemctl禁用默认的firewalld服务</span><br>systemctl <span class="hljs-built_in">disable</span> firewalld.service<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-9-配置netfilter参数"><a href="#1-9-配置netfilter参数" class="headerlink" title="1.9 配置netfilter参数"></a>1.9 配置netfilter参数</h2><p>这里主要是需要配置内核加载<code>br_netfilter</code>和<code>iptables</code>放行<code>ipv6</code>和<code>ipv4</code>的流量，确保集群内的容器能够正常通信。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/modules-load.d/k8s.conf</span><br><span class="hljs-string">br_netfilter</span><br><span class="hljs-string">EOF</span><br><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/sysctl.d/k8s.conf</span><br><span class="hljs-string">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="hljs-string">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="hljs-string">EOF</span><br>sudo sysctl --system<br></code></pre></div></td></tr></table></figure>
+
+
+
+
+
+<h2 id="1-10-配置IPVS"><a href="#1-10-配置IPVS" class="headerlink" title="1.10 配置IPVS"></a>1.10 配置IPVS</h2><p>IPVS是专门设计用来应对负载均衡场景的组件，<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md#run-kube-proxy-in-ipvs-mode">kube-proxy 中的 IPVS 实现</a>通过减少对 iptables 的使用来增加可扩展性。在 iptables 输入链中不使用 PREROUTING，而是创建一个假的接口，叫做 kube-ipvs0，当k8s集群中的负载均衡配置变多的时候，IPVS能实现比iptables更高效的转发性能。</p>
+<blockquote>
+<p>注意在4.19之后的内核版本中使用<code>nf_conntrack</code>模块来替换了原有的<code>nf_conntrack_ipv4</code>模块</p>
+<p>(<strong>Notes</strong>: use <code>nf_conntrack</code> instead of <code>nf_conntrack_ipv4</code> for Linux kernel 4.19 and later)</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 在使用ipvs模式之前确保安装了ipset和ipvsadm</span><br>sudo yum install ipset ipvsadm -y<br><br><span class="hljs-comment"># 手动加载ipvs相关模块</span><br>modprobe -- ip_vs<br>modprobe -- ip_vs_rr<br>modprobe -- ip_vs_wrr<br>modprobe -- ip_vs_sh<br>modprobe -- nf_conntrack<br><br><span class="hljs-comment"># 配置开机自动加载ipvs相关模块</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/modules-load.d/ipvs.conf</span><br><span class="hljs-string">ip_vs</span><br><span class="hljs-string">ip_vs_rr</span><br><span class="hljs-string">ip_vs_wrr</span><br><span class="hljs-string">ip_vs_sh</span><br><span class="hljs-string">nf_conntrack</span><br><span class="hljs-string">EOF</span><br><br><br>$ lsmod | grep -e ip_vs -e nf_conntrack<br>nf_conntrack_netlink    49152  0<br>nfnetlink              20480  2 nf_conntrack_netlink<br>ip_vs_sh               16384  0<br>ip_vs_wrr              16384  0<br>ip_vs_rr               16384  0<br>ip_vs                 159744  6 ip_vs_rr,ip_vs_sh,ip_vs_wrr<br>nf_conntrack          159744  5 xt_conntrack,nf_nat,nf_conntrack_netlink,xt_MASQUERADE,ip_vs<br>nf_defrag_ipv4         16384  1 nf_conntrack<br>nf_defrag_ipv6         24576  2 nf_conntrack,ip_vs<br>libcrc32c              16384  4 nf_conntrack,nf_nat,xfs,ip_vs<br>$ cut -f1 -d <span class="hljs-string">&quot; &quot;</span>  /proc/modules | grep -e ip_vs -e nf_conntrack<br>nf_conntrack_netlink<br>ip_vs_sh<br>ip_vs_wrr<br>ip_vs_rr<br>ip_vs<br>nf_conntrack<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="2、安装container-runtime"><a href="#2、安装container-runtime" class="headerlink" title="2、安装container runtime"></a>2、安装container runtime</h1><h2 id="2-1-安装containerd"><a href="#2-1-安装containerd" class="headerlink" title="2.1 安装containerd"></a>2.1 安装containerd</h2><p>详细的官方文档可以参考<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/">这里</a>，由于在刚发布的1.24版本中移除了<code>docker-shim</code>，因此安装的<code>版本≥1.24</code>的时候需要注意<code>容器运行时</code>的选择。这里我们安装的版本为最新的1.26，因此我们不能继续使用docker，这里我们将其换为<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd">containerd</a></p>
+<h3 id="修改Linux内核参数"><a href="#修改Linux内核参数" class="headerlink" title="修改Linux内核参数"></a>修改Linux内核参数</h3><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先生成配置文件确保配置持久化</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/modules-load.d/containerd.conf</span><br><span class="hljs-string">overlay</span><br><span class="hljs-string">br_netfilter</span><br><span class="hljs-string">EOF</span><br><br>sudo modprobe overlay<br>sudo modprobe br_netfilter<br><br><span class="hljs-comment"># Setup required sysctl params, these persist across reboots.</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf</span><br><span class="hljs-string">net.bridge.bridge-nf-call-iptables  = 1</span><br><span class="hljs-string">net.ipv4.ip_forward                 = 1</span><br><span class="hljs-string">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-comment"># Apply sysctl params without reboot</span><br>sudo sysctl --system<br></code></pre></div></td></tr></table></figure>
+
+<h3 id="安装containerd"><a href="#安装containerd" class="headerlink" title="安装containerd"></a>安装containerd</h3><p>centos7比较方便的部署方式是利用已有的yum源进行安装，这里我们可以使用docker官方的yum源来安装<code>containerd</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 导入docker官方的yum源</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br><br>sudo yum-config-manager --add-repo  https://download.docker.com/linux/centos/docker-ce.repo<br><br><span class="hljs-comment"># 查看yum源中存在的各个版本的containerd.io</span><br>yum list containerd.io --showduplicates | sort -r<br><br><span class="hljs-comment"># 直接安装最新版本的containerd.io</span><br>yum install containerd.io -y<br><br><span class="hljs-comment"># 启动containerd</span><br>sudo systemctl start containerd<br><br><span class="hljs-comment"># 最后我们还要设置一下开机启动</span><br>sudo systemctl <span class="hljs-built_in">enable</span> --now containerd<br><br></code></pre></div></td></tr></table></figure>
+
+<h3 id="关于CRI"><a href="#关于CRI" class="headerlink" title="关于CRI"></a>关于CRI</h3><p>官方表示，对于k8s来说，不需要安装<code>cri-containerd</code>，并且该功能会在后面的2.0版本中废弃。</p>
+<blockquote>
+<p><strong>FAQ</strong>: For Kubernetes, do I need to download <code>cri-containerd-(cni-)&lt;VERSION&gt;-&lt;OS-&lt;ARCH&gt;.tar.gz</code> too?</p>
+<p><strong>Answer</strong>: No.</p>
+<p>As the Kubernetes CRI feature has been already included in <code>containerd-&lt;VERSION&gt;-&lt;OS&gt;-&lt;ARCH&gt;.tar.gz</code>, you do not need to download the <code>cri-containerd-....</code> archives to use CRI.</p>
+<p>The <code>cri-containerd-...</code> archives are <a target="_blank" rel="noopener" href="https://github.com/containerd/containerd/blob/main/RELEASES.md#deprecated-features">deprecated</a>, do not work on old Linux distributions, and will be removed in containerd 2.0.</p>
+</blockquote>
+<h3 id="安装cni-plugins"><a href="#安装cni-plugins" class="headerlink" title="安装cni-plugins"></a>安装cni-plugins</h3><p>使用yum源安装的方式会把runc安装好，但是并不会安装cni-plugins，因此这部分还是需要我们自行安装。</p>
+<blockquote>
+<p>The <code>containerd.io</code> package contains runc too, but does not contain CNI plugins.</p>
+</blockquote>
+<p>我们直接在<a target="_blank" rel="noopener" href="https://github.com/containernetworking/plugins/releases">github上面</a>找到系统对应的架构版本，这里为amd64，然后解压即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># Download the cni-plugins-&lt;OS&gt;-&lt;ARCH&gt;-&lt;VERSION&gt;.tgz archive from https://github.com/containernetworking/plugins/releases , verify its sha256sum, and extract it under /opt/cni/bin:</span><br><br><span class="hljs-comment"># 下载源文件和sha512文件并校验</span><br>$ wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz<br>$ wget https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz.sha512<br>$ sha512sum -c cni-plugins-linux-amd64-v1.1.1.tgz.sha512<br><br><span class="hljs-comment"># 创建目录并解压</span><br>$ mkdir -p /opt/cni/bin<br>$ tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-v1.1.1.tgz<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="2-2-配置cgroup-drivers"><a href="#2-2-配置cgroup-drivers" class="headerlink" title="2.2 配置cgroup drivers"></a>2.2 配置cgroup drivers</h2><p>CentOS7使用的是<code>systemd</code>来初始化系统并管理进程，初始化进程会生成并使用一个 root 控制组 (<code>cgroup</code>), 并充当 <code>cgroup</code> 管理器。 <code>Systemd</code> 与 <code>cgroup</code> 集成紧密，并将为每个 <code>systemd</code> 单元分配一个 <code>cgroup</code>。 我们也可以配置<code>容器运行时</code>和 <code>kubelet</code> 使用 <code>cgroupfs</code>。 连同 <code>systemd</code> 一起使用 <code>cgroupfs</code> 意味着将有两个不同的 <code>cgroup 管理器</code>。而当一个系统中同时存在cgroupfs和systemd两者时，容易变得不稳定，因此最好更改设置，令容器运行时和 kubelet 使用 <code>systemd</code> 作为 <code>cgroup</code> 驱动，以此使系统更为稳定。 对于<code>containerd</code>, 需要设置配置文件<code>/etc/containerd/config.toml</code>中的 <code>SystemdCgroup</code> 参数。</p>
+<blockquote>
+<p>参考k8s官方的说明文档：</p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd-systemd">https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd-systemd</a></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[plugins.<span class="hljs-string">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc]<br>  ...<br>  [plugins.<span class="hljs-string">&quot;io.containerd.grpc.v1.cri&quot;</span>.containerd.runtimes.runc.options]<br>    SystemdCgroup = <span class="hljs-literal">true</span><br></code></pre></div></td></tr></table></figure>
+
+<p>接下来我们开始配置containerd的cgroup driver</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看默认的配置文件，我们可以看到是没有启用systemd</span><br>$ containerd config default | grep SystemdCgroup<br>            SystemdCgroup = <span class="hljs-literal">false</span><br>            <br><span class="hljs-comment"># 使用yum安装的containerd的配置文件非常简单</span><br>$ cat /etc/containerd/config.toml | egrep -v <span class="hljs-string">&quot;^#|^$&quot;</span><br>disabled_plugins = [<span class="hljs-string">&quot;cri&quot;</span>]<br><br><span class="hljs-comment"># 导入一个完整版的默认配置文件模板为config.toml</span><br>$ mv /etc/containerd/config.toml /etc/containerd/config.toml.origin<br>$ containerd config default &gt; /etc/containerd/config.toml<br><span class="hljs-comment"># 修改SystemdCgroup参数并重启</span><br>$ sed -i <span class="hljs-string">&#x27;s/SystemdCgroup = false/SystemdCgroup = true/g&#x27;</span> /etc/containerd/config.toml<br>$ systemctl restart containerd<br><span class="hljs-comment"># 重启之后我们再检查配置就会发现已经启用了SystemdCgroup</span><br>$ containerd config dump | grep SystemdCgroup<br>            SystemdCgroup = <span class="hljs-literal">true</span><br><br><span class="hljs-comment"># 查看containerd状态的时候我们可以看到cni相关的报错</span><br><span class="hljs-comment"># 这是因为我们先安装了cni-plugins但是还没有安装k8s的cni插件</span><br><span class="hljs-comment"># 属于正常情况</span><br>$ systemctl status containerd -l<br>May 12 09:57:31 tiny-kubeproxy-free-master-18-1.k8s.tcinternal containerd[5758]: time=<span class="hljs-string">&quot;2022-05-12T09:57:31.100285056+08:00&quot;</span> level=error msg=<span class="hljs-string">&quot;failed to load cni during init, please check CRI plugin status before setting up network for pods&quot;</span> error=<span class="hljs-string">&quot;cni config load failed: no network config found in /etc/cni/net.d: cni plugin not initialized: failed to load cni config&quot;</span><br><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="2-3-关于kubelet的cgroup-driver"><a href="#2-3-关于kubelet的cgroup-driver" class="headerlink" title="2.3 关于kubelet的cgroup driver"></a>2.3 关于kubelet的cgroup driver</h2><p>k8s官方有<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/">详细的文档</a>介绍了如何设置kubelet的<code>cgroup driver</code>，需要特别注意的是，在1.22版本开始，如果没有手动设置kubelet的cgroup driver，那么默认会设置为systemd</p>
+<blockquote>
+<p><strong>Note:</strong> In v1.22, if the user is not setting the <code>cgroupDriver</code> field under <code>KubeletConfiguration</code>, <code>kubeadm</code> will default it to <code>systemd</code>.</p>
+</blockquote>
+<p>一个比较简单的指定kubelet的<code>cgroup driver</code>的方法就是在<code>kubeadm-config.yaml</code>加入<code>cgroupDriver</code>字段</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># kubeadm-config.yaml</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-string">v1.21.0</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeletConfiguration</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubelet.config.k8s.io/v1beta1</span><br><span class="hljs-attr">cgroupDriver:</span> <span class="hljs-string">systemd</span><br></code></pre></div></td></tr></table></figure>
+
+<p>我们可以直接查看configmaps来查看初始化之后集群的kubeadm-config配置。</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs asciidoc">$ kubectl describe configmaps kubeadm-config -n kube-system<br>Name:         kubeadm-config<br>Namespace:    kube-system<br>Labels:       &lt;none&gt;<br>Annotations:  &lt;none&gt;<br><br><span class="hljs-section">Data</span><br><span class="hljs-section">====</span><br><span class="hljs-section">ClusterConfiguration:</span><br><span class="hljs-section">----</span><br>apiServer:<br><span class="hljs-code">  extraArgs:</span><br><span class="hljs-code">    authorization-mode: Node,RBAC</span><br><span class="hljs-code">  timeoutForControlPlane: 4m0s</span><br>apiVersion: kubeadm.k8s.io/v1beta3<br>certificatesDir: /etc/kubernetes/pki<br>clusterName: kubernetes<br>controllerManager: &#123;&#125;<br>dns: &#123;&#125;<br>etcd:<br><span class="hljs-code">  local:</span><br><span class="hljs-code">    dataDir: /var/lib/etcd</span><br>imageRepository: registry.aliyuncs.com/google_containers<br>kind: ClusterConfiguration<br>kubernetesVersion: v1.23.6<br>networking:<br><span class="hljs-code">  dnsDomain: cali-cluster.tclocal</span><br><span class="hljs-code">  serviceSubnet: 10.88.0.0/18</span><br>scheduler: &#123;&#125;<br><br><br><span class="hljs-section">BinaryData</span><br><span class="hljs-section">====</span><br><br>Events:  &lt;none&gt;<br></code></pre></div></td></tr></table></figure>
+
+<p>当然因为我们需要安装的版本高于1.22.0并且使用的就是systemd，因此可以不用再重复配置。</p>
+<h1 id="3、安装kube三件套"><a href="#3、安装kube三件套" class="headerlink" title="3、安装kube三件套"></a>3、安装kube三件套</h1><blockquote>
+<p>对应的官方文档可以参考这里</p>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl">https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl</a></p>
+</blockquote>
+<p>kube三件套就是<code>kubeadm</code>、<code>kubelet</code> 和 <code>kubectl</code>，三者的具体功能和作用如下：</p>
+<ul>
+<li><code>kubeadm</code>：用来初始化集群的指令。</li>
+<li><code>kubelet</code>：在集群中的每个节点上用来启动 Pod 和容器等。</li>
+<li><code>kubectl</code>：用来与集群通信的命令行工具。</li>
+</ul>
+<p>需要注意的是：</p>
+<ul>
+<li><code>kubeadm</code>不会帮助我们管理<code>kubelet</code>和<code>kubectl</code>，其他两者也是一样的，也就是说这三者是相互独立的，并不存在谁管理谁的情况；</li>
+<li><code>kubelet</code>的版本必须小于等于<code>API-server</code>的版本，否则容易出现兼容性的问题；</li>
+<li><code>kubectl</code>并不是集群中的每个节点都需要安装，也并不是一定要安装在集群中的节点，可以单独安装在自己本地的机器环境上面，然后配合<code>kubeconfig</code>文件即可使用<code>kubectl</code>命令来远程管理对应的k8s集群；</li>
+</ul>
+<p>CentOS7的安装比较简单，我们直接使用官方提供的<code>yum</code>源即可。需要注意的是这里需要设置<code>selinux</code>的状态，但是前面我们已经关闭了selinux，因此这里略过这步。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 直接导入谷歌官方的yum源</span><br>cat &lt;&lt;<span class="hljs-string">EOF | sudo tee /etc/yum.repos.d/kubernetes.repo</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">exclude=kubelet kubeadm kubectl</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-comment"># 当然如果连不上谷歌的源，可以考虑使用国内的阿里镜像源</span><br>cat &lt;&lt;<span class="hljs-string">EOF &gt; /etc/yum.repos.d/kubernetes.repo</span><br><span class="hljs-string">[kubernetes]</span><br><span class="hljs-string">name=Kubernetes</span><br><span class="hljs-string">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="hljs-string">enabled=1</span><br><span class="hljs-string">gpgcheck=1</span><br><span class="hljs-string">repo_gpgcheck=1</span><br><span class="hljs-string">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="hljs-string">EOF</span><br><br><br><span class="hljs-comment"># 接下来直接安装三件套即可</span><br>sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><br><span class="hljs-comment"># 如果网络环境不好出现gpgcheck验证失败导致无法正常读取yum源，可以考虑关闭该yum源的repo_gpgcheck</span><br>sed -i <span class="hljs-string">&#x27;s/repo_gpgcheck=1/repo_gpgcheck=0/g&#x27;</span> /etc/yum.repos.d/kubernetes.repo<br><span class="hljs-comment"># 或者在安装的时候禁用gpgcheck</span><br>sudo yum install -y kubelet kubeadm kubectl --nogpgcheck --disableexcludes=kubernetes<br><br><span class="hljs-comment"># 如果想要安装特定版本，可以使用这个命令查看相关版本的信息</span><br>sudo yum list --nogpgcheck kubelet kubeadm kubectl --showduplicates --disableexcludes=kubernetes<br><br><br><span class="hljs-comment"># 安装完成后配置开机自启kubelet</span><br>sudo systemctl <span class="hljs-built_in">enable</span> --now kubelet<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="4、初始化集群"><a href="#4、初始化集群" class="headerlink" title="4、初始化集群"></a>4、初始化集群</h1><h2 id="4-0-etcd高可用"><a href="#4-0-etcd高可用" class="headerlink" title="4.0 etcd高可用"></a>4.0 etcd高可用</h2><p>etcd高可用架构参考<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/ha-topology/">这篇官方文档</a>，主要可以分为堆叠etcd方案和外置etcd方案，两者的区别就是etcd是否部署在apiserver所在的node机器上面，这里我们主要使用的是堆叠etcd部署方案。</p>
+<p><img src="https://resource.tinychen.com/202212091606423.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202212091606949.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-1-apiserver高可用"><a href="#4-1-apiserver高可用" class="headerlink" title="4.1 apiserver高可用"></a>4.1 apiserver高可用</h2><p>apisever高可用配置参考<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubeadm/blob/main/docs/ha-considerations.md#high-availability-considerations">这篇官方文档</a>。目前apiserver的高可用比较主流的<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubeadm/blob/main/docs/ha-considerations.md#keepalived-and-haproxy">官方推荐方案</a>是使用keepalived和haproxy，由于centos7自带的版本较旧，重新编译又过于麻烦，因此我们可以参考官方给出的<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubeadm/blob/main/docs/ha-considerations.md#option-2-run-the-services-as-static-pods">静态pod的部署方式</a>，提前将相关的配置文件放置到<code>/etc/kubernetes/manifests</code>目录下即可(需要提前手动创建好目录)。官方表示对于我们这种堆叠部署控制面master节点和etcd的方式而言这是一种优雅的解决方案。</p>
+<blockquote>
+<p>This is an elegant solution, in particular with the setup described under <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#stacked-control-plane-and-etcd-nodes">Stacked control plane and etcd nodes</a>.</p>
+</blockquote>
+<p>首先我们需要准备好三台master节点上面的keepalived配置文件和haproxy配置文件：</p>
+<figure class="highlight puppet"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs puppet">! /etc/keepalived/keepalived.conf<br>! Configuration File for keepalived<br><span class="hljs-keyword">global_defs</span> &#123;<br>    router_id LVS_DEVEL<br>&#125;<br><span class="hljs-keyword">vrrp_script</span> <span class="hljs-keyword">check_apiserver</span> &#123;<br>  script <span class="hljs-string">&quot;/etc/keepalived/check_apiserver.sh&quot;</span><br>  interval <span class="hljs-number">3</span><br>  weight -<span class="hljs-number">2</span><br>  fall <span class="hljs-number">10</span><br>  rise <span class="hljs-number">2</span><br>&#125;<br><br><span class="hljs-keyword">vrrp_instance</span> <span class="hljs-keyword">VI_1</span> &#123;<br>    state $&#123;STATE&#125;<br>    <span class="hljs-keyword">interface</span> $&#123;INTERFACE&#125;<br>    virtual_router_id $&#123;ROUTER_ID&#125;<br>    priority $&#123;PRIORITY&#125;<br>    <span class="hljs-keyword">authentication</span> &#123;<br>        <span class="hljs-literal">auth_type</span> PASS<br>        auth_pass $&#123;AUTH_PASS&#125;<br>    &#125;<br>    <span class="hljs-keyword">virtual_ipaddress</span> &#123;<br>        $&#123;APISERVER_VIP&#125;<br>    &#125;<br>    <span class="hljs-keyword">track_script</span> &#123;<br>        check_apiserver<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>实际上我们需要区分三台控制面节点的状态</p>
+<figure class="highlight puppet"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs puppet">! /etc/keepalived/keepalived.conf<br>! Configuration File for keepalived<br><span class="hljs-keyword">global_defs</span> &#123;<br>    router_id CALICO_MASTER_90_1<br>&#125;<br><span class="hljs-keyword">vrrp_script</span> <span class="hljs-keyword">check_apiserver</span> &#123;<br>  script <span class="hljs-string">&quot;/etc/keepalived/check_apiserver.sh&quot;</span><br>  interval <span class="hljs-number">3</span><br>  weight -<span class="hljs-number">2</span><br>  fall <span class="hljs-number">10</span><br>  rise <span class="hljs-number">2</span><br>&#125;<br><br><span class="hljs-keyword">vrrp_instance</span> <span class="hljs-keyword">calico_ha_apiserver_10_31_90_0</span> &#123;<br>    state MASTER<br>    interface eth<span class="hljs-number">0</span><br>    virtual_router_id <span class="hljs-number">90</span><br>    <span class="hljs-literal">priority</span> <span class="hljs-number">100</span><br>    authentication &#123;<br>        <span class="hljs-literal">auth_type</span> PASS<br>        auth_pass <span class="hljs-literal">pass</span>@<span class="hljs-number">77</span><br>    &#125;<br>    <span class="hljs-keyword">virtual_ipaddress</span> &#123;<br>        <span class="hljs-number">10.31</span>.<span class="hljs-number">90.0</span><br>    &#125;<br>    <span class="hljs-keyword">track_script</span> &#123;<br>        check_apiserver<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+
+
+<figure class="highlight puppet"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs puppet">! /etc/keepalived/keepalived.conf<br>! Configuration File for keepalived<br><span class="hljs-keyword">global_defs</span> &#123;<br>    router_id CALICO_MASTER_90_2<br>&#125;<br><span class="hljs-keyword">vrrp_script</span> <span class="hljs-keyword">check_apiserver</span> &#123;<br>  script <span class="hljs-string">&quot;/etc/keepalived/check_apiserver.sh&quot;</span><br>  interval <span class="hljs-number">3</span><br>  weight -<span class="hljs-number">2</span><br>  fall <span class="hljs-number">10</span><br>  rise <span class="hljs-number">2</span><br>&#125;<br><br><span class="hljs-keyword">vrrp_instance</span> <span class="hljs-keyword">calico_ha_apiserver_10_31_90_0</span> &#123;<br>    state BACKUP<br>    interface eth<span class="hljs-number">0</span><br>    virtual_router_id <span class="hljs-number">90</span><br>    <span class="hljs-literal">priority</span> <span class="hljs-number">99</span><br>    authentication &#123;<br>        <span class="hljs-literal">auth_type</span> PASS<br>        auth_pass <span class="hljs-literal">pass</span>@<span class="hljs-number">77</span><br>    &#125;<br>    <span class="hljs-keyword">virtual_ipaddress</span> &#123;<br>        <span class="hljs-number">10.31</span>.<span class="hljs-number">90.0</span><br>    &#125;<br>    <span class="hljs-keyword">track_script</span> &#123;<br>        check_apiserver<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+
+
+<figure class="highlight puppet"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs puppet">! /etc/keepalived/keepalived.conf<br>! Configuration File for keepalived<br><span class="hljs-keyword">global_defs</span> &#123;<br>    router_id CALICO_MASTER_90_3<br>&#125;<br><span class="hljs-keyword">vrrp_script</span> <span class="hljs-keyword">check_apiserver</span> &#123;<br>  script <span class="hljs-string">&quot;/etc/keepalived/check_apiserver.sh&quot;</span><br>  interval <span class="hljs-number">3</span><br>  weight -<span class="hljs-number">2</span><br>  fall <span class="hljs-number">10</span><br>  rise <span class="hljs-number">2</span><br>&#125;<br><br><span class="hljs-keyword">vrrp_instance</span> <span class="hljs-keyword">calico_ha_apiserver_10_31_90_0</span> &#123;<br>    state BACKUP<br>    interface eth<span class="hljs-number">0</span><br>    virtual_router_id <span class="hljs-number">90</span><br>    <span class="hljs-literal">priority</span> <span class="hljs-number">98</span><br>    authentication &#123;<br>        <span class="hljs-literal">auth_type</span> PASS<br>        auth_pass <span class="hljs-literal">pass</span>@<span class="hljs-number">77</span><br>    &#125;<br>    <span class="hljs-keyword">virtual_ipaddress</span> &#123;<br>        <span class="hljs-number">10.31</span>.<span class="hljs-number">90.0</span><br>    &#125;<br>    <span class="hljs-keyword">track_script</span> &#123;<br>        check_apiserver<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>这是haproxy的配置文件模板：</p>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-comment"># /etc/haproxy/haproxy.cfg</span><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-comment"># Global settings</span><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-attribute">global</span><br>    <span class="hljs-attribute">log</span> /dev/log local<span class="hljs-number">0</span><br>    <span class="hljs-attribute">log</span> /dev/log local<span class="hljs-number">1</span> notice<br>    <span class="hljs-attribute">daemon</span><br><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-comment"># common defaults that all the &#x27;listen&#x27; and &#x27;backend&#x27; sections will</span><br><span class="hljs-comment"># use if not designated in their block</span><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-attribute">defaults</span><br>    <span class="hljs-attribute">mode</span>                    http<br>    <span class="hljs-attribute">log</span>                     global<br>    <span class="hljs-attribute">option</span>                  httplog<br>    <span class="hljs-attribute">option</span>                  dontlognull<br>    <span class="hljs-attribute">option</span> http-server-close<br>    <span class="hljs-attribute">option</span> forwardfor       except <span class="hljs-number">127.0.0.0</span>/<span class="hljs-number">8</span><br>    <span class="hljs-attribute">option</span>                  redispatch<br>    <span class="hljs-attribute">retries</span>                 <span class="hljs-number">1</span><br>    <span class="hljs-attribute">timeout</span> http-request    <span class="hljs-number">10</span>s<br>    <span class="hljs-attribute">timeout</span> queue           <span class="hljs-number">20</span>s<br>    <span class="hljs-attribute">timeout</span> connect         <span class="hljs-number">5</span>s<br>    <span class="hljs-attribute">timeout</span> client          <span class="hljs-number">20</span>s<br>    <span class="hljs-attribute">timeout</span> server          <span class="hljs-number">20</span>s<br>    <span class="hljs-attribute">timeout</span> http-keep-alive <span class="hljs-number">10</span>s<br>    <span class="hljs-attribute">timeout</span> check           <span class="hljs-number">10</span>s<br><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-comment"># apiserver frontend which proxys to the control plane nodes</span><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-attribute">frontend</span> apiserver<br>    <span class="hljs-attribute">bind</span> *:<span class="hljs-variable">$&#123;APISERVER_DEST_PORT&#125;</span><br>    <span class="hljs-attribute">mode</span> tcp<br>    <span class="hljs-attribute">option</span> tcplog<br>    <span class="hljs-attribute">default_backend</span> apiserver<br><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-comment"># round robin balancing for apiserver</span><br><span class="hljs-comment">#---------------------------------------------------------------------</span><br><span class="hljs-attribute">backend</span> apiserver<br>    <span class="hljs-attribute">option</span> httpchk GET /healthz<br>    <span class="hljs-attribute">http</span>-check expect status <span class="hljs-number">200</span><br>    <span class="hljs-attribute">mode</span> tcp<br>    <span class="hljs-attribute">option</span> ssl-hello-chk<br>    <span class="hljs-attribute">balance</span>     roundrobin<br>        <span class="hljs-attribute">server</span> <span class="hljs-variable">$&#123;HOST1_ID&#125;</span> <span class="hljs-variable">$&#123;HOST1_ADDRESS&#125;</span>:<span class="hljs-variable">$&#123;APISERVER_SRC_PORT&#125;</span> check<br>        <span class="hljs-comment"># [...]</span><br></code></pre></div></td></tr></table></figure>
+
+<p>这是keepalived的检测脚本，注意这里的<code>$&#123;APISERVER_VIP&#125;</code>和<code>$&#123;APISERVER_DEST_PORT&#125;</code>要替换为集群的实际VIP和端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash">!/bin/sh</span><br>APISERVER_VIP=&quot;10.31.90.0&quot;<br>APISERVER_DEST_PORT=&quot;8443&quot;<br><br>errorExit() &#123;<br>    echo &quot;*** $*&quot; 1&gt;&amp;2<br>    exit 1<br>&#125;<br><br>curl --silent --max-time 2 --insecure https://localhost:$&#123;APISERVER_DEST_PORT&#125;/ -o /dev/null || errorExit &quot;Error GET https://localhost:$&#123;APISERVER_DEST_PORT&#125;/&quot;<br>if ip addr | grep -q $&#123;APISERVER_VIP&#125;; then<br>    curl --silent --max-time 2 --insecure https://$&#123;APISERVER_VIP&#125;:$&#123;APISERVER_DEST_PORT&#125;/ -o /dev/null || errorExit &quot;Error GET https://$&#123;APISERVER_VIP&#125;:$&#123;APISERVER_DEST_PORT&#125;/&quot;<br>fi<br></code></pre></div></td></tr></table></figure>
+
+<p>这是keepalived的部署文件<code>/etc/kubernetes/manifests/keepalived.yaml</code>，注意这里的配置文件路径要和上面的对应一致。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Pod</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">creationTimestamp:</span> <span class="hljs-literal">null</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">keepalived</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-system</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">containers:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">osixia/keepalived:2.0.17</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">keepalived</span><br>    <span class="hljs-attr">resources:</span> &#123;&#125;<br>    <span class="hljs-attr">securityContext:</span><br>      <span class="hljs-attr">capabilities:</span><br>        <span class="hljs-attr">add:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-string">NET_ADMIN</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-string">NET_BROADCAST</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-string">NET_RAW</span><br>    <span class="hljs-attr">volumeMounts:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/usr/local/etc/keepalived/keepalived.conf</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">config</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/etc/keepalived/check_apiserver.sh</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">check</span><br>  <span class="hljs-attr">hostNetwork:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">volumes:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>      <span class="hljs-attr">path:</span> <span class="hljs-string">/etc/keepalived/keepalived.conf</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">config</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>      <span class="hljs-attr">path:</span> <span class="hljs-string">/etc/keepalived/check_apiserver.sh</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">check</span><br><span class="hljs-attr">status:</span> &#123;&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>这是haproxy的部署文件<code>/etc/kubernetes/manifests/haproxy.yaml</code>，注意这里的配置文件路径要和上面的对应一致，且<code>$&#123;APISERVER_DEST_PORT&#125;</code>要换成我们对应的apiserver的端口，这里我们改为8443，避免和原有的6443端口冲突</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Pod</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">haproxy</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">kube-system</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">containers:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">image:</span> <span class="hljs-string">haproxy:2.1.4</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">haproxy</span><br>    <span class="hljs-attr">livenessProbe:</span><br>      <span class="hljs-attr">failureThreshold:</span> <span class="hljs-number">8</span><br>      <span class="hljs-attr">httpGet:</span><br>        <span class="hljs-attr">host:</span> <span class="hljs-string">localhost</span><br>        <span class="hljs-attr">path:</span> <span class="hljs-string">/healthz</span><br>        <span class="hljs-comment">#port: $&#123;APISERVER_DEST_PORT&#125;</span><br>        <span class="hljs-attr">port:</span> <span class="hljs-number">8443</span><br>        <span class="hljs-attr">scheme:</span> <span class="hljs-string">HTTPS</span><br>    <span class="hljs-attr">volumeMounts:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">mountPath:</span> <span class="hljs-string">/usr/local/etc/haproxy/haproxy.cfg</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">haproxyconf</span><br>      <span class="hljs-attr">readOnly:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">hostNetwork:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">volumes:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">hostPath:</span><br>      <span class="hljs-attr">path:</span> <span class="hljs-string">/etc/haproxy/haproxy.cfg</span><br>      <span class="hljs-attr">type:</span> <span class="hljs-string">FileOrCreate</span><br>    <span class="hljs-attr">name:</span> <span class="hljs-string">haproxyconf</span><br><span class="hljs-attr">status:</span> &#123;&#125;<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="4-2-编写配置文件"><a href="#4-2-编写配置文件" class="headerlink" title="4.2 编写配置文件"></a>4.2 编写配置文件</h2><p>在集群中所有节点都执行完上面的操作之后，我们就可以开始创建k8s集群了。<strong>因为我们这次需要进行高可用部署，所以初始化的时候先挑任意一台master控制面节点进行操作即可。</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 我们先使用kubeadm命令查看一下主要的几个镜像版本</span><br>$ kubeadm config images list<br>registry.k8s.io/kube-apiserver:v1.26.0<br>registry.k8s.io/kube-controller-manager:v1.26.0<br>registry.k8s.io/kube-scheduler:v1.26.0<br>registry.k8s.io/kube-proxy:v1.26.0<br>registry.k8s.io/pause:3.9<br>registry.k8s.io/etcd:3.5.6-0<br>registry.k8s.io/coredns/coredns:v1.9.3<br><br><span class="hljs-comment"># 为了方便编辑和管理，我们还是把初始化参数导出成配置文件</span><br>$ kubeadm config <span class="hljs-built_in">print</span> init-defaults &gt; kubeadm-calico-ha.conf<br><br></code></pre></div></td></tr></table></figure>
+
+<ul>
+<li>考虑到大多数情况下国内的网络无法使用谷歌的镜像源(1.25版本开始从<code>k8s.gcr.io</code>换为<code>registry.k8s.io</code>)，我们可以直接在配置文件中修改<code>imageRepository</code>参数为阿里的镜像源<code>registry.aliyuncs.com/google_containers</code></li>
+<li><code>kubernetesVersion</code>字段用来指定我们要安装的k8s版本</li>
+<li><code>localAPIEndpoint</code>参数需要修改为我们的master节点的IP和端口，初始化之后的k8s集群的apiserver地址就是这个</li>
+<li><code>criSocket</code>从1.24.0版本开始已经默认变成了<code>containerd</code></li>
+<li><code>podSubnet</code>、<code>serviceSubnet</code>和<code>dnsDomain</code>两个参数默认情况下可以不用修改，这里我按照自己的需求进行了变更</li>
+<li><code>nodeRegistration</code>里面的<code>name</code>参数修改为对应master节点的<code>hostname</code></li>
+<li><code>controlPlaneEndpoint</code>参数配置的才是我们前面配置的集群高可用apiserver的地址</li>
+<li>新增配置块使用ipvs，具体可以参考<a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/master/pkg/proxy/ipvs/README.md#cluster-created-by-kubeadm">官方文档</a></li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">bootstrapTokens:</span><br><span class="hljs-bullet">-</span> <span class="hljs-attr">groups:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">system:bootstrappers:kubeadm:default-node-token</span><br>  <span class="hljs-attr">token:</span> <span class="hljs-string">abcdef.0123456789abcdef</span><br>  <span class="hljs-attr">ttl:</span> <span class="hljs-string">24h0m0s</span><br>  <span class="hljs-attr">usages:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">signing</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-string">authentication</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">InitConfiguration</span><br><span class="hljs-attr">localAPIEndpoint:</span><br>  <span class="hljs-attr">advertiseAddress:</span> <span class="hljs-number">10.31</span><span class="hljs-number">.90</span><span class="hljs-number">.1</span><br>  <span class="hljs-attr">bindPort:</span> <span class="hljs-number">6443</span><br><span class="hljs-attr">nodeRegistration:</span><br>  <span class="hljs-attr">criSocket:</span> <span class="hljs-string">unix:///var/run/containerd/containerd.sock</span><br>  <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">k8s-calico-master-10-31-90-1.tinychen.io</span><br>  <span class="hljs-attr">taints:</span> <span class="hljs-literal">null</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiServer:</span><br>  <span class="hljs-attr">timeoutForControlPlane:</span> <span class="hljs-string">4m0s</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeadm.k8s.io/v1beta3</span><br><span class="hljs-attr">certificatesDir:</span> <span class="hljs-string">/etc/kubernetes/pki</span><br><span class="hljs-attr">clusterName:</span> <span class="hljs-string">kubernetes</span><br><span class="hljs-attr">controllerManager:</span> &#123;&#125;<br><span class="hljs-attr">dns:</span> &#123;&#125;<br><span class="hljs-attr">etcd:</span><br>  <span class="hljs-attr">local:</span><br>    <span class="hljs-attr">dataDir:</span> <span class="hljs-string">/var/lib/etcd</span><br><span class="hljs-attr">imageRepository:</span> <span class="hljs-string">registry.aliyuncs.com/google_containers</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">ClusterConfiguration</span><br><span class="hljs-attr">kubernetesVersion:</span> <span class="hljs-number">1.26</span><span class="hljs-number">.0</span><br><span class="hljs-attr">controlPlaneEndpoint:</span> <span class="hljs-string">&quot;k8s-calico-apiserver.tinychen.io:8443&quot;</span><br><span class="hljs-attr">networking:</span><br>  <span class="hljs-attr">dnsDomain:</span> <span class="hljs-string">cali-cluster.tclocal</span><br>  <span class="hljs-attr">serviceSubnet:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.128</span><span class="hljs-number">.0</span><span class="hljs-string">/18</span><br>  <span class="hljs-attr">podSubnet:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/17</span><br><span class="hljs-attr">scheduler:</span> &#123;&#125;<br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">kubeproxy.config.k8s.io/v1alpha1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">KubeProxyConfiguration</span><br><span class="hljs-attr">mode:</span> <span class="hljs-string">ipvs</span><br><br><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="4-3-初始化集群"><a href="#4-3-初始化集群" class="headerlink" title="4.3 初始化集群"></a>4.3 初始化集群</h2><p>此时我们再查看对应的配置文件中的镜像版本，就会发现已经变成了对应阿里云镜像源的版本</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看一下对应的镜像版本，确定配置文件是否生效</span><br>$ kubeadm config images list --config kubeadm-calico-ha.conf<br>registry.aliyuncs.com/google_containers/kube-apiserver:v1.26.0<br>registry.aliyuncs.com/google_containers/kube-controller-manager:v1.26.0<br>registry.aliyuncs.com/google_containers/kube-scheduler:v1.26.0<br>registry.aliyuncs.com/google_containers/kube-proxy:v1.26.0<br>registry.aliyuncs.com/google_containers/pause:3.9<br>registry.aliyuncs.com/google_containers/etcd:3.5.6-0<br>registry.aliyuncs.com/google_containers/coredns:v1.9.3<br><br><span class="hljs-comment"># 确认没问题之后我们直接拉取镜像</span><br>$ kubeadm config images pull --config kubeadm-calico-ha.conf<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-apiserver:v1.26.0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-controller-manager:v1.26.0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-scheduler:v1.26.0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/kube-proxy:v1.26.0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/pause:3.9<br>[config/images] Pulled registry.aliyuncs.com/google_containers/etcd:3.5.6-0<br>[config/images] Pulled registry.aliyuncs.com/google_containers/coredns:v1.9.3<br><br><span class="hljs-comment"># 初始化，注意添加参数--upload-certs确保证书能够上传到kubernetes集群中以secret保存</span><br>$ kubeadm init --config kubeadm-calico-ha.conf  --upload-certs<br>[init] Using Kubernetes version: v1.26.0<br>[preflight] Running pre-flight checks<br>[preflight] Pulling images required <span class="hljs-keyword">for</span> setting up a Kubernetes cluster<br>[preflight] This might take a minute or two, depending on the speed of your internet connection<br>[preflight] You can also perform this action <span class="hljs-keyword">in</span> beforehand using <span class="hljs-string">&#x27;kubeadm config images pull&#x27;</span><br>...此处略去一堆输出...<br></code></pre></div></td></tr></table></figure>
+<p>当我们看到下面这个输出结果的时候，我们的集群就算是初始化成功了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Your Kubernetes control-plane has initialized successfully!<br><br>To start using your cluster, you need to run the following as a regular user:<br><br>  mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>  sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>  sudo chown $(id -u):$(id -g) <span class="hljs-variable">$HOME</span>/.kube/config<br><br>Alternatively, <span class="hljs-keyword">if</span> you are the root user, you can run:<br><br>  <span class="hljs-built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf<br><br>You should now deploy a pod network to the cluster.<br>Run <span class="hljs-string">&quot;kubectl apply -f [podnetwork].yaml&quot;</span> with one of the options listed at:<br>  https://kubernetes.io/docs/concepts/cluster-administration/addons/<br><br>You can now join any number of the control-plane node running the following <span class="hljs-built_in">command</span> on each as root:<br><br>  kubeadm join k8s-calico-apiserver.tinychen.io:8443 --token abcdef.0123456789abcdef \<br>        --discovery-token-ca-cert-hash sha256:b451b6484f9b68fbd5b7959b2ae2333088322a12b941bf143131c15acca8728d \<br>        --control-plane --certificate-key 2dad0007267f115f594f4db514f4f664fd0fef4a639791f97893afb1409dbfa5<br><br>Please note that the certificate-key gives access to cluster sensitive data, keep it secret!<br>As a safeguard, uploaded-certs will be deleted <span class="hljs-keyword">in</span> two hours; If necessary, you can use<br><span class="hljs-string">&quot;kubeadm init phase upload-certs --upload-certs&quot;</span> to reload certs afterward.<br><br>Then you can join any number of worker nodes by running the following on each as root:<br><br>kubeadm join k8s-calico-apiserver.tinychen.io:8443 --token abcdef.0123456789abcdef \<br>        --discovery-token-ca-cert-hash sha256:b451b6484f9b68fbd5b7959b2ae2333088322a12b941bf143131c15acca8728d<br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>接下来我们在剩下的两个master节点上面执行上面输出的命令，注意要执行带有<code>--control-plane --certificate-key</code>这两个参数的命令，其中<code>--control-plane</code>参数是确定该节点为master控制面节点，而<code>--certificate-key</code>参数则是把我们前面初始化集群的时候通过<code>--upload-certs</code>上传到k8s集群中的证书下载下来使用。</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs livecodeserver">This node has joined <span class="hljs-keyword">the</span> cluster <span class="hljs-keyword">and</span> <span class="hljs-keyword">a</span> <span class="hljs-built_in">new</span> control plane instance was created:<br><br>* Certificate signing request was sent <span class="hljs-built_in">to</span> apiserver <span class="hljs-keyword">and</span> approval was received.<br>* The Kubelet was informed <span class="hljs-keyword">of</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">new</span> secure connection details.<br>* Control plane label <span class="hljs-keyword">and</span> taint were applied <span class="hljs-built_in">to</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">new</span> node.<br>* The Kubernetes control plane instances scaled up.<br>* A <span class="hljs-built_in">new</span> etcd member was added <span class="hljs-built_in">to</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">local</span>/stacked etcd cluster.<br><br>To <span class="hljs-built_in">start</span> administering your cluster <span class="hljs-built_in">from</span> this node, you need <span class="hljs-built_in">to</span> run <span class="hljs-keyword">the</span> following <span class="hljs-keyword">as</span> <span class="hljs-keyword">a</span> regular user:<br><br>        mkdir -p $HOME/.kube<br>        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config<br>        sudo chown $(id -u):$(id -g) $HOME/.kube/config<br><br>Run <span class="hljs-string">&#x27;kubectl get nodes&#x27;</span> <span class="hljs-built_in">to</span> see this node join <span class="hljs-keyword">the</span> cluster.<br></code></pre></div></td></tr></table></figure>
+
+<p>最后再对剩下的三个worker节点执行普通的加入集群命令，当看到下面的输出的时候说明节点成功加入集群了。</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs livecodeserver">This node has joined <span class="hljs-keyword">the</span> cluster:<br>* Certificate signing request was sent <span class="hljs-built_in">to</span> apiserver <span class="hljs-keyword">and</span> <span class="hljs-keyword">a</span> response was received.<br>* The Kubelet was informed <span class="hljs-keyword">of</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">new</span> secure connection details.<br><br>Run <span class="hljs-string">&#x27;kubectl get nodes&#x27;</span> <span class="hljs-keyword">on</span> <span class="hljs-title">the</span> <span class="hljs-title">control-plane</span> <span class="hljs-title">to</span> <span class="hljs-title">see</span> <span class="hljs-title">this</span> <span class="hljs-title">node</span> <span class="hljs-title">join</span> <span class="hljs-title">the</span> <span class="hljs-title">cluster</span>.<br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>如果不小心没保存初始化成功的输出信息，或者是以后还需要新增节点也没有关系，我们可以使用kubectl工具查看或者生成token</p>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="bash"> 查看现有的token列表</span><br><span class="hljs-meta">$</span><span class="bash"> kubeadm token list</span><br>TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS<br>abcdef.0123456789abcdef   23h         2022-12-09T08:14:37Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br>dss91p.3r5don4a3e9r2f29   1h          2022-12-08T10:14:36Z   &lt;none&gt;                   Proxy for managing TTL for the kubeadm-certs secret        &lt;none&gt;<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 如果token已经失效，那就再创建一个新的token</span><br><span class="hljs-meta">$</span><span class="bash"> kubeadm token create</span><br>8hmoux.jabpgvs521r8rsqm<br><span class="hljs-meta"></span><br><span class="hljs-meta">$</span><span class="bash"> kubeadm token list</span><br>TOKEN                     TTL         EXPIRES                USAGES                   DESCRIPTION                                                EXTRA GROUPS<br>8hmoux.jabpgvs521r8rsqm   23h         2022-12-09T08:29:29Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br>abcdef.0123456789abcdef   23h         2022-12-09T08:14:37Z   authentication,signing   &lt;none&gt;                                                     system:bootstrappers:kubeadm:default-node-token<br>dss91p.3r5don4a3e9r2f29   1h          2022-12-08T10:14:36Z   &lt;none&gt;                   Proxy for managing TTL for the kubeadm-certs secret        &lt;none&gt;<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash"> 如果找不到--discovery-token-ca-cert-hash参数，则可以在master节点上使用openssl工具来获取</span><br><span class="hljs-meta">$</span><span class="bash"> openssl x509 -pubkey -<span class="hljs-keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed <span class="hljs-string">&#x27;s/^.* //&#x27;</span></span><br>cc68219b233262d8834ad5d6e96166be487c751b53fb9ec19a5ca3599b538a33<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="4-4-配置kubeconfig"><a href="#4-4-配置kubeconfig" class="headerlink" title="4.4 配置kubeconfig"></a>4.4 配置kubeconfig</h2><p>刚初始化成功之后，我们还没办法马上查看k8s集群信息，需要配置kubeconfig相关参数才能正常使用kubectl连接apiserver读取集群信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 对于非root用户，可以这样操作</span><br>mkdir -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo cp -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo chown $(id -u):$(id -g) <span class="hljs-variable">$HOME</span>/.kube/config<br><br><span class="hljs-comment"># 如果是root用户，可以直接导入环境变量</span><br><span class="hljs-built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf<br><br><span class="hljs-comment"># 添加kubectl的自动补全功能</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>前面我们提到过<code>kubectl</code>不一定要安装在集群内，实际上只要是任何一台能连接到<code>apiserver</code>的机器上面都可以安装<code>kubectl</code>并且根据步骤配置<code>kubeconfig</code>，就可以使用<code>kubectl</code>命令行来管理对应的k8s集群。</p>
+</blockquote>
+<p>配置完成后，我们再执行相关命令就可以查看集群的信息了，但是此时节点的状态还是<code>NotReady</code>，接下来就需要部署CNI了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl cluster-info<br>Kubernetes control plane is running at https://k8s-calico-apiserver.tinychen.io:8443<br>CoreDNS is running at https://k8s-calico-apiserver.tinychen.io:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy<br><br>To further debug and diagnose cluster problems, use <span class="hljs-string">&#x27;kubectl cluster-info dump&#x27;</span>.<br><br><br>$ kubectl get nodes -o wide<br>NAME                                       STATUS     ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME<br>k8s-calico-master-10-31-90-1.tinychen.io   NotReady   control-plane   7m55s   v1.26.0   10.31.90.1    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   containerd://1.6.14<br>k8s-calico-master-10-31-90-2.tinychen.io   NotReady   control-plane   4m44s   v1.26.0   10.31.90.2    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   containerd://1.6.14<br>k8s-calico-master-10-31-90-3.tinychen.io   NotReady   control-plane   2m44s   v1.26.0   10.31.90.3    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   containerd://1.6.14<br>k8s-calico-worker-10-31-90-4.tinychen.io   NotReady   &lt;none&gt;          2m9s    v1.26.0   10.31.90.4    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   containerd://1.6.14<br>k8s-calico-worker-10-31-90-5.tinychen.io   NotReady   &lt;none&gt;          91s     v1.26.0   10.31.90.5    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   containerd://1.6.14<br>k8s-calico-worker-10-31-90-6.tinychen.io   NotReady   &lt;none&gt;          63s     v1.26.0   10.31.90.6    &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1160.62.1.el7.x86_64   containerd://1.6.14<br><br>$ kubectl get pods -A -o wide<br>NAMESPACE     NAME                                                               READY   STATUS    RESTARTS   AGE     IP           NODE                                       NOMINATED NODE   READINESS GATES<br>kube-system   coredns-5bbd96d687-l84hq                                           0/1     Pending   0          8m11s   &lt;none&gt;       &lt;none&gt;                                     &lt;none&gt;           &lt;none&gt;<br>kube-system   coredns-5bbd96d687-wbmdq                                           0/1     Pending   0          8m11s   &lt;none&gt;       &lt;none&gt;                                     &lt;none&gt;           &lt;none&gt;<br>kube-system   etcd-k8s-calico-master-10-31-90-1.tinychen.io                      1/1     Running   0          8m10s   10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   etcd-k8s-calico-master-10-31-90-2.tinychen.io                      1/1     Running   0          4m51s   10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   etcd-k8s-calico-master-10-31-90-3.tinychen.io                      1/1     Running   0          3m      10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   haproxy-k8s-calico-master-10-31-90-1.tinychen.io                   1/1     Running   0          8m10s   10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   haproxy-k8s-calico-master-10-31-90-2.tinychen.io                   1/1     Running   0          4m45s   10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   haproxy-k8s-calico-master-10-31-90-3.tinychen.io                   1/1     Running   0          3m      10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   keepalived-k8s-calico-master-10-31-90-1.tinychen.io                1/1     Running   0          8m10s   10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   keepalived-k8s-calico-master-10-31-90-2.tinychen.io                1/1     Running   0          4m57s   10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   keepalived-k8s-calico-master-10-31-90-3.tinychen.io                1/1     Running   0          3m1s    10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-apiserver-k8s-calico-master-10-31-90-1.tinychen.io            1/1     Running   0          8m9s    10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-apiserver-k8s-calico-master-10-31-90-2.tinychen.io            1/1     Running   0          4m43s   10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-apiserver-k8s-calico-master-10-31-90-3.tinychen.io            1/1     Running   0          3m      10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-controller-manager-k8s-calico-master-10-31-90-1.tinychen.io   1/1     Running   0          8m10s   10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-controller-manager-k8s-calico-master-10-31-90-2.tinychen.io   1/1     Running   0          4m58s   10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-controller-manager-k8s-calico-master-10-31-90-3.tinychen.io   1/1     Running   0          3m      10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-9x6gc                                                   1/1     Running   0          108s    10.31.90.5   k8s-calico-worker-10-31-90-5.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-jnfqm                                                   1/1     Running   0          8m10s   10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-kb2d5                                                   1/1     Running   0          80s     10.31.90.6   k8s-calico-worker-10-31-90-6.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-n5g6b                                                   1/1     Running   0          5m1s    10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-tsqz8                                                   1/1     Running   0          2m26s   10.31.90.4   k8s-calico-worker-10-31-90-4.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-proxy-wcgch                                                   1/1     Running   0          3m1s    10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-scheduler-k8s-calico-master-10-31-90-1.tinychen.io            1/1     Running   0          8m10s   10.31.90.1   k8s-calico-master-10-31-90-1.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-scheduler-k8s-calico-master-10-31-90-2.tinychen.io            1/1     Running   0          4m51s   10.31.90.2   k8s-calico-master-10-31-90-2.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>kube-system   kube-scheduler-k8s-calico-master-10-31-90-3.tinychen.io            1/1     Running   0          3m      10.31.90.3   k8s-calico-master-10-31-90-3.tinychen.io   &lt;none&gt;           &lt;none&gt;<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="5、安装CNI"><a href="#5、安装CNI" class="headerlink" title="5、安装CNI"></a>5、安装CNI</h1><h2 id="5-1-部署calico"><a href="#5-1-部署calico" class="headerlink" title="5.1 部署calico"></a>5.1 部署calico</h2><p>CNI的部署我们参考官网的自建K8S<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/getting-started/kubernetes/self-managed-onprem/">部署教程</a>，官网主要给出了两种<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/getting-started/kubernetes/self-managed-onprem/onpremises">部署方式</a>，分别是通过<code>Calico operator</code>和<code>Calico manifests</code>来进行部署和管理<code>calico</code>，operator是通过deployment的方式部署一个calico的operator到集群中，再用其来管理calico的安装升级等生命周期操作。manifests则是将相关都使用yaml的配置文件进行管理，这种方式管理起来相对前者比较麻烦，但是对于高度自定义的K8S集群有一定的优势。</p>
+<p>这里我们使用operator的方式进行部署。</p>
+<p>首先我们把需要用到的两个部署文件下载到本地。</p>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">curl https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/projectcalico/</span>calico<span class="hljs-regexp">/v3.24.5/m</span>anifests/tigera-operator.yaml -O<br>curl https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/projectcalico/</span>calico<span class="hljs-regexp">/v3.24.5/m</span>anifests/custom-resources.yaml -O<br></code></pre></div></td></tr></table></figure>
+
+<p>随后我们修改<code>custom-resources.yaml</code>里面的pod ip段信息和划分子网的大小。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># cat custom-resources.yaml</span><br><span class="hljs-comment"># This section includes base Calico installation configuration.</span><br><span class="hljs-comment"># For more information, see: https://projectcalico.docs.tigera.io/master/reference/installation/api#operator.tigera.io/v1.Installation</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">operator.tigera.io/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Installation</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">default</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-comment"># Configures Calico networking.</span><br>  <span class="hljs-attr">calicoNetwork:</span><br>    <span class="hljs-comment"># <span class="hljs-doctag">Note:</span> The ipPools section cannot be modified post-install.</span><br>    <span class="hljs-attr">ipPools:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">blockSize:</span> <span class="hljs-number">24</span><br>      <span class="hljs-attr">cidr:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/17</span><br>      <span class="hljs-attr">encapsulation:</span> <span class="hljs-string">VXLANCrossSubnet</span><br>      <span class="hljs-attr">natOutgoing:</span> <span class="hljs-string">Enabled</span><br>      <span class="hljs-attr">nodeSelector:</span> <span class="hljs-string">all()</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-comment"># This section configures the Calico API server.</span><br><span class="hljs-comment"># For more information, see: https://projectcalico.docs.tigera.io/master/reference/installation/api#operator.tigera.io/v1.APIServer</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">operator.tigera.io/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">APIServer</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">default</span><br><span class="hljs-attr">spec:</span> &#123;&#125;<br></code></pre></div></td></tr></table></figure>
+
+<p>最后我们直接部署</p>
+<figure class="highlight oxygene"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs oxygene">kubectl <span class="hljs-keyword">create</span> -f tigera-<span class="hljs-keyword">operator</span>.yaml<br>kubectl <span class="hljs-keyword">create</span> -f custom-resources.yaml<br></code></pre></div></td></tr></table></figure>
+
+<p>此时部署完成之后我们应该可以看到所有的pod和node都已经处于正常工作状态。接下来我们进入高级配置阶段</p>
+<h2 id="5-2-安装calicoctl"><a href="#5-2-安装calicoctl" class="headerlink" title="5.2 安装calicoctl"></a>5.2 安装calicoctl</h2><p>接下来我们就要<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/maintenance/clis/calicoctl/install">部署calicoctl</a>来帮助我们管理calico的相关配置，为了使用 Calico 的许多功能，需要 calicoctl 命令行工具。它用于管理 Calico 策略和配置，以及查看详细的集群状态。</p>
+<blockquote>
+<p>The <code>calicoctl</code> command line tool is required in order to use many of Calico’s features. It is used to manage Calico policies and configuration, as well as view detailed cluster status.</p>
+</blockquote>
+<p>这里我们可以直接使用二进制部署安装</p>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">curl -L https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/projectcalico/</span>calico<span class="hljs-regexp">/releases/</span>download<span class="hljs-regexp">/v3.24.5/</span>calicoctl-linux-amd64 -o <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/</span>calicoctl<br>chmod +x <span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/bin/</span>calicoctl<br></code></pre></div></td></tr></table></figure>
+
+<p>至于配置也比较简单，因为我们这里使用的是直接连接apiserver的方式，所以直接配置环境变量即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> CALICO_DATASTORE_TYPE=kubernetes<br><span class="hljs-built_in">export</span> CALICO_KUBECONFIG=~/.kube/config<br>calicoctl get workloadendpoints -A<br>calicoctl node status<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="5-3-配置BGP"><a href="#5-3-配置BGP" class="headerlink" title="5.3 配置BGP"></a>5.3 配置BGP</h2><p>一般来说，calico的<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/networking/bgp">BGP拓扑</a>可以分为三种配置：</p>
+<ul>
+<li><p><strong>Full-mesh（全网状连接）</strong>：启用 BGP 后，Calico 的默认行为是创建内部 BGP (iBGP) 连接的<strong>全网状</strong>连接，其中每个节点相互对等。这允许 Calico 在任何 L2 网络上运行，无论是公共云还是私有云，或者是<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/networking/vxlan-ipip">配置</a>了基于IPIP的overlays网络。<strong>Calico 不将 BGP 用于 VXLAN overlays网络。</strong>全网状结构非常适合 100 个或更少节点的中小型部署，但在规模明显更大的情况下，全网状结构的效率会降低，calico建议使用路由反射器（Route reflectors）。</p>
+</li>
+<li><p><strong>Route reflectors（路由反射器）</strong>：要构建大型内部 BGP (iBGP) 集群，可以使用<strong>BGP 路由反射器</strong>来减少每个节点上使用的 BGP 对等体的数量。在这个模型中，一些节点充当路由反射器，并被配置为在它们之间建立一个完整的网格。然后将其他节点配置为与这些路由反射器的子集对等（通常为 2 个用于冗余），与全网状相比减少了 BGP 对等连接的总数。</p>
+</li>
+<li><p><strong>Top of Rack (ToR)<strong>：在</strong>本地部署</strong>中，我们可以直接让calico和物理网络基础设施建立BGP连接，一般来说这需要先把calico默认自带的Full-mesh配置禁用掉，然后将calico和本地的L3 ToR路由建立连接。当整个自建集群的规模很大的时候（通常仅当每个 L2 域中的节点数大于100时），还可以考虑在每个机架内使用BGP的路由反射器（Route reflectors）。</p>
+<p>要深入了解常见的本地部署模型，请参阅<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/reference/architecture/design/l2-interconnect-fabric">Calico over IP Fabrics</a>。</p>
+</li>
+</ul>
+<p>我们这里只是一个小规模的测试集群（6节点），暂时用不上路由反射器这类复杂的配置，因此我们参考第三种TOR的模式，让node直接和我们测试网络内的L3路由器建立BGP连接即可。</p>
+<p>在刚初始化的情况下，我们的calico是还没有创建<code>BGPConfiguration</code>，此时我们需要先手动创建，并且禁用<code>nodeToNodeMesh</code>配置，同时还需要借助calico将集群的<code>ClusterIP</code>和<code>ExternalIP</code>都发布出去。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-string">$</span> <span class="hljs-string">cat</span> <span class="hljs-string">calico-bgp-configuration.yaml</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">projectcalico.org/v3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">BGPConfiguration</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">default</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">logSeverityScreen:</span> <span class="hljs-string">Info</span><br>  <span class="hljs-attr">nodeToNodeMeshEnabled:</span> <span class="hljs-literal">false</span><br>  <span class="hljs-attr">asNumber:</span> <span class="hljs-number">64517</span><br>  <span class="hljs-attr">serviceClusterIPs:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">cidr:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.128</span><span class="hljs-number">.0</span><span class="hljs-string">/18</span><br>  <span class="hljs-attr">serviceExternalIPs:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">cidr:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.192</span><span class="hljs-number">.0</span><span class="hljs-string">/18</span><br>  <span class="hljs-attr">listenPort:</span> <span class="hljs-number">179</span><br>  <span class="hljs-attr">bindMode:</span> <span class="hljs-string">NodeIP</span><br>  <span class="hljs-attr">communities:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">bgp-large-community</span><br>    <span class="hljs-attr">value:</span> <span class="hljs-number">64517</span><span class="hljs-string">:300:100</span><br>  <span class="hljs-attr">prefixAdvertisements:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">cidr:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.0</span><span class="hljs-number">.0</span><span class="hljs-string">/17</span><br>    <span class="hljs-attr">communities:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-string">bgp-large-community</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-number">64517</span><span class="hljs-string">:120</span><br>    <br></code></pre></div></td></tr></table></figure>
+
+<p>另一个就是需要准备<code>BGPPeer</code>的配置，可以同时配置一个或者多个，下面的示例配置了两个<code>BGPPeer</code>，并且ASN号各不相同。其中<code>keepOriginalNextHop</code>默认是不配置的，这里特别配置为<code>true</code>，确保通过BGP宣发pod IP段路由的时候只宣发对应的node，而不是针对podIP也开启ECMP功能。详细的配置可以参考<a target="_blank" rel="noopener" href="https://projectcalico.docs.tigera.io/reference/resources/bgppeer">官方文档</a></p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-string">$</span> <span class="hljs-string">cat</span> <span class="hljs-string">calico-bgp-peer.yaml</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">projectcalico.org/v3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">BGPPeer</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">openwrt-peer</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">peerIP:</span> <span class="hljs-number">10.31</span><span class="hljs-number">.254</span><span class="hljs-number">.253</span><br>  <span class="hljs-attr">keepOriginalNextHop:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">asNumber:</span> <span class="hljs-number">64512</span><br><span class="hljs-meta">---</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">projectcalico.org/v3</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">BGPPeer</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">tiny-unraid-peer</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">peerIP:</span> <span class="hljs-number">10.31</span><span class="hljs-number">.100</span><span class="hljs-number">.100</span><br>  <span class="hljs-attr">keepOriginalNextHop:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">asNumber:</span> <span class="hljs-number">64516</span><br>  <br></code></pre></div></td></tr></table></figure>
+
+<p>配置完成之后我们直接部署即可，这时候集群默认的node-to-node-mesh就已经被我们禁用，此外还可以看到我们配置的两个BGPPeer已经顺利建立连接并发布路由了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl create -f calico-bgp-configuration.yaml<br>$ kubectl create -f calico-bgp-peer.yaml<br><br><br>$ calicoctl node status<br>Calico process is running.<br><br>IPv4 BGP status<br>+---------------+-----------+-------+----------+-------------+<br>| PEER ADDRESS  | PEER TYPE | STATE |  SINCE   |    INFO     |<br>+---------------+-----------+-------+----------+-------------+<br>| 10.31.254.253 | global    | up    | 08:03:49 | Established |<br>| 10.31.100.100 | global    | up    | 08:12:01 | Established |<br>+---------------+-----------+-------+----------+-------------+<br><br>IPv6 BGP status<br>No IPv6 peers found.<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="6、配置LoadBalancer"><a href="#6、配置LoadBalancer" class="headerlink" title="6、配置LoadBalancer"></a>6、配置LoadBalancer</h1><p>目前市面上开源的K8S-LoadBalancer主要就是<a href="https://tinychen.com/20220519-k8s-06-loadbalancer-metallb/">MetalLB</a>、<a href="https://tinychen.com/20220523-k8s-07-loadbalancer-openelb/">OpenELB</a>和<a href="https://tinychen.com/20220524-k8s-08-loadbalancer-purelb/">PureLB</a>这三种，三者的工作原理和使用教程我都写文章分析过，针对目前这种使用场景，我个人认为最合适的是使用PureLB，因为他的组件高度模块化，并且可以自由选择实现ECMP模式的路由协议和软件（MetalLB和OpenELB都是自己通过gobgp实现的BGP协议），能更好的和我们前面的calico BGP模式组合在一起，借助calico自带的BGP配置把LoadBalancer IP发布到集群外。</p>
+<p>关于purelb的详细工作原理和部署使用方式可以参考我之前写的<a href="https://tinychen.com/20220524-k8s-08-loadbalancer-purelb/">这篇文章</a>，这里不再赘述。</p>
+<p><img src="https://resource.tinychen.com/202205241423207.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li><strong>Allocator</strong>：用来监听API中的<code>LoadBalancer</code>类型服务，并且负责分配IP。</li>
+<li><strong>LBnodeagent</strong>： 作为<code>daemonset</code>部署到每个可以暴露请求并吸引流量的节点上，并且负责监听服务的状态变化同时负责把VIP添加到本地网卡或者是虚拟网卡</li>
+<li><strong>KubeProxy</strong>：k8s的内置组件，并非是PureLB的一部分，但是PureLB依赖其进行正常工作，当对VIP的请求达到某个具体的节点之后，需要由kube-proxy来负责将其转发到对应的pod </li>
+</ul>
+<p>因为我们此前已经配置了calico的BGP模式，并且会由它来负责BGP宣告的相关操作，因此在这里我们直接使用purelb的BGP模式，并且不需要自己再额外部署bird或frr来进行BGP路由发布，同时也不需要<code>LBnodeagent</code>组件来帮助暴露并吸引流量，只需要<code>Allocator</code>帮助我们完成LoadBalancerIP的分配操作即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 下载官方提供的yaml文件到本地进行部署</span><br>$ wget https://gitlab.com/api/v4/projects/purelb%2Fpurelb/packages/generic/manifest/0.0.1/purelb-complete.yaml<br><br><span class="hljs-comment"># 请注意，由于 Kubernetes 的最终一致性架构，此manifest清单的第一个应用程序可能会失败。发生这种情况是因为清单既定义了CRD，又使用该CRD创建了资源。如果发生这种情况，请再次应用manifest清单，应该就会部署成功。</span><br>$ kubectl apply -f purelb-complete.yaml<br>$ kubectl apply -f purelb-complete.yaml<br><br><span class="hljs-comment"># lbnodeagent的这个ds我们这里用不到，因此可以直接删除。</span><br>$ kubectl delete ds -n purelb lbnodeagent<br><br><span class="hljs-comment"># 接下来我们部署一个ipam的sg，命名为bgp-ippool，ip段就使用我们预留的 10.33.192.0/18 </span><br>$ cat purelb-ipam.yaml<br>apiVersion: purelb.io/v1<br>kind: ServiceGroup<br>metadata:<br>  name: bgp-ippool<br>  namespace: purelb<br>spec:<br>  <span class="hljs-built_in">local</span>:<br>    v4pool:<br>      subnet: <span class="hljs-string">&#x27;10.33.192.0/18&#x27;</span><br>      pool: <span class="hljs-string">&#x27;10.33.192.0-10.33.255.254&#x27;</span><br>      aggregation: /32<br>$ kubectl apply -f purelb-ipam.yaml<br>$ kubectl get sg -n purelb<br>NAME         AGE<br>bgp-ippool   64s<br></code></pre></div></td></tr></table></figure>
+
+<p>到这里我们的PureLB就部署完了，相比完整的ECMP模式要<strong>少部署了路由协议软件</strong>和**额外删除了<code>lbnodeagent</code>**，接下来可以开始测试了。</p>
+<h1 id="7、部署测试用例"><a href="#7、部署测试用例" class="headerlink" title="7、部署测试用例"></a>7、部署测试用例</h1><p>集群部署完成之后我们在k8s集群中部署一个nginx测试一下是否能够正常工作。首先我们创建一个名为<code>nginx-quic</code>的命名空间（<code>namespace</code>），然后在这个命名空间内创建一个名为<code>nginx-quic-deployment</code>的<code>deployment</code>用来部署pod，最后再创建一个<code>service</code>用来暴露服务，这里我们同时使用<code>nodeport</code>和<code>LoadBalancer</code>两种方式来暴露服务，并且其中一个<code>LoadBalancer</code>的服务还要指定<code>LoadBalancerIP</code>方便我们测试。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># cat ngx-system.yaml</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Namespace</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">apps/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic-deployment</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">matchLabels:</span><br>      <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">4</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">tinychen777/nginx-quic:latest</span><br>        <span class="hljs-attr">imagePullPolicy:</span> <span class="hljs-string">IfNotPresent</span><br>        <span class="hljs-attr">ports:</span><br>        <span class="hljs-bullet">-</span> <span class="hljs-attr">containerPort:</span> <span class="hljs-number">80</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-headless-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">clusterIP:</span> <span class="hljs-string">None</span><br><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-quic-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">externalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span> <span class="hljs-comment"># match for service access port</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for pod access port</span><br>    <span class="hljs-attr">nodePort:</span> <span class="hljs-number">30088</span> <span class="hljs-comment"># match for external access port</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">NodePort</span><br><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-clusterip-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">8080</span> <span class="hljs-comment"># match for service access port</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for pod access port</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">ClusterIP</span><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">purelb.io/service-group:</span> <span class="hljs-string">bgp-ippool</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-lb-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">allocateLoadBalancerNodePorts:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">externalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">internalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for service access port</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for pod access port</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">LoadBalancer</span><br>  <span class="hljs-attr">loadBalancerIP:</span> <span class="hljs-number">10.33</span><span class="hljs-number">.192</span><span class="hljs-number">.80</span><br><br><br><span class="hljs-meta">---</span><br><span class="hljs-meta"></span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">annotations:</span><br>    <span class="hljs-attr">purelb.io/service-group:</span> <span class="hljs-string">bgp-ippool</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-lb2-service</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">nginx-quic</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">allocateLoadBalancerNodePorts:</span> <span class="hljs-literal">true</span><br>  <span class="hljs-attr">externalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">internalTrafficPolicy:</span> <span class="hljs-string">Cluster</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">nginx-quic</span><br>  <span class="hljs-attr">ports:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>    <span class="hljs-attr">port:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for service access port</span><br>    <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span> <span class="hljs-comment"># match for pod access port</span><br>  <span class="hljs-attr">type:</span> <span class="hljs-string">LoadBalancer</span><br></code></pre></div></td></tr></table></figure>
+
+<p>部署完成之后我们检查各项服务的状态</p>
+<figure class="highlight subunit"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs subunit">$ kubectl get svc -n nginx-quic -o wide<br>NAME                      TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)          AGE     SELECTOR<br>nginx-clusterip-service   ClusterIP      10.33.141.36    &lt;none&gt;         8080/TCP         2d22h   app=nginx-quic<br>nginx-headless-service    ClusterIP      None            &lt;none&gt;         &lt;none&gt;           2d22h   app=nginx-quic<br>nginx-lb-service          LoadBalancer   10.33.151.137   10.33.192.80   80:30167/TCP     2d22h   app=nginx-quic<br>nginx-lb2-service         LoadBalancer   10.33.154.206   10.33.192.0    80:31868/TCP     2d22h   app=nginx-quic<br>nginx-quic-service        NodePort       10.33.150.169   &lt;none&gt;         8080:30088/TCP   2d22h   app=nginx-quic<br><br>$ kubectl get pods -n nginx-quic -o wide<br>NAME                                     READY   STATUS    RESTARTS   AGE     IP           NODE                                       NOMINATED NODE   READINESS GATES<br>nginx-quic-deployment<span class="hljs-string">-5</span>d7d9559dd<span class="hljs-string">-2</span>f4kx   1/1     Running   0          2d22h   10.33.26.2   k8s-calico-worker<span class="hljs-string">-10</span><span class="hljs-string">-31</span><span class="hljs-string">-90</span><span class="hljs-string">-4</span>.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment<span class="hljs-string">-5</span>d7d9559dd<span class="hljs-string">-8</span>gm7s   1/1     Running   0          2d22h   10.33.93.3   k8s-calico-worker<span class="hljs-string">-10</span><span class="hljs-string">-31</span><span class="hljs-string">-90</span><span class="hljs-string">-6</span>.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment<span class="hljs-string">-5</span>d7d9559dd-jwhth   1/1     Running   0          2d22h   10.33.93.2   k8s-calico-worker<span class="hljs-string">-10</span><span class="hljs-string">-31</span><span class="hljs-string">-90</span><span class="hljs-string">-6</span>.tinychen.io   &lt;none&gt;           &lt;none&gt;<br>nginx-quic-deployment<span class="hljs-string">-5</span>d7d9559dd-qxhqh   1/1     Running   0          2d22h   10.33.12.2   k8s-calico-worker<span class="hljs-string">-10</span><span class="hljs-string">-31</span><span class="hljs-string">-90</span><span class="hljs-string">-5</span>.tinychen.io   &lt;none&gt;           &lt;none&gt;<br></code></pre></div></td></tr></table></figure>
+
+<p>随后我们在集群外的机器进行测试，分别访问podIP 、clusterIP和loadbalancerIP</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 访问pod IP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.26.2</span><br>10.31.100.100:43240<br><br><span class="hljs-comment"># 访问clusterIP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.151.137</span><br>10.31.90.5:52758<br><br><span class="hljs-comment"># 访问loadbalancerIP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.192.0</span><br>10.31.90.5:7319<br><span class="hljs-comment"># 访问loadbalancerIP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.192.80</span><br>10.31.90.5:38170<br><br><span class="hljs-comment"># 在集群内的node进行测试</span><br>[root@k8s-calico-master-10-31-90-1 ~]<span class="hljs-comment"># curl 10.33.26.2</span><br>10.31.90.1:40222<br>[root@k8s-calico-master-10-31-90-1 ~]<span class="hljs-comment"># curl 10.33.151.137</span><br>10.31.90.1:50773<br>[root@k8s-calico-master-10-31-90-1 ~]<span class="hljs-comment"># curl 10.33.192.0</span><br>10.31.90.1:19219<br>[root@k8s-calico-master-10-31-90-1 ~]<span class="hljs-comment"># curl 10.33.192.80</span><br>10.31.90.1:22346<br><br><span class="hljs-comment"># 在集群内的pod进行测试</span><br>[root@nginx-quic-deployment-5d7d9559dd-8gm7s /]<span class="hljs-comment"># curl 10.33.26.2</span><br>10.33.93.3:39560<br>[root@nginx-quic-deployment-5d7d9559dd-8gm7s /]<span class="hljs-comment"># curl 10.33.151.137</span><br>10.33.93.3:58160<br>[root@nginx-quic-deployment-5d7d9559dd-8gm7s /]<span class="hljs-comment"># curl 10.33.192.0</span><br>10.31.90.6:34183<br>[root@nginx-quic-deployment-5d7d9559dd-8gm7s /]<span class="hljs-comment"># curl 10.33.192.80</span><br>10.31.90.6:64266<br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>最后检测一下路由器端的情况，可以看到对应的podIP、clusterIP和loadbalancerIP段路由</p>
+<figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">B&gt;* <span class="hljs-number">10.33.5.0</span>/<span class="hljs-number">24</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.1</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h22m<br>B&gt;* <span class="hljs-number">10.33.12.0</span>/<span class="hljs-number">24</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.5</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h22m<br>B&gt;* <span class="hljs-number">10.33.23.0</span>/<span class="hljs-number">24</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.2</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h22m<br>B&gt;* <span class="hljs-number">10.33.26.0</span>/<span class="hljs-number">24</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.4</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h22m<br>B&gt;* <span class="hljs-number">10.33.57.0</span>/<span class="hljs-number">24</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.3</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h22m<br>B&gt;* <span class="hljs-number">10.33.93.0</span>/<span class="hljs-number">24</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.6</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h22m<br>B&gt;* <span class="hljs-number">10.33.128.0</span>/<span class="hljs-number">18</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.1</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span><br>  *                       via <span class="hljs-number">10.31.90.2</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span><br>  *                       via <span class="hljs-number">10.31.90.3</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span><br>  *                       via <span class="hljs-number">10.31.90.4</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span><br>  *                       via <span class="hljs-number">10.31.90.5</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span><br>  *                       via <span class="hljs-number">10.31.90.6</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">20</span><br>B&gt;* <span class="hljs-number">10.33.192.0</span>/<span class="hljs-number">18</span> [<span class="hljs-number">20</span>/<span class="hljs-number">0</span>] via <span class="hljs-number">10.31.90.1</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h21m<br>  *                       via <span class="hljs-number">10.31.90.2</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h21m<br>  *                       via <span class="hljs-number">10.31.90.3</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h21m<br>  *                       via <span class="hljs-number">10.31.90.4</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h21m<br>  *                       via <span class="hljs-number">10.31.90.5</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h21m<br>  *                       via <span class="hljs-number">10.31.90.6</span>, eth0, weight <span class="hljs-number">1</span>, <span class="hljs-number">2d</span>19h21m<br></code></pre></div></td></tr></table></figure>
+
+<p>到这里整个K8S集群就部署完成了。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/cloudnative/">cloudnative</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/k8s/">k8s</a>
+                    
+                      <a class="hover-with-bg" href="/tags/docker/">docker</a>
+                    
+                      <a class="hover-with-bg" href="/tags/calico/">calico</a>
+                    
+                      <a class="hover-with-bg" href="/tags/containerd/">containerd</a>
+                    
+                      <a class="hover-with-bg" href="/tags/purelb/">purelb</a>
+                    
+                      <a class="hover-with-bg" href="/tags/bgp/">bgp</a>
+                    
+                      <a class="hover-with-bg" href="/tags/bird/">bird</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20221224-k8s-12-kubeadm-upgrade-cluster/">
+                        <span class="hidden-mobile">k8s系列12-kubeadm升级k8s集群</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>2017~2022 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
