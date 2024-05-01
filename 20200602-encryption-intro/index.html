@@ -79,7 +79,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -206,7 +206,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      8.9k 字
+      9k 字
     </span>
   
 
@@ -246,7 +246,7 @@
               </p>
             
             <div class="markdown-body">
-              <p>本文主要对对称加密和非对称加密的原理以及过程进行分析，同时还会简单介绍一下TLS/SSL的一些相关内容，并且对比TLSv1.2和TLSv1.3的不同。</p>
+              <p>本文主要对对称加密和非对称加密的原理以及过程进行分析，同时还会简单介绍一下TLS&#x2F;SSL的一些相关内容，并且对比TLSv1.2和TLSv1.3的不同。</p>
 <span id="more"></span>
 
 <h1 id="1、SSL和TLS的历史"><a href="#1、SSL和TLS的历史" class="headerlink" title="1、SSL和TLS的历史"></a>1、SSL和TLS的历史</h1><p>其实早期的互联网协议基本都是不加密进行传输的，如HTTP、FTP、telnet.等协议的</p>
@@ -312,15 +312,15 @@
 <figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql">RFC <span class="hljs-number">6176</span>的原文摘要如下：<br>   This document requires that <span class="hljs-keyword">when</span> Transport Layer <span class="hljs-keyword">Security</span> (TLS)<br>   clients <span class="hljs-keyword">and</span> servers establish connections, they never negotiate the<br>   use <span class="hljs-keyword">of</span> Secure Sockets Layer (SSL) <span class="hljs-keyword">version</span> <span class="hljs-number">2.0</span>.  This document updates<br>   the backward compatibility sections <span class="hljs-built_in">found</span> <span class="hljs-keyword">in</span> the Transport Layer<br>   <span class="hljs-keyword">Security</span> (TLS).<br></code></pre></div></td></tr></table></figure>
 </blockquote>
 <p>TLS 1.1在 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc4346">RFC 4346</a> 中定义，于2006年4月发表。TLS 1.2在 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc5246">RFC 5246</a> 中定义，于2008年8月发表。TLS 1.3在 <a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc8446">RFC 8446</a> 中定义，于2018年8月发表。实际上现代的浏览器已经基本不使用 SSL，使用的都是 TLS，而目前主流使用的加密协议版本是TLS1.2和TLS1.3。</p>
-<h1 id="2、SSL-TLS属于哪一层"><a href="#2、SSL-TLS属于哪一层" class="headerlink" title="2、SSL/TLS属于哪一层"></a>2、SSL/TLS属于哪一层</h1><p>这个问题十分有意思，从前面的发展历史中我们不难知道，TLS可以视为是SSL的高级版本（主要体现在更加安全上），而从TLS的名字（传输层安全性协议）就会觉得它应该是传输层的协议，当然这可能就望文生义了，实际上在网上有不少的文章在讨论TLS/SSL属于应用层还是传输层，实际上的情况要更为复杂一些，我们先来搞清楚在不同的网络模型中对于不同层的划分。</p>
-<p>首先我们需要知道一般说的七层协议指的是在OSI模型协议，而在TCP/IP模型中网络被划分为四层，我们直接来看下面的示意图：</p>
+<h1 id="2、SSL-TLS属于哪一层"><a href="#2、SSL-TLS属于哪一层" class="headerlink" title="2、SSL&#x2F;TLS属于哪一层"></a>2、SSL&#x2F;TLS属于哪一层</h1><p>这个问题十分有意思，从前面的发展历史中我们不难知道，TLS可以视为是SSL的高级版本（主要体现在更加安全上），而从TLS的名字（传输层安全性协议）就会觉得它应该是传输层的协议，当然这可能就望文生义了，实际上在网上有不少的文章在讨论TLS&#x2F;SSL属于应用层还是传输层，实际上的情况要更为复杂一些，我们先来搞清楚在不同的网络模型中对于不同层的划分。</p>
+<p>首先我们需要知道一般说的七层协议指的是在OSI模型协议，而在TCP&#x2F;IP模型中网络被划分为四层，我们直接来看下面的示意图：</p>
 <p><img src="https://resource.tinychen.com/image-20200518143710872.png" srcset="/img/loading.gif" lazyload></p>
-<p>原始版本的OSI模型划分得太细，TCP/IP模型又划分得太粗，于是人们把两者结合，将OSI模型中的5、6、7三层统一为应用层，就得到了一个升级版的五层网络模型。</p>
-<p>首先我们对SSL/TLS的作用进行分析：SSL/TLS最初是为了给HTTP协议加密使用，也就是HTTPS协议，通常来说我们可以认为<code>HTTP+SSL/TLS=HTTPS</code>，而实际上现在我们的很多其他应用层协议都可以使用SSL/TLS，比如SSH、FTPS、POP3S、IMAPS等等。再以HTTPS为例，一个HTTPS建立连接需要经过TCP握手建立连接这一步骤的，也就是说HTTPS还是基于TCP的，而TCP属于传输层这是毫无争论的。也就是说从划分最细的OSI七层参考模型来看，SSL/TLS应该是在传输层和应用层之间。</p>
-<p>实际上从SSL/TLS的功能来分析：</p>
+<p>原始版本的OSI模型划分得太细，TCP&#x2F;IP模型又划分得太粗，于是人们把两者结合，将OSI模型中的5、6、7三层统一为应用层，就得到了一个升级版的五层网络模型。</p>
+<p>首先我们对SSL&#x2F;TLS的作用进行分析：SSL&#x2F;TLS最初是为了给HTTP协议加密使用，也就是HTTPS协议，通常来说我们可以认为<code>HTTP+SSL/TLS=HTTPS</code>，而实际上现在我们的很多其他应用层协议都可以使用SSL&#x2F;TLS，比如SSH、FTPS、POP3S、IMAPS等等。再以HTTPS为例，一个HTTPS建立连接需要经过TCP握手建立连接这一步骤的，也就是说HTTPS还是基于TCP的，而TCP属于传输层这是毫无争论的。也就是说从划分最细的OSI七层参考模型来看，SSL&#x2F;TLS应该是在传输层和应用层之间。</p>
+<p>实际上从SSL&#x2F;TLS的功能来分析：</p>
 <p><img src="https://resource.tinychen.com/image-20200518185915178.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
-<li>SSL Record Protocol（SSL记录协议），它建立在可靠的传输协议（如TCP）之上，SSL/TLS使用了双向字节流传输（全双工），为高层协议提供数据封装、压缩、加密等基本功能的支持，从功能上看这应该是OSI的L6（表示层）</li>
+<li>SSL Record Protocol（SSL记录协议），它建立在可靠的传输协议（如TCP）之上，SSL&#x2F;TLS使用了双向字节流传输（全双工），为高层协议提供数据封装、压缩、加密等基本功能的支持，从功能上看这应该是OSI的L6（表示层）</li>
 <li>SSL Handshake Protocol（SSL握手协议）：它建立在SSL记录协议之上，用于在实际的数据传输开始前，通讯双方进行身份认证、协商加密算法、交换加密密钥等，从功能上看这应该是OSI的L5（会话层）</li>
 </ul>
 <blockquote>
@@ -330,8 +330,8 @@
 <p>二、表示层对统一传输方式，并对数据进行加密之类的前置处理。这个应该是SSL记录协议要做的事情。</p>
 <p> 所以如果真要说对应关系，应该是SSL握手协议对应会话层， SSL记录协议对应表示层，但是这又与SSL握手协议在SSL记录协议之上相违背。</p>
 </blockquote>
-<p>那么我们就可以得出结论：<strong>OSI七层模型并不适用于SSL/TLS协议，这个人为设计的理论参考模型并不能完美地套用在每一个网络协议上，</strong>可能这也是OSI模型被弃用的原因之一吧。</p>
-<p>那么对应五层的网络模型呢？由于OSI模型中的L5、L6、L7都合并成了应用层，所以SSL/TLS应该是属于传输层和应用层了。</p>
+<p>那么我们就可以得出结论：<strong>OSI七层模型并不适用于SSL&#x2F;TLS协议，这个人为设计的理论参考模型并不能完美地套用在每一个网络协议上，</strong>可能这也是OSI模型被弃用的原因之一吧。</p>
+<p>那么对应五层的网络模型呢？由于OSI模型中的L5、L6、L7都合并成了应用层，所以SSL&#x2F;TLS应该是属于传输层和应用层了。</p>
 <h1 id="3、对称加密和非对称加密"><a href="#3、对称加密和非对称加密" class="headerlink" title="3、对称加密和非对称加密"></a>3、对称加密和非对称加密</h1><p>讲到加密，必然需要理解加密算法，而加密算法一般来说可以分为<strong>对称加密</strong>和<strong>非对称加密</strong>两种。</p>
 <p><img src="https://resource.tinychen.com/image-20200518124623154.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里的对称和非对称是针对加密和解密这两个操作而言的，一般来说是消息发送方发送消息时需要加密，消息接收方在接收消息后需要进行解密。<strong>如果加密和解密用的密钥是相同的，则是对称加密；如果不同则是非对称加密。</strong></p>
@@ -380,7 +380,7 @@
 <p>在<a target="_blank" rel="noopener" href="https://tools.ietf.org/html/rfc5246#page-35">RFC5246</a>文档中我们也可以看到对应的简单图示</p>
 <p><img src="https://resource.tinychen.com/image-20200607165105117.png" srcset="/img/loading.gif" lazyload></p>
 <p>整体流程和上面的基本相同，都是需要进行两个RTT操作。</p>
-<h1 id="5、TLS1-2的问题"><a href="#5、TLS1-2的问题" class="headerlink" title="5、TLS1.2的问题"></a>5、TLS1.2的问题</h1><p>纵观整个SSL/TLS协议的发展史，我们可以发现整个SSL/TLS协议就是不断地填坑的一个过程，不断地对旧版本的协议中的各种漏洞进行修补迭代更新，然后发布新的版本，直到TLSv1.2版本才算是一个不错的可用的加密协议版本。即便如此，对应TLSv1.2来说还是有着太多的历史包袱和兼容性的问题，尽管在功能实现上的漏洞可以通过补丁来进行修补，但是在协议设计之初就存在的问题是没有办法修复的，只能推倒重来，于是就出现了后面的TLSv1.3。这里我们先了解一下TLSv1.2版本中的一些主要的问题：</p>
+<h1 id="5、TLS1-2的问题"><a href="#5、TLS1-2的问题" class="headerlink" title="5、TLS1.2的问题"></a>5、TLS1.2的问题</h1><p>纵观整个SSL&#x2F;TLS协议的发展史，我们可以发现整个SSL&#x2F;TLS协议就是不断地填坑的一个过程，不断地对旧版本的协议中的各种漏洞进行修补迭代更新，然后发布新的版本，直到TLSv1.2版本才算是一个不错的可用的加密协议版本。即便如此，对应TLSv1.2来说还是有着太多的历史包袱和兼容性的问题，尽管在功能实现上的漏洞可以通过补丁来进行修补，但是在协议设计之初就存在的问题是没有办法修复的，只能推倒重来，于是就出现了后面的TLSv1.3。这里我们先了解一下TLSv1.2版本中的一些主要的问题：</p>
 <h2 id="5-1-安全问题"><a href="#5-1-安全问题" class="headerlink" title="5.1 安全问题"></a>5.1 安全问题</h2><p>作为一个提供安全通信的协议，安全问题是首要的也是致命的问题。TLS发展到1.2以来，已经被很多机构和学者曝出有各种各样的安全漏洞，包括密钥交换算法（key exchange algorithms）、加密套件（ciphersuites）和数字签名（digital signatures）各个方面都存在安全问题，很多都是由于历史原因兼容问题而遗留下来的问题。</p>
 <p>还有一些则是设计协议本身就存在的问题如TLS重新协议（renegotiation）可以让心怀不轨的人将高版本的TLS协议重新协商降级到低版本的不安全的协议然后进行攻击。又或者是SNI的不加密问题，TLS1.2及之前的协议都不对SNI进行加密，这也存在了很大的风险。</p>
 <h2 id="5-2-性能问题"><a href="#5-2-性能问题" class="headerlink" title="5.2 性能问题"></a>5.2 性能问题</h2><p>互联网上一直存在着加密传输对性能有很大损耗的说法，实际上了解了上面的TLSv1.2握手过程之后，我们可以知道加密传输对性能确实有损耗，但是远没有到很多人鼓吹的那么严重的程度。而且在后面也加入了很多诸如OCSP、HSTS等技术来提高其性能表现，但是即便如此，整个TLSv1.2的握手过程也需要2-RTT，也就是在客户端和服务器之间来回两次才能顺利建立TLS传输，这还是在一切都进行顺利的情况下。</p>

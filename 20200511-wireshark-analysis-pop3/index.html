@@ -81,7 +81,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -251,9 +251,9 @@
               <p>本文主要使用Wireshark对邮件客户端使用POP3协议收取邮件的过程进行抓包分析并使用telnet命令进行简单操作。</p>
 <span id="more"></span>
 
-<h1 id="1、POP3简介"><a href="#1、POP3简介" class="headerlink" title="1、POP3简介"></a>1、POP3简介</h1><p><strong>邮局协议</strong>（英语：<strong>P</strong>ost <strong>O</strong>ffice <strong>P</strong>rotocol，缩写：<strong>POP</strong>）属于TCP/IP协议族中的一员，由<em>RFC 1939</em>定义。<strong>此协议主要用于支持使用客户端远程管理在服务器上的电子邮件。</strong>最新版本为POP3，全名“<strong>Post Office Protocol - Version 3</strong>”，而提供了SSL加密的POP3协议被称为<strong>POP3S</strong>。</p>
+<h1 id="1、POP3简介"><a href="#1、POP3简介" class="headerlink" title="1、POP3简介"></a>1、POP3简介</h1><p><strong>邮局协议</strong>（英语：<strong>P</strong>ost <strong>O</strong>ffice <strong>P</strong>rotocol，缩写：<strong>POP</strong>）属于TCP&#x2F;IP协议族中的一员，由<em>RFC 1939</em>定义。<strong>此协议主要用于支持使用客户端远程管理在服务器上的电子邮件。</strong>最新版本为POP3，全名“<strong>Post Office Protocol - Version 3</strong>”，而提供了SSL加密的POP3协议被称为<strong>POP3S</strong>。</p>
 <p>POP支持离线邮件处理。其具体过程是：发件人将邮件发送到服务器上，收件人客户端使用MUA以连接服务器，并下载所有未阅读的电子邮件。这种离线访问模式是一种存储转发服务，将邮件从邮件服务器端送到个人客户端上，可以是PC或者手机等多种设备。旧版的POP3协议在邮件被下载后，会删除掉邮件服务器上的邮件。改进的POP3协议可以在配置中选择可以“只下载邮件，服务器端并不删除”，也是目前POP3的主流操作方式。</p>
-<h1 id="2、抓包环境"><a href="#2、抓包环境" class="headerlink" title="2、抓包环境"></a>2、抓包环境</h1><p>抓包工具还是使用的wireshark，测试的协议是POP3，默认端口110，同样地为了方便分析数据没有使用TLS/SSL加密，但是结果都问题不大。</p>
+<h1 id="2、抓包环境"><a href="#2、抓包环境" class="headerlink" title="2、抓包环境"></a>2、抓包环境</h1><p>抓包工具还是使用的wireshark，测试的协议是POP3，默认端口110，同样地为了方便分析数据没有使用TLS&#x2F;SSL加密，但是结果都问题不大。</p>
 <p>测试的账号登录之后自动同步了收件箱中已有的5封邮件，然后我又给测试账号发了一封邮件，因此抓包的时候MUA客户端上应该是只有本地已缓存的5封已读邮件和服务器端尚未下载的1封未读邮件，这样比较符合实际的情况。</p>
 <p>开启wireshark监听对应的网卡，设定Filter为邮件服务器的IP并且设定协议为pop基本就能抓取到需要的数据包，然后我们再Follow这条POP数据流对应的TCP stream就可以看到下面的完整信息。</p>
 <p><img src="https://resource.tinychen.com/image-20200511131942318.png" srcset="/img/loading.gif" lazyload></p>
@@ -276,7 +276,7 @@
 <p><img src="https://resource.tinychen.com/image-20200512175514439.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来客户端开始传输账号密码用于登录，可以看到在登录成功之后，POP3服务端返回了消息提示有6封邮件（6 messages）和邮件的总大小（25568 bytes），然后客户端发送UTF8命令指定编码方式，收到服务端返回的确认消息后再发送STAT命令来请求服务器发回关于邮箱的统计资料（此处为邮件总数和总字节数）。</p>
 <p><img src="https://resource.tinychen.com/image-20200512175824004.png" srcset="/img/loading.gif" lazyload></p>
-<p>紧接着客户端继续发送UIDL命令，POP3服务器端返回邮件的唯一标识符，<strong>POP3会话的每个标识符都将是唯一的，并且是全局始终唯一</strong>。即同一封邮件在每次通信的时候的标识符都是不变的，这样就有利于MUA将本地存储的邮件和服务器端的邮件进行对比从而知道哪些邮件还没有被下载到本地。    </p>
+<p>紧接着客户端继续发送UIDL命令，POP3服务器端返回邮件的唯一标识符，<strong>POP3会话的每个标识符都将是唯一的，并且是全局始终唯一</strong>。即同一封邮件在每次通信的时候的标识符都是不变的，这样就有利于MUA将本地存储的邮件和服务器端的邮件进行对比从而知道哪些邮件还没有被下载到本地。	</p>
 <p>获取邮件标识符后，客户端会发送LIST命令查询邮件数量和每个邮件的大小，这里我们可以看到邮件的总数量和总大小是和上面的STAT命令查询的一致的。</p>
 <p><img src="https://resource.tinychen.com/image-20200512180145244.png" srcset="/img/loading.gif" lazyload></p>
 <p>前面我们说过在抓包之前MUA中是存着5封邮件并且第6封邮件是未读的，因此这时客户端就会发送RETR请求获取第6封邮件的信息：</p>

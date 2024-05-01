@@ -81,7 +81,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -261,7 +261,7 @@
 <p>通过虚拟化引擎VMM来对虚拟机上的指令进行捕获并解释执行，就可以有效地隔离开虚拟机和物理机上的操作，最常见的表现就是关闭虚拟机并不会关闭物理机。这种方案也因此叫做软件全虚拟化的解决方案。</p>
 <blockquote>
 <p>Hypervisor，又称虚拟机监视器（英语：virtual machine monitor，缩写为 VMM），是用来建立与执行虚拟机器的软件、固件或硬件。</p>
-<p>被Hypervisor用来执行一个或多个虚拟机器的电脑称为主体机器/宿主机/物理机（host machine），这些虚拟机器则称为客体机器/虚拟机（guest machine）。hypervisor提供虚拟的作业平台来执行客体操作系统（guest operating systems），负责管理其他客体操作系统的执行阶段；这些客体操作系统，共同分享虚拟化后的硬件资源。</p>
+<p>被Hypervisor用来执行一个或多个虚拟机器的电脑称为主体机器&#x2F;宿主机&#x2F;物理机（host machine），这些虚拟机器则称为客体机器&#x2F;虚拟机（guest machine）。hypervisor提供虚拟的作业平台来执行客体操作系统（guest operating systems），负责管理其他客体操作系统的执行阶段；这些客体操作系统，共同分享虚拟化后的硬件资源。</p>
 </blockquote>
 <h2 id="2-2-半虚拟化"><a href="#2-2-半虚拟化" class="headerlink" title="2.2 半虚拟化"></a>2.2 半虚拟化</h2><p>软件全虚拟化的解决方案虽然可行，但是由于指令需要经过VMM，所以要在虚拟化层做大量的工作，性能上比较一般，因此Xen项目提出了使用修改虚拟机操作系统内核的解决方案。具体来说就是在虚拟机上使用修改过的内核，在修改过的内核中对特殊指令进行修改使其与物理机隔离开来，这样就可以有效地减少虚拟化层的工作，从而提高性能。但是劣势也是显而易见的，由于需要使用特殊的内核，因此在配置上也会相对麻烦一些，且由于内核原因一开始不支持windows系统的虚拟化，直到后来才加入支持。</p>
 <p>不过由于将一部分的指令翻译工作从虚拟化层转移到了修改过的内核当中，因此性能比上面提到的软件全虚拟化要高很多，这种虚拟化方式也称为<strong>半虚拟化（paravirtualization）</strong>或者是<strong>准虚拟化</strong>。</p>
@@ -270,7 +270,7 @@
 <blockquote>
 <p>2005年，随着Intel推出支持x86虚拟化技术的CPU，Xen亦加入全虚拟化模式。Xen的全虚拟化模式允许在虚拟机中运行Windows等非Linux系统。</p>
 </blockquote>
-<p>因为是基于硬件的，所以效率非常高，这种方案也称为硬件支持的全虚拟化方案。现在的一个发展趋势是不仅CPU指令有硬件解决方案，I/O通信也有硬件解决方案，称为VT-d；网络通信也有硬件解决方案，称为VT-c。</p>
+<p>因为是基于硬件的，所以效率非常高，这种方案也称为硬件支持的全虚拟化方案。现在的一个发展趋势是不仅CPU指令有硬件解决方案，I&#x2F;O通信也有硬件解决方案，称为VT-d；网络通信也有硬件解决方案，称为VT-c。</p>
 <blockquote>
 <p>除了Intel，AMD也在自家的处理器上加入了对硬件级虚拟化的支持，命名为AMD-v。</p>
 </blockquote>
@@ -290,13 +290,13 @@
 <p>以下摘录自wiki：</p>
 <p>QEMU有多种模式</p>
 <ul>
-<li>User mod：又称作“使用者模式”，在这种模块下，QEMU运行针对不同指令编译的单个Linux或Darwin/macOS程序。系统调用与32/64位接口适应。在这种模式下，我们可以实现交叉编译（cross-compilation）与交叉偵错（cross- debugging）。</li>
+<li>User mod：又称作“使用者模式”，在这种模块下，QEMU运行针对不同指令编译的单个Linux或Darwin&#x2F;macOS程序。系统调用与32&#x2F;64位接口适应。在这种模式下，我们可以实现交叉编译（cross-compilation）与交叉偵错（cross- debugging）。</li>
 <li>System mod：“系统模式”，在这种模式下，QEMU模拟一个完整的计算机系统，包括外围设备。它可以用于在一台计算机上提供多台虚拟计算机的虚拟主机。 QEMU可以实现许多客户机OS的引导，比如x86，MIPS，32-bit ARMv7，PowerPC等等。</li>
 <li>KVM Hosting：QEMU在这时处理KVM镜像的设置与迁移，并参加硬件的仿真，但是客户端的执行则由KVM完成。</li>
 <li>Xen Hosting：在这种托管下，客户端的执行几乎完全在Xen中完成，并且对QEMU屏蔽。QEMU只提供硬件仿真的支持。</li>
 </ul>
 </blockquote>
-<p>前面我们提到过QEMU的架构是纯软件实现的，因此灵活性很强，但是性能很差，因此可以搭配KVM模块使用从而有效地提升性能表现，也就是我们常说的<code>QEMU-KVM</code>，此时的QEMU运行在上面提到的<code>KVM Hosting</code>模式下，处理KVM镜像的设置与迁移，并参加硬件的仿真，可以存储及还原虚拟机运行状态，还可以虚拟多种设备，包括网卡、多CPU、IDE设备、软驱、显卡、声卡、多种并口设备、多种串口设备、多种USB设备、PC喇叭、PS/2键盘鼠标（默认）和USB键盘鼠标、蓝牙设备，但是客户端的执行则由KVM完成。</p>
+<p>前面我们提到过QEMU的架构是纯软件实现的，因此灵活性很强，但是性能很差，因此可以搭配KVM模块使用从而有效地提升性能表现，也就是我们常说的<code>QEMU-KVM</code>，此时的QEMU运行在上面提到的<code>KVM Hosting</code>模式下，处理KVM镜像的设置与迁移，并参加硬件的仿真，可以存储及还原虚拟机运行状态，还可以虚拟多种设备，包括网卡、多CPU、IDE设备、软驱、显卡、声卡、多种并口设备、多种串口设备、多种USB设备、PC喇叭、PS&#x2F;2键盘鼠标（默认）和USB键盘鼠标、蓝牙设备，但是客户端的执行则由KVM完成。</p>
 <p>QEMU-KVM的分支版本发布了3个正式的版本1.1、1.2、1.3，随后和QEMU的主版本合并，也就是说<strong>现在的QEMU版本默认支持KVM</strong>，而KVM的最后一个自己的版本是KVM 83，随后和内核版本一起发布，和内核版本号保持一致，所以要使用KVM的最新版本，就要使用最新的内核。</p>
 <h2 id="4-3-Libvirt和KVM"><a href="#4-3-Libvirt和KVM" class="headerlink" title="4.3 Libvirt和KVM"></a>4.3 Libvirt和KVM</h2><p>前面我们提到，基于KVM的虚拟机在Linux中可以视为一个进程，而为了方便管理，红帽公司发布了一个开源项目Libvirt，Libvirt有API，也有一套命令行工具，可以完成对虚拟机的管理，大多数的管理平台都是通过Libvirt来完成对KVM虚拟机的管理的，比如OpenStack、CloudStack、OpenNebula等。</p>
 <p>Libvirt主要由3部分组成：</p>

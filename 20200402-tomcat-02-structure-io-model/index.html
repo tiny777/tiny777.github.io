@@ -79,7 +79,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -246,7 +246,7 @@
               </p>
             
             <div class="markdown-body">
-              <p>本文主要包括tomcat服务器的目录结构、工作模式、整体架构、I/O模型以及NIO、NIO2、APR三者的对比介绍。</p>
+              <p>本文主要包括tomcat服务器的目录结构、工作模式、整体架构、I&#x2F;O模型以及NIO、NIO2、APR三者的对比介绍。</p>
 <span id="more"></span>
 
 <h1 id="1、Tomcat的目录结构"><a href="#1、Tomcat的目录结构" class="headerlink" title="1、Tomcat的目录结构"></a>1、Tomcat的目录结构</h1><p>我们先来看一下tomcat8.5和tomcat9中的home目录中的文件：</p>
@@ -344,7 +344,7 @@
 <li><p><code>juli</code>提供日志服务，JDK 所提供的默认 <code>java.util.logging</code> 实现功能太过局限，不能实现针对每一应用进行日志记录，因为配置是针对VM的。而<code>juli</code>通过自定义的 <code>LogManager</code> 能分辨运行在 Tomcat 上的不同 Web 应用（以及它们所用的不同的类加载器），还能针对每一应用进行私有的日志配置。</p>
 </li>
 </ul>
-<h1 id="4、Tomcat的I-O模型"><a href="#4、Tomcat的I-O模型" class="headerlink" title="4、Tomcat的I/O模型"></a>4、Tomcat的I/O模型</h1><h2 id="4-1-阻塞I-O处理模型"><a href="#4-1-阻塞I-O处理模型" class="headerlink" title="4.1 阻塞I/O处理模型"></a>4.1 阻塞I/O处理模型</h2><h3 id="4-1-1-单线程阻塞I-O模型"><a href="#4-1-1-单线程阻塞I-O模型" class="headerlink" title="4.1.1 单线程阻塞I/O模型"></a>4.1.1 单线程阻塞I/O模型</h3><p>单线程阻塞I/O模型是最简单的一种服务器I/O模型，单线程即同时只能处理一个客户端的请求，阻塞即该线程会一直等待，直到处理完成为止。对于多个客户端访问，必须要等到前一个客户端访问结束才能进行下一个访问的处理，请求一个一个排队，只提供一问一答服务。</p>
+<h1 id="4、Tomcat的I-O模型"><a href="#4、Tomcat的I-O模型" class="headerlink" title="4、Tomcat的I&#x2F;O模型"></a>4、Tomcat的I&#x2F;O模型</h1><h2 id="4-1-阻塞I-O处理模型"><a href="#4-1-阻塞I-O处理模型" class="headerlink" title="4.1 阻塞I&#x2F;O处理模型"></a>4.1 阻塞I&#x2F;O处理模型</h2><h3 id="4-1-1-单线程阻塞I-O模型"><a href="#4-1-1-单线程阻塞I-O模型" class="headerlink" title="4.1.1 单线程阻塞I&#x2F;O模型"></a>4.1.1 单线程阻塞I&#x2F;O模型</h3><p>单线程阻塞I&#x2F;O模型是最简单的一种服务器I&#x2F;O模型，单线程即同时只能处理一个客户端的请求，阻塞即该线程会一直等待，直到处理完成为止。对于多个客户端访问，必须要等到前一个客户端访问结束才能进行下一个访问的处理，请求一个一个排队，只提供一问一答服务。</p>
 <p><img src="https://resource.tinychen.com/20200401153247.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图所示：这是一个同步阻塞服务器响应客户端访问的时间节点图。</p>
 <ul>
@@ -352,21 +352,21 @@
 <li>接着，客户端1调用服务器的服务，服务器接收到请求后对其进行处理，处理完后写数据回客户端1，整个过程都是在一个线程里面完成的</li>
 <li>最后，处理客户端2的请求并写数据回客户端2，期间就算客户端2在服务器处理完客户端1之前就进行请求，也要等服务器对客户端1响应完后才会对客户端2进行响应处理</li>
 </ul>
-<p><strong>这种模型的特点在于单线程和阻塞I/O。</strong>单线程即服务器端只有一个线程处理客户端的所有请求，客户端连接与服务器端的处理线程比是<code>n:1</code>，它无法同时处理多个连接，只能串行处理连接。而阻塞I/O是指服务器在读写数据时是阻塞的，读取客户端数据时要等待客户端发送数据并且把操作系统内核复制到用户进程中，这时才解除阻塞状态。写数据回客户端时要等待用户进程将数据写入内核并发送到客户端后才解除阻塞状态。<strong>这种阻塞带来了一个问题，服务器必须要等到客户端成功接收才能继续往下处理另外一个客户端的请求，在此期间线程将无法响应任何客户端请求。</strong></p>
+<p><strong>这种模型的特点在于单线程和阻塞I&#x2F;O。</strong>单线程即服务器端只有一个线程处理客户端的所有请求，客户端连接与服务器端的处理线程比是<code>n:1</code>，它无法同时处理多个连接，只能串行处理连接。而阻塞I&#x2F;O是指服务器在读写数据时是阻塞的，读取客户端数据时要等待客户端发送数据并且把操作系统内核复制到用户进程中，这时才解除阻塞状态。写数据回客户端时要等待用户进程将数据写入内核并发送到客户端后才解除阻塞状态。<strong>这种阻塞带来了一个问题，服务器必须要等到客户端成功接收才能继续往下处理另外一个客户端的请求，在此期间线程将无法响应任何客户端请求。</strong></p>
 <p>该模型的特点：它是最简单的服务器模型，整个运行过程都只有一个线程，只能支持同时处理一个客户端的请求(如果有多个客户端访问，就必须排队等待)，<strong>服务器系统资源消耗较小，但并发能力低，容错能力差。</strong></p>
-<h3 id="4-1-2-多线程阻塞I-O模型"><a href="#4-1-2-多线程阻塞I-O模型" class="headerlink" title="4.1.2 多线程阻塞I/O模型"></a>4.1.2 多线程阻塞I/O模型</h3><p>多线程阻塞I/O模型在单线程阻塞I/O模型的基础上对其进行改进，加入多线程，提高并发能力，使其能够同时对多个客户端进行响应，多线程的核心就是利用多线程机制为每个客户端分配一个线程。</p>
+<h3 id="4-1-2-多线程阻塞I-O模型"><a href="#4-1-2-多线程阻塞I-O模型" class="headerlink" title="4.1.2 多线程阻塞I&#x2F;O模型"></a>4.1.2 多线程阻塞I&#x2F;O模型</h3><p>多线程阻塞I&#x2F;O模型在单线程阻塞I&#x2F;O模型的基础上对其进行改进，加入多线程，提高并发能力，使其能够同时对多个客户端进行响应，多线程的核心就是利用多线程机制为每个客户端分配一个线程。</p>
 <p><img src="https://resource.tinychen.com/image-20200401154934307.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图所示，服务器端开始监听客户端的访问，假如有两个客户端同时发送请求过来，服务器端在接收到客户端请求后分别创建两个线程对它们进行处理，每条线程负责一个客户端连接，直到响应完成。<strong>期间两个线程并发地为各自对应的客户端处理请求</strong>，包括读取客户端数据、处理客户端数据、写数据回客户端等操作。</p>
-<p><strong>这种模型的I/O操作也是阻塞的</strong>，因为每个线程执行到读取或写入操作时都将进入阻塞状态，直到读取到客户端的数据或数据成功写入客户端后才解除阻塞状态。尽管I/O操作阻塞，但这种模式比单线程处理的性能明显高了，它不用等到第一个请求处理完才处理第二个，而是并发地处理客户端请求，客户端连接与服务器端处理线程的比例是<code>1:1</code>。</p>
-<p>多线程阻塞I/O模型的特点：支持对多个客户端并发响应，处理能力得到大幅提高，有较大的并发量，但服务器系统资源消耗量较大，而且如果线程数过多，多线程之间会产生较大的线程切换成本，同时拥有较复杂的结构。</p>
-<h2 id="4-2-非阻塞I-O模型"><a href="#4-2-非阻塞I-O模型" class="headerlink" title="4.2 非阻塞I/O模型"></a>4.2 非阻塞I/O模型</h2><h3 id="4-2-1-非阻塞情况下的事件检测"><a href="#4-2-1-非阻塞情况下的事件检测" class="headerlink" title="4.2.1 非阻塞情况下的事件检测"></a>4.2.1 非阻塞情况下的事件检测</h3><p>在探讨单线程非阻塞I/O模型前必须要先了解非阻塞情况下套接字事件的检测机制，因为对于单线程非阻塞模型最重要的事情是检测哪些连接有感兴趣的事件发生。一般会有如下三种检测方式。</p>
+<p><strong>这种模型的I&#x2F;O操作也是阻塞的</strong>，因为每个线程执行到读取或写入操作时都将进入阻塞状态，直到读取到客户端的数据或数据成功写入客户端后才解除阻塞状态。尽管I&#x2F;O操作阻塞，但这种模式比单线程处理的性能明显高了，它不用等到第一个请求处理完才处理第二个，而是并发地处理客户端请求，客户端连接与服务器端处理线程的比例是<code>1:1</code>。</p>
+<p>多线程阻塞I&#x2F;O模型的特点：支持对多个客户端并发响应，处理能力得到大幅提高，有较大的并发量，但服务器系统资源消耗量较大，而且如果线程数过多，多线程之间会产生较大的线程切换成本，同时拥有较复杂的结构。</p>
+<h2 id="4-2-非阻塞I-O模型"><a href="#4-2-非阻塞I-O模型" class="headerlink" title="4.2 非阻塞I&#x2F;O模型"></a>4.2 非阻塞I&#x2F;O模型</h2><h3 id="4-2-1-非阻塞情况下的事件检测"><a href="#4-2-1-非阻塞情况下的事件检测" class="headerlink" title="4.2.1 非阻塞情况下的事件检测"></a>4.2.1 非阻塞情况下的事件检测</h3><p>在探讨单线程非阻塞I&#x2F;O模型前必须要先了解非阻塞情况下套接字事件的检测机制，因为对于单线程非阻塞模型最重要的事情是检测哪些连接有感兴趣的事件发生。一般会有如下三种检测方式。</p>
 <blockquote>
 <p>此处“有感兴趣的事件发生”指的是需要进行读写数据等操作。</p>
 </blockquote>
 <h4 id="1-应用程序遍历套接字的事件检测"><a href="#1-应用程序遍历套接字的事件检测" class="headerlink" title="(1)应用程序遍历套接字的事件检测"></a>(1)应用程序遍历套接字的事件检测</h4><p>当多个客户端向服务器请求时，服务器端会保存一个套接字连接列表中，应用层线程对套接字列表轮询尝试读取或写入。如果成功则进行处理，如果失败则下次继续。这样不管有多少个套接字连接，它们都可以被一个线程管理，这很好地利用了阻塞的时间，处理能力得到提升。</p>
 <p>但这种模型需要在应用程序中遍历所有的套接字列表，同时需要处理数据的拼接，连接空闲时可能也会占用较多CPU资源，不适合实际使用。</p>
 <h4 id="2-内核遍历套接字的事件检测"><a href="#2-内核遍历套接字的事件检测" class="headerlink" title="(2)内核遍历套接字的事件检测"></a>(2)内核遍历套接字的事件检测</h4><p>这种方式将套接字的遍历工作交给了操作系统内核，把对套接字遍历的结果组织成一系列的事件列表并返回应用层处理。对于应用层，它们需要处理的对象就是这些事件，这是一种事件驱动的非阻塞方式。</p>
-<p>服务器端有多个客户端连接，应用层向内核请求读写事件列表。内核遍历所有套接字并生成对应的可读列表readList和可写列表writeList。readList和writeList则标明了每个套接字是否可读/可写。应用层遍历读写事件列表readList和writeList，做相应的读写操作。</p>
+<p>服务器端有多个客户端连接，应用层向内核请求读写事件列表。内核遍历所有套接字并生成对应的可读列表readList和可写列表writeList。readList和writeList则标明了每个套接字是否可读&#x2F;可写。应用层遍历读写事件列表readList和writeList，做相应的读写操作。</p>
 <p>内核遍历套接字时已经不用在应用层对所有套接字进行遍历，将遍历工作下移到内核层，这种方式有助于提高检测效率。<strong>然而，它需要将所有连接的可读事件列表和可写事件列表传到应用层，假如套接字连接数量变大，列表从内核复制到应用层也是不小的开销。</strong>另外，当活跃连接较少时，<strong>内核与应用层之间存在很多无效的数据副本</strong>，因为它将活跃和不活跃的连接状态都复制到应用层中。</p>
 <h4 id="3-内核基于回调的事件检测"><a href="#3-内核基于回调的事件检测" class="headerlink" title="(3)内核基于回调的事件检测"></a>(3)内核基于回调的事件检测</h4><p>通过遍历的方式检测套接字是否可读可写是一种效率比较低的方式，不管是在应用层中遍历还是在内核中遍历。所以需要另外一种机制来优化遍历的方式，那就是<strong>回调函数</strong>。内核中的套接字都对应一个回调函数，当客户端往套接字发送数据时，内核从网卡接收数据后就会调用回调函数，在回调函数中维护事件列表，应用层获取此事件列表即可得到所有感兴趣的事件。</p>
 <p><strong>内核基于回调的事件检测方式有两种</strong></p>
@@ -374,7 +374,7 @@
 <ul>
 <li><p>服务器端有多个客户端套接字连接</p>
 </li>
-<li><p>当客户端发送数据过来时，内核从网卡复制数据成功后调用回调函数将<code>readList/writeList</code>对应的元素标记为可读/可写</p>
+<li><p>当客户端发送数据过来时，内核从网卡复制数据成功后调用回调函数将<code>readList/writeList</code>对应的元素标记为可读&#x2F;可写</p>
 </li>
 <li><p>应用层发送请求读、写事件列表，内核返回包含了事件标识的<code>readList</code>和<code>writeList</code>事件列表，此时返回的两个列表内容大致如下</p>
 <table>
@@ -497,18 +497,18 @@
 </li>
 </ul>
 <p>上面两种方式由操作系统内核维护客户端的所有连接并通过回调函数不断更新事件列表，而应用层线程只要遍历这些事件列表即可知道可读取或可写入的连接，进而对这些连接进行读写操作，极大提高了检测效率，自然处理能力也更强。</p>
-<h3 id="4-2-2-单线程非阻塞I-O模型"><a href="#4-2-2-单线程非阻塞I-O模型" class="headerlink" title="4.2.2 单线程非阻塞I/O模型"></a>4.2.2 单线程非阻塞I/O模型</h3><p>单线程非阻塞I/O模型最重要的一个特点是，在调用读取或写入接口后立即返回，而不会进入阻塞状态。虽然只有一个线程，但是它通过把非阻塞读写操作与上面几种检测机制配合就可以实现对多个连接的及时处理，而不会因为某个连接的阻塞操作导致其他连接无法处理。在客户端连接大多数都保持活跃的情况下，这个线程会一直循环处理这些连接，它很好地利用了阻塞的时间，大大提高了这个线程的执行效率。</p>
-<p>单线程非阻塞I/O模型的主要优势体现在对多个连接的管理，一般在同时需要处理多个连接的发场景中会使用非阻塞NIO模式，此模型下只通过一个线程去维护和处理连接，这样大大提高了机器的效率。一般服务器端才会使用NIO模式，而对于客户端，出于方便及习惯，可使用阻塞模式的套接字进行通信。</p>
-<h3 id="4-2-3-多线程非阻塞I-O模型"><a href="#4-2-3-多线程非阻塞I-O模型" class="headerlink" title="4.2.3 多线程非阻塞I/O模型"></a>4.2.3 多线程非阻塞I/O模型</h3><p>在多核的机器上可以通过多线程继续提高机器效率。最朴实、最自然的做法就是将客户端连接按组分配给若干线程，每个线程负责处理对应组内的连接。比如有4个客户端访问服务器，服务器将套接字1和套接字2交由线程1管理，而线程2则管理套接字3和套接字4，通过事件检测及非阻塞读写就可以让每个线程都能高效处理。</p>
-<p><strong>多线程非阻塞I/O模式让服务器端处理能力得到很大提高，它充分利用机器的CPU，适合用于处理高并发的场景，但它也让程序更复杂，更容易出现问题（死锁、数据不一致等经典并发问题）。</strong></p>
-<h3 id="4-2-4-Reactor模式"><a href="#4-2-4-Reactor模式" class="headerlink" title="4.2.4 Reactor模式"></a>4.2.4 Reactor模式</h3><p>最经典的多线程非阻塞I/O模型方式是Reactor模式。首先看单线程下的Reactor，Reactor将服务器端的整个处理过程分成若干个事件，例如分为接收事件、读事件、写事件、执行事件等。Reactor通过事件检测机制将这些事件分发给不同处理器去处理。在整个过程中只要有待处理的事件存在，即可以让Reactor线程不断往下执行，而不会阻塞在某处，所以处理效率很高。</p>
+<h3 id="4-2-2-单线程非阻塞I-O模型"><a href="#4-2-2-单线程非阻塞I-O模型" class="headerlink" title="4.2.2 单线程非阻塞I&#x2F;O模型"></a>4.2.2 单线程非阻塞I&#x2F;O模型</h3><p>单线程非阻塞I&#x2F;O模型最重要的一个特点是，在调用读取或写入接口后立即返回，而不会进入阻塞状态。虽然只有一个线程，但是它通过把非阻塞读写操作与上面几种检测机制配合就可以实现对多个连接的及时处理，而不会因为某个连接的阻塞操作导致其他连接无法处理。在客户端连接大多数都保持活跃的情况下，这个线程会一直循环处理这些连接，它很好地利用了阻塞的时间，大大提高了这个线程的执行效率。</p>
+<p>单线程非阻塞I&#x2F;O模型的主要优势体现在对多个连接的管理，一般在同时需要处理多个连接的发场景中会使用非阻塞NIO模式，此模型下只通过一个线程去维护和处理连接，这样大大提高了机器的效率。一般服务器端才会使用NIO模式，而对于客户端，出于方便及习惯，可使用阻塞模式的套接字进行通信。</p>
+<h3 id="4-2-3-多线程非阻塞I-O模型"><a href="#4-2-3-多线程非阻塞I-O模型" class="headerlink" title="4.2.3 多线程非阻塞I&#x2F;O模型"></a>4.2.3 多线程非阻塞I&#x2F;O模型</h3><p>在多核的机器上可以通过多线程继续提高机器效率。最朴实、最自然的做法就是将客户端连接按组分配给若干线程，每个线程负责处理对应组内的连接。比如有4个客户端访问服务器，服务器将套接字1和套接字2交由线程1管理，而线程2则管理套接字3和套接字4，通过事件检测及非阻塞读写就可以让每个线程都能高效处理。</p>
+<p><strong>多线程非阻塞I&#x2F;O模式让服务器端处理能力得到很大提高，它充分利用机器的CPU，适合用于处理高并发的场景，但它也让程序更复杂，更容易出现问题（死锁、数据不一致等经典并发问题）。</strong></p>
+<h3 id="4-2-4-Reactor模式"><a href="#4-2-4-Reactor模式" class="headerlink" title="4.2.4 Reactor模式"></a>4.2.4 Reactor模式</h3><p>最经典的多线程非阻塞I&#x2F;O模型方式是Reactor模式。首先看单线程下的Reactor，Reactor将服务器端的整个处理过程分成若干个事件，例如分为接收事件、读事件、写事件、执行事件等。Reactor通过事件检测机制将这些事件分发给不同处理器去处理。在整个过程中只要有待处理的事件存在，即可以让Reactor线程不断往下执行，而不会阻塞在某处，所以处理效率很高。</p>
 <p><img src="https://resource.tinychen.com/20200402115511.png" srcset="/img/loading.gif" lazyload></p>
 <p><strong>基于单线程Reactor模型，根据实际使用场景，把它改进成多线程模式。常见的有两种方式：一种是在耗时的process处理器中引入多线程，如使用线程池；另一种是直接使用多个Reactor实例，每个Reactor实例对应一个线程。</strong></p>
 <p>Reactor模式的一种改进方式如下图所示。其整体结构基本上与单线程的Reactor类似，只是引入了一个线程池。由于对连接的接收、对数据的读取和对数据的写入等操作基本上都耗时较少，因此把它们都放到Reactor线程中处理。然而，对于逻辑处理可能比较耗时的工作，可以在process处理器中引入线程池，process处理器自己不执行任务，而是交给线程池，从而在Reactor线程中避免了耗时的操作。将耗时的操作转移到线程池中后，尽管Reactor只有一个线程，它也能保证Reactor的高效。</p>
 <p><img src="https://resource.tinychen.com/20200402115553.png" srcset="/img/loading.gif" lazyload></p>
 <p>Reactor模式的另一种改进方式如下图所示。其中有多个Reactor实例，每个Reactor实例对应一个线程。因为接收事件是相对于服务器端而言的，所以客户端的连接接收工作统一由一个accept处理器负责，accept处理器会将接收的客户端连接均匀分配给所有Reactor实例，每个Reactor实例负责处理分配到该Reactor上的客户端连接，包括连接的读数据、写数据和逻辑处理。这就是多Reactor实例的原理。</p>
 <p><img src="https://resource.tinychen.com/20200402115623.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="4-3-Tomcat的I-O模型"><a href="#4-3-Tomcat的I-O模型" class="headerlink" title="4.3 Tomcat的I/O模型"></a>4.3 Tomcat的I/O模型</h2><p>Tomcat支持的I/O模型如下表（自8.5/9.0 版本起，Tomcat移除了对BIO的支持），在 8.0 之前 ， Tomcat 默认采用的I/O方式为 BIO ， 之后改为 NIO。 无论 NIO、NIO2 还是 APR， 在性能方面均优于以往的BIO。</p>
+<h2 id="4-3-Tomcat的I-O模型"><a href="#4-3-Tomcat的I-O模型" class="headerlink" title="4.3 Tomcat的I&#x2F;O模型"></a>4.3 Tomcat的I&#x2F;O模型</h2><p>Tomcat支持的I&#x2F;O模型如下表（自8.5&#x2F;9.0 版本起，Tomcat移除了对BIO的支持），在 8.0 之前 ， Tomcat 默认采用的I&#x2F;O方式为 BIO ， 之后改为 NIO。 无论 NIO、NIO2 还是 APR， 在性能方面均优于以往的BIO。</p>
 <table>
 <thead>
 <tr>
@@ -518,28 +518,28 @@
 </thead>
 <tbody><tr>
 <td>NIO</td>
-<td>同步非阻塞I/O，采用Java NIO类库实现</td>
+<td>同步非阻塞I&#x2F;O，采用Java NIO类库实现</td>
 </tr>
 <tr>
 <td>NIO2</td>
-<td>异步非阻塞I/O，采用JDK 7最新的NIO2类库实现</td>
+<td>异步非阻塞I&#x2F;O，采用JDK 7最新的NIO2类库实现</td>
 </tr>
 <tr>
 <td>APR</td>
-<td>采用Apache可移植运行库实现，是C/C++编写的本地库，需要单独安装APR库</td>
+<td>采用Apache可移植运行库实现，是C&#x2F;C++编写的本地库，需要单独安装APR库</td>
 </tr>
 </tbody></table>
 <p><img src="https://resource.tinychen.com/20200402151558.png" srcset="/img/loading.gif" lazyload></p>
-<h3 id="4-3-1-NIO（New-I-O-APIs、同步非阻塞）"><a href="#4-3-1-NIO（New-I-O-APIs、同步非阻塞）" class="headerlink" title="4.3.1 NIO（New I/O APIs、同步非阻塞）"></a>4.3.1 NIO（New I/O APIs、同步非阻塞）</h3><p><strong>Tomcat中的NIO模型是使用的JAVA的NIO类库，其内部的IO实现是同步的（也就是在用户态和内核态之间的数据交换上是同步机制），采用基于selector实现的异步事件驱动机制（这里的异步指的是selector这个实现模型是使用的异步机制）。</strong>而对于Java来说，非阻塞I/O的实现完全是基于操作系统内核的非阻塞I/O，它将操作系统的非阻塞I/O的差异屏蔽并提供统一的API，让我们不必关心操作系统。JDK会帮我们选择非阻塞I/O的实现方式。</p>
+<h3 id="4-3-1-NIO（New-I-O-APIs、同步非阻塞）"><a href="#4-3-1-NIO（New-I-O-APIs、同步非阻塞）" class="headerlink" title="4.3.1 NIO（New I&#x2F;O APIs、同步非阻塞）"></a>4.3.1 NIO（New I&#x2F;O APIs、同步非阻塞）</h3><p><strong>Tomcat中的NIO模型是使用的JAVA的NIO类库，其内部的IO实现是同步的（也就是在用户态和内核态之间的数据交换上是同步机制），采用基于selector实现的异步事件驱动机制（这里的异步指的是selector这个实现模型是使用的异步机制）。</strong>而对于Java来说，非阻塞I&#x2F;O的实现完全是基于操作系统内核的非阻塞I&#x2F;O，它将操作系统的非阻塞I&#x2F;O的差异屏蔽并提供统一的API，让我们不必关心操作系统。JDK会帮我们选择非阻塞I&#x2F;O的实现方式。</p>
 <blockquote>
 <p>这里需要提一下同步异步和阻塞非阻塞的概念：</p>
 <p><strong>同步和异步关注的是消息通信机制</strong>，同步异步指的是应用程序<strong>发起的调用请求</strong>和<strong>获得的返回值</strong>是否一起返回，如果一起返回就是同步，否则就是异步，异步可以通过回调函数等方式实现。</p>
 <p><strong>阻塞和非阻塞关注的是程序在等待调用结果时的状态</strong>，应用程序发起调用请求之后不能干别的事情直到请求处理完成了就是阻塞，否则就是非阻塞。</p>
-<p><strong>所以我个人认为，对于阻塞I/O谈同步异步是没有太大意义的，因为此时进程已经阻塞，想要去干别的事情必须得等请求处理完，而请求处理完必然会得到返回值。</strong></p>
-<p>上面我们提到得内核基于回调得事件检测方式二就是典型的异步非阻塞I/O模型。</p>
+<p><strong>所以我个人认为，对于阻塞I&#x2F;O谈同步异步是没有太大意义的，因为此时进程已经阻塞，想要去干别的事情必须得等请求处理完，而请求处理完必然会得到返回值。</strong></p>
+<p>上面我们提到得内核基于回调得事件检测方式二就是典型的异步非阻塞I&#x2F;O模型。</p>
 </blockquote>
-<h3 id="4-3-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）"><a href="#4-3-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）" class="headerlink" title="4.3.2 NIO2（New I/O APIs 2、异步非阻塞、AIO）"></a>4.3.2 NIO2（New I/O APIs 2、异步非阻塞、AIO）</h3><p>NIO2和前者相比的最大不同就在于引入了异步通道来实现异步IO操作，因此也叫AIO（Asynchronous I/O）。NIO.2 的异步通道 APIs 提供方便的、平台独立的执行异步操作的标准方法。这使得应用程序开发人员能够以更清晰的方式来编写程序，而不必定义自己的 Java 线程，此外，还可通过使用底层 OS 所支持的异步功能来提高性能。如同其他 Java API 一样，API 可利用的 OS 自有异步功能的数量取决于其对该平台的支持程度。</p>
-<p>异步通道提供支持连接、读取、以及写入之类非锁定操作的连接，并提供对已启动操作的控制机制。Java 7 中用于 Java Platform（NIO.2）的 More New I/O APIs，通过在 <code>java.nio.channels</code> 包中增加四个异步通道类，从而增强了 Java 1.4 中的 New I/O APIs（NIO），这些类在风格上与 NIO 通道 API 很相似。他们共享相同的方法与参数结构体，并且大多数对于 NIO 通道类可用的参数，对于新的异步版本仍然可用。主要区别在于新通道可使一些操作异步执行。</p>
+<h3 id="4-3-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）"><a href="#4-3-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）" class="headerlink" title="4.3.2 NIO2（New I&#x2F;O APIs 2、异步非阻塞、AIO）"></a>4.3.2 NIO2（New I&#x2F;O APIs 2、异步非阻塞、AIO）</h3><p>NIO2和前者相比的最大不同就在于引入了异步通道来实现异步IO操作，因此也叫AIO（Asynchronous I&#x2F;O）。NIO.2 的异步通道 APIs 提供方便的、平台独立的执行异步操作的标准方法。这使得应用程序开发人员能够以更清晰的方式来编写程序，而不必定义自己的 Java 线程，此外，还可通过使用底层 OS 所支持的异步功能来提高性能。如同其他 Java API 一样，API 可利用的 OS 自有异步功能的数量取决于其对该平台的支持程度。</p>
+<p>异步通道提供支持连接、读取、以及写入之类非锁定操作的连接，并提供对已启动操作的控制机制。Java 7 中用于 Java Platform（NIO.2）的 More New I&#x2F;O APIs，通过在 <code>java.nio.channels</code> 包中增加四个异步通道类，从而增强了 Java 1.4 中的 New I&#x2F;O APIs（NIO），这些类在风格上与 NIO 通道 API 很相似。他们共享相同的方法与参数结构体，并且大多数对于 NIO 通道类可用的参数，对于新的异步版本仍然可用。主要区别在于新通道可使一些操作异步执行。</p>
 <p>异步通道 API 提供两种对已启动异步操作的监测与控制机制。第一种是通过返回一个 <code>java.util.concurrent.Future</code> 对象来实现，它将会建模一个挂起操作，并可用于查询其状态以及获取结果。第二种是通过传递给操作一个新类的对象，<code>java.nio.channels.CompletionHandler</code>，来完成，它会定义在操作完毕后所执行的处理程序方法。每个异步通道类为每个操作定义 API 副本，这样可采用任一机制。</p>
 <h3 id="4-3-3-APR"><a href="#4-3-3-APR" class="headerlink" title="4.3.3 APR"></a>4.3.3 APR</h3><p><strong>Apache可移植运行时（Apache Portable Runtime，APR）</strong>是Apache HTTP服务器的支持库，最初，APR是作为Apache HTTP服务器的一部分而存在的，后来成为一个单独的项目。其他的应用程序可以使用APR来实现平台无关性（跨平台）。APR提供了一组映射到下层操作系统的API，如果操作系统不支持某个特定的功能，APR将提供一个模拟的实现。这样程序员使用APR编写真正可在不同平台上移植的程序。</p>
 <h3 id="4-3-4-Tomcat配置APR"><a href="#4-3-4-Tomcat配置APR" class="headerlink" title="4.3.4 Tomcat配置APR"></a>4.3.4 Tomcat配置APR</h3><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 手动编译安装最新版本的apr</span><br><span class="hljs-built_in">cd</span> /home<br>wget https://dlcdn.apache.org//apr/apr-1.7.0.tar.gz<br>yum group install <span class="hljs-string">&quot; Development Tools &quot;</span> -y<br>tar -zxvf apr-1.7.0.tar.gz<br>/home/apr-1.7.0<br>./buildconf<br>./configure &amp;&amp; make &amp;&amp; make install<br><br><span class="hljs-comment"># 也可以使用yum来安装apr</span><br>yum install apr apr-devel<br><br><span class="hljs-comment"># 进入tomcat目录下对tomcat-native进行解压</span><br><span class="hljs-built_in">cd</span> /home/tomcat9/bin/<br>tar -zxvf tomcat-native.tar.gz <br><span class="hljs-built_in">cd</span> tomcat-native-1.2.23-src/native/<br><span class="hljs-comment"># 编译安装</span><br>./configure <br>make<br>make install<br></code></pre></div></td></tr></table></figure>
@@ -548,7 +548,7 @@
 <p><img src="https://resource.tinychen.com/20200402101103.png" srcset="/img/loading.gif" lazyload></p>
 <p>安装完成之后我们还需要修改环境变量和配置参数</p>
 <p>这里我们使用的是systemd调用jsvc来启动tomcat，所以我们直接在systemd对应的tomcat的unit文件中的<code>ExecStart</code>中添加一个路径参数<code>-Djava.library.path=/usr/local/apr/lib</code>指向apr库的路径：</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">ExecStart=<span class="hljs-regexp">/home/</span>tomcat9<span class="hljs-regexp">/bin/</span>jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home <span class="hljs-variable">$&#123;JAVA_HOME&#125;</span> \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -classpath <span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span><span class="hljs-regexp">/bin/</span>bootstrap.jar:<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span><span class="hljs-regexp">/bin/</span>tomcat-juli.jar \<br>        -outfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span><span class="hljs-regexp">/logs/</span>catalina.out \<br>        -errfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span><span class="hljs-regexp">/logs/</span>catalina.err \<br>        -Dcatalina.home=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -Dcatalina.base=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Djava.io.tmpdir=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.file=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span><span class="hljs-regexp">/conf/</span>logging.properties \<br>        -Djava.library.path=<span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/apr/</span>lib \<br>        org.apache.catalina.startup.Bootstrap<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros"><span class="hljs-attribute">ExecStart</span>=/home/tomcat9/bin/jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home <span class="hljs-variable">$&#123;JAVA_HOME&#125;</span> \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -classpath <span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/bootstrap.jar:<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/tomcat-juli.jar \<br>        -outfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.out \<br>        -errfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.err \<br>        -Dcatalina.<span class="hljs-attribute">home</span>=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -Dcatalina.<span class="hljs-attribute">base</span>=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Djava.io.<span class="hljs-attribute">tmpdir</span>=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.<span class="hljs-attribute">manager</span>=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.<span class="hljs-attribute">file</span>=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties \<br>        -Djava.library.<span class="hljs-attribute">path</span>=/usr/local/apr/lib \<br>        org.apache.catalina.startup.Bootstrap<br></code></pre></div></td></tr></table></figure>
 
 <p>然后我们在tomcat的home目录下的conf子目录中对server.xml文件进行修改</p>
 <p>把8080端口对应的配置修改成apr：（其他端口配置也类似）</p>
@@ -557,7 +557,7 @@
 <p>重启tomcat服务我们从tomcat的日志中就可以看到协议已经从默认的NIO变成了apr。</p>
 <p><img src="https://resource.tinychen.com/20200402102439.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/20200402102535.png" srcset="/img/loading.gif" lazyload></p>
-<h3 id="4-3-5-三者之间的区别："><a href="#4-3-5-三者之间的区别：" class="headerlink" title="4.3.5 三者之间的区别："></a>4.3.5 三者之间的区别：</h3><p>NIO性能是最差的这是毋庸置疑的，如果是考虑到高并发的情况，显然异步非阻塞I/O模式的NIO2和APR库在性能上更有优势，实际上NIO2的性能表现也和APR不相上下，但是NIO2要求Tomcat的版本要在8.0以上，而APR只需要5.5以上即可，但是APR需要额外配置库环境，相对于内置集成的NIO2来说APR这个操作比较麻烦，两者各有优劣。具体使用哪个还是需要结合实际业务需求和环境进行测试才能决定。</p>
+<h3 id="4-3-5-三者之间的区别："><a href="#4-3-5-三者之间的区别：" class="headerlink" title="4.3.5 三者之间的区别："></a>4.3.5 三者之间的区别：</h3><p>NIO性能是最差的这是毋庸置疑的，如果是考虑到高并发的情况，显然异步非阻塞I&#x2F;O模式的NIO2和APR库在性能上更有优势，实际上NIO2的性能表现也和APR不相上下，但是NIO2要求Tomcat的版本要在8.0以上，而APR只需要5.5以上即可，但是APR需要额外配置库环境，相对于内置集成的NIO2来说APR这个操作比较麻烦，两者各有优劣。具体使用哪个还是需要结合实际业务需求和环境进行测试才能决定。</p>
 
             </div>
             <hr>

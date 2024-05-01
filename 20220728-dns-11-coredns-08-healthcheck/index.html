@@ -80,7 +80,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -256,7 +256,7 @@
 <p>比较特别的是health插件还附带了一个<code>lameduck</code>功能，<code>lameduck</code>的效果就是在coredns进程关闭之前延迟对应的时间。假设我们设置了<code>lameduck 10s</code>，那么coredns在接收到退出进程命令的时候会延迟10s的时间再结束进程。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">health [ADDRESS] &#123;<br>    lameduck DURATION<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
-<p>需要特别注意的是，假设我们在多个配置块中都使用了<code>lameduck</code>功能，那么时间会叠加。举个例子，假设我们在10个配置块中都设置了<code>lameduck 10s</code>，那么coredns在接收到退出进程命令的时候会延迟10*10=100s的时间再结束进程。</p>
+<p>需要特别注意的是，假设我们在多个配置块中都使用了<code>lameduck</code>功能，那么时间会叠加。举个例子，假设我们在10个配置块中都设置了<code>lameduck 10s</code>，那么coredns在接收到退出进程命令的时候会延迟10*10&#x3D;100s的时间再结束进程。</p>
 <p>此外还有一个小问题，在开启health插件之后会导致health插件对应的端口会有较多的<code>TIME_WAIT</code>连接，目前怀疑是插件本身会请求自身端口进行检查导致产生TIME_WAIT连接。</p>
 <figure class="highlight subunit"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs subunit">[root@coredns<span class="hljs-string">-10</span><span class="hljs-string">-31</span><span class="hljs-string">-53</span><span class="hljs-string">-1</span> conf]# netstat -nt | grep 8080 | grep -c TIME_WAIT<br>61<br></code></pre></div></td></tr></table></figure>
 

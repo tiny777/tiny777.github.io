@@ -80,7 +80,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -251,7 +251,7 @@
 <p>Ubunut18.04版本请移步<a href="https://tinychen.com/20190614-ubuntu-update-kernel/">这里</a></p>
 <span id="more"></span>
 
-<h1 id="1、yum升级内核"><a href="#1、yum升级内核" class="headerlink" title="1、yum升级内核"></a>1、yum升级内核</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前内核版本</span><br>uname -r<br><br><span class="hljs-comment"># 更新yum源</span><br>yum update -y<br><br><span class="hljs-comment"># 升级yum源中的最新版内核</span><br>yum install -y kernel<br></code></pre></div></td></tr></table></figure>
+<h1 id="1、yum升级内核"><a href="#1、yum升级内核" class="headerlink" title="1、yum升级内核"></a>1、yum升级内核</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前内核版本</span><br><span class="hljs-built_in">uname</span> -r<br><br><span class="hljs-comment"># 更新yum源</span><br>yum update -y<br><br><span class="hljs-comment"># 升级yum源中的最新版内核</span><br>yum install -y kernel<br></code></pre></div></td></tr></table></figure>
 
 <h1 id="2、升级ELRepo库提供的内核"><a href="#2、升级ELRepo库提供的内核" class="headerlink" title="2、升级ELRepo库提供的内核"></a>2、升级ELRepo库提供的内核</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 导入 ELRepo 仓库的KEY</span><br>rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org<br><span class="hljs-comment"># 使用yum安装 elrepo的仓库包</span><br>yum install https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm<br></code></pre></div></td></tr></table></figure>
 
@@ -267,11 +267,11 @@
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/W4FFAbKnvAXD.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前一共安装了多少个内核</span><br>cat /etc/grub2.cfg | grep menuentry | awk <span class="hljs-string">&#x27;&#123;print $2$4$5$6&#125;&#x27;</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看当前一共安装了多少个内核</span><br><span class="hljs-built_in">cat</span> /etc/grub2.cfg | grep menuentry | awk <span class="hljs-string">&#x27;&#123;print $2$4$5$6&#125;&#x27;</span><br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/lqzAq3euQXmL.png" srcset="/img/loading.gif" lazyload></p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 或者这样，找到网上的一个大佬的正则表达式，比我这种菜鸡强多了</span><br>awk -F\<span class="hljs-string">&#x27; &#x27;</span><span class="hljs-variable">$1</span>==<span class="hljs-string">&quot;menuentry &quot;</span> &#123;<span class="hljs-built_in">print</span> i++ <span class="hljs-string">&quot; : &quot;</span> <span class="hljs-variable">$2</span>&#125;<span class="hljs-string">&#x27; /etc/grub2.cfg</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 或者这样，找到网上的一个大佬的正则表达式，比我这种菜鸡强多了</span><br>awk -F\&#x27; <span class="hljs-string">&#x27;$1==&quot;menuentry &quot; &#123;print i++ &quot; : &quot; $2&#125;&#x27;</span> /etc/grub2.cfg<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190612/Qsz4B1UdaBqe.png" srcset="/img/loading.gif" lazyload></p>

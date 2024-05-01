@@ -80,7 +80,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -207,7 +207,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      7.1k 字
+      7.2k 字
     </span>
   
 
@@ -251,12 +251,12 @@
 <span id="more"></span>
 
 <h1 id="1、用途介绍"><a href="#1、用途介绍" class="headerlink" title="1、用途介绍"></a>1、用途介绍</h1><p>和大多数用户搭建HEDT平台的用途不同（影视剪辑后期制作、游戏直播），这次的HEDT平台并不单纯是用作服务器用途，而是主要用来在Linux下开虚拟机（KVM虚拟化），同时兼顾个人高性能台式机娱乐用途，因此主要的预算是花在CPU、内存、硬盘上面，对于显卡的要求很低，只要能硬解4K蓝光原盘电影即可。接下来是对主要的板U、内存、固态、显卡进行分析。</p>
-<h2 id="1-1-主板-amp-CPU"><a href="#1-1-主板-amp-CPU" class="headerlink" title="1.1 主板&amp;CPU"></a>1.1 主板&amp;CPU</h2><p>首先是板U部分，硬性指标非常简单，需要CPU支持VT-d、VT-x这两项（AMD处理器也有对应的选项），简单来说就是CPU必须要支持硬件虚拟化，同时单核性能并不需要太强，但是核心数要尽可能多，且PCIE通道数量要尽可能多，配套的主板扩展性要尽可能好（PCIE插槽尽可能多），除了显卡之外还需要插入PCIE转NVME的转接卡、无线网卡和万兆有线网卡等设备。</p>
+<h2 id="1-1-主板-CPU"><a href="#1-1-主板-CPU" class="headerlink" title="1.1 主板&amp;CPU"></a>1.1 主板&amp;CPU</h2><p>首先是板U部分，硬性指标非常简单，需要CPU支持VT-d、VT-x这两项（AMD处理器也有对应的选项），简单来说就是CPU必须要支持硬件虚拟化，同时单核性能并不需要太强，但是核心数要尽可能多，且PCIE通道数量要尽可能多，配套的主板扩展性要尽可能好（PCIE插槽尽可能多），除了显卡之外还需要插入PCIE转NVME的转接卡、无线网卡和万兆有线网卡等设备。</p>
 <p>这里首先排除了绝大多数的主流桌面CPU，因为他们的核心数都比较少，即使是9900K和3900X也才分别8C16T和12C24T，AMD这边的话3950X以上勉强够用，再往上的3960和3970当时还没有推出，当然就算是出了我也买不起，二代的线程撕裂者有设计缺陷，内存表现实在令人担忧，因此不作考虑，INTEL这边的话就是挤了好几代牙膏的HEDT的酷睿X平台，9960X或者9980XE算是够用。</p>
 <p>再然后看向服务器平台，由于主要考虑的是二手硬件（全新的买不到也买不起），这里就是英特尔的主场了，因为AMD早年的不给力，x86服务器领域基本就是英特尔一直独秀，某宝上能买到的二手硬件也基本是英特尔的，主要还是大量的双路E5洋垃圾和部分的3647平台的QS、ES处理器（正式版非常贵），AMD这边虽然有少量的霄龙EPYC处理器，但是总的来说选择比较少，而且这方面的评测和教程都很少，个人并不是很想在这方面冒险，万一翻车了要耽误很长一段时间，而且还不好出二手。</p>
 <p>再加上价格和稳定性的因素，AMD的选择就可以说被淘汰掉了，因为毕设需要用到的Linux系统主要还是CentOS7，内核版本是3.x系列，旧版本的Linux内核对AMD的支持并不算很好，综合各方面的因素考虑，AMD在这次的装机中并不算是特别优秀的选择，因此只能淘汰掉。</p>
 <p>而在INTEL这边，高端的intel的HEDT平台不仅本身的CPU很贵，由于不能使用服务器内存，整机的价格预算还会上升很多，到这里就可以得出结论，主要进入备选列表的板U套餐就是二手的双路E5服务器套餐、铂金3647服务器平台这两种选择，这两个平台的CPU都有很多的PCIE通道数，能使用比家用内存条便宜很多的二手服务器内存（REG ECC内存）。</p>
-<h2 id="1-2-内存"><a href="#1-2-内存" class="headerlink" title="1.2 内存"></a>1.2 内存</h2><p>对于内存的要求不算很高，容量至少需要128G，价格尽可能低一些，频率不需要太高（大多数服务器的CPU支持的最高内存频率为2933），时序不需要太低，没有大型游戏的需求，而且大多数服务器的CPU支持四通道内存（线程撕裂者支持四通道），铂金处理器还支持六通道内存（得益于CCX模块化设计，EPYC霄龙处理器还有八通道内存），如果是双路CPU的话，支持的内存通道则翻倍，多通道内存可以有效提升内存的读写性能。此外，ECC内存支持内存纠错，可以有效降低运行时候的蓝屏死机等情况，比较适合我这种24小时不关机的情况。（最重要的还是便宜，淘宝上面的32G 2666MHz的三星REG内存条单条才五百多，2400MHz的镁光/海力士只要四百多）</p>
+<h2 id="1-2-内存"><a href="#1-2-内存" class="headerlink" title="1.2 内存"></a>1.2 内存</h2><p>对于内存的要求不算很高，容量至少需要128G，价格尽可能低一些，频率不需要太高（大多数服务器的CPU支持的最高内存频率为2933），时序不需要太低，没有大型游戏的需求，而且大多数服务器的CPU支持四通道内存（线程撕裂者支持四通道），铂金处理器还支持六通道内存（得益于CCX模块化设计，EPYC霄龙处理器还有八通道内存），如果是双路CPU的话，支持的内存通道则翻倍，多通道内存可以有效提升内存的读写性能。此外，ECC内存支持内存纠错，可以有效降低运行时候的蓝屏死机等情况，比较适合我这种24小时不关机的情况。（最重要的还是便宜，淘宝上面的32G 2666MHz的三星REG内存条单条才五百多，2400MHz的镁光&#x2F;海力士只要四百多）</p>
 <h2 id="1-3-硬盘"><a href="#1-3-硬盘" class="headerlink" title="1.3 硬盘"></a>1.3 硬盘</h2><p>这次的虚拟机硬盘主要还是以虚拟硬盘为主，使用一般的PCIe3.0x4的NVME固态就能满足需求，由于基本都是测试用途，并没有上线使用所产生的大量文件读写存储需求，预计使用NVME固态进行虚拟化，普通的机械硬盘进行备份即可，并没有打算直通固态或者是使用HBA卡或阵列卡等组合。</p>
 <h2 id="1-4-显卡"><a href="#1-4-显卡" class="headerlink" title="1.4 显卡"></a>1.4 显卡</h2><p>考虑到以后可能会进行黑苹果安装，这里还是尽可能地选择了A卡，而且在二手的情况来看，千元以下的价位基本就是580的天下，其他的选择都没啥性价比。而且580足以满足硬解4K蓝光，外接4KHDR显示器等需求，由于不玩大型游戏，不剪辑，不用CUDA，所以就没有考虑N卡。当然最主要的原因还是为后期的黑苹果做好准备。</p>
 <h2 id="1-5-小结"><a href="#1-5-小结" class="headerlink" title="1.5 小结"></a>1.5 小结</h2><p>总的来说，由于预算的限制，选择二手的intel服务器平台是目前对于我来说综合各方面因素比较合适的选择，在128G内存这个选择下，使用服务器内存虽然牺牲了一部分的高频和低延迟特性，但是换来了整体预算的极大程度降低和ECC纠错功能。</p>
@@ -452,7 +452,7 @@
 <h1 id="4、上机测试"><a href="#4、上机测试" class="headerlink" title="4、上机测试"></a>4、上机测试</h1><p>接下来上机测试一下：</p>
 <p><img src="https://resource.tinychen.com/blog/20191222/je47xN5medAK.png" srcset="/img/loading.gif" lazyload></p>
 <p>由于是ES版的处理器，CPU表面并没有标明型号，不过由于同样都是2066阵脚，这里可以使用x299平台点亮，前提是需要把主板升级到最新的BIOS。</p>
-<h2 id="4-1-CPU-Z-amp-GPU-Z"><a href="#4-1-CPU-Z-amp-GPU-Z" class="headerlink" title="4.1 CPU-Z&amp;GPU-Z"></a>4.1 CPU-Z&amp;GPU-Z</h2><p>然后我们使用CPU-Z进行查看，无法识别出具体的型号：</p>
+<h2 id="4-1-CPU-Z-GPU-Z"><a href="#4-1-CPU-Z-GPU-Z" class="headerlink" title="4.1 CPU-Z&amp;GPU-Z"></a>4.1 CPU-Z&amp;GPU-Z</h2><p>然后我们使用CPU-Z进行查看，无法识别出具体的型号：</p>
 <p><img src="https://resource.tinychen.com/blog/20191223/x0fe21vKwNP4.png" srcset="/img/loading.gif" lazyload></p>
 <p>顺便进行跑分测试：</p>
 <p><img src="https://resource.tinychen.com/blog/20191223/GkPDQc5Yf5PM.png" srcset="/img/loading.gif" lazyload></p>
@@ -476,7 +476,7 @@
 <h2 id="4-5-无线"><a href="#4-5-无线" class="headerlink" title="4.5 无线"></a>4.5 无线</h2><p>博通BCM943602CS这块网卡好处是在黑苹果下可以实现免驱，考虑到黑苹果对无线模块的硬件兼容性之差，这就显得格外重要，同样博通的无线网卡在RedHat和Debian系的Linux系统上都有较为友好成熟的闭源驱动支持，对Linux内核的版本要求不高。不过这块网卡在windows下的驱动并不完善，2.4G无线的速率只有216M，无法发挥标称的450M速率，不过好在5G频段能够实现1.3G的无线速率，这比几乎不怎么用到的2.4G来的更加实际一些。而驱动更为完善的94360CD则是要贵上一些，具体选择哪个就见仁见智了。</p>
 <p><img src="https://resource.tinychen.com/blog/20191223/5JLUlYOb7rA6.png" srcset="/img/loading.gif" lazyload></p>
 <p><img src="https://resource.tinychen.com/blog/20191223/fyFrHxKovRrP.png" srcset="/img/loading.gif" lazyload></p>
-<p>接着我们使用Windows在局域网内通过华硕AC68U(1900P)进行速度测试，2.4G的表现情况十分差劲，不仅速度很慢，只能在10MB/s左右徘徊，而且这时候的蓝牙和2.4G鼠标都受到了严重的干扰，而在5G频段下则好很多，基本在90MB/s左右徘徊，偶尔能到100MB/s左右，相比2T2R的Intel AX200要好上很多（使用WiFi5的华硕AC68U路由器只有50~60MB/s的速度），当然943602CS的价格也是比AX200要贵上很多。</p>
+<p>接着我们使用Windows在局域网内通过华硕AC68U(1900P)进行速度测试，2.4G的表现情况十分差劲，不仅速度很慢，只能在10MB&#x2F;s左右徘徊，而且这时候的蓝牙和2.4G鼠标都受到了严重的干扰，而在5G频段下则好很多，基本在90MB&#x2F;s左右徘徊，偶尔能到100MB&#x2F;s左右，相比2T2R的Intel AX200要好上很多（使用WiFi5的华硕AC68U路由器只有50~60MB&#x2F;s的速度），当然943602CS的价格也是比AX200要贵上很多。</p>
 <p>不过这里的无线主要还是在没有有线网络的场景下的补充，以及为台式机扩展蓝牙功能用来连接各种蓝牙键鼠耳机等设备，真正需要大量的文件数据传输工作还是需要使用稳定的有线千兆网络或者是万兆网络。</p>
 <h2 id="4-6-鲁大师"><a href="#4-6-鲁大师" class="headerlink" title="4.6 鲁大师"></a>4.6 鲁大师</h2><p>最后当然少不了鲁大师了，这里顺便吐槽一下升级了新版的windows1909和AMD的2020年新款鸡血驱动之后，显卡的跑分反而更低了一些，也不知道是系统的问题还是驱动的问题，希望能尽快地优化好吧。</p>
 <p><img src="https://resource.tinychen.com/blog/20191223/AuNAQry2vEQD.jpg" srcset="/img/loading.gif" lazyload></p>

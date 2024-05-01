@@ -79,7 +79,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -206,7 +206,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      2.5k 字
+      2.6k 字
     </span>
   
 
@@ -260,7 +260,7 @@
 <h1 id="2、结构"><a href="#2、结构" class="headerlink" title="2、结构"></a>2、结构</h1><p>MBR分区表占用一个扇区，位于硬盘的0磁头、0柱面、1扇区。</p>
 <p>这里需要引用一下度娘百科对于磁头柱面扇区这三个概念的解释。</p>
 <p>**磁头(Heads)**：每张磁片的正反两面各有一个磁头，一个磁头对应一张磁片的一个面。因此，用第几磁 头就可以表示数据在哪个磁面。</p>
-<p>**柱面(Cylinder)**：所有磁片中半径相同的同心磁道构成“柱面”，意思是这一系列的磁道垂直叠在一起，就形成一个柱面的形状。简单地理解，柱面数=磁道数。</p>
+<p>**柱面(Cylinder)**：所有磁片中半径相同的同心磁道构成“柱面”，意思是这一系列的磁道垂直叠在一起，就形成一个柱面的形状。简单地理解，柱面数&#x3D;磁道数。</p>
 <p>**扇区(Sector)**：将磁道划分为若干个小的区段，就是扇区。虽然很小，但实际是一个扇子的形状，故称为扇区。</p>
 <p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2802%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为磁头、柱面、扇区示意图</p>
@@ -279,7 +279,7 @@
 <p><strong>而DPT的作用其实非常简单，就是管理磁盘的分区信息。如果DPT被破坏，那么系统将无法识别该磁盘上的所有分区，并且有可能会提示需要格式化磁盘。</strong></p>
 <p>一般小白遇到这种情况会比较无奈，只能格式化，对磁盘中宝贵的数据说拜拜，<strong>但是，其实只要修复DPT，就可以读取分区，找回数据，实际上，硬盘的数据一直都在那里。那怕是对硬盘进行一般的格式化操作，也只是将DPT中对应的分区的数据清空，并没有影响到原来的在其他扇区的数据，此时只要不进行数据的读写操作（防止覆盖原有数据），还是有可能找回丢失的数据的。</strong></p>
 <h1 id="4、DPT"><a href="#4、DPT" class="headerlink" title="4、DPT"></a>4、DPT</h1><p>DPT其实有挺多可以讲的地方，这里拿一个分区（16Byte）为例，<strong>讲解一下MBR分区最大只能识别2TB硬盘的原因。</strong></p>
-<h1 id="5、分区项表内容及含义"><a href="#5、分区项表内容及含义" class="headerlink" title="5、分区项表内容及含义"></a>5、分区项表内容及含义</h1><p><strong>注：1 Byte=8 bit</strong></p>
+<h1 id="5、分区项表内容及含义"><a href="#5、分区项表内容及含义" class="headerlink" title="5、分区项表内容及含义"></a>5、分区项表内容及含义</h1><p><strong>注：1 Byte&#x3D;8 bit</strong></p>
 <p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2805%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为MBR中的DPT的分区项表的内容及含义</p>
 <p>再对其作进一步的解释：</p>
@@ -288,12 +288,12 @@
 <p>第2、3、4、6、7、8字节：记录了这个分区的起始和结束磁头、扇区、柱面，即可确定该分区在硬盘中的位置以及该分区的容量；</p>
 <p><strong>最后的8个字节就是MBR分区为何最大只能识别2TB容量的原因了。</strong></p>
 <p><strong>前提知识背景：</strong></p>
-<p>①    计算机中采用2进制，bit是最小的大小计量单位；</p>
-<p>②    1 Byte=8 bit；</p>
-<p>③    一个扇区的大小是512Byte；</p>
-<p>④    Byte、KB、MB、GB、TB、PB这六者按照从小到大的顺序排列，且相邻两者间差1024倍（即2^10）；</p>
-<p>⑤    在上面的缩写中，大写的B表示Byte，小写的b表示bit，两者相差8倍；</p>
-<p>由于只有4 Byte来记录本分区的总扇区数，4 Byte=32 bit，在2进制即有2^32种状态，假设全部为1，则最多有2^32个扇区。即</p>
+<p>①	计算机中采用2进制，bit是最小的大小计量单位；</p>
+<p>②	1 Byte&#x3D;8 bit；</p>
+<p>③	一个扇区的大小是512Byte；</p>
+<p>④	Byte、KB、MB、GB、TB、PB这六者按照从小到大的顺序排列，且相邻两者间差1024倍（即2^10）；</p>
+<p>⑤	在上面的缩写中，大写的B表示Byte，小写的b表示bit，两者相差8倍；</p>
+<p>由于只有4 Byte来记录本分区的总扇区数，4 Byte&#x3D;32 bit，在2进制即有2^32种状态，假设全部为1，则最多有2^32个扇区。即</p>
 <p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2806%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>所以MBR分区中单个分区最多只能识别2TB容量，而由于记录已使用的扇区的字节数也是4，所以整个分区最多也只能识别2TB容量。</p>
 <h1 id="6、扩展分区"><a href="#6、扩展分区" class="headerlink" title="6、扩展分区"></a>6、扩展分区</h1><p>前面我们已经提到了当四个主分区无法满足需求的时候，可以使用三个主分区+一个扩展分区的方法，在扩展分区下，理论上可以分出无数个分区（实际还要看操作系统的限制等其他因素）。</p>

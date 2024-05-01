@@ -81,7 +81,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -208,7 +208,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      8.4k 字
+      8.5k 字
     </span>
   
 
@@ -289,7 +289,8 @@
 <ul>
 <li><p><code>cluster.local</code>变成了<code>cali-cluster.tclocal</code></p>
 <p>这里我们可以看到coredns的配置中就是配置的<code>cali-cluster.tclocal</code>，也就是说<code>/etc/resolv.conf</code>中的配置其实是和<code>coredns</code>中的配置一样，更准确的说是和该K8S集群初始化时配置的集群名一样</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 再查看K8S集群中的coredns的configmap	</span><br>[root@tiny-calico-master-88-1 tiny-calico]<span class="hljs-comment"># kubectl get configmaps -n kube-system coredns -oyaml</span><br>apiVersion: v1<br>data:<br>  Corefile: |<br>    .:53 &#123;<br>        errors<br>        health &#123;<br>           lameduck 5s<br>        &#125;<br>        ready<br>        kubernetes cali-cluster.tclocal in-addr.arpa ip6.arpa &#123;<br>           pods insecure<br>           fallthrough in-addr.arpa ip6.arpa<br>           ttl 30<br>        &#125;<br>        prometheus :9153<br>        forward . 10.31.100.100 &#123;<br>           max_concurrent 1000<br>        &#125;<br>        cache 30<br>        loop<br>        reload<br>        loadbalance<br>    &#125;<br>kind: ConfigMap<br>metadata:<br>  creationTimestamp: <span class="hljs-string">&quot;2022-05-06T05:19:08Z&quot;</span><br>  name: coredns<br>  namespace: kube-system<br>  resourceVersion: <span class="hljs-string">&quot;3986029&quot;</span><br>  uid: 54f5f803-a5ab-4c77-b149-f02229bcad0a<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 再查看K8S集群中的coredns的configmap	</span><br>[root@tiny-calico-master-88-1 tiny-calico]<span class="hljs-comment"># kubectl get configmaps -n kube-system coredns -oyaml</span><br>apiVersion: v1<br>data:<br>  Corefile: |<br>    .:53 &#123;<br>        errors<br>        health &#123;<br>           lameduck 5s<br>        &#125;<br>        ready<br>        kubernetes cali-cluster.tclocal in-addr.arpa ip6.arpa &#123;<br>           pods insecure<br>           fallthrough in-addr.arpa ip6.arpa<br>           ttl 30<br>        &#125;<br>        prometheus :9153<br>        forward . 10.31.100.100 &#123;<br>           max_concurrent 1000<br>        &#125;<br>        cache 30<br>        loop<br>        reload<br>        loadbalance<br>    &#125;<br>kind: ConfigMap<br>metadata:<br>  creationTimestamp: <span class="hljs-string">&quot;2022-05-06T05:19:08Z&quot;</span><br>  name: coredns<br>  namespace: kube-system<br>  resourceVersion: <span class="hljs-string">&quot;3986029&quot;</span><br>  uid: 54f5f803-a5ab-4c77-b149-f02229bcad0a<br></code></pre></div></td></tr></table></figure>
+</li>
 <li><p><code>search</code>新增了一个<code>k8s.tcinternal</code></p>
 <p>实际上我们再查看K8S的宿主机节点的DNS配置规则时会发现这个<code>k8s.tcinternal</code>是从宿主机上面继承而来的</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 最后查看宿主机节点上面的DNS解析配置</span><br>[root@tiny-calico-master-88-1 tiny-calico]<span class="hljs-comment"># cat /etc/resolv.conf</span><br><span class="hljs-comment"># Generated by NetworkManager</span><br>search k8s.tcinternal<br>nameserver 10.31.254.253<br></code></pre></div></td></tr></table></figure></li>
@@ -319,7 +320,7 @@
 
 <ul>
 <li><p><code>endpoint</code></p>
-<p>用来指定k8s集群的apiserver地址，如<a href="https://10.31.88.1:6443，当然也可以是域名等其他形式，如果不配置，那么默认情况下会使用对应的`service">https://10.31.88.1:6443，当然也可以是域名等其他形式，如果不配置，那么默认情况下会使用对应的`service</a> account`去连接<strong>当前k8s集群内</strong>的apiserver，如果不是在k8s集群中部署，那么就会连接失败。</p>
+<p>用来指定k8s集群的apiserver地址，如<a href="https://10.31.88.1:6443，当然也可以是域名等其他形式，如果不配置，那么默认情况下会使用对应的`service">https://10.31.88.1:6443，当然也可以是域名等其他形式，如果不配置，那么默认情况下会使用对应的`service</a> account&#96;去连接<strong>当前k8s集群内</strong>的apiserver，如果不是在k8s集群中部署，那么就会连接失败。</p>
 </li>
 <li><p><code>tls</code> </p>
 <p><code>CERT KEY CACERT</code>是远程 k8s 连接的 TLS 证书、密钥和 CA 证书文件名。如果前面的<code>endpoint</code>没有配置，那么这个配置项会被忽略。</p>
@@ -341,7 +342,7 @@
 <blockquote>
 <p>注意这里的<code>labels</code>匹配的是<code>service</code>中的<code>labels</code>，而前面的<code>labels</code>匹配的是<code>namespace</code>中的<code>labels</code>。这两个<code>labels</code>的配置写法可以和使用<code>kubectl命令</code>中的<code>-l</code>参数完全一致。</p>
 <p>如果要使用多个labels匹配规则，注意不要使用空格，而是对应的表达式进行匹配：</p>
-<p>  -l, –selector=’’: Selector (label query) to filter on, supports ‘=’, ‘==’, and ‘!=’.(e.g. -l key1=value1,key2=value2)</p>
+<p>  -l, –selector&#x3D;’’: Selector (label query) to filter on, supports ‘&#x3D;’, ‘&#x3D;&#x3D;’, and ‘!&#x3D;’.(e.g. -l key1&#x3D;value1,key2&#x3D;value2)</p>
 </blockquote>
 <ul>
 <li><p><code>pods</code> </p>

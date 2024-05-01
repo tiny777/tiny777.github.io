@@ -81,7 +81,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -208,7 +208,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      6.3k 字
+      6.5k 字
     </span>
   
 
@@ -254,10 +254,10 @@
 <h1 id="1、编译安装openssl"><a href="#1、编译安装openssl" class="headerlink" title="1、编译安装openssl"></a>1、编译安装openssl</h1><p>考虑到Linux系统中有许多组件都需要使用openssl库，而现在默认使用的openssl库绝大多数都没到达能够支持TLS1.3的openssl1.1.1版本以上，因此个人建议不要直接修改系统已有的默认openssl库而是另外使用一个新目录来编译安装新版本的openssl。</p>
 <p>具体的支持信息可以查看<a target="_blank" rel="noopener" href="https://wiki.openssl.org/index.php/TLS1.3">openssl官网的TLSv1.3部分</a>。</p>
 <p>解压下载的稳定版openssl1.1.1g进行编译安装，注意使用<code>--prefix=</code>指定安装目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 下载</span><br>wget https://www.openssl.org/<span class="hljs-built_in">source</span>/openssl-1.1.1g.tar.gz<br><span class="hljs-comment"># 解压</span><br>tar -zxvf openssl-1.1.1g.tar.gz<br><span class="hljs-comment"># 配置、编译</span><br>./config  --prefix=/home/openssl<br>make<br><span class="hljs-comment"># 检查是否出错</span><br>make <span class="hljs-built_in">test</span><br><span class="hljs-comment"># 安装</span><br>make install<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 下载</span><br>wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz<br><span class="hljs-comment"># 解压</span><br>tar -zxvf openssl-1.1.1g.tar.gz<br><span class="hljs-comment"># 配置、编译</span><br>./config  --prefix=/home/openssl<br>make<br><span class="hljs-comment"># 检查是否出错</span><br>make <span class="hljs-built_in">test</span><br><span class="hljs-comment"># 安装</span><br>make install<br></code></pre></div></td></tr></table></figure>
 
 <p>安装完成后检查链接库是否正常，将缺少的文件直接软链接到系统的<code>/usr/lib64</code>目录下</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ln -s /home/openssl/lib/libssl.so.1.1 /usr/lib64/libssl.so.1.1<br>ln -s /home/openssl/lib/libcrypto.so.1.1 /usr/lib64/libcrypto.so.1.1<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">ln</span> -s /home/openssl/lib/libssl.so.1.1 /usr/lib64/libssl.so.1.1<br><span class="hljs-built_in">ln</span> -s /home/openssl/lib/libcrypto.so.1.1 /usr/lib64/libcrypto.so.1.1<br></code></pre></div></td></tr></table></figure>
 
 <p>最后检查系统使用的openssl的版本是否为新版以及系统的库指向是否正确</p>
 <p><img src="https://resource.tinychen.com/image-20200526134022033.png" srcset="/img/loading.gif" lazyload></p>
@@ -288,15 +288,15 @@
 <h2 id="2-3-nginx配置修改"><a href="#2-3-nginx配置修改" class="headerlink" title="2.3 nginx配置修改"></a>2.3 nginx配置修改</h2><p>安装完成之后将原来的配置文件和html文件全部迁移到新的nginx目录下并进行相应的修改就可以正常的启用nginx了。如果此前的nginx是直接使用yum安装并且使用systemd进行守护进程的控制，我们可以将对应的systemd unit文件中的目录进行修改，一般来说只需要修改相关路径的参数即可：</p>
 <p><img src="https://resource.tinychen.com/image-20200520095720093.png" srcset="/img/loading.gif" lazyload></p>
 <p>首先我们停止服务，然后修改文件，接着重启服务即可：</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 停止nginx</span><br>systemctl stop nginx<br><span class="hljs-comment"># 修改配置文件</span><br>vim /usr/lib/systemd/system/nginx.service<br><br>[Unit]<br>Description=nginx - high performance web server<br>Documentation=http://nginx.org/en/docs/<br>After=network-online.target remote-fs.target nss-lookup.target<br>Wants=network-online.target<br><br>[Service]<br>Type=forking<br>PIDFile=/home/nginx/nginx.pid<br>ExecStart=/home/nginx/sbin/nginx -c /home/nginx/nginx.conf<br>ExecReload=/bin/<span class="hljs-built_in">kill</span> -s HUP <span class="hljs-variable">$MAINPID</span><br>ExecStop=/bin/<span class="hljs-built_in">kill</span> -s TERM <span class="hljs-variable">$MAINPID</span><br><br>[Install]<br>WantedBy=multi-user.target<br><br><span class="hljs-comment"># 重启daemon进程</span><br>systemctl daemon-reload<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 停止nginx</span><br>systemctl stop nginx<br><span class="hljs-comment"># 修改配置文件</span><br>vim /usr/lib/systemd/system/nginx.service<br><br>[Unit]<br>Description=nginx - high performance web server<br>Documentation=http://nginx.org/en/docs/<br>After=network-online.target remote-fs.target nss-lookup.target<br>Wants=network-online.target<br><br>[Service]<br>Type=forking<br>PIDFile=/home/nginx/nginx.pid<br>ExecStart=/home/nginx/sbin/nginx -c /home/nginx/nginx.conf<br>ExecReload=/bin/kill -s HUP <span class="hljs-variable">$MAINPID</span><br>ExecStop=/bin/kill -s TERM <span class="hljs-variable">$MAINPID</span><br><br>[Install]<br>WantedBy=multi-user.target<br><br><span class="hljs-comment"># 重启daemon进程</span><br>systemctl daemon-reload<br></code></pre></div></td></tr></table></figure>
 
 <p>如果还想使用全局命令nginx的话，可以先把原来的yum安装的移除再将编译安装的新版本指向系统目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment">#使用which nginx查看nginx的指向</span><br>$  <span class="hljs-built_in">which</span> nginx<br>/usr/sbin/nginx<br>$  mv /usr/sbin/nginx /usr/sbin/nginx.bak<br>$  ln -s /home/nginx/sbin/nginx /usr/sbin/nginx<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment">#使用which nginx查看nginx的指向</span><br>$  <span class="hljs-built_in">which</span> nginx<br>/usr/sbin/nginx<br>$  <span class="hljs-built_in">mv</span> /usr/sbin/nginx /usr/sbin/nginx.bak<br>$  <span class="hljs-built_in">ln</span> -s /home/nginx/sbin/nginx /usr/sbin/nginx<br></code></pre></div></td></tr></table></figure>
 
 <p>最后我们查看nginx版本信息：</p>
 <p><img src="https://resource.tinychen.com/image-20200526135856527.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、配置http2和tls1-3"><a href="#3、配置http2和tls1-3" class="headerlink" title="3、配置http2和tls1.3"></a>3、配置http2和tls1.3</h1><h2 id="3-1-nginx配置"><a href="#3-1-nginx配置" class="headerlink" title="3.1 nginx配置"></a>3.1 nginx配置</h2><p>nginx中开启http2和tls1.3十分简单，这里配置如下：</p>
-<figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql"><span class="hljs-keyword">server</span>&#123;<br>    <span class="hljs-keyword">listen</span> <span class="hljs-number">80</span>;<br>    server_name tinychen.com www.tinychen.com;<br><br>    <span class="hljs-keyword">if</span> ($server_port = <span class="hljs-number">80</span>)&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">301</span> https://$host$<span class="pgsql">request_uri;</span><br><span class="pgsql">    &#125;</span><br><span class="pgsql">&#125;</span><br><span class="pgsql"></span><br><span class="pgsql"><span class="hljs-keyword">server</span>&#123;</span><br><span class="pgsql">    <span class="hljs-keyword">listen</span> <span class="hljs-number">443</span> ssl http2 default_server;</span><br><span class="pgsql">    server_name tinychen.com www.tinychen.com;</span><br><span class="pgsql"></span><br><span class="pgsql">    add_header <span class="hljs-keyword">Strict</span>-Transport-<span class="hljs-keyword">Security</span> &quot;max-age=63072000; includeSubDomains; preload&quot;;</span><br><span class="pgsql"></span><br><span class="pgsql">    ssl_ciphers TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES<span class="hljs-number">-256</span>-GCM-SHA384:TLS13-AES<span class="hljs-number">-128</span>-GCM-SHA256:EECDH+CHACHA20:EECDH+AESGCM:EECDH+AES;</span><br><span class="pgsql">    #ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256;</span><br><span class="pgsql">    ssl_protocols TLSv1<span class="hljs-number">.2</span> TLSv1<span class="hljs-number">.3</span>;</span><br><span class="pgsql">    ssl_stapling <span class="hljs-keyword">on</span>;</span><br><span class="pgsql">    ssl_stapling_verify <span class="hljs-keyword">on</span>;</span><br><span class="pgsql">    ssl_trusted_certificate certs/tinychen.com.pem;</span><br><span class="pgsql">    ssl_prefer_server_ciphers <span class="hljs-keyword">on</span>;</span><br><span class="pgsql">    ssl_certificate certs/tinychen.com.pem;</span><br><span class="pgsql">    ssl_certificate_key certs/tinychen.com.key;</span><br><span class="pgsql">    ssl_session_cache shared:SSL:<span class="hljs-number">1</span>m;</span><br><span class="pgsql">    ssl_verify_depth <span class="hljs-number">10</span>;</span><br><span class="pgsql">    ssl_session_timeout <span class="hljs-number">30</span>m;</span><br><span class="pgsql"></span><br><span class="pgsql">    <span class="hljs-keyword">location</span> / &#123;</span><br><span class="pgsql">        root html/;</span><br><span class="pgsql">        <span class="hljs-keyword">index</span> <span class="hljs-keyword">index</span>.html <span class="hljs-keyword">index</span>.htm;</span><br><span class="pgsql">    &#125;</span><br><span class="pgsql"></span><br><span class="pgsql">&#125;</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql"><span class="hljs-keyword">server</span>&#123;<br>    <span class="hljs-keyword">listen</span> <span class="hljs-number">80</span>;<br>    server_name tinychen.com www.tinychen.com;<br><br>    <span class="hljs-keyword">if</span> ($server_port = <span class="hljs-number">80</span>)&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">301</span> https://$host$<span class="language-ruby">request_uri;</span><br><span class="language-ruby">    &#125;</span><br><span class="language-ruby">&#125;</span><br><span class="language-ruby"></span><br><span class="language-ruby">server&#123;</span><br><span class="language-ruby">    listen <span class="hljs-number">443</span> ssl http2 default_server;</span><br><span class="language-ruby">    server_name tinychen.com www.tinychen.com;</span><br><span class="language-ruby"></span><br><span class="language-ruby">    add_header <span class="hljs-title class_">Strict</span>-<span class="hljs-title class_">Transport</span>-<span class="hljs-title class_">Security</span> <span class="hljs-string">&quot;max-age=63072000; includeSubDomains; preload&quot;</span>;</span><br><span class="language-ruby"></span><br><span class="language-ruby">    ssl_ciphers <span class="hljs-variable constant_">TLS13</span>-<span class="hljs-variable constant_">CHACHA20</span>-<span class="hljs-variable constant_">POLY1305</span>-<span class="hljs-variable constant_">SHA256</span><span class="hljs-symbol">:TLS13-AES-</span><span class="hljs-number">256</span>-<span class="hljs-variable constant_">GCM</span>-<span class="hljs-variable constant_">SHA384</span><span class="hljs-symbol">:TLS13-AES-</span><span class="hljs-number">128</span>-<span class="hljs-variable constant_">GCM</span>-<span class="hljs-variable constant_">SHA256</span><span class="hljs-symbol">:EECDH+CHACHA20</span><span class="hljs-symbol">:EECDH+AESGCM</span><span class="hljs-symbol">:EECDH+AES</span>;</span><br><span class="language-ruby">    <span class="hljs-comment">#ssl_ciphers TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:TLS_AES_128_CCM_8_SHA256:TLS_AES_128_CCM_SHA256;</span></span><br><span class="language-ruby">    ssl_protocols <span class="hljs-title class_">TLSv1</span>.<span class="hljs-number">2</span> <span class="hljs-title class_">TLSv1</span>.<span class="hljs-number">3</span>;</span><br><span class="language-ruby">    ssl_stapling on;</span><br><span class="language-ruby">    ssl_stapling_verify on;</span><br><span class="language-ruby">    ssl_trusted_certificate certs/tinychen.com.pem;</span><br><span class="language-ruby">    ssl_prefer_server_ciphers on;</span><br><span class="language-ruby">    ssl_certificate certs/tinychen.com.pem;</span><br><span class="language-ruby">    ssl_certificate_key certs/tinychen.com.key;</span><br><span class="language-ruby">    ssl_session_cache <span class="hljs-symbol">shared:</span><span class="hljs-variable constant_">SSL</span><span class="hljs-symbol">:</span>1m;</span><br><span class="language-ruby">    ssl_verify_depth <span class="hljs-number">10</span>;</span><br><span class="language-ruby">    ssl_session_timeout 30m;</span><br><span class="language-ruby"></span><br><span class="language-ruby">    location / &#123;</span><br><span class="language-ruby">        root html/;</span><br><span class="language-ruby">        index index.html index.htm;</span><br><span class="language-ruby">    &#125;</span><br><span class="language-ruby"></span><br><span class="language-ruby">&#125;</span><br></code></pre></div></td></tr></table></figure>
 
 <ul>
 <li>由于http2默认需要使用加密，因此直接在nginx对应的ssl监听端口上加上<code>http2</code>字段即可</li>
@@ -327,37 +327,37 @@
 </thead>
 <tbody><tr>
 <td align="center">谷歌</td>
-<td align="center">google.com/</td>
-<td align="center">H2+quic/46</td>
+<td align="center">google.com&#x2F;</td>
+<td align="center">H2+quic&#x2F;46</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">苹果</td>
-<td align="center">apple.com.cn/</td>
+<td align="center">apple.com.cn&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">GitHub</td>
-<td align="center">github.com/</td>
+<td align="center">github.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">维基百科</td>
-<td align="center">en.wikipedia.org/</td>
+<td align="center">en.wikipedia.org&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">k8s</td>
-<td align="center">kubernetes.io/</td>
+<td align="center">kubernetes.io&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">nginx商业版</td>
-<td align="center">nginx.com/</td>
+<td align="center">nginx.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.3</td>
 </tr>
@@ -369,151 +369,151 @@
 </tr>
 <tr>
 <td align="center">163首页</td>
-<td align="center">163.com/</td>
+<td align="center">163.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">ssllab</td>
-<td align="center">ssllabs.com/index.html</td>
+<td align="center">ssllabs.com&#x2F;index.html</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.3</td>
 </tr>
 <tr>
 <td align="center">微软</td>
-<td align="center">microsoft.com/zh-cn/</td>
+<td align="center">microsoft.com&#x2F;zh-cn&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">docker</td>
-<td align="center">docker.com/</td>
+<td align="center">docker.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">微信</td>
-<td align="center">weixin.qq.com/</td>
+<td align="center">weixin.qq.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">严选</td>
-<td align="center">you.163.com/</td>
+<td align="center">you.163.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">淘宝</td>
-<td align="center">taobao.com/</td>
+<td align="center">taobao.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">天猫</td>
-<td align="center">tmall.com/</td>
+<td align="center">tmall.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">阿里巴巴</td>
-<td align="center">alibaba.com/</td>
+<td align="center">alibaba.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">csdn</td>
-<td align="center">csdn.net/</td>
+<td align="center">csdn.net&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">腾讯云</td>
-<td align="center">cloud.tencent.com/</td>
+<td align="center">cloud.tencent.com&#x2F;</td>
 <td align="center">H2</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">亚马逊</td>
-<td align="center">amazon.com/</td>
+<td align="center">amazon.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">QQ</td>
-<td align="center">qq.com/</td>
+<td align="center">qq.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">B站</td>
-<td align="center">bilibili.com/</td>
+<td align="center">bilibili.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">百度</td>
-<td align="center">baidu.com/</td>
+<td align="center">baidu.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">今日头条</td>
-<td align="center">toutiao.com/</td>
+<td align="center">toutiao.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">小米</td>
-<td align="center">mi.com/</td>
+<td align="center">mi.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">拼多多</td>
-<td align="center">pinduoduo.com/</td>
+<td align="center">pinduoduo.com&#x2F;</td>
 <td align="center">H2+HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">美团</td>
-<td align="center">meituan.com/</td>
+<td align="center">meituan.com&#x2F;</td>
 <td align="center">HTTP1.1+H2(极少)</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">网易企业邮</td>
-<td align="center">qiye.163.com/</td>
+<td align="center">qiye.163.com&#x2F;</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">126邮箱</td>
-<td align="center">126.com/</td>
+<td align="center">126.com&#x2F;</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">myssl</td>
-<td align="center">myssl.com/</td>
+<td align="center">myssl.com&#x2F;</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">openssl</td>
-<td align="center">openssl.org/</td>
+<td align="center">openssl.org&#x2F;</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">nginx开源版</td>
-<td align="center">nginx.org/</td>
+<td align="center">nginx.org&#x2F;</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>
 <tr>
 <td align="center">华为</td>
-<td align="center">huawei.com/cn/</td>
+<td align="center">huawei.com&#x2F;cn&#x2F;</td>
 <td align="center">HTTP1.1</td>
 <td align="center">TLS1.2</td>
 </tr>

@@ -88,7 +88,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -267,7 +267,7 @@
 <li><code>etcd</code>用于 Kubernetes 的后端存储。etcd 负责保存Kubernetes Cluster的配置信息和各种资源的状态信息，始终为 Kubernetes 集群的 etcd 数据提供备份计划。当数据发生变化时，etcd 会快速地通知Kubernetes相关组件。</li>
 <li><code>kube-scheduler</code>主要的工作就是调度新创建的<code>Pod</code>，当集群中出现了新的Pod还没有确定分配到哪一个Node节点的时候，<code>kube-scheduler</code>会根据各个节点的负载，以及应用对高可用、性能、数据亲和性的需求等各个方面进行分析并将其分配到最合适的节点上。</li>
 <li><code>kube-controller-manager</code>运行控制器，它们是处理集群中常规任务的后台线程。逻辑上，每个控制器是一个单独的进程，但为了降低复杂性，它们都被编译成独立的可执行文件，并在单个进程中运行。这些控制器包括：节点控制器(<code>Node Controller</code>)、副本控制器(<code>Replication Controller</code>)、端点控制器(<code>Endpoints Controller</code>)、服务帐户和令牌控制器(<code>Service Account &amp; Token Controllers</code>)等</li>
-<li><code>kube-proxy</code>是集群中每个节点上运行的网络代理， kube-proxy通过维护主机上的网络规则并执行连接转发，实现了Kubernetes服务抽象。service在逻辑上代表了后端的多个Pod，外界通过service访问Pod。service接收到的请求就是通过kube-proxy转发到Pod上的，kube-proxy服务负责将访问service的TCP/UDP数据流转发到后端的容器。<strong>如果有多个副本，kube-proxy会实现负载均衡。</strong></li>
+<li><code>kube-proxy</code>是集群中每个节点上运行的网络代理， kube-proxy通过维护主机上的网络规则并执行连接转发，实现了Kubernetes服务抽象。service在逻辑上代表了后端的多个Pod，外界通过service访问Pod。service接收到的请求就是通过kube-proxy转发到Pod上的，kube-proxy服务负责将访问service的TCP&#x2F;UDP数据流转发到后端的容器。<strong>如果有多个副本，kube-proxy会实现负载均衡。</strong></li>
 <li>K8S的<a target="_blank" rel="noopener" href="https://landscape.cncf.io/card-mode?category=runtime&grouping=category&zoom=150">三大插件</a>分别管控<strong>运行时</strong>、<strong>网络</strong>和<strong>存储</strong>，即<code>Container Runtime Interface (CRI)</code>、<code>Container Network Interface (CNI)</code>和<code>Container-Storage-Interface (CSI)</code>。注意CRI和CNI是每个K8S集群都必须要部署的基础组件，而CSI则不一定，一般来说只有在我们需要运行有状态服务的时候才需要用到CSI。</li>
 </ul>
 <h2 id="1-2-CNI基础"><a href="#1-2-CNI基础" class="headerlink" title="1.2 CNI基础"></a>1.2 CNI基础</h2><p>K8S本身不实现集群内的网络模型，而是通过将其抽象出来提供了CNI接口给第三方实现，这样一来节省了开发资源可以集中精力到K8S本身，二来可以利用开源社区的力量打造一整个丰富的生态，CNI的一些实现细节和要求我们都可以在<a target="_blank" rel="noopener" href="https://github.com/containernetworking/cni/blob/main/SPEC.md">github</a>上面找到，我们这里暂不深入解析。</p>
@@ -289,7 +289,7 @@
 <li>轻微的性能影响。封装数据包的过程占用少量 CPU，数据包中用于编码封装（VXLAN 或 IP-in-IP 标头）所需的额外字节减少了可以发送的内部数据包的最大大小，进而可以意味着需要为相同数量的总数据发送更多数据包。</li>
 <li>Pod IP 地址不可在集群外路由。</li>
 </ul>
-<h2 id="1-4-边界网关协议（BGP）"><a href="#1-4-边界网关协议（BGP）" class="headerlink" title="1.4 边界网关协议（BGP）"></a>1.4 边界网关协议（BGP）</h2><p>BGP（Border Gateway Protocol/边界网关协议）是一种基于标准的网络协议，用于在网络中共享路由。它是互联网的基本组成部分之一，具有出色的扩展特性。在K8S中，BGP是出场率很高的一个路由协议，有很多相关的CNI或者是LoadBalancer都会使用BGP协议来实现诸如路由可达或者是ECMP等特性。</p>
+<h2 id="1-4-边界网关协议（BGP）"><a href="#1-4-边界网关协议（BGP）" class="headerlink" title="1.4 边界网关协议（BGP）"></a>1.4 边界网关协议（BGP）</h2><p>BGP（Border Gateway Protocol&#x2F;边界网关协议）是一种基于标准的网络协议，用于在网络中共享路由。它是互联网的基本组成部分之一，具有出色的扩展特性。在K8S中，BGP是出场率很高的一个路由协议，有很多相关的CNI或者是LoadBalancer都会使用BGP协议来实现诸如路由可达或者是ECMP等特性。</p>
 <p>目前对BGP协议支持最好、使用最广泛的CNI应该是Calico，另外Cilium也有仍处于beta阶段的BGP模式的支持。</p>
 <h2 id="1-5-可路由性（routability）"><a href="#1-5-可路由性（routability）" class="headerlink" title="1.5 可路由性（routability）"></a>1.5 可路由性（routability）</h2><p><strong>不同的K8S集群网络的一个重要区别就是Pod的IP在K8S集群外的可路由性。</strong></p>
 <blockquote>
@@ -311,7 +311,7 @@
 </ul>
 <h3 id="可路由性的决定因素"><a href="#可路由性的决定因素" class="headerlink" title="可路由性的决定因素"></a>可路由性的决定因素</h3><ul>
 <li>如果集群使用的是overlay网络，一般来说Pod IP无法在集群外部路由</li>
-<li>如果不使用overlay网络，则取决于部署的环境（云厂商/本地部署）、使用的CNI（Calico-BGP、Cilium-BGP等）以及实际网络规划等</li>
+<li>如果不使用overlay网络，则取决于部署的环境（云厂商&#x2F;本地部署）、使用的CNI（Calico-BGP、Cilium-BGP等）以及实际网络规划等</li>
 <li>目前K8S网络的集群外可路由性实现一般都是通过BGP协议</li>
 </ul>
 <h1 id="2、K8S服务暴露"><a href="#2、K8S服务暴露" class="headerlink" title="2、K8S服务暴露"></a>2、K8S服务暴露</h1><p>正常情况下，我们部署在K8S集群中的工作负载是需要对外提供服务的。这里的<strong>“对外”</strong>指的是对该负载以外的所有外部服务器提供服务，而根据这些外部服务器是否位于K8S集群中，我们可以分为K8S集群内部流量和K8S集群外流量。</p>
@@ -324,7 +324,7 @@
 <p>综上所诉，我们可以得出以下结论：</p>
 <ol>
 <li>K8S中的工作负载（Workload）和服务暴露（service）是相互隔离开来的，分别交给不同的<code>api</code>来实现</li>
-<li>每个SVC都会有一个<code>服务名+命名空间+svc+集群名</code>/<code>$service_name.$namespace_name.svc.$cluster_name</code>的域名可以用来访问（如<code>app.namespace.svc.cluster.local</code>）</li>
+<li>每个SVC都会有一个<code>服务名+命名空间+svc+集群名</code>&#x2F;<code>$service_name.$namespace_name.svc.$cluster_name</code>的域名可以用来访问（如<code>app.namespace.svc.cluster.local</code>）</li>
 <li>K8S集群内的服务之间访问主要就是通过这个域名来实现的</li>
 </ol>
 <h2 id="2-2-SVC的种类"><a href="#2-2-SVC的种类" class="headerlink" title="2.2 SVC的种类"></a>2.2 SVC的种类</h2><p>一般来说svc可以分为四类：<code>Headless</code>、<code>ClusterIP</code>、<code>NodePort</code>、<code>LoadBalancer</code>。四者之间的关系并非是完全互斥，具体如下：</p>
@@ -359,7 +359,7 @@
 <p><code>NodePort Service</code>这种方式的<strong>优点是非常简单的就能把服务通过K8S自带的功能暴露到集群外部；缺点也很明显：NodePort本身的端口限制（数量和选择范围都有限）以及请求量大时的kube-proxy组件的性能瓶颈问题。</strong></p>
 <h3 id="LoadBalancer-Service"><a href="#LoadBalancer-Service" class="headerlink" title="LoadBalancer Service"></a>LoadBalancer Service</h3><ul>
 <li>LoadBalancer服务类型是K8S对集群外服务暴露的最高级最优雅的方式，同时也是门槛最高的方式；</li>
-<li>LoadBalancer服务类型需要K8S集群支持一个云原生的LoadBalancer，这部分功能K8S本身没有实现，而是将其交给云厂商/第三方，因此对于云环境的K8S集群可以直接使用云厂商提供的LoadBalancer，当然也有一些开源的云原生LoadBalancer，如MetalLB、OpenELB、PureLB等；</li>
+<li>LoadBalancer服务类型需要K8S集群支持一个云原生的LoadBalancer，这部分功能K8S本身没有实现，而是将其交给云厂商&#x2F;第三方，因此对于云环境的K8S集群可以直接使用云厂商提供的LoadBalancer，当然也有一些开源的云原生LoadBalancer，如MetalLB、OpenELB、PureLB等；</li>
 <li>LoadBalancer服务域名解析的解析结果是一个<code>CLUSTER-IP</code>；</li>
 <li>LoadBalancer服务同时会分配一个<code>EXTERNAL-IP</code>，集群外的机器可以通过这个<code>EXTERNAL-IP</code>来访问服务；</li>
 <li>LoadBalancer服务默认情况下会同时创建NodePort，也就是说一个LoadBalancer类型的服务同时是一个NodePort服务，同时也是一个clusterIP服务；一些云原生LoadBalancer可以通过指定<code>allocateLoadBalancerNodePorts: false</code>来拒绝创建NodePort服务；</li>
@@ -409,7 +409,8 @@
 <ul>
 <li><p><code>cluster.local</code>变成了<code>cali-cluster.tclocal</code></p>
 <p>这里我们可以看到coredns的配置中就是配置的<code>cali-cluster.tclocal</code>，也就是说<code>/etc/resolv.conf</code>中的配置其实是和<code>coredns</code>中的配置一样，更准确的说是和该K8S集群初始化时配置的集群名一样</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 再查看K8S集群中的coredns的configmap	</span><br>[root@tiny-calico-master-88-1 tiny-calico]<span class="hljs-comment"># kubectl get configmaps -n kube-system coredns -oyaml</span><br>apiVersion: v1<br>data:<br>  Corefile: |<br>    .:53 &#123;<br>        errors<br>        health &#123;<br>           lameduck 5s<br>        &#125;<br>        ready<br>        kubernetes cali-cluster.tclocal in-addr.arpa ip6.arpa &#123;<br>           pods insecure<br>           fallthrough in-addr.arpa ip6.arpa<br>           ttl 30<br>        &#125;<br>        prometheus :9153<br>        forward . 10.31.100.100 &#123;<br>           max_concurrent 1000<br>        &#125;<br>        cache 30<br>        loop<br>        reload<br>        loadbalance<br>    &#125;<br>kind: ConfigMap<br>metadata:<br>  creationTimestamp: <span class="hljs-string">&quot;2022-05-06T05:19:08Z&quot;</span><br>  name: coredns<br>  namespace: kube-system<br>  resourceVersion: <span class="hljs-string">&quot;3986029&quot;</span><br>  uid: 54f5f803-a5ab-4c77-b149-f02229bcad0a<br></code></pre></div></td></tr></table></figure></li>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 再查看K8S集群中的coredns的configmap	</span><br>[root@tiny-calico-master-88-1 tiny-calico]<span class="hljs-comment"># kubectl get configmaps -n kube-system coredns -oyaml</span><br>apiVersion: v1<br>data:<br>  Corefile: |<br>    .:53 &#123;<br>        errors<br>        health &#123;<br>           lameduck 5s<br>        &#125;<br>        ready<br>        kubernetes cali-cluster.tclocal in-addr.arpa ip6.arpa &#123;<br>           pods insecure<br>           fallthrough in-addr.arpa ip6.arpa<br>           ttl 30<br>        &#125;<br>        prometheus :9153<br>        forward . 10.31.100.100 &#123;<br>           max_concurrent 1000<br>        &#125;<br>        cache 30<br>        loop<br>        reload<br>        loadbalance<br>    &#125;<br>kind: ConfigMap<br>metadata:<br>  creationTimestamp: <span class="hljs-string">&quot;2022-05-06T05:19:08Z&quot;</span><br>  name: coredns<br>  namespace: kube-system<br>  resourceVersion: <span class="hljs-string">&quot;3986029&quot;</span><br>  uid: 54f5f803-a5ab-4c77-b149-f02229bcad0a<br></code></pre></div></td></tr></table></figure>
+</li>
 <li><p><code>search</code>新增了一个<code>k8s.tcinternal</code></p>
 <p>实际上我们再查看K8S的宿主机节点的DNS配置规则时会发现这个<code>k8s.tcinternal</code>是从宿主机上面继承而来的</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 最后查看宿主机节点上面的DNS解析配置</span><br>[root@tiny-calico-master-88-1 tiny-calico]<span class="hljs-comment"># cat /etc/resolv.conf</span><br><span class="hljs-comment"># Generated by NetworkManager</span><br>search k8s.tcinternal<br>nameserver 10.31.254.253<br></code></pre></div></td></tr></table></figure></li>
@@ -461,7 +462,7 @@
 </li>
 <li><p>最后就是用来暴露四层服务的服务，一般是NodePort或者是LoadBalancer，因为端口和IP等原因，实际上使用的时候大部分都是以LoadBalancer的方式暴露出去；</p>
 </li>
-<li><p>LoadBalancer服务对外暴露的并不是一个IP，而是一个<code>IP+端口</code>，也就是说实际上一个IP的多个端口可以为不同类型的服务提供服务，例如80和443端口提供http/https服务，3306提供数据库服务等；</p>
+<li><p>LoadBalancer服务对外暴露的并不是一个IP，而是一个<code>IP+端口</code>，也就是说实际上一个IP的多个端口可以为不同类型的服务提供服务，例如80和443端口提供http&#x2F;https服务，3306提供数据库服务等；</p>
 </li>
 <li><p>K8S并没有内置LoadBalancer，因此需要实现LoadBalancer，目前主流有两种方式：一是使用云厂商如AWS、Azure、阿里腾讯等提供的LoadBalancer，这些LoadBalancer基本都是闭源的解决方案，基本仅适用于他们自家的云环境，但是作为收费服务，在技术支持和售后已经产品成熟度方面均有不错的表现；二是使用已有的一些开源LoadBalancer，主要就是<a href="https://tinychen.com/20220519-k8s-06-loadbalancer-metallb/">MetalLB</a>、<a href="https://tinychen.com/20220523-k8s-07-loadbalancer-openelb/">OpenELB</a>以及<a href="https://tinychen.com/20220524-k8s-08-loadbalancer-purelb/">PureLB</a>，关于三者的详细介绍，之前已经写过相关的文章，有兴趣的可以点击链接进去看看。</p>
 </li>

@@ -79,7 +79,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -246,7 +246,7 @@
               </p>
             
             <div class="markdown-body">
-              <p>本文主要是偏向运维角度来对tomcat进行入门介绍，重点讲解了tomcat的基本概念、基本配置和tomcat的I/O模型。是之前的<a href="https://tinychen.com/tags/tomcat/">tomcat篇</a>的汇总整理之作。</p>
+              <p>本文主要是偏向运维角度来对tomcat进行入门介绍，重点讲解了tomcat的基本概念、基本配置和tomcat的I&#x2F;O模型。是之前的<a href="https://tinychen.com/tags/tomcat/">tomcat篇</a>的汇总整理之作。</p>
 <span id="more"></span>
 
 <h1 id="1、Tomcat简介"><a href="#1、Tomcat简介" class="headerlink" title="1、Tomcat简介"></a>1、Tomcat简介</h1><p>在了解tomcat之前我们需要了解一些基本的概念。</p>
@@ -257,10 +257,10 @@
 <li>客户端界面一律表现为网页形式，网页由HTML语言写成。</li>
 <li>客户端与服务器端能进行和业务相关的<strong>动态交互</strong>。</li>
 <li>能完成与桌面应用程序类似的功能。</li>
-<li>使用浏览器—服务器架构（B/S），浏览器与服务器之间采用HTTP协议通信。</li>
+<li>使用浏览器—服务器架构（B&#x2F;S），浏览器与服务器之间采用HTTP协议通信。</li>
 <li>Web应用通过Web服务器来发布。</li>
 </ul>
-<p>web应用的一大好处就是可以轻易地跨平台运行，不论是windows、mac、ios、android还是linux，只要安装了浏览器，一般都可以使用web应用，而浏览器在各个平台都是标配的软件，因此给web应用的普及提供了非常良好的条件。同样的，web应用使用的是B/S架构，即Browser/Server架构，主要的计算任务都交给Server端进行，因此都客户端的性能要求较低，同时也推动了服务端的负载均衡、高可用等技术的发展。</p>
+<p>web应用的一大好处就是可以轻易地跨平台运行，不论是windows、mac、ios、android还是linux，只要安装了浏览器，一般都可以使用web应用，而浏览器在各个平台都是标配的软件，因此给web应用的普及提供了非常良好的条件。同样的，web应用使用的是B&#x2F;S架构，即Browser&#x2F;Server架构，主要的计算任务都交给Server端进行，因此都客户端的性能要求较低，同时也推动了服务端的负载均衡、高可用等技术的发展。</p>
 <blockquote>
 <p><code>Context</code>：在tomcat中一般指web应用</p>
 </blockquote>
@@ -269,7 +269,7 @@
 <p><strong>Servlet规范把能够发布和运行Java Web应用的Web服务器称为Servlet容器。</strong>Servlet容器最主要的特征是动态执行Java Web应用中Servlet实现类的程序代码。由Apache开源软件组织创建的Tomcat是一个符合Servlet规范的优秀Servlet容器。</p>
 <p><img src="https://resource.tinychen.com/blog/20200324/dak4snL5hzJi.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="1-3-jsp"><a href="#1-3-jsp" class="headerlink" title="1.3 jsp"></a>1.3 jsp</h2><p>JSP（全称JavaServer Pages）是由Sun Microsystems公司主导建立的一种<strong>动态网页技术标准</strong>。JSP是HttpServlet的扩展。JSP将Java代码和特定变动内容嵌入到静态的页面中，实现以静态页面为模板，动态生成其中的部分内容。JSP在首次被访问的时候被应用服务器转换为servlet，在以后的运行中，容器直接调用这个servlet，而不再访问JSP页面。<strong>JSP的实质仍然是servlet。</strong></p>
-<h2 id="1-4-Tomcat"><a href="#1-4-Tomcat" class="headerlink" title="1.4 Tomcat"></a>1.4 Tomcat</h2><p><a target="_blank" rel="noopener" href="http://tomcat.apache.org/">Tomcat</a>是在Oracle公司的JSWDK（JavaServer Web DevelopmentKit，是Oracle公司推出的小型Servlet/JSP调试工具）的基础上发展起来的一个优秀的Servlet容器，<strong>Tomcat本身完全用Java语言编写</strong>。作为一个开源软件，Tomcat除了运行稳定、可靠，并且效率高之外，还可以和目前大部分的主流Web服务器（如IIS、Apache、Nginx等）一起工作。</p>
+<h2 id="1-4-Tomcat"><a href="#1-4-Tomcat" class="headerlink" title="1.4 Tomcat"></a>1.4 Tomcat</h2><p><a target="_blank" rel="noopener" href="http://tomcat.apache.org/">Tomcat</a>是在Oracle公司的JSWDK（JavaServer Web DevelopmentKit，是Oracle公司推出的小型Servlet&#x2F;JSP调试工具）的基础上发展起来的一个优秀的Servlet容器，<strong>Tomcat本身完全用Java语言编写</strong>。作为一个开源软件，Tomcat除了运行稳定、可靠，并且效率高之外，还可以和目前大部分的主流Web服务器（如IIS、Apache、Nginx等）一起工作。</p>
 <p>tomcat的版本实际上比较复杂，目前有7、8、9、10四个版本并行发布，具体的各个版本的兼容信息我们可以通过<a target="_blank" rel="noopener" href="https://tomcat.apache.org/whichversion.html">官网</a>查询。</p>
 <h1 id="2、Tomcat的目录结构"><a href="#2、Tomcat的目录结构" class="headerlink" title="2、Tomcat的目录结构"></a>2、Tomcat的目录结构</h1><p>我们先来看一下tomcat8.5和tomcat9中的home目录中的文件：</p>
 <p><img src="https://resource.tinychen.com/blog/20200401/EurnK7y7obav.png" srcset="/img/loading.gif" lazyload></p>
@@ -324,7 +324,7 @@
 </ol>
 <h1 id="3、Tomcat安装配置"><a href="#3、Tomcat安装配置" class="headerlink" title="3、Tomcat安装配置"></a>3、Tomcat安装配置</h1><p>tomcat的配置安装需要先在系统上配置好jdk环境，这里我们使用<code>centos7.7</code>版本的Linux系统和<code>jdk8</code>版本。</p>
 <h2 id="3-1-配置jdk8"><a href="#3-1-配置jdk8" class="headerlink" title="3.1 配置jdk8"></a>3.1 配置jdk8</h2><p>我们首先到<a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">官网</a>下载JDK8的安装包，这里我们选择<code>tar.gz</code>格式的压缩包下载，需要注意建议先使用浏览器下载再使用工具传输到Linux上，因为下载需要登录注册账号。</p>
-<p>接着我们解压将安装包解压到自己想要配置的jdk安装目录下，这里我们使用/home/目录</p>
+<p>接着我们解压将安装包解压到自己想要配置的jdk安装目录下，这里我们使用&#x2F;home&#x2F;目录</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">tar -zxvf jdk-8u241-linux-x64.tar.gz -C /home/<br></code></pre></div></td></tr></table></figure>
 
 <p>在<code>/etc/profile</code>中添加以下三个参数并导入</p>
@@ -338,14 +338,14 @@
 
 <h2 id="3-2-配置tomcat"><a href="#3-2-配置tomcat" class="headerlink" title="3.2 配置tomcat"></a>3.2 配置tomcat</h2><p>tomcat的安装配置和上面几乎一样，由于我们已经在<code>/etc/profile</code>中设定了全局的java环境变量，因此在tomcat中就不用再特殊配置，直接就会使用默认的全局变量。</p>
 <p>这里我们还是使用<a target="_blank" rel="noopener" href="https://downloads.apache.org/">官网</a><br>提供的<code>tar.gz</code>压缩包来安装。</p>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-comment"># tomcat可以直接使用wget下载</span><br><span class="hljs-attribute">wget</span> https://downloads.apache.org/tomcat/tomcat-<span class="hljs-number">8</span>/v<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>/bin/apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz<br><span class="hljs-comment"># 解压到安装目录并重命名</span><br><span class="hljs-attribute">tar</span> -zxvf apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz /home/<br><span class="hljs-attribute">cd</span> /home<br><span class="hljs-attribute">mv</span> apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span> tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-comment"># tomcat可以直接使用wget下载</span><br><span class="hljs-attribute">wget</span> https://downloads.apache.org/tomcat/tomcat-<span class="hljs-number">8</span>/v8.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>/bin/apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz<br><span class="hljs-comment"># 解压到安装目录并重命名</span><br><span class="hljs-attribute">tar</span> -zxvf apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span>.tar.gz /home/<br><span class="hljs-attribute">cd</span> /home<br><span class="hljs-attribute">mv</span> apache-tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span> tomcat-<span class="hljs-number">8</span>.<span class="hljs-number">5</span>.<span class="hljs-number">53</span><br></code></pre></div></td></tr></table></figure>
 
 <p>首先我们来看一下tomcat中的主要目录：</p>
 <ul>
-<li><strong>/bin</strong> 存放用于启动及关闭的文件，以及其他一些脚本。其中，UNIX 系统专用的 <code>*.sh</code> 文件在功能上等同于 Windows 系统专用的 <code>*.bat</code> 文件。因为 Win32 的命令行缺乏某些功能，所以又额外地加入了一些文件。</li>
-<li><strong>/conf</strong> 配置文件及相关的 DTD。其中最重要的文件是 server.xml，这是容器的主配置文件。</li>
-<li><strong>/log</strong> 日志文件的默认目录。</li>
-<li><strong>/webapps</strong> 存放 Web 应用的相关文件。</li>
+<li><strong>&#x2F;bin</strong> 存放用于启动及关闭的文件，以及其他一些脚本。其中，UNIX 系统专用的 <code>*.sh</code> 文件在功能上等同于 Windows 系统专用的 <code>*.bat</code> 文件。因为 Win32 的命令行缺乏某些功能，所以又额外地加入了一些文件。</li>
+<li><strong>&#x2F;conf</strong> 配置文件及相关的 DTD。其中最重要的文件是 server.xml，这是容器的主配置文件。</li>
+<li><strong>&#x2F;log</strong> 日志文件的默认目录。</li>
+<li><strong>&#x2F;webapps</strong> 存放 Web 应用的相关文件。</li>
 </ul>
 <p>接着我们进入tomcat目录下的<code>bin</code>目录就可以看到各种各样的脚本文件，主要分为<code>bat</code>和<code>sh</code>两类，其中bat主要是在windows系统上使用的，我们可以把它们删掉，接着我们执行一些<code>version.sh</code>这个脚本就可以看到版本信息。</p>
 <p><img src="https://resource.tinychen.com/blog/20200324/fL53hXHw5Q1I.png" srcset="/img/loading.gif" lazyload></p>
@@ -375,12 +375,12 @@
 <blockquote>
 <p>注意前面提到的<code>CATALINA_HOME</code>和<code>CATALINA_BASE</code>两个变量不能在这里设定，因为tomcat就是根据这两个变量来找到 <code>setenv.sh</code>的。</p>
 </blockquote>
-<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">$ cat setenv.sh <br><span class="hljs-attribute">JRE_HOME</span>=/home/jdk1.8.0_241/jre<br><span class="hljs-attribute">CATALINA_PID</span>=<span class="hljs-string">&quot;<span class="hljs-variable">$CATALINA_BASE</span>/tomcat.pid&quot;</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ <span class="hljs-built_in">cat</span> setenv.sh <br>JRE_HOME=/home/jdk1.8.0_241/jre<br>CATALINA_PID=<span class="hljs-string">&quot;<span class="hljs-variable">$CATALINA_BASE</span>/tomcat.pid&quot;</span><br></code></pre></div></td></tr></table></figure>
 
 <p>这时候运行<code>./catalina.sh start</code>或者是<code>./startup.sh</code>文件就可以启动tomcat，注意要在防火墙中放行默认的8080端口。如果没有指定PID文件的位置，在关闭tomcat的时候可能会出现错误。此外，一般不建议使用root用户来运行tomcat。</p>
+<p><img src="https://resource.tinychen.com/blog/20200325/Jdtn5kIniRtV.png" srcset="/img/loading.gif" lazyload></p>
 </li>
 </ul>
-<p>  <img src="https://resource.tinychen.com/blog/20200325/Jdtn5kIniRtV.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="3-3-manager应用"><a href="#3-3-manager应用" class="headerlink" title="3.3 manager应用"></a>3.3 manager应用</h2><p>tomcat本身内置了两个web应用，专门用来管理tomcat，它们分别是host-manager（管理virtual host）和manager（管理web应用）。</p>
 <figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">http:<span class="hljs-regexp">//</span>localhost:<span class="hljs-number">8080</span><span class="hljs-regexp">/host-manager/</span>html<br>http:<span class="hljs-regexp">//</span>localhost:<span class="hljs-number">8080</span><span class="hljs-regexp">/manager/</span>html<br></code></pre></div></td></tr></table></figure>
 
@@ -414,14 +414,14 @@
 <p><strong>有两种使用Commons守护程序的方法：直接调用实现守护程序接口（interface）或调用为守护程序提供所需方法（method）的类（class）。</strong>例如，Tomcat-4.1.x使用守护程序接口，而Tomcat-5.0.x提供了一个类，该类的方法直接由JSVC调用。</p>
 <h3 id="3-4-2-jsvc工作原理"><a href="#3-4-2-jsvc工作原理" class="headerlink" title="3.4.2 jsvc工作原理"></a>3.4.2 jsvc工作原理</h3><p>jsvc使用了三个进程来工作：一个启动进程、一个控制进程、一个被控制进程。其中被控制进程一般来说就是java主线程（我们这里就是tomcat），如果JVM虚拟机崩溃了，那么控制进程会在下一分钟重启。因为jsvc是守护进程，所以它应该使用root用户来启动，同时我们可以使用-user参数来进行用户的降级（downgrade），即先使用root用户来创建进程，然后再降级到指定的非root用户而不丢失root用户的特殊权限，如监听1024以下的端口。</p>
 <h3 id="3-4-3-jsvc配置tomcat守护进程（daemon）"><a href="#3-4-3-jsvc配置tomcat守护进程（daemon）" class="headerlink" title="3.4.3 jsvc配置tomcat守护进程（daemon）"></a>3.4.3 jsvc配置tomcat守护进程（daemon）</h3><p>tomcat的二进制安装包中的bin目录下就有jsvc的安装包，我们需要使用GCC编译器对其进行编译安装。同时在编译的时候我们需要指定jdk的路径，由于我们前面已经手动指定了，这里不需要再指定。如果没有，可以使用<code>./configure --with-java=$JAVA_HOME</code>来进行操作。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们进入tomcat的bin目录进行编译</span><br><span class="hljs-built_in">cd</span> <span class="hljs-variable">$CATALINA_HOME</span>/bin<br>tar xvfz commons-daemon-native.tar.gz<br><span class="hljs-built_in">cd</span> commons-daemon-1.2.2-native-src/unix<br>./configure<br>make<br><span class="hljs-comment"># 编译完成后，会在当前文件夹生成一个jsvc的文件，将它拷贝到tomcat的/bin/目录下</span><br>cp jsvc ../..<br><span class="hljs-built_in">cd</span> ../..<br><span class="hljs-comment"># 接着我们可以这样查看jsvc的帮助文档</span><br>./jsvc -<span class="hljs-built_in">help</span><br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们进入tomcat的bin目录进行编译</span><br><span class="hljs-built_in">cd</span> <span class="hljs-variable">$CATALINA_HOME</span>/bin<br>tar xvfz commons-daemon-native.tar.gz<br><span class="hljs-built_in">cd</span> commons-daemon-1.2.2-native-src/unix<br>./configure<br>make<br><span class="hljs-comment"># 编译完成后，会在当前文件夹生成一个jsvc的文件，将它拷贝到tomcat的/bin/目录下</span><br><span class="hljs-built_in">cp</span> jsvc ../..<br><span class="hljs-built_in">cd</span> ../..<br><span class="hljs-comment"># 接着我们可以这样查看jsvc的帮助文档</span><br>./jsvc -<span class="hljs-built_in">help</span><br></code></pre></div></td></tr></table></figure>
 
 <p>使用jsvc来启动tomcat，我们使用下面的参数来进行启动</p>
 <figure class="highlight stylus"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs stylus">./jsvc \<br>    -user tomcat \<br>    -classpath <span class="hljs-variable">$CATALINA_HOME</span>/bin/bootstrap<span class="hljs-selector-class">.jar</span>:<span class="hljs-variable">$CATALINA_HOME</span>/bin/tomcat-juli<span class="hljs-selector-class">.jar</span> \<br>    -outfile <span class="hljs-variable">$CATALINA_BASE</span>/logs/catalina<span class="hljs-selector-class">.out</span> \<br>    -errfile <span class="hljs-variable">$CATALINA_BASE</span>/logs/catalina<span class="hljs-selector-class">.err</span> \<br>    -Dcatalina.home=<span class="hljs-variable">$CATALINA_HOME</span> \<br>    -Dcatalina.base=<span class="hljs-variable">$CATALINA_BASE</span> \<br>    -Djava<span class="hljs-selector-class">.util</span><span class="hljs-selector-class">.logging</span>.manager=org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.juli</span><span class="hljs-selector-class">.ClassLoaderLogManager</span> \<br>    -Djava<span class="hljs-selector-class">.util</span><span class="hljs-selector-class">.logging</span><span class="hljs-selector-class">.config</span>.file=<span class="hljs-variable">$CATALINA_BASE</span>/conf/logging<span class="hljs-selector-class">.properties</span> \<br>    org<span class="hljs-selector-class">.apache</span><span class="hljs-selector-class">.catalina</span><span class="hljs-selector-class">.startup</span>.Bootstrap<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20200326/jlQScDXanNG5.png" srcset="/img/loading.gif" lazyload></p>
-<p>注意看这时的用户和PID，上面的12839的用户为root，也就是我们前面说的控制进程，后面被12839进程控制的12840进程才是我们主要运行的tomcat进程，而这里的用户也符合我们使用-user参数指定的tomcat用户。如果我们不指定进程的PID文件位置，那么默认就会在/var/run目录下生成PID文件，我们可以看到这个jsvc.pid对应的正好是jsvc运行的三个进程中的被控制进程。</p>
+<p>注意看这时的用户和PID，上面的12839的用户为root，也就是我们前面说的控制进程，后面被12839进程控制的12840进程才是我们主要运行的tomcat进程，而这里的用户也符合我们使用-user参数指定的tomcat用户。如果我们不指定进程的PID文件位置，那么默认就会在&#x2F;var&#x2F;run目录下生成PID文件，我们可以看到这个jsvc.pid对应的正好是jsvc运行的三个进程中的被控制进程。</p>
 <p>如果需要关闭，我们可以使用下面的命令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">./jsvc -stop org.apache.catalina.startup.Bootstrap stop<br><br><span class="hljs-comment"># 还可以指定pid文件位置，如果前面没有使用默认的pid文件目录的话</span><br>./jsvc -stop -pidfile /var/run/jsvc.pid org.apache.catalina.startup.Bootstrap stop<br></code></pre></div></td></tr></table></figure>
 
@@ -510,7 +510,7 @@
 </ul>
 </blockquote>
 <h4 id="3-5-3-1-使用daemon-sh"><a href="#3-5-3-1-使用daemon-sh" class="headerlink" title="3.5.3.1 使用daemon.sh"></a>3.5.3.1 使用daemon.sh</h4><p>首先我们尝试在systemd中使用自带的脚本进行启动和关闭tomcat，这里我们先把<code>startup.sh</code>和<code>shutdown.sh</code>两个脚本给排除掉，虽然它们无法启动守护进程的缺陷可以使用systemd来进行弥补，但是还是无法使用jsvc，无法在特权端口和运行用户之间取得两全，我们直接使用<code>daemon.sh</code>来运行。</p>
-<p>需要注意的是，systemd并不会去读取我们先前在/etc/profile中设定的变量，因此我们直接把变量写进unit配置文件中。</p>
+<p>需要注意的是，systemd并不会去读取我们先前在&#x2F;etc&#x2F;profile中设定的变量，因此我们直接把变量写进unit配置文件中。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[Unit]<br>Description=Apache Tomcat 9<br><br>[Service]<br>User=tomcat<br>Group=tomcat<br>PIDFile=/var/run/tomcat.pid<br>Environment=JAVA_HOME=/home/jdk8/<br>Environment=JRE_HOME=/home/jdk8/jre<br>Environment=CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>Environment=CATALINA_HOME=/home/tomcat9<br>Environment=CATALINA_BASE=/home/tomcat9<br>Environment=CATALINA_TMPDIR=/home/tomcat9/temp<br>ExecStart=/home/tomcat9/bin/daemon.sh start<br>ExecStop=/home/tomcat9/bin/daemon.sh stop<br><br>[Install]<br>WantedBy=multi-user.target<br></code></pre></div></td></tr></table></figure>
 
 <p>添加了新的unit单元之后我们先<code>systemctl daemon-reload</code>重启一下daemon进程，再使用<code>systemctl start tomcat9.service</code>来启动服务，接着查看状态，发现无法正常运行，一启动进程就failed掉了，查看daemon脚本默认的日志文件（位于tomcat目录下的<code>logs/catalina-daemon.out</code>）我们发现返回了143错误。</p>
@@ -555,17 +555,13 @@
 <li><p><strong>第一种：Tomcat在一个Java虚拟机进程中独立运行，此时客户端直接和tomcat通信。</strong>Tomcat可看作是能运行Servlet的独立Web服务器。Servlet容器组件作为Web服务器中的一部分而存在。<strong>这是Tomcat的默认工作模式。</strong></p>
 <p><img src="https://resource.tinychen.com/blog/20200401/FldbzwEHSxcO.png" srcset="/img/loading.gif" lazyload></p>
 </li>
-</ul>
-<ul>
 <li><p><strong>第二种：Tomcat运行在其他Web服务器的进程中，Tomcat不直接和客户端通信，仅仅为其他Web服务器处理客户端访问Servlet的请求。</strong>进程内的Servlet容器对于单进程、多线程的Web服务器非常合适，<strong>可以提供较高的运行速度，但缺乏伸缩性。</strong></p>
 <p>在这种模式下，Tomcat分为Web服务器插件和Servlet容器组件两部分。如下图所示，Web服务器插件在其他Web服务器进程的内部地址空间启动一个Java虚拟机，Servlet容器组件在此Java虚拟机中运行。如有客户端发出调用Servlet的请求，Web服务器插件获得对此请求的控制并将它转发<strong>（使用JNI通信机制）</strong>给Servlet容器组件。</p>
 <p><img src="https://resource.tinychen.com/blog/20200401/Qyp6hqzGjiDW.png" srcset="/img/loading.gif" lazyload></p>
-</li>
-</ul>
 <blockquote>
 <p>JNI（Java Native Interface）指的是Java本地调用接口，通过这一接口，Java程序可以和采用其他语言编写的本地程序进行通信。</p>
 </blockquote>
-<ul>
+</li>
 <li><p><strong>第三种：Tomcat在一个Java虚拟机进程中独立运行，但是它不直接和客户端通信，仅仅为与它集成的其他Web服务器处理客户端访问Servlet的请求。</strong></p>
 <p>在这种模式下，Tomcat分为Web服务器插件和Servlet容器组件两部分。如下图所示，Web服务器插件在其他Web服务器的<strong>外部地址空间</strong>启动一个JVM进程，Servlet容器组件在此JVM中运行。如有客户端发出调用Servlet的请求，Web服务器插件获得对此请求的控制并将它转发（采用IPC通信机制）给Servlet容器。</p>
 <p><strong>进程外Servlet容器对客户请求的响应速度不如进程内Servlet容器，但进程外容器具有更好的伸缩性和稳定性。</strong></p>
@@ -607,12 +603,12 @@
 <p>Tomcat使用组合模式来管理这些容器，所有容器组件都实现了Container接口，因此组合模式可以使得用户对单容器对象（最底层的Wrapper）和组合容器对象（Context、Host或者Engine）的使用具有一致性。</p>
 <p>Tomcat 服务器的配置主要集中于 <code>tomcat/conf</code> 下的 <code>catalina.policy</code>、 <code>catalina.properties</code>、<code>context.xml</code>、<code>server.xml</code>、<code>tomcat-users.xml</code>、<code>web.xml</code> 文件。</p>
 <p>Tomcat的这一设计思想在其配置文件<code>server.xml</code>中得到了很好的诠释，<code>server.xml</code> 是tomcat 服务器的核心配置文件，包含了Tomcat的 Servlet 容器 （Catalina）的所有配置。下面我们先来了解一下<code>server.xml</code>文件中的一些主要配置。</p>
-<h1 id="7、Tomcat的connector简介"><a href="#7、Tomcat的connector简介" class="headerlink" title="7、Tomcat的connector简介"></a>7、Tomcat的connector简介</h1><h2 id="7-1-connector的工作原理"><a href="#7-1-connector的工作原理" class="headerlink" title="7.1 connector的工作原理"></a>7.1 connector的工作原理</h2><p>这里我们说的Tomcat中三种不同的I/O模型主要指的是其连接器（connector）的工作模型，对于tomcat而言，连接器一般指的是coyote，其工作原理大致如下图所示：</p>
+<h1 id="7、Tomcat的connector简介"><a href="#7、Tomcat的connector简介" class="headerlink" title="7、Tomcat的connector简介"></a>7、Tomcat的connector简介</h1><h2 id="7-1-connector的工作原理"><a href="#7-1-connector的工作原理" class="headerlink" title="7.1 connector的工作原理"></a>7.1 connector的工作原理</h2><p>这里我们说的Tomcat中三种不同的I&#x2F;O模型主要指的是其连接器（connector）的工作模型，对于tomcat而言，连接器一般指的是coyote，其工作原理大致如下图所示：</p>
 <p><img src="https://resource.tinychen.com/blog/20200409/Yt4hJSPQcMJj.png" srcset="/img/loading.gif" lazyload></p>
 <p>连接器中的各个组件的作用如下： </p>
-<h3 id="7-1-1-EndPoint"><a href="#7-1-1-EndPoint" class="headerlink" title="7.1.1 EndPoint"></a>7.1.1 EndPoint</h3><p><code>EndPoint</code>即Coyote通信端点，是通信监听的接口，是具体Socket接收和发送处理器，是对传输层（四层）的抽象，因此<code>EndPoint</code>用来实现TCP/IP协议的。Tomcat 并没有<code>EndPoint</code>接口，而是提供了一个抽象类<code>AbstractEndpoint</code>， 里面定义了两个内部类：<code>Acceptor</code>和<code>SocketProcessor</code>。<code>Acceptor</code>用于监听Socket连接请求。 <code>SocketProcessor</code>用于处理接收到的Socket请求，它实现<code>Runnable</code>接口，在<code>Run</code>方法里 调用协议处理组件<code>Processor</code>进行处理。为了提高处理能力，<code>SocketProcessor</code>被提交到线程池来执行，而这个线程池叫作执行器（<strong>Executor</strong>)。</p>
-<h3 id="7-1-2-Processor"><a href="#7-1-2-Processor" class="headerlink" title="7.1.2 Processor"></a>7.1.2 Processor</h3><p><strong><code>Processor</code>是coyote的协议处理接口 。</strong>如果说EndPoint是用来实现TCP/IP协议的，那么 <code>Processor</code>用来实现HTTP协议，<code>Processor</code>接收来自EndPoint的Socket，读取字节流解析成Tomcat的<code>Request</code>和<code>Response</code>对象，并通过<code>Adapter</code>将其提交到容器处理， <code>Processor</code>是对应用层（七层）协议的抽象。</p>
-<h3 id="7-1-3-ProtocolHandler"><a href="#7-1-3-ProtocolHandler" class="headerlink" title="7.1.3 ProtocolHandler"></a>7.1.3 ProtocolHandler</h3><p><strong><code>ProtocolHandler</code>是Coyote的协议接口，通过Endpoint和Processor ，实现对具体协议（HTTP或AJP）的处理。</strong>Tomcat 按照协议和I/O 提供了6个实现类 ： <code>AjpNioProtocol</code> ， <code>AjpAprProtocol</code>， <code>AjpNio2Protocol</code> ， <code>Http11NioProtocol</code> ，<code>Http11Nio2Protocol</code> ， <code>Http11AprProtocol</code>。我们在配置<code>tomcat/conf/server.xml</code> 中的<code>connecter</code>块时 ， 至少要指定具体的<code>ProtocolHandler</code> , 当然也可以指定协议名称（如HTTP/1.1）。</p>
+<h3 id="7-1-1-EndPoint"><a href="#7-1-1-EndPoint" class="headerlink" title="7.1.1 EndPoint"></a>7.1.1 EndPoint</h3><p><code>EndPoint</code>即Coyote通信端点，是通信监听的接口，是具体Socket接收和发送处理器，是对传输层（四层）的抽象，因此<code>EndPoint</code>用来实现TCP&#x2F;IP协议的。Tomcat 并没有<code>EndPoint</code>接口，而是提供了一个抽象类<code>AbstractEndpoint</code>， 里面定义了两个内部类：<code>Acceptor</code>和<code>SocketProcessor</code>。<code>Acceptor</code>用于监听Socket连接请求。 <code>SocketProcessor</code>用于处理接收到的Socket请求，它实现<code>Runnable</code>接口，在<code>Run</code>方法里 调用协议处理组件<code>Processor</code>进行处理。为了提高处理能力，<code>SocketProcessor</code>被提交到线程池来执行，而这个线程池叫作执行器（<strong>Executor</strong>)。</p>
+<h3 id="7-1-2-Processor"><a href="#7-1-2-Processor" class="headerlink" title="7.1.2 Processor"></a>7.1.2 Processor</h3><p><strong><code>Processor</code>是coyote的协议处理接口 。</strong>如果说EndPoint是用来实现TCP&#x2F;IP协议的，那么 <code>Processor</code>用来实现HTTP协议，<code>Processor</code>接收来自EndPoint的Socket，读取字节流解析成Tomcat的<code>Request</code>和<code>Response</code>对象，并通过<code>Adapter</code>将其提交到容器处理， <code>Processor</code>是对应用层（七层）协议的抽象。</p>
+<h3 id="7-1-3-ProtocolHandler"><a href="#7-1-3-ProtocolHandler" class="headerlink" title="7.1.3 ProtocolHandler"></a>7.1.3 ProtocolHandler</h3><p><strong><code>ProtocolHandler</code>是Coyote的协议接口，通过Endpoint和Processor ，实现对具体协议（HTTP或AJP）的处理。</strong>Tomcat 按照协议和I&#x2F;O 提供了6个实现类 ： <code>AjpNioProtocol</code> ， <code>AjpAprProtocol</code>， <code>AjpNio2Protocol</code> ， <code>Http11NioProtocol</code> ，<code>Http11Nio2Protocol</code> ， <code>Http11AprProtocol</code>。我们在配置<code>tomcat/conf/server.xml</code> 中的<code>connecter</code>块时 ， 至少要指定具体的<code>ProtocolHandler</code> , 当然也可以指定协议名称（如HTTP&#x2F;1.1）。</p>
 <h3 id="7-1-4-Adapter"><a href="#7-1-4-Adapter" class="headerlink" title="7.1.4 Adapter"></a>7.1.4 Adapter</h3><p>由于协议不同，客户端发过来的请求信息也不尽相同，Tomcat定义了自己的Request类来存放这些请求信息。<code>ProtocolHandler</code>接口负责解析请求并生成Tomcat的<code>Request</code>类。 但是这个Request对象不是标准的ServletRequest，不能用来作为参数来调用容器。因此需要引入<code>CoyoteAdapter</code>，连接器调用<code>CoyoteAdapter</code>的<code>Sevice</code>方法，传入Tomcat的<code>Request</code>对象，CoyoteAdapter将<code>Request</code>转成<code>ServletRequest</code>，再调用容器的Service方法。</p>
 <h2 id="7-2-connector的几个重要参数"><a href="#7-2-connector的几个重要参数" class="headerlink" title="7.2 connector的几个重要参数"></a>7.2 connector的几个重要参数</h2><h3 id="7-2-1-connectionTimeout"><a href="#7-2-1-connectionTimeout" class="headerlink" title="7.2.1 connectionTimeout"></a>7.2.1 connectionTimeout</h3><blockquote>
 <p>The number of milliseconds this <strong>Connector</strong> will wait, after accepting a connection, for the request URI line to be presented. Use a value of -1 to indicate no (i.e. infinite) timeout. The default value is 60000 (i.e. 60 seconds) but note that the standard server.xml that ships with Tomcat sets this to 20000 (i.e. 20 seconds). Unless <strong>disableUploadTimeout</strong> is set to <code>false</code>, this timeout will also be used when reading the request body (if any).</p>
@@ -628,18 +624,18 @@
 </blockquote>
 <p>当最大线程数（maxThreads）被使用完时，可以放入请求队列排队个数，超过这个数返回connection refused（请求被拒绝），默认值为100；</p>
 <h3 id="7-2-4-maxConnections"><a href="#7-2-4-maxConnections" class="headerlink" title="7.2.4 maxConnections"></a>7.2.4 maxConnections</h3><blockquote>
-<p>The maximum number of connections that the server will accept and process at any given time. When this number has been reached, the server will accept, but not process, one further connection. This additional connection be blocked until the number of connections being processed falls below <strong>maxConnections</strong> at which point the server will start accepting and processing new connections again. Note that once the limit has been reached, the operating system may still accept connections based on the <code>acceptCount</code> setting. The default value is <code>8192</code>.For NIO/NIO2 only, setting the value to -1, will disable the maxConnections feature and connections will not be counted.</p>
+<p>The maximum number of connections that the server will accept and process at any given time. When this number has been reached, the server will accept, but not process, one further connection. This additional connection be blocked until the number of connections being processed falls below <strong>maxConnections</strong> at which point the server will start accepting and processing new connections again. Note that once the limit has been reached, the operating system may still accept connections based on the <code>acceptCount</code> setting. The default value is <code>8192</code>.For NIO&#x2F;NIO2 only, setting the value to -1, will disable the maxConnections feature and connections will not be counted.</p>
 </blockquote>
 <p>Tomcat在任意时刻接收和处理的最大连接数。当Tomcat接收的连接数达到maxConnections时，Acceptor线程不会读取accept队列中的连接；这时accept队列中的线程会一直阻塞着，直到Tomcat接收的连接数小于maxConnections。默认值为8192。 </p>
-<p>对于NIO / NIO2，将该值设置为-1将禁用maxConnections功能，并且不计算连接数。</p>
+<p>对于NIO &#x2F; NIO2，将该值设置为-1将禁用maxConnections功能，并且不计算连接数。</p>
 <h3 id="7-2-5-图解"><a href="#7-2-5-图解" class="headerlink" title="7.2.5 图解"></a>7.2.5 图解</h3><p>按照被处理的先后顺序我们可以把tomcat中的线程队列和以上四个参数使用该图进行表示</p>
 <p><img src="https://resource.tinychen.com/blog/20200409/Ic6Wtt6KkKeV.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>当<code>maxThreads + acceptCount &lt; maxConnections</code>的时候将不会有线程被阻塞</li>
 <li>当阻塞的线程时间超过connectionTimeout还没得到返回值将返回连接超时</li>
 </ul>
-<h1 id="8、常见的服务器I-O模型"><a href="#8、常见的服务器I-O模型" class="headerlink" title="8、常见的服务器I/O模型"></a>8、常见的服务器I/O模型</h1><p>在开始了解Tomcat的I/O模型之前，我们需要先对服务器中常见的I/O模型进行简单介绍。</p>
-<h2 id="8-1-阻塞I-O处理模型"><a href="#8-1-阻塞I-O处理模型" class="headerlink" title="8.1 阻塞I/O处理模型"></a>8.1 阻塞I/O处理模型</h2><h3 id="8-1-1-单线程阻塞I-O模型"><a href="#8-1-1-单线程阻塞I-O模型" class="headerlink" title="8.1.1 单线程阻塞I/O模型"></a>8.1.1 单线程阻塞I/O模型</h3><p>单线程阻塞I/O模型是最简单的一种服务器I/O模型，单线程即同时只能处理一个客户端的请求，阻塞即该线程会一直等待，直到处理完成为止。对于多个客户端访问，必须要等到前一个客户端访问结束才能进行下一个访问的处理，请求一个一个排队，只提供一问一答服务。</p>
+<h1 id="8、常见的服务器I-O模型"><a href="#8、常见的服务器I-O模型" class="headerlink" title="8、常见的服务器I&#x2F;O模型"></a>8、常见的服务器I&#x2F;O模型</h1><p>在开始了解Tomcat的I&#x2F;O模型之前，我们需要先对服务器中常见的I&#x2F;O模型进行简单介绍。</p>
+<h2 id="8-1-阻塞I-O处理模型"><a href="#8-1-阻塞I-O处理模型" class="headerlink" title="8.1 阻塞I&#x2F;O处理模型"></a>8.1 阻塞I&#x2F;O处理模型</h2><h3 id="8-1-1-单线程阻塞I-O模型"><a href="#8-1-1-单线程阻塞I-O模型" class="headerlink" title="8.1.1 单线程阻塞I&#x2F;O模型"></a>8.1.1 单线程阻塞I&#x2F;O模型</h3><p>单线程阻塞I&#x2F;O模型是最简单的一种服务器I&#x2F;O模型，单线程即同时只能处理一个客户端的请求，阻塞即该线程会一直等待，直到处理完成为止。对于多个客户端访问，必须要等到前一个客户端访问结束才能进行下一个访问的处理，请求一个一个排队，只提供一问一答服务。</p>
 <p><img src="https://resource.tinychen.com/20200401153247.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图所示：这是一个同步阻塞服务器响应客户端访问的时间节点图。</p>
 <ul>
@@ -647,21 +643,21 @@
 <li>接着，客户端1调用服务器的服务，服务器接收到请求后对其进行处理，处理完后写数据回客户端1，整个过程都是在一个线程里面完成的</li>
 <li>最后，处理客户端2的请求并写数据回客户端2，期间就算客户端2在服务器处理完客户端1之前就进行请求，也要等服务器对客户端1响应完后才会对客户端2进行响应处理</li>
 </ul>
-<p><strong>这种模型的特点在于单线程和阻塞I/O。</strong>单线程即服务器端只有一个线程处理客户端的所有请求，客户端连接与服务器端的处理线程比是<code>n:1</code>，它无法同时处理多个连接，只能串行处理连接。而阻塞I/O是指服务器在读写数据时是阻塞的，读取客户端数据时要等待客户端发送数据并且把操作系统内核复制到用户进程中，这时才解除阻塞状态。写数据回客户端时要等待用户进程将数据写入内核并发送到客户端后才解除阻塞状态。<strong>这种阻塞带来了一个问题，服务器必须要等到客户端成功接收才能继续往下处理另外一个客户端的请求，在此期间线程将无法响应任何客户端请求。</strong></p>
+<p><strong>这种模型的特点在于单线程和阻塞I&#x2F;O。</strong>单线程即服务器端只有一个线程处理客户端的所有请求，客户端连接与服务器端的处理线程比是<code>n:1</code>，它无法同时处理多个连接，只能串行处理连接。而阻塞I&#x2F;O是指服务器在读写数据时是阻塞的，读取客户端数据时要等待客户端发送数据并且把操作系统内核复制到用户进程中，这时才解除阻塞状态。写数据回客户端时要等待用户进程将数据写入内核并发送到客户端后才解除阻塞状态。<strong>这种阻塞带来了一个问题，服务器必须要等到客户端成功接收才能继续往下处理另外一个客户端的请求，在此期间线程将无法响应任何客户端请求。</strong></p>
 <p>该模型的特点：它是最简单的服务器模型，整个运行过程都只有一个线程，只能支持同时处理一个客户端的请求(如果有多个客户端访问，就必须排队等待)，<strong>服务器系统资源消耗较小，但并发能力低，容错能力差。</strong></p>
-<h3 id="8-1-2-多线程阻塞I-O模型"><a href="#8-1-2-多线程阻塞I-O模型" class="headerlink" title="8.1.2 多线程阻塞I/O模型"></a>8.1.2 多线程阻塞I/O模型</h3><p>多线程阻塞I/O模型在单线程阻塞I/O模型的基础上对其进行改进，加入多线程，提高并发能力，使其能够同时对多个客户端进行响应，多线程的核心就是利用多线程机制为每个客户端分配一个线程。</p>
+<h3 id="8-1-2-多线程阻塞I-O模型"><a href="#8-1-2-多线程阻塞I-O模型" class="headerlink" title="8.1.2 多线程阻塞I&#x2F;O模型"></a>8.1.2 多线程阻塞I&#x2F;O模型</h3><p>多线程阻塞I&#x2F;O模型在单线程阻塞I&#x2F;O模型的基础上对其进行改进，加入多线程，提高并发能力，使其能够同时对多个客户端进行响应，多线程的核心就是利用多线程机制为每个客户端分配一个线程。</p>
 <p><img src="https://resource.tinychen.com/image-20200401154934307.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图所示，服务器端开始监听客户端的访问，假如有两个客户端同时发送请求过来，服务器端在接收到客户端请求后分别创建两个线程对它们进行处理，每条线程负责一个客户端连接，直到响应完成。<strong>期间两个线程并发地为各自对应的客户端处理请求</strong>，包括读取客户端数据、处理客户端数据、写数据回客户端等操作。</p>
-<p><strong>这种模型的I/O操作也是阻塞的</strong>，因为每个线程执行到读取或写入操作时都将进入阻塞状态，直到读取到客户端的数据或数据成功写入客户端后才解除阻塞状态。尽管I/O操作阻塞，但这种模式比单线程处理的性能明显高了，它不用等到第一个请求处理完才处理第二个，而是并发地处理客户端请求，客户端连接与服务器端处理线程的比例是<code>1:1</code>。</p>
-<p>多线程阻塞I/O模型的特点：支持对多个客户端并发响应，处理能力得到大幅提高，有较大的并发量，但服务器系统资源消耗量较大，而且如果线程数过多，多线程之间会产生较大的线程切换成本，同时拥有较复杂的结构。</p>
-<h2 id="8-2-非阻塞I-O模型"><a href="#8-2-非阻塞I-O模型" class="headerlink" title="8.2 非阻塞I/O模型"></a>8.2 非阻塞I/O模型</h2><h3 id="8-2-1-非阻塞情况下的事件检测"><a href="#8-2-1-非阻塞情况下的事件检测" class="headerlink" title="8.2.1 非阻塞情况下的事件检测"></a>8.2.1 非阻塞情况下的事件检测</h3><p>在探讨单线程非阻塞I/O模型前必须要先了解非阻塞情况下套接字事件的检测机制，因为对于单线程非阻塞模型最重要的事情是检测哪些连接有感兴趣的事件发生。一般会有如下三种检测方式。</p>
+<p><strong>这种模型的I&#x2F;O操作也是阻塞的</strong>，因为每个线程执行到读取或写入操作时都将进入阻塞状态，直到读取到客户端的数据或数据成功写入客户端后才解除阻塞状态。尽管I&#x2F;O操作阻塞，但这种模式比单线程处理的性能明显高了，它不用等到第一个请求处理完才处理第二个，而是并发地处理客户端请求，客户端连接与服务器端处理线程的比例是<code>1:1</code>。</p>
+<p>多线程阻塞I&#x2F;O模型的特点：支持对多个客户端并发响应，处理能力得到大幅提高，有较大的并发量，但服务器系统资源消耗量较大，而且如果线程数过多，多线程之间会产生较大的线程切换成本，同时拥有较复杂的结构。</p>
+<h2 id="8-2-非阻塞I-O模型"><a href="#8-2-非阻塞I-O模型" class="headerlink" title="8.2 非阻塞I&#x2F;O模型"></a>8.2 非阻塞I&#x2F;O模型</h2><h3 id="8-2-1-非阻塞情况下的事件检测"><a href="#8-2-1-非阻塞情况下的事件检测" class="headerlink" title="8.2.1 非阻塞情况下的事件检测"></a>8.2.1 非阻塞情况下的事件检测</h3><p>在探讨单线程非阻塞I&#x2F;O模型前必须要先了解非阻塞情况下套接字事件的检测机制，因为对于单线程非阻塞模型最重要的事情是检测哪些连接有感兴趣的事件发生。一般会有如下三种检测方式。</p>
 <blockquote>
 <p>此处“有感兴趣的事件发生”指的是需要进行读写数据等操作。</p>
 </blockquote>
 <h4 id="1-应用程序遍历套接字的事件检测"><a href="#1-应用程序遍历套接字的事件检测" class="headerlink" title="(1)应用程序遍历套接字的事件检测"></a>(1)应用程序遍历套接字的事件检测</h4><p>当多个客户端向服务器请求时，服务器端会保存一个套接字连接列表中，应用层线程对套接字列表轮询尝试读取或写入。如果成功则进行处理，如果失败则下次继续。这样不管有多少个套接字连接，它们都可以被一个线程管理，这很好地利用了阻塞的时间，处理能力得到提升。</p>
 <p>但这种模型需要在应用程序中遍历所有的套接字列表，同时需要处理数据的拼接，连接空闲时可能也会占用较多CPU资源，不适合实际使用。</p>
 <h4 id="2-内核遍历套接字的事件检测"><a href="#2-内核遍历套接字的事件检测" class="headerlink" title="(2)内核遍历套接字的事件检测"></a>(2)内核遍历套接字的事件检测</h4><p>这种方式将套接字的遍历工作交给了操作系统内核，把对套接字遍历的结果组织成一系列的事件列表并返回应用层处理。对于应用层，它们需要处理的对象就是这些事件，这是一种事件驱动的非阻塞方式。</p>
-<p>服务器端有多个客户端连接，应用层向内核请求读写事件列表。内核遍历所有套接字并生成对应的可读列表readList和可写列表writeList。readList和writeList则标明了每个套接字是否可读/可写。应用层遍历读写事件列表readList和writeList，做相应的读写操作。</p>
+<p>服务器端有多个客户端连接，应用层向内核请求读写事件列表。内核遍历所有套接字并生成对应的可读列表readList和可写列表writeList。readList和writeList则标明了每个套接字是否可读&#x2F;可写。应用层遍历读写事件列表readList和writeList，做相应的读写操作。</p>
 <p>内核遍历套接字时已经不用在应用层对所有套接字进行遍历，将遍历工作下移到内核层，这种方式有助于提高检测效率。<strong>然而，它需要将所有连接的可读事件列表和可写事件列表传到应用层，假如套接字连接数量变大，列表从内核复制到应用层也是不小的开销。</strong>另外，当活跃连接较少时，<strong>内核与应用层之间存在很多无效的数据副本</strong>，因为它将活跃和不活跃的连接状态都复制到应用层中。</p>
 <h4 id="3-内核基于回调的事件检测"><a href="#3-内核基于回调的事件检测" class="headerlink" title="(3)内核基于回调的事件检测"></a>(3)内核基于回调的事件检测</h4><p>通过遍历的方式检测套接字是否可读可写是一种效率比较低的方式，不管是在应用层中遍历还是在内核中遍历。所以需要另外一种机制来优化遍历的方式，那就是<strong>回调函数</strong>。内核中的套接字都对应一个回调函数，当客户端往套接字发送数据时，内核从网卡接收数据后就会调用回调函数，在回调函数中维护事件列表，应用层获取此事件列表即可得到所有感兴趣的事件。</p>
 <p><strong>内核基于回调的事件检测方式有两种</strong></p>
@@ -669,7 +665,7 @@
 <ul>
 <li><p>服务器端有多个客户端套接字连接</p>
 </li>
-<li><p>当客户端发送数据过来时，内核从网卡复制数据成功后调用回调函数将<code>readList/writeList</code>对应的元素标记为可读/可写</p>
+<li><p>当客户端发送数据过来时，内核从网卡复制数据成功后调用回调函数将<code>readList/writeList</code>对应的元素标记为可读&#x2F;可写</p>
 </li>
 <li><p>应用层发送请求读、写事件列表，内核返回包含了事件标识的<code>readList</code>和<code>writeList</code>事件列表，此时返回的两个列表内容大致如下</p>
 <table>
@@ -792,18 +788,18 @@
 </li>
 </ul>
 <p>上面两种方式由操作系统内核维护客户端的所有连接并通过回调函数不断更新事件列表，而应用层线程只要遍历这些事件列表即可知道可读取或可写入的连接，进而对这些连接进行读写操作，极大提高了检测效率，自然处理能力也更强。</p>
-<h3 id="8-2-2-单线程非阻塞I-O模型"><a href="#8-2-2-单线程非阻塞I-O模型" class="headerlink" title="8.2.2 单线程非阻塞I/O模型"></a>8.2.2 单线程非阻塞I/O模型</h3><p>单线程非阻塞I/O模型最重要的一个特点是，在调用读取或写入接口后立即返回，而不会进入阻塞状态。虽然只有一个线程，但是它通过把非阻塞读写操作与上面几种检测机制配合就可以实现对多个连接的及时处理，而不会因为某个连接的阻塞操作导致其他连接无法处理。在客户端连接大多数都保持活跃的情况下，这个线程会一直循环处理这些连接，它很好地利用了阻塞的时间，大大提高了这个线程的执行效率。</p>
-<p>单线程非阻塞I/O模型的主要优势体现在对多个连接的管理，一般在同时需要处理多个连接的发场景中会使用非阻塞NIO模式，此模型下只通过一个线程去维护和处理连接，这样大大提高了机器的效率。一般服务器端才会使用NIO模式，而对于客户端，出于方便及习惯，可使用阻塞模式的套接字进行通信。</p>
-<h3 id="8-2-3-多线程非阻塞I-O模型"><a href="#8-2-3-多线程非阻塞I-O模型" class="headerlink" title="8.2.3 多线程非阻塞I/O模型"></a>8.2.3 多线程非阻塞I/O模型</h3><p>在多核的机器上可以通过多线程继续提高机器效率。最朴实、最自然的做法就是将客户端连接按组分配给若干线程，每个线程负责处理对应组内的连接。比如有4个客户端访问服务器，服务器将套接字1和套接字2交由线程1管理，而线程2则管理套接字3和套接字4，通过事件检测及非阻塞读写就可以让每个线程都能高效处理。</p>
-<p><strong>多线程非阻塞I/O模式让服务器端处理能力得到很大提高，它充分利用机器的CPU，适合用于处理高并发的场景，但它也让程序更复杂，更容易出现问题（死锁、数据不一致等经典并发问题）。</strong></p>
-<h3 id="8-2-4-Reactor模式"><a href="#8-2-4-Reactor模式" class="headerlink" title="8.2.4 Reactor模式"></a>8.2.4 Reactor模式</h3><p>最经典的多线程非阻塞I/O模型方式是Reactor模式。首先看单线程下的Reactor，Reactor将服务器端的整个处理过程分成若干个事件，例如分为接收事件、读事件、写事件、执行事件等。Reactor通过事件检测机制将这些事件分发给不同处理器去处理。在整个过程中只要有待处理的事件存在，即可以让Reactor线程不断往下执行，而不会阻塞在某处，所以处理效率很高。</p>
+<h3 id="8-2-2-单线程非阻塞I-O模型"><a href="#8-2-2-单线程非阻塞I-O模型" class="headerlink" title="8.2.2 单线程非阻塞I&#x2F;O模型"></a>8.2.2 单线程非阻塞I&#x2F;O模型</h3><p>单线程非阻塞I&#x2F;O模型最重要的一个特点是，在调用读取或写入接口后立即返回，而不会进入阻塞状态。虽然只有一个线程，但是它通过把非阻塞读写操作与上面几种检测机制配合就可以实现对多个连接的及时处理，而不会因为某个连接的阻塞操作导致其他连接无法处理。在客户端连接大多数都保持活跃的情况下，这个线程会一直循环处理这些连接，它很好地利用了阻塞的时间，大大提高了这个线程的执行效率。</p>
+<p>单线程非阻塞I&#x2F;O模型的主要优势体现在对多个连接的管理，一般在同时需要处理多个连接的发场景中会使用非阻塞NIO模式，此模型下只通过一个线程去维护和处理连接，这样大大提高了机器的效率。一般服务器端才会使用NIO模式，而对于客户端，出于方便及习惯，可使用阻塞模式的套接字进行通信。</p>
+<h3 id="8-2-3-多线程非阻塞I-O模型"><a href="#8-2-3-多线程非阻塞I-O模型" class="headerlink" title="8.2.3 多线程非阻塞I&#x2F;O模型"></a>8.2.3 多线程非阻塞I&#x2F;O模型</h3><p>在多核的机器上可以通过多线程继续提高机器效率。最朴实、最自然的做法就是将客户端连接按组分配给若干线程，每个线程负责处理对应组内的连接。比如有4个客户端访问服务器，服务器将套接字1和套接字2交由线程1管理，而线程2则管理套接字3和套接字4，通过事件检测及非阻塞读写就可以让每个线程都能高效处理。</p>
+<p><strong>多线程非阻塞I&#x2F;O模式让服务器端处理能力得到很大提高，它充分利用机器的CPU，适合用于处理高并发的场景，但它也让程序更复杂，更容易出现问题（死锁、数据不一致等经典并发问题）。</strong></p>
+<h3 id="8-2-4-Reactor模式"><a href="#8-2-4-Reactor模式" class="headerlink" title="8.2.4 Reactor模式"></a>8.2.4 Reactor模式</h3><p>最经典的多线程非阻塞I&#x2F;O模型方式是Reactor模式。首先看单线程下的Reactor，Reactor将服务器端的整个处理过程分成若干个事件，例如分为接收事件、读事件、写事件、执行事件等。Reactor通过事件检测机制将这些事件分发给不同处理器去处理。在整个过程中只要有待处理的事件存在，即可以让Reactor线程不断往下执行，而不会阻塞在某处，所以处理效率很高。</p>
 <p><img src="https://resource.tinychen.com/20200402115511.png" srcset="/img/loading.gif" lazyload></p>
 <p><strong>基于单线程Reactor模型，根据实际使用场景，把它改进成多线程模式。常见的有两种方式：一种是在耗时的process处理器中引入多线程，如使用线程池；另一种是直接使用多个Reactor实例，每个Reactor实例对应一个线程。</strong></p>
 <p>Reactor模式的一种改进方式如下图所示。其整体结构基本上与单线程的Reactor类似，只是引入了一个线程池。由于对连接的接收、对数据的读取和对数据的写入等操作基本上都耗时较少，因此把它们都放到Reactor线程中处理。然而，对于逻辑处理可能比较耗时的工作，可以在process处理器中引入线程池，process处理器自己不执行任务，而是交给线程池，从而在Reactor线程中避免了耗时的操作。将耗时的操作转移到线程池中后，尽管Reactor只有一个线程，它也能保证Reactor的高效。</p>
 <p><img src="https://resource.tinychen.com/20200402115553.png" srcset="/img/loading.gif" lazyload></p>
 <p>Reactor模式的另一种改进方式如下图所示。其中有多个Reactor实例，每个Reactor实例对应一个线程。因为接收事件是相对于服务器端而言的，所以客户端的连接接收工作统一由一个accept处理器负责，accept处理器会将接收的客户端连接均匀分配给所有Reactor实例，每个Reactor实例负责处理分配到该Reactor上的客户端连接，包括连接的读数据、写数据和逻辑处理。这就是多Reactor实例的原理。</p>
 <p><img src="https://resource.tinychen.com/20200402115623.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="9、Tomcat的三种主要I-O模型"><a href="#9、Tomcat的三种主要I-O模型" class="headerlink" title="9、Tomcat的三种主要I/O模型"></a>9、Tomcat的三种主要I/O模型</h1><p>Tomcat支持的I/O模型如下表（自8.5/9.0 版本起，Tomcat移除了对BIO的支持），在 8.0 之前 ， Tomcat 默认采用的I/O方式为 BIO ， 之后改为 NIO。 无论 NIO、NIO2 还是 APR， 在性能方面均优于以往的BIO。</p>
+<h1 id="9、Tomcat的三种主要I-O模型"><a href="#9、Tomcat的三种主要I-O模型" class="headerlink" title="9、Tomcat的三种主要I&#x2F;O模型"></a>9、Tomcat的三种主要I&#x2F;O模型</h1><p>Tomcat支持的I&#x2F;O模型如下表（自8.5&#x2F;9.0 版本起，Tomcat移除了对BIO的支持），在 8.0 之前 ， Tomcat 默认采用的I&#x2F;O方式为 BIO ， 之后改为 NIO。 无论 NIO、NIO2 还是 APR， 在性能方面均优于以往的BIO。</p>
 <table>
 <thead>
 <tr>
@@ -813,52 +809,52 @@
 </thead>
 <tbody><tr>
 <td>NIO</td>
-<td>同步非阻塞I/O，采用Java NIO类库实现</td>
+<td>同步非阻塞I&#x2F;O，采用Java NIO类库实现</td>
 </tr>
 <tr>
 <td>NIO2</td>
-<td>异步非阻塞I/O，采用JDK 7最新的NIO2类库实现</td>
+<td>异步非阻塞I&#x2F;O，采用JDK 7最新的NIO2类库实现</td>
 </tr>
 <tr>
 <td>APR</td>
-<td>采用Apache可移植运行库实现，是C/C++编写的本地库，需要单独安装APR库</td>
+<td>采用Apache可移植运行库实现，是C&#x2F;C++编写的本地库，需要单独安装APR库</td>
 </tr>
 </tbody></table>
-<p>在开始之前，我们先看一下<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/http.html">tomcat官网</a>给出的这三种I/O模型的工作参数的一个对比图：</p>
+<p>在开始之前，我们先看一下<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/http.html">tomcat官网</a>给出的这三种I&#x2F;O模型的工作参数的一个对比图：</p>
 <p><img src="https://resource.tinychen.com/blog/20200409/l0bTxdP2juMk.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到一般说的NIO、NIO2和APR使用的是非阻塞方式指的就是在<strong>读取请求报头</strong>和<strong>等待下一个请求</strong>的时候是使用的<strong>非阻塞方式。</strong></p>
-<p><strong>Tomcat的NIO是基于I/O复用（同步I/O）来实现的，而NIO2是使用的异步I/O。</strong>参考经典书籍《UNIX网络编程 卷1 套接字联网API》，两者的主要原理如下：</p>
+<p><strong>Tomcat的NIO是基于I&#x2F;O复用（同步I&#x2F;O）来实现的，而NIO2是使用的异步I&#x2F;O。</strong>参考经典书籍《UNIX网络编程 卷1 套接字联网API》，两者的主要原理如下：</p>
 <ul>
-<li><p>I/O复用</p>
-<p>I/O复用（I/O multiplexing）可以调用<code>select</code>或<code>poll</code>，阻塞在这两个系统调用中的某一个之上，而不是阻塞在真正的I/O系统调用上。进程阻塞于<code>select</code>调用，等待数据报套接字变为可读。当<code>select</code>返回套接字可读这一条件时，进程调用<code>recvfrom</code>把所读数据报复制到应用进程缓冲区，尽管这里需要使用<code>select</code>和<code>recvfrom</code>两个系统调用，但是使用<code>select</code>的可以等待多个描述符就绪，即可以等待多个请求。</p>
+<li><p>I&#x2F;O复用</p>
+<p>I&#x2F;O复用（I&#x2F;O multiplexing）可以调用<code>select</code>或<code>poll</code>，阻塞在这两个系统调用中的某一个之上，而不是阻塞在真正的I&#x2F;O系统调用上。进程阻塞于<code>select</code>调用，等待数据报套接字变为可读。当<code>select</code>返回套接字可读这一条件时，进程调用<code>recvfrom</code>把所读数据报复制到应用进程缓冲区，尽管这里需要使用<code>select</code>和<code>recvfrom</code>两个系统调用，但是使用<code>select</code>的可以等待多个描述符就绪，即可以等待多个请求。</p>
 <p><img src="https://resource.tinychen.com/blog/20200409/tKX17eQCJnzT.png" srcset="/img/loading.gif" lazyload></p>
 </li>
 <li><p>异步IO</p>
-<p>异步I/O（asynchronous I/O）的工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到应用程序的缓冲区）完成后通知应用程序。需要注意的是：异步I/O模型是由内核通知应用进程I/O操作何时完成。</p>
+<p>异步I&#x2F;O（asynchronous I&#x2F;O）的工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到应用程序的缓冲区）完成后通知应用程序。需要注意的是：异步I&#x2F;O模型是由内核通知应用进程I&#x2F;O操作何时完成。</p>
 <p><img src="https://resource.tinychen.com/blog/20200409/cxhjDzPYM0a4.png" srcset="/img/loading.gif" lazyload></p>
 </li>
 </ul>
 <p>最后我们可以把上面的过程结合剩下没有提到的三种UNIX系统中的IO模型进行对比得到下图：</p>
 <p><img src="https://resource.tinychen.com/blog/20200409/YDYCG1ChUYRp.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="9-1-NIO（New-I-O-APIs、同步非阻塞）"><a href="#9-1-NIO（New-I-O-APIs、同步非阻塞）" class="headerlink" title="9.1 NIO（New I/O APIs、同步非阻塞）"></a>9.1 NIO（New I/O APIs、同步非阻塞）</h2><p><strong>Tomcat中的NIO模型是使用的JAVA的NIO类库，其内部的IO实现是同步的（也就是在用户态和内核态之间的数据交换上是同步机制），采用基于selector实现的异步事件驱动机制（这里的异步指的是selector这个实现模型是使用的异步机制）。</strong>而对于Java来说，非阻塞I/O的实现完全是基于操作系统内核的非阻塞I/O，它将操作系统的非阻塞I/O的差异屏蔽并提供统一的API，让我们不必关心操作系统。JDK会帮我们选择非阻塞I/O的实现方式。</p>
+<h2 id="9-1-NIO（New-I-O-APIs、同步非阻塞）"><a href="#9-1-NIO（New-I-O-APIs、同步非阻塞）" class="headerlink" title="9.1 NIO（New I&#x2F;O APIs、同步非阻塞）"></a>9.1 NIO（New I&#x2F;O APIs、同步非阻塞）</h2><p><strong>Tomcat中的NIO模型是使用的JAVA的NIO类库，其内部的IO实现是同步的（也就是在用户态和内核态之间的数据交换上是同步机制），采用基于selector实现的异步事件驱动机制（这里的异步指的是selector这个实现模型是使用的异步机制）。</strong>而对于Java来说，非阻塞I&#x2F;O的实现完全是基于操作系统内核的非阻塞I&#x2F;O，它将操作系统的非阻塞I&#x2F;O的差异屏蔽并提供统一的API，让我们不必关心操作系统。JDK会帮我们选择非阻塞I&#x2F;O的实现方式。</p>
 <blockquote>
 <p>这里需要提一下同步异步和阻塞非阻塞的概念：</p>
 <p><strong>同步和异步关注的是消息通信机制</strong>，同步异步指的是应用程序<strong>发起的调用请求</strong>和<strong>获得的返回值</strong>是否一起返回，如果一起返回就是同步，否则就是异步，异步可以通过回调函数等方式实现。</p>
 <p><strong>阻塞和非阻塞关注的是程序在等待调用结果时的状态</strong>，应用程序发起调用请求之后不能干别的事情直到请求处理完成了就是阻塞，否则就是非阻塞。</p>
-<p><strong>所以我个人认为，对于阻塞I/O谈同步异步是没有太大意义的，因为此时进程已经阻塞，想要去干别的事情必须得等请求处理完，而请求处理完必然会得到返回值。</strong></p>
-<p>上面我们提到得内核基于回调得事件检测方式二就是典型的异步非阻塞I/O模型。</p>
+<p><strong>所以我个人认为，对于阻塞I&#x2F;O谈同步异步是没有太大意义的，因为此时进程已经阻塞，想要去干别的事情必须得等请求处理完，而请求处理完必然会得到返回值。</strong></p>
+<p>上面我们提到得内核基于回调得事件检测方式二就是典型的异步非阻塞I&#x2F;O模型。</p>
 </blockquote>
-<h2 id="9-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）"><a href="#9-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）" class="headerlink" title="9.2 NIO2（New I/O APIs 2、异步非阻塞、AIO）"></a>9.2 NIO2（New I/O APIs 2、异步非阻塞、AIO）</h2><p>NIO2和前者相比的最大不同就在于引入了异步通道来实现异步IO操作，因此也叫AIO（Asynchronous I/O）。NIO.2 的异步通道 APIs 提供方便的、平台独立的执行异步操作的标准方法。这使得应用程序开发人员能够以更清晰的方式来编写程序，而不必定义自己的 Java 线程，此外，还可通过使用底层 OS 所支持的异步功能来提高性能。如同其他 Java API 一样，API 可利用的 OS 自有异步功能的数量取决于其对该平台的支持程度。</p>
-<p>异步通道提供支持连接、读取、以及写入之类非锁定操作的连接，并提供对已启动操作的控制机制。Java 7 中用于 Java Platform（NIO.2）的 More New I/O APIs，通过在 <code>java.nio.channels</code> 包中增加四个异步通道类，从而增强了 Java 1.4 中的 New I/O APIs（NIO），这些类在风格上与 NIO 通道 API 很相似。他们共享相同的方法与参数结构体，并且大多数对于 NIO 通道类可用的参数，对于新的异步版本仍然可用。主要区别在于新通道可使一些操作异步执行。</p>
+<h2 id="9-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）"><a href="#9-2-NIO2（New-I-O-APIs-2、异步非阻塞、AIO）" class="headerlink" title="9.2 NIO2（New I&#x2F;O APIs 2、异步非阻塞、AIO）"></a>9.2 NIO2（New I&#x2F;O APIs 2、异步非阻塞、AIO）</h2><p>NIO2和前者相比的最大不同就在于引入了异步通道来实现异步IO操作，因此也叫AIO（Asynchronous I&#x2F;O）。NIO.2 的异步通道 APIs 提供方便的、平台独立的执行异步操作的标准方法。这使得应用程序开发人员能够以更清晰的方式来编写程序，而不必定义自己的 Java 线程，此外，还可通过使用底层 OS 所支持的异步功能来提高性能。如同其他 Java API 一样，API 可利用的 OS 自有异步功能的数量取决于其对该平台的支持程度。</p>
+<p>异步通道提供支持连接、读取、以及写入之类非锁定操作的连接，并提供对已启动操作的控制机制。Java 7 中用于 Java Platform（NIO.2）的 More New I&#x2F;O APIs，通过在 <code>java.nio.channels</code> 包中增加四个异步通道类，从而增强了 Java 1.4 中的 New I&#x2F;O APIs（NIO），这些类在风格上与 NIO 通道 API 很相似。他们共享相同的方法与参数结构体，并且大多数对于 NIO 通道类可用的参数，对于新的异步版本仍然可用。主要区别在于新通道可使一些操作异步执行。</p>
 <p>异步通道 API 提供两种对已启动异步操作的监测与控制机制。第一种是通过返回一个 <code>java.util.concurrent.Future</code> 对象来实现，它将会建模一个挂起操作，并可用于查询其状态以及获取结果。第二种是通过传递给操作一个新类的对象，<code>java.nio.channels.CompletionHandler</code>，来完成，它会定义在操作完毕后所执行的处理程序方法。每个异步通道类为每个操作定义 API 副本，这样可采用任一机制。</p>
 <h2 id="9-3-APR"><a href="#9-3-APR" class="headerlink" title="9.3 APR"></a>9.3 APR</h2><p><strong>Apache可移植运行时（Apache Portable Runtime，APR）</strong>是Apache HTTP服务器的支持库，最初，APR是作为Apache HTTP服务器的一部分而存在的，后来成为一个单独的项目。其他的应用程序可以使用APR来实现平台无关性（跨平台）。APR提供了一组映射到下层操作系统的API，如果操作系统不支持某个特定的功能，APR将提供一个模拟的实现。这样程序员使用APR编写真正可在不同平台上移植的程序。</p>
-<h2 id="9-4-Tomcat配置APR"><a href="#9-4-Tomcat配置APR" class="headerlink" title="9.4 Tomcat配置APR"></a>9.4 Tomcat配置APR</h2><figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk"><span class="hljs-comment"># 首先使用yum来安装apr</span><br>yum install apr apr-devel<br><br><span class="hljs-comment"># 进入tomcat目录下对tomcat-native进行解压</span><br>cd <span class="hljs-regexp">/home/</span>tomcat9<span class="hljs-regexp">/bin/</span><br>tar -zxvf tomcat-native.tar.gz <br>cd tomcat-native-<span class="hljs-number">1.2</span>.<span class="hljs-number">23</span>-src<span class="hljs-regexp">/native/</span><br><span class="hljs-comment"># 编译安装</span><br>./configure <br>make<br>make install<br></code></pre></div></td></tr></table></figure>
+<h2 id="9-4-Tomcat配置APR"><a href="#9-4-Tomcat配置APR" class="headerlink" title="9.4 Tomcat配置APR"></a>9.4 Tomcat配置APR</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先使用yum来安装apr</span><br>yum install apr apr-devel<br><br><span class="hljs-comment"># 进入tomcat目录下对tomcat-native进行解压</span><br><span class="hljs-built_in">cd</span> /home/tomcat9/bin/<br>tar -zxvf tomcat-native.tar.gz <br><span class="hljs-built_in">cd</span> tomcat-native-1.2.23-src/native/<br><span class="hljs-comment"># 编译安装</span><br>./configure <br>make<br>make install<br></code></pre></div></td></tr></table></figure>
 
 <p>顺利安装完成后会显示apr的lib库路径，一般都是<code>/usr/local/apr/lib</code></p>
 <p><img src="https://resource.tinychen.com/20200402101103.png" srcset="/img/loading.gif" lazyload></p>
 <p>安装完成之后我们还需要修改环境变量和配置参数</p>
 <p>这里我们使用的是systemd调用jsvc来启动tomcat，所以我们直接在systemd对应的tomcat的unit文件中的<code>ExecStart</code>中添加一个路径参数<code>-Djava.library.path=/usr/local/apr/lib</code>指向apr库的路径：</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">ExecStart=<span class="hljs-regexp">/home/</span>tomcat9<span class="hljs-regexp">/bin/</span>jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home <span class="hljs-variable">$&#123;JAVA_HOME&#125;</span> \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -classpath <span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span><span class="hljs-regexp">/bin/</span>bootstrap.jar:<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span><span class="hljs-regexp">/bin/</span>tomcat-juli.jar \<br>        -outfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span><span class="hljs-regexp">/logs/</span>catalina.out \<br>        -errfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span><span class="hljs-regexp">/logs/</span>catalina.err \<br>        -Dcatalina.home=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -Dcatalina.base=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Djava.io.tmpdir=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.file=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span><span class="hljs-regexp">/conf/</span>logging.properties \<br>        -Djava.library.path=<span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/apr/</span>lib \<br>        org.apache.catalina.startup.Bootstrap<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros"><span class="hljs-attribute">ExecStart</span>=/home/tomcat9/bin/jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home <span class="hljs-variable">$&#123;JAVA_HOME&#125;</span> \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -classpath <span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/bootstrap.jar:<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/tomcat-juli.jar \<br>        -outfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.out \<br>        -errfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.err \<br>        -Dcatalina.<span class="hljs-attribute">home</span>=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -Dcatalina.<span class="hljs-attribute">base</span>=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Djava.io.<span class="hljs-attribute">tmpdir</span>=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.<span class="hljs-attribute">manager</span>=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.<span class="hljs-attribute">file</span>=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties \<br>        -Djava.library.<span class="hljs-attribute">path</span>=/usr/local/apr/lib \<br>        org.apache.catalina.startup.Bootstrap<br></code></pre></div></td></tr></table></figure>
 
 <p>然后我们在tomcat的home目录下的conf子目录中对server.xml文件进行修改</p>
 <p>把8080端口对应的配置修改成apr：（其他端口配置也类似）</p>
@@ -895,7 +891,7 @@
 <blockquote>
 <p>APR的重点在于使用C语言实现并且能够跨平台使用，它相当于将UNIX系统中的IO操作进行了一层封装使得编程开发更容易</p>
 </blockquote>
-<p>NIO性能是最差的这是毋庸置疑的，如果是考虑到高并发的情况，显然异步非阻塞I/O模式的NIO2和APR库在性能上更有优势，实际上NIO2的性能表现也和APR不相上下，但是NIO2要求Tomcat的版本要在8.0以上，而APR只需要5.5以上即可，但是APR需要额外配置库环境，相对于内置集成的NIO2来说APR这个操作比较麻烦，两者各有优劣。具体使用哪个还是需要结合实际业务需求和环境进行测试才能决定。</p>
+<p>NIO性能是最差的这是毋庸置疑的，如果是考虑到高并发的情况，显然异步非阻塞I&#x2F;O模式的NIO2和APR库在性能上更有优势，实际上NIO2的性能表现也和APR不相上下，但是NIO2要求Tomcat的版本要在8.0以上，而APR只需要5.5以上即可，但是APR需要额外配置库环境，相对于内置集成的NIO2来说APR这个操作比较麻烦，两者各有优劣。具体使用哪个还是需要结合实际业务需求和环境进行测试才能决定。</p>
 <h1 id="10、server-xml"><a href="#10、server-xml" class="headerlink" title="10、server.xml"></a>10、server.xml</h1><p>Tomcat中的大多数配置都会在<code>server.xml</code>文件中，<code>server.xml</code>的地位就好像nginx中的<code>nginx.conf</code>文件，因此我们想要学习配置tomcat的各类参数，最先开始学习的配置就是<code>server.xml</code>文件。</p>
 <h2 id="10-1-server-xml整体架构"><a href="#10-1-server-xml整体架构" class="headerlink" title="10.1 server.xml整体架构"></a>10.1 server.xml整体架构</h2><p>首先我们需要知道<code>server.xml</code>中的xml代码块分类，tomcat官网将其主要分为四类：</p>
 <ul>

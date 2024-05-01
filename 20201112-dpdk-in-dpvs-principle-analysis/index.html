@@ -82,7 +82,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -209,7 +209,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      6.8k 字
+      6.9k 字
     </span>
   
 
@@ -265,10 +265,10 @@
 <p>对于运行着dpdk的机器，我们查看内核模块和对应的dpdk网卡驱动，可以发现uio模块和PMD驱动的踪迹，其中04:00.1是dpdk的网卡，而04:00.0则是普通状态下的网卡</p>
 <figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-comment"># lsmod | grep uio</span><br><span class="hljs-string">igb_uio</span>                <span class="hljs-number">13414</span>  <span class="hljs-number">1</span><br><span class="hljs-string">uio</span>                    <span class="hljs-number">19338</span>  <span class="hljs-number">3</span> <span class="hljs-string">igb_uio</span><br><br><span class="hljs-number">04</span><span class="hljs-string">:00.0</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">ixgbe</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br><span class="hljs-number">04</span><span class="hljs-string">:00.1</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">controller</span> [<span class="hljs-number">0200</span>]<span class="hljs-string">:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">82599ES</span> <span class="hljs-number">10</span><span class="hljs-string">-Gigabit</span> <span class="hljs-string">SFI/SFP+</span> <span class="hljs-string">Network</span> <span class="hljs-string">Connection</span> [<span class="hljs-number">8086</span><span class="hljs-string">:10fb</span>] <span class="hljs-string">(rev</span> <span class="hljs-number">01</span><span class="hljs-string">)</span><br>        <span class="hljs-attr">Subsystem:</span> <span class="hljs-string">Intel</span> <span class="hljs-string">Corporation</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Server</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">X520-2</span> [<span class="hljs-number">8086</span><span class="hljs-string">:000c</span>]<br>        <span class="hljs-attr">Kernel driver in use:</span> <span class="hljs-string">igb_uio</span><br>        <span class="hljs-attr">Kernel modules:</span> <span class="hljs-string">ixgbe</span><br></code></pre></div></td></tr></table></figure>
 
-<p>PMD驱动包含了各种API，并且提供了在用户态运行的BSD驱动，用于配置网卡和网卡的收发队列。此外，PWD驱动最大的优势就是无需任何中断操作就可以直接访问网卡队列中的RX/TX描述符（除了网卡的链接状态变化），借助这个优势，就可以绕过内核和同样运行在用户态的应用程序快速地进行数据传输。我们可以通过下图来对比传统的应用程序和网卡通信的方式以及使用PMD驱动后和网卡通信的方式。</p>
+<p>PMD驱动包含了各种API，并且提供了在用户态运行的BSD驱动，用于配置网卡和网卡的收发队列。此外，PWD驱动最大的优势就是无需任何中断操作就可以直接访问网卡队列中的RX&#x2F;TX描述符（除了网卡的链接状态变化），借助这个优势，就可以绕过内核和同样运行在用户态的应用程序快速地进行数据传输。我们可以通过下图来对比传统的应用程序和网卡通信的方式以及使用PMD驱动后和网卡通信的方式。</p>
 <p><img src="https://resource.tinychen.com/20201112135138.jpeg" srcset="/img/loading.gif" lazyload></p>
-<p>传统模式下，应用程序如nginx等运行在用户态（User Space），网卡（NIC）属于硬件设备，是归属于内核管理，网卡驱动运行在内核态中（Kernel Space）。那么当应用程序需要和网卡交换数据的时候，需要进行一轮用户态到内核态之间的切换，再经过内核中的TCP/IP协议栈，才能和网卡驱动通信，而网卡驱动和网卡之间的通信是通过硬件中断的方式来实现的，也就是<strong>传统模式下存在着用户态/内核态切换和两个非常耗时耗资源的操作</strong>。</p>
-<p>DPDK的处理方式非常简单粗暴，首先<strong>将网卡驱动从内核态移动到用户态运行</strong>，这样应用程序和PMD网卡驱动之间进行数据交换就不需要进行内核态/用户态的切换，避免了上下文切换，且由于都是在用户态，不需要将数据拷贝到内核态，也实现了零拷贝<code>zero copy</code>，同时还绕过了内核中的TCP/IP网络栈，极大地缩短APP到Driver之间的传输时间。</p>
+<p>传统模式下，应用程序如nginx等运行在用户态（User Space），网卡（NIC）属于硬件设备，是归属于内核管理，网卡驱动运行在内核态中（Kernel Space）。那么当应用程序需要和网卡交换数据的时候，需要进行一轮用户态到内核态之间的切换，再经过内核中的TCP&#x2F;IP协议栈，才能和网卡驱动通信，而网卡驱动和网卡之间的通信是通过硬件中断的方式来实现的，也就是<strong>传统模式下存在着用户态&#x2F;内核态切换和两个非常耗时耗资源的操作</strong>。</p>
+<p>DPDK的处理方式非常简单粗暴，首先<strong>将网卡驱动从内核态移动到用户态运行</strong>，这样应用程序和PMD网卡驱动之间进行数据交换就不需要进行内核态&#x2F;用户态的切换，避免了上下文切换，且由于都是在用户态，不需要将数据拷贝到内核态，也实现了零拷贝<code>zero copy</code>，同时还绕过了内核中的TCP&#x2F;IP网络栈，极大地缩短APP到Driver之间的传输时间。</p>
 <p>当然这种绕过系统内核的做法最直接的代价就是<strong>驱动程序必须一直通过轮询poll的操作来保证能够及时接收到网卡的信息和数据，导致对应的cpu核心会一直处于100%的占用状态</strong>。同时这个时候网卡已经不再归于系统内核管理，常规的ip和ifconfig等命令已经没办法查看网卡的详细信息，需要使用dpip工具来对网卡进行管理。</p>
 <p>这里就是dpvs宣称的<code>内核旁路</code>（<code>kernel bypass</code>）、轮询（polling）、<code>零拷贝</code>（<code>zero copy</code>）等特性的实现原理。</p>
 <blockquote>
@@ -293,20 +293,20 @@
 <p>对于关闭NUMA的机器，在Linux系统中查看的时候只有一个NUMA节点，系统会以为只有一颗CPU，那么这128G内存就都是这一颗CPU的，这样的好处是在应用程序可以通过操作系统<strong>跨NUMA节点调度另外一颗CPU的内存</strong>，虽然一颗CPU只有64G内存的，但是在这个CPU上面运行的程序可以调用128G的内存，实在不够了再调用SWAP内存。对于一般的应用程序来说，即使是使用了另外一颗CPU的内存会带来较高的延时，但是性能也远比swap内存强多了。</p>
 <blockquote>
 <p>关于是否开启处理器的超线程技术，主要分析如下：</p>
-<p>超线程（Hyper-Threading）在一个处理器中提供两个逻辑执行线程，逻辑线程共享流水线、执行单元和缓存。<strong>该技术的本质是复用单处理器中的超标量流水线的多路执行单元，降低多路执行单元中因指令依赖造成的执行单元闲置。</strong>对于每个逻辑线程，拥有完整独立的寄存器集合和本地中断逻辑，从软件的角度，与单线程物理核并没有差异。例如，8核心的处理器使用超线程技术之后，可以得到16个逻辑线程。采用超线程，在单核上可以同时进行多线程处理，使整体性能得到一定程度提升。但由于其毕竟是共享执行单元的，对IPC（每周期执行指令数）越高的应用，带来的帮助越有限。<strong>DPDK是一种I/O集中的负载，对于这类负载，IPC相对不是特别高，所以超线程技术会有一定程度的帮助。</strong></p>
+<p>超线程（Hyper-Threading）在一个处理器中提供两个逻辑执行线程，逻辑线程共享流水线、执行单元和缓存。<strong>该技术的本质是复用单处理器中的超标量流水线的多路执行单元，降低多路执行单元中因指令依赖造成的执行单元闲置。</strong>对于每个逻辑线程，拥有完整独立的寄存器集合和本地中断逻辑，从软件的角度，与单线程物理核并没有差异。例如，8核心的处理器使用超线程技术之后，可以得到16个逻辑线程。采用超线程，在单核上可以同时进行多线程处理，使整体性能得到一定程度提升。但由于其毕竟是共享执行单元的，对IPC（每周期执行指令数）越高的应用，带来的帮助越有限。<strong>DPDK是一种I&#x2F;O集中的负载，对于这类负载，IPC相对不是特别高，所以超线程技术会有一定程度的帮助。</strong></p>
 </blockquote>
 <p>对于打开NUMA的机器，在本身的CPU内存用尽的情况下，不会去跨NUMA节点调度另外一颗CPU的内存，而是<strong>直接调用swap内存</strong>。对于DPDK程序来说，这样的好处就是尽可能地降低内存的延迟，提高性能表现。由于DPDK广泛的使用了大页内存（HugePage），可以有效地控制内存的超用问题，不会涉及到swap内存的调用。</p>
 <h2 id="RSS（Receive-Side-Scaling）"><a href="#RSS（Receive-Side-Scaling）" class="headerlink" title="RSS（Receive Side Scaling）"></a>RSS（Receive Side Scaling）</h2><p>同样的除了内存之外，问题还存在于网卡设备上。一般来说网卡设备是通过PCIe总线和CPU连接，不同CPU之间跨NUMA节点调用PCIe设备带来的性能损耗实际上并没有内存那么大，因为PCIe总线并没有内存总线距离CPU那么“近”，而且两者的带宽也不是在一个数量级上。</p>
 <p>还是前面用到的那张网卡，我们使用lspci命令查看pci设备信息的时候我们可以看到对应的NIC设备的信息（截取部分）：</p>
 <ul>
-<li><p>这里可以看到5GT/s对应的是PCIe2.0，x8则表示带宽，这里使用的是一个PCIe2.0x8的双口万兆网卡82599ES</p>
-<p>GT/s是PCIe设备用来表示带宽的单位，具体对应速度转换可以查看下面的这个表格</p>
+<li><p>这里可以看到5GT&#x2F;s对应的是PCIe2.0，x8则表示带宽，这里使用的是一个PCIe2.0x8的双口万兆网卡82599ES</p>
+<p>GT&#x2F;s是PCIe设备用来表示带宽的单位，具体对应速度转换可以查看下面的这个表格</p>
 <p><img src="https://resource.tinychen.com/20201112171900.png" srcset="/img/loading.gif" lazyload></p>
 </li>
 <li><p>NUMA node表示这块PCIe网卡插在的插槽是哪一颗CPU对应的PCIe总线</p>
 </li>
 </ul>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">04</span>:<span class="hljs-number">00</span>.<span class="hljs-number">1</span> Ethernet controller: Intel Corporation <span class="hljs-number">82599</span>ES <span class="hljs-number">10</span>-Gigabit SFI/SFP+ Network Connection (rev <span class="hljs-number">01</span>)<br>        <span class="hljs-attribute">Subsystem</span>: Intel Corporation Ethernet Server Adapter X<span class="hljs-number">520</span>-<span class="hljs-number">2</span><br>        <span class="hljs-attribute">NUMA</span> node: <span class="hljs-number">0</span><br>                <span class="hljs-attribute">LnkCap</span>: Port #<span class="hljs-number">0</span>, Speed <span class="hljs-number">5</span>GT/s, Width x<span class="hljs-number">8</span>, ASPM L<span class="hljs-number">0</span>s, Exit Latency L<span class="hljs-number">0</span>s &lt;<span class="hljs-number">1</span>us, L<span class="hljs-number">1</span> &lt;<span class="hljs-number">8</span>us<br>                        <span class="hljs-attribute">ClockPM</span>- Surprise- LLActRep- BwNot- ASPMOptComp-<br>        <span class="hljs-attribute">Kernel</span> driver in use: igb_uio<br>        <span class="hljs-attribute">Kernel</span> modules: ixgbe<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">04</span>:<span class="hljs-number">00</span>.<span class="hljs-number">1</span> Ethernet controller: Intel Corporation <span class="hljs-number">82599</span>ES <span class="hljs-number">10</span>-Gigabit SFI/SFP+ Network Connection (rev <span class="hljs-number">01</span>)<br>        <span class="hljs-attribute">Subsystem</span>: Intel Corporation Ethernet Server Adapter X520-<span class="hljs-number">2</span><br>        <span class="hljs-attribute">NUMA</span> node: <span class="hljs-number">0</span><br>                <span class="hljs-attribute">LnkCap</span>: Port #<span class="hljs-number">0</span>, Speed <span class="hljs-number">5</span>GT/s, Width x8, ASPM L0s, Exit Latency L0s &lt;<span class="hljs-number">1</span>us, L1 &lt;<span class="hljs-number">8</span>us<br>                        <span class="hljs-attribute">ClockPM</span>- Surprise- LLActRep- BwNot- ASPMOptComp-<br>        <span class="hljs-attribute">Kernel</span> driver in use: igb_uio<br>        <span class="hljs-attribute">Kernel</span> modules: ixgbe<br></code></pre></div></td></tr></table></figure>
 
 <p>RSS（Receive Side Scaling）功能的实现其实和网卡以及CPU都有关系，但是这里放到CPU的部分来分析，主要是需要前面提及的技术作为支撑。关于RSS的一些说明我们可以参考Linux内核的<a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/networking/scaling.txt">官网文档</a>，此外微软的官方文档也有不错的图文解释。</p>
 <blockquote>
@@ -324,7 +324,7 @@
 <p>在硬件上会有一个叫做页表基地址寄存器，它存储PGD页表的首地址。MMU就是根据页表基地址寄存器从PGD页表一路查到PTE，最终找到物理地址(PTE页表中存储物理地址)。四级页表查找过程需要四次内存访问。延时可想而知，非常影响性能。（下图来自<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/108425561">知乎</a>）</p>
 <p><img src="https://resource.tinychen.com/20201112165225.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>TLB的本质其实就是一块高速缓存。数据cache缓存地址(虚拟地址或者物理地址)和数据。<strong>TLB缓存虚拟地址和其映射的物理地址。</strong>TLB根据虚拟地址查找cache，它没得选，只能根据虚拟地址查找。所以TLB是一个虚拟高速缓存。<strong>硬件存在TLB后，虚拟地址到物理地址的转换过程发生了变化。虚拟地址首先发往TLB确认是否命中cache，如果cache hit直接可以得到物理地址。否则，一级一级查找页表获取物理地址。并将虚拟地址和物理地址的映射关系缓存到TLB中。</strong></p>
-<p>默认下Linux系统的内存采用4KB为一页，页越小且内存越大则页表的开销越大，页表的内存占用也越大。CPU使用的TLB（Translation Lookaside Buffer）制作成本很高，所以一般大小并不大，因此一般就只能存放几百到上千个页表项。如果进程要使用64G内存，则64G/4KB=16000000（一千六百万）页，每页在页表项中占用16000000*4B=62MB。如果用HugePage采用2MB作为一页，只需64G/2MB=2000，数量不在同个级别。</p>
+<p>默认下Linux系统的内存采用4KB为一页，页越小且内存越大则页表的开销越大，页表的内存占用也越大。CPU使用的TLB（Translation Lookaside Buffer）制作成本很高，所以一般大小并不大，因此一般就只能存放几百到上千个页表项。如果进程要使用64G内存，则64G&#x2F;4KB&#x3D;16000000（一千六百万）页，每页在页表项中占用16000000*4B&#x3D;62MB。如果用HugePage采用2MB作为一页，只需64G&#x2F;2MB&#x3D;2000，数量不在同个级别。</p>
 <p>而DPDK采用HugePage，在×86-64下支持2MB、1GB的页大小，几何级的降低了页表项的大小，从而减少TLB-Miss，并提供了内存池（Mempool）、MBuf、无锁环（Ring）、Bitmap等基础库。</p>
 <p>而且对于普通应用程序而言，根本不会调用到大页内存，且大页内存分配之后立刻就会在系统的可用内存中划去，不管dpdk程序是否使用，都不会被其他程序占用，在只运行了dpdk程序的机器上，划分出的大页内存区域就是该dpdk程序独享的VIP区。</p>
 <p>这里就是DPVS宣传的<code>mempool</code>和<code>HugePage</code>特性的实现原理。</p>

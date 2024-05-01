@@ -79,7 +79,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -288,7 +288,7 @@
 <p><img src="https://resource.tinychen.com/blog/20190408/TW5JLvUOCKDc.png" srcset="/img/loading.gif" lazyload></p>
 <p>图中的是默认的名字，改不改都可以，不要搞混了就行，接下来我们把它们上传到服务器中的apache的安装目录下面，给他们专门新建一个cert文件夹。</p>
 <p>首先我们在服务器中给他新建一个目录</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mkdir /etc/httpd/cert<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> /etc/httpd/cert<br></code></pre></div></td></tr></table></figure>
 
 
 
@@ -317,7 +317,7 @@
 <p>还是一样的问题，路径不太正确，我们这里找到的文件路径是<code>/etc/httpd/conf.d/ssl.conf</code></p>
 <p><img src="https://resource.tinychen.com/blog/20190408/E3iYqx2ohyuF.png" srcset="/img/loading.gif" lazyload></p>
 <p>在更改配置文件之前，为了保险起见，咱们先备份一下，以备不时之需。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">cp ssl.conf ssl.conf.bak<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> ssl.conf ssl.conf.bak<br></code></pre></div></td></tr></table></figure>
 
 <p>这里再给出我自己的<code>ssl.conf</code>文件和大家交流一下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Listen 443<br>&lt;VirtualHost *:443&gt;<br><br>DocumentRoot <span class="hljs-string">&quot;/var/www/html&quot;</span><br>ServerName tiny777.com<br>ServerAlias www.tiny777.com<br><br><br>SSLEngine on<br><br>SSLProtocol all -SSLv2 -SSLv3<br><br>SSLCertificateFile /etc/httpd/cert/1692315_tiny777.com_public.crt<br><br>SSLCertificateKeyFile /etc/httpd/cert/1692315_tiny777.com.key<br><br>SSLCertificateChainFile /etc/httpd/cert/1692315_tiny777.com_chain.crt<br><br>DirectoryIndex index.html index.htm index.php<br>&lt;Directory <span class="hljs-string">&quot;/var/www/html&quot;</span>&gt;<br>     Options Indexes FollowSymLinks<br>     AllowOverride None<br>     Require all granted<br>&lt;/Directory&gt;<br>&lt;/VirtualHost&gt;<br></code></pre></div></td></tr></table></figure>

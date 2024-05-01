@@ -80,7 +80,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -296,9 +296,9 @@
 </ul>
 <h2 id="2-4-iptables的常见情况"><a href="#2-4-iptables的常见情况" class="headerlink" title="2.4 iptables的常见情况"></a>2.4 iptables的常见情况</h2><p>下面我们利用上面的流程图来对几种常见的情况解析：<strong>关键点在于发往iptables主机的数据包的目的地址是否是iptables主机本机</strong>。如果是，那我们就可以理解为常见的开启了iptables防火墙的网站服务器主机；如果不是，那就是走ip_forward进行转发，比如我们常见的NAT路由器的NAT服务和策略路由等。如下图为开启了ip_forward功能的openwrt路由器。</p>
 <p><img src="https://resource.tinychen.com/20200421111042.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="3、NAT工作原理"><a href="#3、NAT工作原理" class="headerlink" title="3、NAT工作原理"></a>3、NAT工作原理</h1><p>接下来介绍一些NAT(<strong>N</strong>etwork <strong>A</strong>ddress <strong>T</strong>ranslation，网络地址转换)的基本知识，众所周知，IPv4的公网IP地址已经枯竭，但是需要接入互联网的设备还在不断增加，这其中NAT就发挥了很大的作用（此处不讨论IPv6）。NAT服务器提供了一组私有的IP地址池（10.0.0.0/8、172.16.0.0/12、192.168.0.0/16），使得连接该NAT服务器的设备能够获得一个私有的IP地址（也称局域网IP/内网IP），当设备需要连接互联网的时候，NAT服务器将该设备的私有IP转换成可以在互联网上路由的公网IP（全球唯一）。NAT的实现方式有很多种，这里我们主要介绍三种：<strong>静态NAT</strong>、<strong>动态NAT</strong>和网络地址端口转换（<strong>NAPT</strong>）。</p>
+<h1 id="3、NAT工作原理"><a href="#3、NAT工作原理" class="headerlink" title="3、NAT工作原理"></a>3、NAT工作原理</h1><p>接下来介绍一些NAT(<strong>N</strong>etwork <strong>A</strong>ddress <strong>T</strong>ranslation，网络地址转换)的基本知识，众所周知，IPv4的公网IP地址已经枯竭，但是需要接入互联网的设备还在不断增加，这其中NAT就发挥了很大的作用（此处不讨论IPv6）。NAT服务器提供了一组私有的IP地址池（10.0.0.0&#x2F;8、172.16.0.0&#x2F;12、192.168.0.0&#x2F;16），使得连接该NAT服务器的设备能够获得一个私有的IP地址（也称局域网IP&#x2F;内网IP），当设备需要连接互联网的时候，NAT服务器将该设备的私有IP转换成可以在互联网上路由的公网IP（全球唯一）。NAT的实现方式有很多种，这里我们主要介绍三种：<strong>静态NAT</strong>、<strong>动态NAT</strong>和网络地址端口转换（<strong>NAPT</strong>）。</p>
 <h2 id="3-1-BNAT"><a href="#3-1-BNAT" class="headerlink" title="3.1 BNAT"></a>3.1 BNAT</h2><ul>
-<li><p>静态NAT：LVS的官方文档中也称为(N-to-N mapping)<br>，前面的N指的是局域网中需要联网的设备数量，后面的N指的是该NAT服务器所拥有的公网IP的数量。既然数量相等，那么就可以实现静态转换，即一个设备对应一个公网IP，这时候的NAT服务器只需要维护一张静态的NAT映射转换表。    </p>
+<li><p>静态NAT：LVS的官方文档中也称为(N-to-N mapping)<br>，前面的N指的是局域网中需要联网的设备数量，后面的N指的是该NAT服务器所拥有的公网IP的数量。既然数量相等，那么就可以实现静态转换，即一个设备对应一个公网IP，这时候的NAT服务器只需要维护一张静态的NAT映射转换表。	</p>
 <table>
 <thead>
 <tr>

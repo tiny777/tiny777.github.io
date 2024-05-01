@@ -82,7 +82,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -209,7 +209,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      8.5k 字
+      8.6k 字
     </span>
   
 
@@ -267,7 +267,7 @@
 
 <p>需要注意的是要确定网卡配置中是使用了DHCP而不是手动指定IP地址。</p>
 <p><img src="https://resource.tinychen.com/blog/20190609/4wSvnifDgxaP.png" srcset="/img/loading.gif" lazyload></p>
-<h3 id="2-0-2-一次DHCP过程的四个数据包"><a href="#2-0-2-一次DHCP过程的四个数据包" class="headerlink" title="2.0.2 一次DHCP过程的四个数据包"></a>2.0.2 一次DHCP过程的四个数据包</h3><p>正常来说，一次DHCP过程只需要上面状态机的前四步，后面的续约是在DHCP的租期到达1/2和7/8的时候进行的。</p>
+<h3 id="2-0-2-一次DHCP过程的四个数据包"><a href="#2-0-2-一次DHCP过程的四个数据包" class="headerlink" title="2.0.2 一次DHCP过程的四个数据包"></a>2.0.2 一次DHCP过程的四个数据包</h3><p>正常来说，一次DHCP过程只需要上面状态机的前四步，后面的续约是在DHCP的租期到达1&#x2F;2和7&#x2F;8的时候进行的。</p>
 <p><img src="https://resource.tinychen.com/blog/20190609/CDdjQgrGbqac.png" srcset="/img/loading.gif" lazyload></p>
 <p>打开任意一个数据包，我们可以看到wireshark已经把里面的数据分层显示。</p>
 <p><img src="https://resource.tinychen.com/blog/20190609/hytGlrtwYwlT.png" srcset="/img/loading.gif" lazyload></p>
@@ -275,7 +275,7 @@
 <p>接下来我们对这四个数据包进行分析。</p>
 <h2 id="2-1-发现阶段——DHCP-Discover（广播）"><a href="#2-1-发现阶段——DHCP-Discover（广播）" class="headerlink" title="2.1 发现阶段——DHCP Discover（广播）"></a>2.1 发现阶段——DHCP Discover（广播）</h2><h3 id="2-1-1-DHCP-Discover-理论分析"><a href="#2-1-1-DHCP-Discover-理论分析" class="headerlink" title="2.1.1 DHCP Discover 理论分析"></a>2.1.1 DHCP Discover 理论分析</h3><p>DHCP Discover（广播）是第一个阶段即DHCP客户端寻找DHCP服务端的阶段。</p>
 <p>由于DHCP服务端的IP地址等信息对于DHCP客户端来说是未知，此时就需要使用广播的方式进行发送消息，基于UDP的源端口号68，目的端口号67来发送DHCP Discover发现信息来寻找DHCP服务器。</p>
-<p>由于是广播包，在同一个广播域中的每一台安装了TCP/IP协议的主机都会接收到这种广播信息，但只有DHCP服务器才会做出响应。</p>
+<p>由于是广播包，在同一个广播域中的每一台安装了TCP&#x2F;IP协议的主机都会接收到这种广播信息，但只有DHCP服务器才会做出响应。</p>
 <blockquote>
 <p>在二层中，广播地址是12个f即<code>ff:ff:ff:ff:ff:ff</code>。</p>
 <p>在三层中，广播地址是4个255（IPv4）即<code>255.255.255.255</code>。</p>
@@ -312,7 +312,7 @@
 </li>
 <li><p>源IP地址（Source）：0.0.0.0，表明当前尚未获得DHCP服务端分配的IP地址，只能使用0.0.0.0</p>
 </li>
-<li><p>目标IP地址（Destination）：255.255.255.255，广播IP地址，对同一广播域内的所有TCP/IP协议客户端进行广播</p>
+<li><p>目标IP地址（Destination）：255.255.255.255，广播IP地址，对同一广播域内的所有TCP&#x2F;IP协议客户端进行广播</p>
 </li>
 </ul>
 <h3 id="2-1-5-DHCP-Discover-传输层"><a href="#2-1-5-DHCP-Discover-传输层" class="headerlink" title="2.1.5 DHCP Discover 传输层"></a>2.1.5 DHCP Discover 传输层</h3><p><img src="https://resource.tinychen.com/blog/20190609/wYNVDCL6RDrJ.png" srcset="/img/loading.gif" lazyload></p>
@@ -335,7 +335,7 @@
 <li><p>我们还可以看到请求信息里面需要请求获取包括子网掩码（Subnet Mask）、路由网关（Router）、 DNS服务器（Domain Name Server） 、以及域名（Domain Name）等信息</p>
 </li>
 </ul>
-<h2 id="2-2-提供阶段——DHCP-Offer（单播-广播）"><a href="#2-2-提供阶段——DHCP-Offer（单播-广播）" class="headerlink" title="2.2 提供阶段——DHCP Offer（单播/广播）"></a>2.2 提供阶段——DHCP Offer（单播/广播）</h2><h3 id="2-2-1-DHCP-Offer-理论分析"><a href="#2-2-1-DHCP-Offer-理论分析" class="headerlink" title="2.2.1 DHCP Offer 理论分析"></a>2.2.1 DHCP Offer 理论分析</h3><p>提供阶段，即DHCP服务器向DHCP客户端提供预分配IP地址的阶段。网络中的所有DHCP服务器接收到客户端的DHCP Discover报文后都会根据自己的DHCP地址池中IP地址分配的优先次序选出一个IP地址，然后与其他参数一起通过传输层的UDP67号端口在DHCP Offer报文中以单播/广播方式发送给客户端的UDP68号端口。</p>
+<h2 id="2-2-提供阶段——DHCP-Offer（单播-广播）"><a href="#2-2-提供阶段——DHCP-Offer（单播-广播）" class="headerlink" title="2.2 提供阶段——DHCP Offer（单播&#x2F;广播）"></a>2.2 提供阶段——DHCP Offer（单播&#x2F;广播）</h2><h3 id="2-2-1-DHCP-Offer-理论分析"><a href="#2-2-1-DHCP-Offer-理论分析" class="headerlink" title="2.2.1 DHCP Offer 理论分析"></a>2.2.1 DHCP Offer 理论分析</h3><p>提供阶段，即DHCP服务器向DHCP客户端提供预分配IP地址的阶段。网络中的所有DHCP服务器接收到客户端的DHCP Discover报文后都会根据自己的DHCP地址池中IP地址分配的优先次序选出一个IP地址，然后与其他参数一起通过传输层的UDP67号端口在DHCP Offer报文中以单播&#x2F;广播方式发送给客户端的UDP68号端口。</p>
 <blockquote>
 <p>DHCP服务器在分配这个地址之间会ping一下这个分配的ip地址，如果没有Response就才会预分配这个地址</p>
 </blockquote>
@@ -357,8 +357,8 @@
 <li>Giaddr即DHCP中继IP地址（Relay agent IP address）：10.22.25.254，这个是DHCP的中继代理服务器的IP地址，在这里应该是一个开启了DHCP中继的三层交换机</li>
 <li>子网掩码（Subnet Mask）、路由网关（Router）、 DNS服务器（Domain Name Server） 、以及域名（Domain Name）等信息均已经包含在里面</li>
 <li>租约时间是需要注意的一个问题，这里我们可以看到DHCP租约时间（IP Address Lease Time）实际上是8天，单位是s，wieshark换算成了天方便我们查看</li>
-<li>而Renewal Time Value就是初次续约的时间，这个时间是租约时间的1/2，这里就是4天，这个时候一般客户端会以单播的方式向DHCP服务器发送报文请求续约</li>
-<li>而Rebinding Time Value就是第二次续约时间，这个时间是租约时间的7/8，这里也就是7天，只有在初次续约失败之后，才会在这个时间以广播的方式向网络中的DHCP服务器再次申请IP地址</li>
+<li>而Renewal Time Value就是初次续约的时间，这个时间是租约时间的1&#x2F;2，这里就是4天，这个时候一般客户端会以单播的方式向DHCP服务器发送报文请求续约</li>
+<li>而Rebinding Time Value就是第二次续约时间，这个时间是租约时间的7&#x2F;8，这里也就是7天，只有在初次续约失败之后，才会在这个时间以广播的方式向网络中的DHCP服务器再次申请IP地址</li>
 </ul>
 <h2 id="2-3-选择阶段——DHCP-Request（广播）"><a href="#2-3-选择阶段——DHCP-Request（广播）" class="headerlink" title="2.3 选择阶段——DHCP Request（广播）"></a>2.3 选择阶段——DHCP Request（广播）</h2><h3 id="2-3-1-DHCP-Request-理论分析"><a href="#2-3-1-DHCP-Request-理论分析" class="headerlink" title="2.3.1 DHCP Request 理论分析"></a>2.3.1 DHCP Request 理论分析</h3><p>选择阶段，即DHCP客户端选择IP地址的阶段。</p>
 <p>如果有多台DHCP服务器向该客户端发来DHCPOFFER报文，客户端只接收第一个收到的DHCP Offer报文，然后以广播方式发送DHCP Request报文。在该报文的Requested Address选项中包含DHCP服务器在DHCP Offer报文中预分配的IP地址、对应的DHCP服务器IP地址等。</p>
@@ -373,8 +373,8 @@
 <li>Bootp flags：0表示单播，1表示广播，这里为0，即DHCP服务端回复的报文应为单播形式</li>
 <li>Ciaddr、Yiaddr、Siaddr、Giaddr 字段的地址均为0.0.0.0</li>
 </ul>
-<h2 id="2-4-确认阶段——DHCP-Ack（单播-广播）"><a href="#2-4-确认阶段——DHCP-Ack（单播-广播）" class="headerlink" title="2.4 确认阶段——DHCP Ack（单播/广播）"></a>2.4 确认阶段——DHCP Ack（单播/广播）</h2><h3 id="2-4-1-DHCP-Ack-理论分析"><a href="#2-4-1-DHCP-Ack-理论分析" class="headerlink" title="2.4.1 DHCP Ack 理论分析"></a>2.4.1 DHCP Ack 理论分析</h3><p>确认阶段，即DHCP服务器确认分配级DHCP客户端IP地址的阶段。</p>
-<p>某个DHCP服务器在收到DHCP客户端发来的DHCP REOUEST报文后，只有DHCP客户端选择的服务器会进行如下操作：如果确认将地址分配给该客户端，则以单播/广播方式返回DHCP ACK报文；否则返回DHCP NAK报文，表明地址不能分配给该客户端。</p>
+<h2 id="2-4-确认阶段——DHCP-Ack（单播-广播）"><a href="#2-4-确认阶段——DHCP-Ack（单播-广播）" class="headerlink" title="2.4 确认阶段——DHCP Ack（单播&#x2F;广播）"></a>2.4 确认阶段——DHCP Ack（单播&#x2F;广播）</h2><h3 id="2-4-1-DHCP-Ack-理论分析"><a href="#2-4-1-DHCP-Ack-理论分析" class="headerlink" title="2.4.1 DHCP Ack 理论分析"></a>2.4.1 DHCP Ack 理论分析</h3><p>确认阶段，即DHCP服务器确认分配级DHCP客户端IP地址的阶段。</p>
+<p>某个DHCP服务器在收到DHCP客户端发来的DHCP REOUEST报文后，只有DHCP客户端选择的服务器会进行如下操作：如果确认将地址分配给该客户端，则以单播&#x2F;广播方式返回DHCP ACK报文；否则返回DHCP NAK报文，表明地址不能分配给该客户端。</p>
 <h3 id="2-4-2-DHCP-Ack-数据链路层"><a href="#2-4-2-DHCP-Ack-数据链路层" class="headerlink" title="2.4.2 DHCP Ack 数据链路层"></a>2.4.2 DHCP Ack 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/sf6I5auVsS32.png" srcset="/img/loading.gif" lazyload></p>
 <p>可以看到这里是单播，源MAC地址是DHCP服务器（此处为中继代理）的MAC地址，目标MAC地址是DHCP客户端的MAC地址。</p>
 <h3 id="2-4-3-DHCP-Ack-网络层"><a href="#2-4-3-DHCP-Ack-网络层" class="headerlink" title="2.4.3 DHCP Ack 网络层"></a>2.4.3 DHCP Ack 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/wT71TP3iEOGS.png" srcset="/img/loading.gif" lazyload></p>
@@ -386,9 +386,9 @@
 <p>如果DHCP客户端希望继续使用该地址，则需要向DHCP服务器提出更新IP地址租约的申请，也就是前面所说到的“续约”。</p>
 <p>IP地址租约更新或者IP地址续约也就是更新服务器端对IP地址的租约信息，使其恢复为初始状态。</p>
 <h2 id="3-2-申请续约的方法"><a href="#3-2-申请续约的方法" class="headerlink" title="3.2 申请续约的方法"></a>3.2 申请续约的方法</h2><ol>
-<li>在DHCP客户端的IP地址<strong>租约期限达到1/2时</strong>，由DHCP客户端向为它分配IP地址的DHCP服务器以单播方式发送DHCP REOUEST请求报文，以期进行IP租约的更新。</li>
+<li>在DHCP客户端的IP地址<strong>租约期限达到1&#x2F;2时</strong>，由DHCP客户端向为它分配IP地址的DHCP服务器以单播方式发送DHCP REOUEST请求报文，以期进行IP租约的更新。</li>
 <li>如果DHCP服务器同意续约，则DHCP服务器向客户端以单播方式返回DHCP ACK报文，通知DHCP客户端已经获得新IP租约，可以继续使用此IP地址；相反，如果DHCP服务器不同意续约，则DHCP服务器以单播方式返回DHCP NAK报文，通知DHCP客户端不能获得新的租约，此IP地址不可以再分配给该客户端。</li>
-<li>如果上面的续约申请失败，则DHCP客户端还会在<strong>租约期限达到7/8时</strong>再次以广播方式发送DHCP REQUEST请求报文进行续约。DHCP服务器的处理方式同上，不再赘述。</li>
+<li>如果上面的续约申请失败，则DHCP客户端还会在<strong>租约期限达到7&#x2F;8时</strong>再次以广播方式发送DHCP REQUEST请求报文进行续约。DHCP服务器的处理方式同上，不再赘述。</li>
 <li>如果第二次续约请求还是失败，则原来租约的IP地址将被释放。</li>
 </ol>
 <h1 id="4、DHCP中继代理服务"><a href="#4、DHCP中继代理服务" class="headerlink" title="4、DHCP中继代理服务"></a>4、DHCP中继代理服务</h1><p>在前面我们已经说过，在DHCP客户端初次从DHCP服务器获取IP地址的过程中，所有从DHCP客户端发出的请求报文均是以广播方式（目的地址为255.255.255.255）进行发送的，<strong>所以DHCP服务只适用于DHCP客户端和DHCP服务器处于同一个子网</strong>（也就是DHCP服务器至少有一个端口与DHCP客户端所在的子网是直接连接的）的情况，因为广播包是不能穿越子网的。</p>
@@ -400,7 +400,7 @@
 <p><img src="https://resource.tinychen.com/blog/20190610/4ALNec1bheRj.png" srcset="/img/loading.gif" lazyload></p>
 <p>从图中我们可以看到，从10.22.25.254这个DHCP中继代理到DHCP服务器之间需要经过5个路由节点。</p>
 <p>而实际上，在很多的大型园区网络中，都会使用一个DHCP服务器集群+多个DHCP中继代理这样的方式进行DHCP分配。</p>
-<h1 id="5、路由干扰"><a href="#5、路由干扰" class="headerlink" title="5、路由干扰"></a>5、路由干扰</h1><h2 id="5-1-路由干扰原理"><a href="#5-1-路由干扰原理" class="headerlink" title="5.1 路由干扰原理"></a>5.1 路由干扰原理</h2><p>路由干扰是园区网络中经常出现的问题，主要体现在用户无法获取到正确的IP地址/网关地址/DNS服务器地址等信息而无法上网。</p>
+<h1 id="5、路由干扰"><a href="#5、路由干扰" class="headerlink" title="5、路由干扰"></a>5、路由干扰</h1><h2 id="5-1-路由干扰原理"><a href="#5-1-路由干扰原理" class="headerlink" title="5.1 路由干扰原理"></a>5.1 路由干扰原理</h2><p>路由干扰是园区网络中经常出现的问题，主要体现在用户无法获取到正确的IP地址&#x2F;网关地址&#x2F;DNS服务器地址等信息而无法上网。</p>
 <p>主要原因则是因为其他用户私接路由器且配置不当，导致私接的路由器成为所在的局域网中的第二个DHCP服务器，这时其他用户使用DHCP获取IP地址的时候就会有不只一个DHCP服务器提供IP地址。不幸的是，私接的路由器虽然能正确提供DHCP服务和IP地址等信息，却往往无法提供上网功能，这就会造成所谓的路由干扰。</p>
 <p><strong>从上面的解释我们可以知道，路由干扰只可能发生在使用DHCP协议的客户端，如果是使用静态IP地址，是可以避免路由干扰的。</strong></p>
 <p>因为这时候当客户端接入网络之后，会直接发送ARP请求来查询设置的网关IP地址的MAC地址信息，而根本不会去发送DHCP Discover报文。</p>

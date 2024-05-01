@@ -81,7 +81,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -293,7 +293,7 @@
 <p><strong><code>ipvs</code> (IP Virtual Server)</strong> 实现了传输层负载均衡，也就是我们常说的4层<code>LAN</code>交换（基于TCP四层(IP+端口)的负载均衡软件），作为 Linux 内核的一部分。<code>ipvs</code>运行在主机上，在真实服务器集群前充当负载均衡器。<code>ipvs</code>可以将基于<code>TCP</code>和<code>UDP</code>的服务请求转发到真实服务器上，并使真实服务器的服务在单个 IP 地址上显示为虚拟服务。</p>
 <p><code>ipvs</code>是在<code>kubernetes v1.8</code>版本中引进的，小七这里使用的是<code>v1.15</code>版本，<a href="https://tinychen.com/20190718-centos7-install-k8s-ha/">之前配置的时候</a>就是使用了<code>ipvs</code>来替换<code>iptables</code>。</p>
 <h2 id="3-2-查看ipvs"><a href="#3-2-查看ipvs" class="headerlink" title="3.2 查看ipvs"></a>3.2 查看ipvs</h2><p><strong>不管是<code>ipvs</code>还是<code>iptables</code>，都是需要<code>root</code>权限才能查看</strong>，因此我们需要在命令前加上<code>sudo</code>或者是切换到<code>root</code>用户。</p>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo ipvsadm -ln<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo ipvsadm -<span class="hljs-built_in">ln</span><br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190723/DvxtRHLUuVum.png" srcset="/img/loading.gif" lazyload></p>
@@ -310,17 +310,17 @@
 </blockquote>
 <h2 id="3-3-使用DNS访问"><a href="#3-3-使用DNS访问" class="headerlink" title="3.3 使用DNS访问"></a>3.3 使用DNS访问</h2><p>实际上，k8s集群中内置有dns解析服务，我们可以通过<code>&lt;SERVICE_NAME&gt;.&lt;NAMESPACE_NAME&gt;</code>来对service进行访问。</p>
 <blockquote>
-<p><code>v1.11</code>版本之后，<code>coredns</code>取    代<code>kube-dns</code>成为k8s中默认的dns解析服务器。</p>
+<p><code>v1.11</code>版本之后，<code>coredns</code>取	代<code>kube-dns</code>成为k8s中默认的dns解析服务器。</p>
 </blockquote>
 <p>我们在pod中运行一个shell来实验一下：</p>
-<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">kubectl <span class="hljs-builtin-name">run</span> busybox --rm -ti <span class="hljs-attribute">--image</span>=busybox /bin/sh<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">kubectl <span class="hljs-built_in">run</span> busybox --rm -ti <span class="hljs-attribute">--image</span>=busybox /bin/sh<br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190723/JeaNq64gqmpG.png" srcset="/img/loading.gif" lazyload></p>
 <p><code>busybox</code>对<code>nslookup</code>的支持似乎有些问题，不一定能成功查询到<code>dns</code>，而且并没有内置<code>curl</code>命令，我们只能用<code>wget</code>来进行访问。<strong>事实上<code>wget</code>能成功就说明<code>dns</code>服务是正常的。</strong></p>
 <p><img src="https://resource.tinychen.com/blog/20190723/IIYnXUyxiDkL.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们使用它的测试版本，这时候<code>nslookup</code>命令正常了，<code>wget</code>命令又不正常了。</p>
-<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">kubectl run dig --rm -it --image=docker.io<span class="hljs-regexp">/azukiapp/</span>dig <span class="hljs-regexp">/bin/</span>sh<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dockerfile">kubectl <span class="hljs-keyword">run</span><span class="language-bash"> dig --<span class="hljs-built_in">rm</span> -it --image=docker.io/azukiapp/dig /bin/sh</span><br></code></pre></div></td></tr></table></figure>
 
 
 <p><img src="https://resource.tinychen.com/blog/20190723/Fxbv9dHLo0QQ.png" srcset="/img/loading.gif" lazyload></p>

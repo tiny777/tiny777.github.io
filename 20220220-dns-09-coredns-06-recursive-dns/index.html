@@ -81,7 +81,7 @@
   </script>
   <script  src="/js/utils.js" ></script>
   <script  src="/js/color-schema.js" ></script>
-<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
 </head>
 
 
@@ -270,10 +270,10 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">.:53 &#123;<br>    forward . 114.114.114.114 114.114.115.115 &#123;<br>        health_check 5s<br>    &#125;<br>    <span class="hljs-built_in">log</span><br>    errors<br>    ready <br>    prometheus <br>    cache &#123;<br>        success 10240 600 60<br>        denial 5120 60 5<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 <p>forward对应的upstream机器可以根据自己的需求选择现有的公共DNS，如国内常见的114、谷歌的8888等免费DNS，或者选择自己使用unbound、bind9之类的DNS服务器单独搭建一个专门用来做递归查询的DNS服务。</p>
-<h2 id="2-2-一些问题"><a href="#2-2-一些问题" class="headerlink" title="2.2 一些问题"></a>2.2 一些问题</h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">Jan</span> <span class="hljs-number">18</span> <span class="hljs-number">05</span>:<span class="hljs-number">29</span>:<span class="hljs-number">16</span> coredns<span class="hljs-number">1</span> coredns:<span class="hljs-meta"> [ERROR] plugin/errors: 2 nonexist.test.tinychen.com. A: read udp 127.0.0.1:7522-&gt;114.114.114.114:53: i/o timeout</span><br></code></pre></div></td></tr></table></figure>
+<h2 id="2-2-一些问题"><a href="#2-2-一些问题" class="headerlink" title="2.2 一些问题"></a>2.2 一些问题</h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">Jan</span> <span class="hljs-number">18</span> <span class="hljs-number">05</span>:<span class="hljs-number">29</span>:<span class="hljs-number">16</span> coredns1 coredns:<span class="hljs-meta"> [ERROR] plugin/errors: 2 nonexist.test.tinychen.com. A: read udp 127.0.0.1:7522-&gt;114.114.114.114:53: i/o timeout</span><br></code></pre></div></td></tr></table></figure>
 
 <p>当查询的域名解析记录不存在或者是网络问题不可达的时候，可能会触发upstream的超时时间限制，导致报错<code>i/o timeout</code>，可以考虑使用<code>error</code>插件的<code>consolidate</code>指令对这类报警进行统一处理并修改报警等级</p>
-<figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-section">errors</span> &#123;<br>    <span class="hljs-attribute">consolidate</span> <span class="hljs-number">5m</span> <span class="hljs-string">&quot;.* i/o timeout$&quot;</span> warning<br>&#125;<br></code></pre></div></td></tr></table></figure>
+<figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">errors &#123;<br>    consolidate 5m <span class="hljs-string">&quot;.* i/o timeout$&quot;</span> <span class="hljs-built_in">warning</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 
 
