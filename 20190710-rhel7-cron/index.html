@@ -18,12 +18,12 @@
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
-    <meta name="description" content="RHEL7中的CRON功能以及使用方式简介。 1、cron简介crond 是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，与windows下的计划任务类似，当安装完成操作系统后，默认会安装此服务 工具，并且会自动启动crond进程，crond进程每分钟会定期检查是否有要执行的任务，如果有要执行的任务，则自动执行该任务。">
+    <meta name="description" content="RHEL7中的CRON功能以及使用方式简介。 1、cron简介 crond 是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，与windows下的计划任务类似，当安装完成操作系统后，默认会安装此服务 工具，并且会自动启动crond进程，crond进程每分钟会定期检查是否有要执行的任务，如果有要执行的任务，则自动执行该任务。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="RHEL7中的CRON简介">
 <meta property="og:url" content="https://tinychen.com/20190710-rhel7-cron/index.html">
 <meta property="og:site_name" content="TinyChen&#39;s Studio - 互联网技术学习工作经验分享">
-<meta property="og:description" content="RHEL7中的CRON功能以及使用方式简介。 1、cron简介crond 是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，与windows下的计划任务类似，当安装完成操作系统后，默认会安装此服务 工具，并且会自动启动crond进程，crond进程每分钟会定期检查是否有要执行的任务，如果有要执行的任务，则自动执行该任务。">
+<meta property="og:description" content="RHEL7中的CRON功能以及使用方式简介。 1、cron简介 crond 是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，与windows下的计划任务类似，当安装完成操作系统后，默认会安装此服务 工具，并且会自动启动crond进程，crond进程每分钟会定期检查是否有要执行的任务，如果有要执行的任务，则自动执行该任务。">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://resource.tinychen.com/20210617170552.jpg">
 <meta property="article:published_time" content="2019-07-10T02:50:00.000Z">
@@ -207,7 +207,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      3.2k 字
+      3.1k 字
     </span>
   
 
@@ -248,109 +248,118 @@
             
             <div class="markdown-body">
               <p>RHEL7中的CRON功能以及使用方式简介。</p>
-<h1 id="1、cron简介"><a href="#1、cron简介" class="headerlink" title="1、cron简介"></a>1、cron简介</h1><p>crond 是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，与windows下的计划任务类似，当安装完成操作系统后，默认会安装此服务 工具，并且会自动启动crond进程，crond进程<strong>每分钟</strong>会定期检查是否有要执行的任务，如果有要执行的任务，则自动执行该任务。</p>
+<h1>1、cron简介</h1>
+<p>crond 是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，与windows下的计划任务类似，当安装完成操作系统后，默认会安装此服务 工具，并且会自动启动crond进程，crond进程<strong>每分钟</strong>会定期检查是否有要执行的任务，如果有要执行的任务，则自动执行该任务。</p>
 <span id="more"></span>
-
 <blockquote>
 <p>注意Cron在设置定时任务的时候，最多只能精确到分钟而无法精确到秒。</p>
 </blockquote>
 <p>Linux下的任务调度分为两类，系统任务调度和用户任务调度。</p>
 <ul>
-<li><p>系统任务调度：系统周期性所要执行的工作，比如写缓存数据到硬盘、日志清理等。**&#x2F;etc&#x2F;crontab文件是系统任务调度的配置文件。**</p>
+<li>
+<p>系统任务调度：系统周期性所要执行的工作，比如写缓存数据到硬盘、日志清理等。<strong>/etc/crontab文件是系统任务调度的配置文件。</strong></p>
 </li>
-<li><p>用户任务调度：用户定期要执行的工作，比如用户数据备份、定时邮件提醒等。用户可以使用 crontab 工具来定制自己的计划任务。<strong>所有用户定义的crontab 文件都被保存在 &#x2F;var&#x2F;spool&#x2F;cron目录中。其文件名与用户名一致。</strong></p>
+<li>
+<p>用户任务调度：用户定期要执行的工作，比如用户数据备份、定时邮件提醒等。用户可以使用 crontab 工具来定制自己的计划任务。<strong>所有用户定义的crontab 文件都被保存在 /var/spool/cron目录中。其文件名与用户名一致。</strong></p>
 </li>
 </ul>
-<h1 id="2、cron安装"><a href="#2、cron安装" class="headerlink" title="2、cron安装"></a>2、cron安装</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># cron的安装进程是cronie</span><br>yum install -y cronie<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190709/O6eDpJ2adV2B.png" srcset="/img/loading.gif" lazyload></p>
+<h1>2、cron安装</h1>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># cron的安装进程是cronie</span><br>yum install -y cronie<br></code></pre></div></td></tr></table></figure>
+<p><img src="https://resource.tinychen.com/blog/20190709/O6eDpJ2adV2B.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置cron开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> crond.service<br><br><span class="hljs-comment"># 关闭cron开机启动</span><br>systemctl <span class="hljs-built_in">disable</span> crond.service<br><br><span class="hljs-comment"># 启动cron</span><br>systemctl start crond.service<br><br><span class="hljs-comment"># 查看cron运行状态</span><br>systemctl status crond.service<br><br><span class="hljs-comment"># 重启cron</span><br>systemctl restart crond.service<br><br><span class="hljs-comment"># 关闭cron</span><br>systemctl stop crond.service<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h1 id="3、cron相关文件"><a href="#3、cron相关文件" class="headerlink" title="3、cron相关文件"></a>3、cron相关文件</h1><p>我们先看一下在<code>/etc</code>目录下和cron相关的文件主要有哪些，接下来我们逐个对其进行分析。</p>
-<p><img src="https://resource.tinychen.com/blog/20190710/fY25X17dYdiG.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="3-1-etc-crontab"><a href="#3-1-etc-crontab" class="headerlink" title="3.1 &#x2F;etc&#x2F;crontab"></a>3.1 &#x2F;etc&#x2F;crontab</h2><p>我们cat一下<code>/etc/crontab</code>这个文件看看里面的内容</p>
-<p><img src="https://resource.tinychen.com/blog/20190709/UUFUSB1FVE07.png" srcset="/img/loading.gif" lazyload></p>
+<h1>3、cron相关文件</h1>
+<p>我们先看一下在<code>/etc</code>目录下和cron相关的文件主要有哪些，接下来我们逐个对其进行分析。</p>
+<p><img src="https://resource.tinychen.com/blog/20190710/fY25X17dYdiG.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="3-1-etc-crontab">3.1 /etc/crontab</h2>
+<p>我们cat一下<code>/etc/crontab</code>这个文件看看里面的内容</p>
+<p><img src="https://resource.tinychen.com/blog/20190709/UUFUSB1FVE07.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用哪种she11接口</span><br>SHELL=/bin/bash<br><span class="hljs-comment"># 执行文件搜寻路径</span><br>PATH=/sbin:/bin:/usr/sbin:/usr/bin<br><span class="hljs-comment"># 若有额外STDOUT，以email将数据送给谁</span><br>MAILTO=root<br><br><span class="hljs-comment"># For details see man 4 crontabs</span><br><br><span class="hljs-comment"># Example of job definition:</span><br><span class="hljs-comment"># .---------------- minute (0 - 59)</span><br><span class="hljs-comment"># |  .------------- hour (0 - 23)</span><br><span class="hljs-comment"># |  |  .---------- day of month (1 - 31)</span><br><span class="hljs-comment"># |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...</span><br><span class="hljs-comment"># |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat</span><br><span class="hljs-comment"># |  |  |  |  |</span><br><span class="hljs-comment"># *  *  *  *  * user-name  command to be executed</span><br></code></pre></div></td></tr></table></figure>
-
 <ul>
-<li><strong>MAILTO&#x3D;root：</strong>这个项目是说，当<code>/etc/crontab</code>这个文件中的例行性工作的指令发生错误时，或者是该工作的执行结果有STDOUT&#x2F;STDERR时，默认是由系统直接寄发一封mail给root。由于root 并无法在客户端中以POP3之类的协议接收邮件，因此你也可以改成自己的邮箱。</li>
-<li><strong>PATH：</strong>这里就是输入执行文件的搜寻路径，一般使用默认的路径即可</li>
-<li><strong>分-时-日-月-周-执行用户-执行指令：</strong>七个字段的设定，这个<code>/etc/crontab</code>里面可以设定的基本语法就在这个文件里面，当我们忘了格式的时候可以cat这个文件看一下，<strong>需要注意的是不填写的字段需要使用星号<code>*</code>来占位，同一个字段要写多个数字的时候用英文逗号隔开；执行用户方面，系统默认是以root的身份来进行的。</strong></li>
+<li>**MAILTO=root：**这个项目是说，当<code>/etc/crontab</code>这个文件中的例行性工作的指令发生错误时，或者是该工作的执行结果有STDOUT/STDERR时，默认是由系统直接寄发一封mail给root。由于root 并无法在客户端中以POP3之类的协议接收邮件，因此你也可以改成自己的邮箱。</li>
+<li>**PATH：**这里就是输入执行文件的搜寻路径，一般使用默认的路径即可</li>
+<li>**分-时-日-月-周-执行用户-执行指令：**七个字段的设定，这个<code>/etc/crontab</code>里面可以设定的基本语法就在这个文件里面，当我们忘了格式的时候可以cat这个文件看一下，<strong>需要注意的是不填写的字段需要使用星号<code>*</code>来占位，同一个字段要写多个数字的时候用英文逗号隔开；执行用户方面，系统默认是以root的身份来进行的。</strong></li>
 </ul>
 <blockquote>
 <p>这里需要注意的是，在设定时间的时候，不能同时使用周和日月，即我们只能设定该任务在周几执行或者是几月几日执行，不能同时满足这两个条件，否则系统可能会无法正确识别。</p>
 </blockquote>
-<h2 id="3-2-etc-cron-allow和-etc-cron-deny"><a href="#3-2-etc-cron-allow和-etc-cron-deny" class="headerlink" title="3.2 &#x2F;etc&#x2F;cron.allow和&#x2F;etc&#x2F;cron.deny"></a>3.2 &#x2F;etc&#x2F;cron.allow和&#x2F;etc&#x2F;cron.deny</h2><p><code>/etc/cron.allow</code>和<code>/etc/cron.deny</code>这两个文件主要是对使用<code>cron</code>的用户进行管理。</p>
+<h2 id="3-2-etc-cron-allow和-etc-cron-deny">3.2 /etc/cron.allow和/etc/cron.deny</h2>
+<p><code>/etc/cron.allow</code>和<code>/etc/cron.deny</code>这两个文件主要是对使用<code>cron</code>的用户进行管理。</p>
 <p>这里可以分为四种情况。</p>
 <ol>
 <li>如果这两个文件<strong>都不存在</strong>，那么就只有<code>root</code>用户能够使用<code>crontab</code>命令</li>
 <li>如果<strong>只存在</strong><code>cron.allow</code>，那么就只有<code>cron.allow</code>上面的用户<strong>能</strong>使用<code>crontab</code>命令，<strong>如果<code>root</code>用户也不在里面，则root用户也不能使用<code>crontab</code></strong></li>
 <li>如果<strong>只存在</strong><code>cron.deny</code>，那么就只有<code>cron.deny</code>上面的用户<strong>不能</strong>使用<code>crontab</code>命令</li>
-<li>如果两个文件<strong>都存在</strong>，则列在<code>cron.allow</code>文件中<strong>而且没有</strong>列在<code>cron.deny</code>中的用户可以使用<code>crontab</code>，<strong>如果两个文件中都有同一个用户，以cron.allow文件里面是否有该用户为准，</strong>如果<code>cron.allow</code>中有该用户，则可以使用<code>crontab</code>命令</li>
+<li>如果两个文件<strong>都存在</strong>，则列在<code>cron.allow</code>文件中<strong>而且没有</strong>列在<code>cron.deny</code>中的用户可以使用<code>crontab</code>，**如果两个文件中都有同一个用户，以cron.allow文件里面是否有该用户为准，**如果<code>cron.allow</code>中有该用户，则可以使用<code>crontab</code>命令</li>
 </ol>
 <blockquote>
 <p><code>crontab</code>命令我们将在本文后面讲解</p>
 </blockquote>
-<h2 id="3-3-etc-cron-d"><a href="#3-3-etc-cron-d" class="headerlink" title="3.3 &#x2F;etc&#x2F;cron.d"></a>3.3 &#x2F;etc&#x2F;cron.d</h2><p><code>/etc/cron.d/</code> 这个目录用来存放任何要执行的<code>crontab</code>文件或脚本</p>
-<h2 id="3-4-etc-cron-ly"><a href="#3-4-etc-cron-ly" class="headerlink" title="3.4.&#x2F;etc&#x2F;cron.*ly&#x2F;"></a>3.4.&#x2F;etc&#x2F;cron.*ly&#x2F;</h2><p><code>cron.monthly/</code>，<code> cron.weekly/</code> ， <code>cron.daily/</code> ， <code>cron.hourly/</code>这四个目录下面存放的文件会在对应的时间内被执行，如 <code>cron.hourly/</code>里面的文件会在每个小时被执行一次，<strong>需要注意的是，这里放置的是直接执行的脚本文件，而不是上述的crontab格式的定时任务描述文件。</strong></p>
-<h2 id="3-5-var-spool-cron"><a href="#3-5-var-spool-cron" class="headerlink" title="3.5 &#x2F;var&#x2F;spool&#x2F;cron&#x2F;"></a>3.5 &#x2F;var&#x2F;spool&#x2F;cron&#x2F;</h2><p><code>/var/spool/cron/</code>目录下存放着每个用户自己的<code>crontab</code>文件。</p>
-<p><img src="https://resource.tinychen.com/blog/20190710/15mBjRkwAUoR.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="4、crontab命令"><a href="#4、crontab命令" class="headerlink" title="4、crontab命令"></a>4、crontab命令</h1><p><strong>语法格式：</strong>crontab [参数]</p>
+<h2 id="3-3-etc-cron-d">3.3 /etc/cron.d</h2>
+<p><code>/etc/cron.d/</code> 这个目录用来存放任何要执行的<code>crontab</code>文件或脚本</p>
+<h2 id="3-4-etc-cron-ly">3.4./etc/cron.*ly/</h2>
+<p><code>cron.monthly/</code>，<code> cron.weekly/</code> ， <code>cron.daily/</code> ， <code>cron.hourly/</code>这四个目录下面存放的文件会在对应的时间内被执行，如 <code>cron.hourly/</code>里面的文件会在每个小时被执行一次，<strong>需要注意的是，这里放置的是直接执行的脚本文件，而不是上述的crontab格式的定时任务描述文件。</strong></p>
+<h2 id="3-5-var-spool-cron">3.5 /var/spool/cron/</h2>
+<p><code>/var/spool/cron/</code>目录下存放着每个用户自己的<code>crontab</code>文件。</p>
+<p><img src="https://resource.tinychen.com/blog/20190710/15mBjRkwAUoR.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>4、crontab命令</h1>
+<p>**语法格式：**crontab [参数]</p>
 <p><strong>常用参数：</strong></p>
 <table>
 <thead>
 <tr>
-<th align="right">参数</th>
-<th align="left">含义</th>
+<th style="text-align:right">参数</th>
+<th style="text-align:left">含义</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="right">-e</td>
-<td align="left">编辑该用户的计时器设置</td>
+<tbody>
+<tr>
+<td style="text-align:right">-e</td>
+<td style="text-align:left">编辑该用户的计时器设置</td>
 </tr>
 <tr>
-<td align="right">-l</td>
-<td align="left">列出该用户的计时器设置</td>
+<td style="text-align:right">-l</td>
+<td style="text-align:left">列出该用户的计时器设置</td>
 </tr>
 <tr>
-<td align="right">-r</td>
-<td align="left">删除该用户的计时器设置</td>
+<td style="text-align:right">-r</td>
+<td style="text-align:left">删除该用户的计时器设置</td>
 </tr>
 <tr>
-<td align="right">-u</td>
-<td align="left">指定要设定计时器的用户名称</td>
+<td style="text-align:right">-u</td>
+<td style="text-align:left">指定要设定计时器的用户名称</td>
 </tr>
 <tr>
-<td align="right">–help</td>
-<td align="left">显示帮助信息</td>
+<td style="text-align:right">–help</td>
+<td style="text-align:left">显示帮助信息</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p><strong>参考实例</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用tinychen用户，每年的1月1日输出HappyNewYear！</span><br>crontab -e -u tinychen<br><span class="hljs-comment"># 然后和vim一样的编辑模式，输入下列参数</span><br>0 0 1 1 * /bin/echo HappyNewYear! &gt; /dev/pts/0<br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
 <p>需要注意的是，和<code>/etc/crontab</code>文件不同，使用<code>crontab</code>命令进入到编辑模式的时候不需要再加执行用户这一参数，默认是使用当前的登录账户，如果需要指定，使用<code>-u</code>参数即可。</p>
 </blockquote>
 <p><strong>此外，crontab中还有几种简化的写法需要我们了解一下</strong></p>
 <figure class="highlight asciidoc"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs asciidoc"><span class="hljs-bullet">*	</span>代表所有的取值范围内的数字<br><br>/	代表每的意思,如/5表示每5个单位<br><br><span class="hljs-bullet">-	</span>代表从某个数字到某个数字<br><br>,	分开几个离散的数字<br></code></pre></div></td></tr></table></figure>
-
 <p><strong>需要注意的是，<code>crontab -r</code>是删除该用户的所有定时任务。</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20190710/NEkfbtYTLoMU.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="5、小结"><a href="#5、小结" class="headerlink" title="5、小结"></a>5、小结</h1><ul>
-<li><p>个人化的行为使用<code>crontab-e</code>：</p>
-<p>  如果你是依据个人需求来建立的例行工作排程，建议直接使用<code>crontab-e</code>。这样也能保障你的指令行为不会被大家看到（<code>/etc/crontab</code>是大家都能读取的）；</p>
+<p><img src="https://resource.tinychen.com/blog/20190710/NEkfbtYTLoMU.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>5、小结</h1>
+<ul>
+<li>
+<p>个人化的行为使用<code>crontab-e</code>：</p>
+<p>如果你是依据个人需求来建立的例行工作排程，建议直接使用<code>crontab-e</code>。这样也能保障你的指令行为不会被大家看到（<code>/etc/crontab</code>是大家都能读取的）；</p>
 </li>
-<li><p>系统维护管理使用<code>vim/etc/crontab</code>：</p>
-<p>  如果这个例行工作排程是系统的重要工作，为了让自己管理方便，同时容易追踪，建议直接写入<code>/etc/crontab</code>较佳！</p>
+<li>
+<p>系统维护管理使用<code>vim/etc/crontab</code>：</p>
+<p>如果这个例行工作排程是系统的重要工作，为了让自己管理方便，同时容易追踪，建议直接写入<code>/etc/crontab</code>较佳！</p>
 </li>
-<li><p>自己开发软件使用<code>vim/etc/cron.d/newfile</code>：</p>
-<p>  如果是想要自己开发软件，那当然最好就是使用全新的配置文件，并且放置于<code>/etc/cron.d/</code>目录内即可。</p>
+<li>
+<p>自己开发软件使用<code>vim/etc/cron.d/newfile</code>：</p>
+<p>如果是想要自己开发软件，那当然最好就是使用全新的配置文件，并且放置于<code>/etc/cron.d/</code>目录内即可。</p>
 </li>
-<li><p>固定每小时、每日、每周、每天执行的特别工作：</p>
-<p>  如果与系统维护有关，还是建议放置到<code>/etc/crontab</code>中来集中管理较好。如果想要偷懒，或者是一定要再某个周期内进行的任务，也可以放置到上面谈到的几个目录中，直接写入指令即可！</p>
+<li>
+<p>固定每小时、每日、每周、每天执行的特别工作：</p>
+<p>如果与系统维护有关，还是建议放置到<code>/etc/crontab</code>中来集中管理较好。如果想要偷懒，或者是一定要再某个周期内进行的任务，也可以放置到上面谈到的几个目录中，直接写入指令即可！</p>
 </li>
 </ul>
 

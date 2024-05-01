@@ -250,67 +250,75 @@
             <div class="markdown-body">
               <p>本文主要用于介绍如何编译安装queryperf来对DNS服务器进行压测，以及CoreDNS常见的几种配置下的压测性能表现。</p>
 <span id="more"></span>
-
-<h1 id="1、queryperf"><a href="#1、queryperf" class="headerlink" title="1、queryperf"></a>1、queryperf</h1><h2 id="1-1-编译安装"><a href="#1-1-编译安装" class="headerlink" title="1.1 编译安装"></a>1.1 编译安装</h2><p><code>queryperf</code>是bind9出品的一款测试dns服务器性能的工具，目前在<code>9.12.4</code>版本的bind源码中还存在，再往后的新版本就没看到有<code>queryperf</code>了。</p>
+<h1>1、queryperf</h1>
+<h2 id="1-1-编译安装">1.1 编译安装</h2>
+<p><code>queryperf</code>是bind9出品的一款测试dns服务器性能的工具，目前在<code>9.12.4</code>版本的bind源码中还存在，再往后的新版本就没看到有<code>queryperf</code>了。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ wget https://ftp.isc.org/isc/bind9/9.12.4/bind-9.12.4.tar.gz<br>$ tar -zxvf bind-9.12.4.tar.gz<br>$ <span class="hljs-built_in">cd</span> bind-9.12.4/contrib/queryperf<br>$ ./configure<br>$ make<br>$ file queryperf<br>queryperf: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), <span class="hljs-keyword">for</span> GNU/Linux 2.6.32, not stripped<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="1-2-常用操作"><a href="#1-2-常用操作" class="headerlink" title="1.2 常用操作"></a>1.2 常用操作</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将编译好的二进制文件直接复制到系统的bin目录中即可全局操作</span><br>$ <span class="hljs-built_in">cp</span> queryperf /usr/local/bin/<br><br><br>$ queryperf -h<br><br>DNS Query Performance Testing Tool<br>Version: <span class="hljs-variable">$Id</span>: queryperf.c,v 1.12 2007/09/05 07:36:04 marka Exp $<br><br><br>Usage: queryperf [-d datafile] [-s server_addr] [-p port] [-q num_queries]<br>                 [-b bufsize] [-t <span class="hljs-built_in">timeout</span>] [-n] [-l <span class="hljs-built_in">limit</span>] [-f family] [-1]<br>                 [-i interval] [-r arraysize] [-u unit] [-H histfile]<br>                 [-T qps] [-e] [-D] [-R] [-c] [-v] [-h]<br>  -d specifies the input data file (default: stdin)<br>  -s sets the server to query (default: 127.0.0.1)<br>  -p sets the port on <span class="hljs-built_in">which</span> to query the server (default: 53)<br>  -q specifies the maximum number of queries outstanding (default: 20)<br>  -t specifies the <span class="hljs-built_in">timeout</span> <span class="hljs-keyword">for</span> query completion <span class="hljs-keyword">in</span> seconds (default: 5)<br>  -n causes configuration changes to be ignored<br>  -l specifies how a <span class="hljs-built_in">limit</span> <span class="hljs-keyword">for</span> how long to run tests <span class="hljs-keyword">in</span> seconds (no default)<br>  -1 run through input only once (default: multiple iff <span class="hljs-built_in">limit</span> given)<br>  -b <span class="hljs-built_in">set</span> input/output buffer size <span class="hljs-keyword">in</span> kilobytes (default: 32 k)<br>  -i specifies interval of intermediate outputs <span class="hljs-keyword">in</span> seconds (default: 0=none)<br>  -f specify address family of DNS transport, inet or inet6 (default: any)<br>  -r <span class="hljs-built_in">set</span> RTT statistics array size (default: 50000)<br>  -u <span class="hljs-built_in">set</span> RTT statistics time unit <span class="hljs-keyword">in</span> usec (default: 100)<br>  -H specifies RTT histogram data file (default: none)<br>  -T specify the target qps (default: 0=unspecified)<br>  -e <span class="hljs-built_in">enable</span> EDNS 0<br>  -D <span class="hljs-built_in">set</span> the DNSSEC OK bit (implies EDNS)<br>  -R <span class="hljs-built_in">disable</span> recursion<br>  -c <span class="hljs-built_in">print</span> the number of packets with each rcode<br>  -v verbose: report the RCODE of each response on stdout<br>  -h <span class="hljs-built_in">print</span> this usage<br><br></code></pre></div></td></tr></table></figure>
-
+<h2 id="1-2-常用操作">1.2 常用操作</h2>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将编译好的二进制文件直接复制到系统的bin目录中即可全局操作</span><br>$ <span class="hljs-built_in">cp</span> queryperf /usr/local/bin/<br><br><br>$ queryperf -h<br><br>DNS Query Performance Testing Tool<br>Version: <span class="hljs-variable">$Id</span>: queryperf.c,v 1.12 2007/09/05 07:36:04 marka Exp $<br><br><br>Usage: queryperf [-d datafile] [-s server_addr] [-p port] [-q num_queries]<br>                 [-b bufsize] [-t <span class="hljs-built_in">timeout</span>] [-n] [-l <span class="hljs-built_in">limit</span>] [-f family] [-1]<br>                 [-i interval] [-r arraysize] [-u unit] [-H histfile]<br>                 [-T qps] [-e] [-D] [-R] [-c] [-v] [-h]<br>  -d specifies the input data file (default: stdin)<br>  -s sets the server to query (default: 127.0.0.1)<br>  -p sets the port on <span class="hljs-built_in">which</span> to query the server (default: 53)<br>  -q specifies the maximum number of queries outstanding (default: 20)<br>  -t specifies the <span class="hljs-built_in">timeout</span> <span class="hljs-keyword">for</span> query completion <span class="hljs-keyword">in</span> seconds (default: 5)<br>  -n causes configuration changes to be ignored<br>  -l specifies how a <span class="hljs-built_in">limit</span> <span class="hljs-keyword">for</span> how long to run tests <span class="hljs-keyword">in</span> seconds (no default)<br>  -1 run through input only once (default: multiple iff <span class="hljs-built_in">limit</span> given)<br>  -b <span class="hljs-built_in">set</span> input/output buffer size <span class="hljs-keyword">in</span> kilobytes (default: 32 k)<br>  -i specifies interval of intermediate outputs <span class="hljs-keyword">in</span> seconds (default: 0=none)<br>  -f specify address family of DNS transport, inet or inet6 (default: any)<br>  -r <span class="hljs-built_in">set</span> RTT statistics array size (default: 50000)<br>  -u <span class="hljs-built_in">set</span> RTT statistics time unit <span class="hljs-keyword">in</span> usec (default: 100)<br>  -H specifies RTT histogram data file (default: none)<br>  -T specify the target qps (default: 0=unspecified)<br>  -e <span class="hljs-built_in">enable</span> EDNS 0<br>  -D <span class="hljs-built_in">set</span> the DNSSEC OK bit (implies EDNS)<br>  -R <span class="hljs-built_in">disable</span> recursion<br>  -c <span class="hljs-built_in">print</span> the number of packets with each rcode<br>  -v verbose: report the RCODE of each response on stdout<br>  -h <span class="hljs-built_in">print</span> this usage<br><br></code></pre></div></td></tr></table></figure>
 <p>在压测之前需要我们自己准备压测的测试数据，格式为<code>域名 查询类型</code>，如：</p>
 <figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">tinychen.com <span class="hljs-keyword">A</span><br>tiny777.com <span class="hljs-keyword">A</span><br>tinychen.com <span class="hljs-keyword">MX</span><br>tiny777.com <span class="hljs-keyword">MX</span><br>tinychen777.com <span class="hljs-keyword">AAAA</span><br></code></pre></div></td></tr></table></figure>
-
 <p>常用的操作命令有：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 对192.168.1.1进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -d query.domain.list<br><br><span class="hljs-comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list<br><br><span class="hljs-comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000<br><br><span class="hljs-comment"># 对192.168.1.1的5353端口进行压测，查询域名为文件query.domain.list的内容，压测压力为1000qps，每次查询超时时间为3s</span><br>queryperf -s 192.168.1.1 -p 5353 -d query.domain.list -T 1000 -t 3<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h1 id="2、压测数据"><a href="#2、压测数据" class="headerlink" title="2、压测数据"></a>2、压测数据</h1><h2 id="2-1-机器硬件配置"><a href="#2-1-机器硬件配置" class="headerlink" title="2.1 机器硬件配置"></a>2.1 机器硬件配置</h2><ul>
-<li><p>虚拟机为16核16G配置，宿主机为R730，配置是<code>双路E5-2640 v4</code>+<code>82599万兆网卡</code></p>
+<h1>2、压测数据</h1>
+<h2 id="2-1-机器硬件配置">2.1 机器硬件配置</h2>
+<ul>
+<li>
+<p>虚拟机为16核16G配置，宿主机为R730，配置是<code>双路E5-2640 v4</code>+<code>82599万兆网卡</code></p>
 </li>
-<li><p>物理机为R640，配置是<code>双路银牌Silver 4114</code>+<code>128G内存</code>+<code>x710万兆万卡</code></p>
+<li>
+<p>物理机为R640，配置是<code>双路银牌Silver 4114</code>+<code>128G内存</code>+<code>x710万兆万卡</code></p>
 </li>
 </ul>
 <p>这里需要额外提一下，CoreDNS比较吃网卡和CPU，对于硬盘IO的要求并不算特别高（主要取决于写日志的量），对内存占用较低</p>
-<h2 id="2-2-CoreDNS配置"><a href="#2-2-CoreDNS配置" class="headerlink" title="2.2 CoreDNS配置"></a>2.2 CoreDNS配置</h2><p>CoreDNS配置的复杂程度会直接影响具体实例的性能表现，简单来说就是启用的插件越多，性能表现越差；比较影响性能表现的插件主要是日志相关的插件，如log插件开启全量日志记录，我们测试启用的插件主要有：<code>log、errors、bind、reload、ready、prometheus、loadbalance、cache、acl、secondary、transfer、hosts、forward、import、file、kubernetes</code>。</p>
-<h2 id="2-3-数据汇总"><a href="#2-3-数据汇总" class="headerlink" title="2.3 数据汇总"></a>2.3 数据汇总</h2><table>
+<h2 id="2-2-CoreDNS配置">2.2 CoreDNS配置</h2>
+<p>CoreDNS配置的复杂程度会直接影响具体实例的性能表现，简单来说就是启用的插件越多，性能表现越差；比较影响性能表现的插件主要是日志相关的插件，如log插件开启全量日志记录，我们测试启用的插件主要有：<code>log、errors、bind、reload、ready、prometheus、loadbalance、cache、acl、secondary、transfer、hosts、forward、import、file、kubernetes</code>。</p>
+<h2 id="2-3-数据汇总">2.3 数据汇总</h2>
+<table>
 <thead>
 <tr>
-<th align="center">机器配置</th>
-<th align="center">CoreDNS配置</th>
-<th align="center">性能表现</th>
+<th style="text-align:center">机器配置</th>
+<th style="text-align:center">CoreDNS配置</th>
+<th style="text-align:center">性能表现</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="center">虚拟机</td>
-<td align="center">多插件配置+全量日志记录</td>
-<td align="center">30K qps</td>
+<tbody>
+<tr>
+<td style="text-align:center">虚拟机</td>
+<td style="text-align:center">多插件配置+全量日志记录</td>
+<td style="text-align:center">30K qps</td>
 </tr>
 <tr>
-<td align="center">物理机</td>
-<td align="center">多插件配置+全量日志记录</td>
-<td align="center">55K qps</td>
+<td style="text-align:center">物理机</td>
+<td style="text-align:center">多插件配置+全量日志记录</td>
+<td style="text-align:center">55K qps</td>
 </tr>
 <tr>
-<td align="center">物理机</td>
-<td align="center">多插件配置+关闭log和error插件</td>
-<td align="center">70K qps</td>
+<td style="text-align:center">物理机</td>
+<td style="text-align:center">多插件配置+关闭log和error插件</td>
+<td style="text-align:center">70K qps</td>
 </tr>
 <tr>
-<td align="center">物理机</td>
-<td align="center">最少插件配置</td>
-<td align="center">75K qps</td>
+<td style="text-align:center">物理机</td>
+<td style="text-align:center">最少插件配置</td>
+<td style="text-align:center">75K qps</td>
 </tr>
-</tbody></table>
-<h2 id="2-4-Q-A"><a href="#2-4-Q-A" class="headerlink" title="2.4 Q&amp;A"></a>2.4 Q&amp;A</h2><ol>
-<li><p><strong>虚拟机和物理机数据差距并不算特别大？</strong></p>
+</tbody>
+</table>
+<h2 id="2-4-Q-A">2.4 Q&amp;A</h2>
+<ol>
+<li>
+<p><strong>虚拟机和物理机数据差距并不算特别大？</strong></p>
 <p>首先要明确：CoreDNS并没有完全吃满物理机上面的所有硬件配置，因此在物理机这里的性能表现瓶颈处于CoreDNS本身，而虚拟机的性能表现瓶颈才是硬件配置；</p>
 <p>其次要知道：我们的虚拟机相互之间的影响比较严重，30K qps的性能表现是同宿主机上面的其他虚拟机基本处于摸鱼状态，由于宿主机资源超售严重，一旦其他虚拟机利用率过高，必然会影响性能表现；而使用物理机则不用担心这类问题；</p>
 </li>
-<li><p><strong>log插件对性能的影响？</strong></p>
+<li>
+<p><strong>log插件对性能的影响？</strong></p>
 <p>log插件对性能的影响确实较大，但是仅限于全量写入查询日志的时候，如果对普通的查询日志的需求低于性能需求，可以考虑只配置部分特殊类型日志，如只记录错误日志<code>log denial error</code>；</p>
 <p>还有些同学可能会担心日志落盘速度慢是否会影响查询响应速度，实测在使用rsyslog记录日志的时候，所有查询请求均响应完之后一段时候内，rsyslog还在落盘相关日志，因此可以确定逻辑上并非是必须要等日志落盘结束后才响应请求；</p>
 </li>
-<li><p><strong>Prometheus插件采集到的数据和queryperf的数据不一致？</strong></p>
+<li>
+<p><strong>Prometheus插件采集到的数据和queryperf的数据不一致？</strong></p>
 <p>如果压测的时间太短（几秒到几分钟不等），会导致高峰时间持续太短而Prometheus插件无法准确暴露数据，同时还要考虑Prometheus服务端的采集频率已经Grafana面板的显示设置等；最好的方式是进行一段时间较长的压测，如三十分钟以上；</p>
 </li>
 </ol>

@@ -250,8 +250,9 @@
               <p>解析k8s的重要概念和介绍其工作原理。</p>
 <p>简单介绍一下k8s中的重要概念和各个主要的工作组件，主要参考了官方的技术文档和《每天5分钟玩转kubernetes》。</p>
 <span id="more"></span>
-
-<h1 id="1、重要概念"><a href="#1、重要概念" class="headerlink" title="1、重要概念"></a>1、重要概念</h1><h2 id="1-k8s-kubernetes"><a href="#1-k8s-kubernetes" class="headerlink" title="1. k8s&#x2F;kubernetes"></a>1. k8s&#x2F;kubernetes</h2><p><strong>Kubernetes</strong> 源于希腊语，意为 “舵手” 或 “飞行员”， 且是英文<code>governor</code>和 <code>cybernetic</code>的词根。 <strong>K8s</strong> 是通过将 8 个字母<code>ubernete</code>替换为 8 而导出的缩写。</p>
+<h1>1、重要概念</h1>
+<h2 id="1-k8s-kubernetes">1. k8s/kubernetes</h2>
+<p><strong>Kubernetes</strong> 源于希腊语，意为 “舵手” 或 “飞行员”， 且是英文<code>governor</code>和 <code>cybernetic</code>的词根。 <strong>K8s</strong> 是通过将 8 个字母<code>ubernete</code>替换为 8 而导出的缩写。</p>
 <p><code>k8s</code>是谷歌在2014年发布的一个开源项目，其主要用途就是用来管理大量的容器。Kubernetes 建立在 Google 公司超过十余年的运维经验基础之上，Google 所有的应用都运行在容器上。在谷歌内部，使用的容器管理系统叫<code>Borg</code>，现在已经改名叫<code>Omega</code>。（就是数学里面经常用到的那个欧米茄符合的读音）所以<code>k8s</code>其实相当于是<code>Borg</code>的开源版本。</p>
 <blockquote>
 <p>我们再来看一下k8s官网的说法：</p>
@@ -263,12 +264,21 @@
 <li><strong>可扩展</strong>: 它是模块化、可插拔、可挂载、可组合的，支持各种形式的扩展</li>
 <li><strong>自修复:</strong> 它可以自保持应用状态、可自重启、自复制、自缩放的，通过声明式语法提供了强大的自修复能力</li>
 </ul>
-<h2 id="2-Cluster"><a href="#2-Cluster" class="headerlink" title="2. Cluster"></a>2. Cluster</h2><p>Cluster就是集群的意思，即整个k8s管理的所有机器和容器等等的总称。它是计算、存储和网络资源的集合，k8s利用这些资源运行各种基于容器的应用。</p>
-<h2 id="3-Master"><a href="#3-Master" class="headerlink" title="3. Master"></a>3. Master</h2><p>Master是Cluster中的管理者，即该集群中所有节点的老大或老大们，因为Master可能不止一个，如果是有多个Master节点的集群我们一般称之为<strong>高可用集群</strong>。它的主要职责是调度，即决定将应用放在哪里运行。</p>
-<h2 id="4-Node"><a href="#4-Node" class="headerlink" title="4. Node"></a>4. Node</h2><p>Node的职责是运行容器应用。Node由Master管理，Node负责监控并汇报容器的状态，同时根据Master的要求管理容器的生命周期。</p>
-<h2 id="5-Pod"><a href="#5-Pod" class="headerlink" title="5. Pod"></a>5. Pod</h2><p>Pod是Kubernetes的最小工作单元。每个Pod包含一个或多个容器。Pod中的容器会作为一个整体被Master调度到一个Node上运行。这意味着，即使是只有一个容器，Master也是要把它作为一个Pod调度运行的。</p>
-<p>Kubernetes 引入Pod主要基于下面两个目的：<br>（1）可管理性。<br>有些容器天生就是需要紧密联系，一起工作。Pod提供了比容器更高层次的抽象，将它们封装到一个部署单元中。Kubernetes以Pod为最小单位进行调度、扩展、共享资源、管理生命周期。<br>（2）通信和资源共享。<br>Pod 中的所有容器使用同一个网络namespace，即相同的IP地址和Port空间。它们可以直接用localhost通信。同样的，这些容器可以共享存储，当Kubernetes挂载 volume到Pod，本质上是将volume挂载到Pod中的每一个容器。</p>
-<h2 id="6-namespace"><a href="#6-namespace" class="headerlink" title="6. namespace"></a>6. namespace</h2><p>Kubernetes支持由同一物理集群支持的多个虚拟集群。这些虚拟集群称为namespace。</p>
+<h2 id="2-Cluster">2. Cluster</h2>
+<p>Cluster就是集群的意思，即整个k8s管理的所有机器和容器等等的总称。它是计算、存储和网络资源的集合，k8s利用这些资源运行各种基于容器的应用。</p>
+<h2 id="3-Master">3. Master</h2>
+<p>Master是Cluster中的管理者，即该集群中所有节点的老大或老大们，因为Master可能不止一个，如果是有多个Master节点的集群我们一般称之为<strong>高可用集群</strong>。它的主要职责是调度，即决定将应用放在哪里运行。</p>
+<h2 id="4-Node">4. Node</h2>
+<p>Node的职责是运行容器应用。Node由Master管理，Node负责监控并汇报容器的状态，同时根据Master的要求管理容器的生命周期。</p>
+<h2 id="5-Pod">5. Pod</h2>
+<p>Pod是Kubernetes的最小工作单元。每个Pod包含一个或多个容器。Pod中的容器会作为一个整体被Master调度到一个Node上运行。这意味着，即使是只有一个容器，Master也是要把它作为一个Pod调度运行的。</p>
+<p>Kubernetes 引入Pod主要基于下面两个目的：<br>
+（1）可管理性。<br>
+有些容器天生就是需要紧密联系，一起工作。Pod提供了比容器更高层次的抽象，将它们封装到一个部署单元中。Kubernetes以Pod为最小单位进行调度、扩展、共享资源、管理生命周期。<br>
+（2）通信和资源共享。<br>
+Pod 中的所有容器使用同一个网络namespace，即相同的IP地址和Port空间。它们可以直接用localhost通信。同样的，这些容器可以共享存储，当Kubernetes挂载 volume到Pod，本质上是将volume挂载到Pod中的每一个容器。</p>
+<h2 id="6-namespace">6. namespace</h2>
+<p>Kubernetes支持由同一物理集群支持的多个虚拟集群。这些虚拟集群称为namespace。</p>
 <p>namespace旨在用于多个用户分布在多个团队或项目中的环境中。对于具有几个到几十个用户的集群，您根本不需要创建或考虑名称空间。当您需要它们提供的功能时，请开始使用命名空间。</p>
 <ul>
 <li>namespace提供名称范围。</li>
@@ -278,12 +288,16 @@
 <li>在Kubernetes的未来版本中，默认情况下，同一namespace中的对象将具有相同的访问控制策略。</li>
 <li>没有必要使用多个namespace来分隔略有不同的资源，例如同一软件的不同版本：可以使用标签来区分同一namespace中的资源。</li>
 </ul>
-<h1 id="2、Master节点"><a href="#2、Master节点" class="headerlink" title="2、Master节点"></a>2、Master节点</h1><p>Master 组件提供的集群控制。Master 组件对集群做出全局性决策(例如：调度)，以及检测和响应集群事件(副本控制器的<code>replicas</code>字段不满足时,启动新的副本)。</p>
+<h1>2、Master节点</h1>
+<p>Master 组件提供的集群控制。Master 组件对集群做出全局性决策(例如：调度)，以及检测和响应集群事件(副本控制器的<code>replicas</code>字段不满足时,启动新的副本)。</p>
 <p>Master 组件可以在集群中的任何节点上运行。然而，为了简单起见，设置脚本通常会启动同一个虚拟机上所有 Master 组件，并且不会在此虚拟机上运行用户容器。</p>
-<h2 id="2-1-kube-apiserver"><a href="#2-1-kube-apiserver" class="headerlink" title="2.1 kube-apiserver"></a>2.1 kube-apiserver</h2><p><code>kube-apiserver</code>对外暴露了Kubernetes API。它是的 Kubernetes 前端控制层。它被设计为水平扩展，即通过部署更多实例来缩放。</p>
+<h2 id="2-1-kube-apiserver">2.1 kube-apiserver</h2>
+<p><code>kube-apiserver</code>对外暴露了Kubernetes API。它是的 Kubernetes 前端控制层。它被设计为水平扩展，即通过部署更多实例来缩放。</p>
 <p>API Server 提供<code>HTTP/HTTPS</code> <code>RESTful</code> API，即Kubernetes API。API Server是Kubernetes Cluster的前端接口，各种客户端工具（CLI或UI）以及Kubernetes其他组件可以通过它管理Cluster的各种资源。</p>
-<h2 id="2-2-etcd"><a href="#2-2-etcd" class="headerlink" title="2.2 etcd"></a>2.2 etcd</h2><p><code>etcd</code>用于 Kubernetes 的后端存储。etcd 负责保存Kubernetes Cluster的配置信息和各种资源的状态信息，始终为 Kubernetes 集群的 etcd 数据提供备份计划。当数据发生变化时，etcd 会快速地通知Kubernetes相关组件。</p>
-<h2 id="2-3-kube-controller-manager"><a href="#2-3-kube-controller-manager" class="headerlink" title="2.3 kube-controller-manager"></a>2.3 kube-controller-manager</h2><p><code>kube-controller-manager</code>运行控制器，它们是处理集群中常规任务的后台线程。逻辑上，每个控制器是一个单独的进程，但为了降低复杂性，它们都被编译成独立的可执行文件，并在单个进程中运行。</p>
+<h2 id="2-2-etcd">2.2 etcd</h2>
+<p><code>etcd</code>用于 Kubernetes 的后端存储。etcd 负责保存Kubernetes Cluster的配置信息和各种资源的状态信息，始终为 Kubernetes 集群的 etcd 数据提供备份计划。当数据发生变化时，etcd 会快速地通知Kubernetes相关组件。</p>
+<h2 id="2-3-kube-controller-manager">2.3 kube-controller-manager</h2>
+<p><code>kube-controller-manager</code>运行控制器，它们是处理集群中常规任务的后台线程。逻辑上，每个控制器是一个单独的进程，但为了降低复杂性，它们都被编译成独立的可执行文件，并在单个进程中运行。</p>
 <p>这些控制器包括:</p>
 <ul>
 <li>节点控制器(<code>Node Controller</code>): 当节点移除时，负责注意和响应。</li>
@@ -291,13 +305,18 @@
 <li>端点控制器(<code>Endpoints Controller</code>): 填充 端点(Endpoints) 对象(即连接 Services &amp; Pods)。</li>
 <li>服务帐户和令牌控制器(<code>Service Account &amp; Token Controllers</code>): 为新的namespace创建默认帐户和 API 访问令牌.</li>
 </ul>
-<h2 id="2-4-kube-scheduler"><a href="#2-4-kube-scheduler" class="headerlink" title="2.4 kube-scheduler"></a>2.4 kube-scheduler</h2><p><code>kube-scheduler</code>主要的工作就是调度新创建的<code>Pod</code>，当集群中出现了新的Pod还没有确定分配到哪一个Node节点的时候，<code>kube-scheduler</code>会根据各个节点的负载，以及应用对高可用、性能、数据亲和性的需求等各个方面进行分析并将其分配到最合适的节点上。</p>
-<h2 id="2-5-Pod-网络"><a href="#2-5-Pod-网络" class="headerlink" title="2.5 Pod 网络"></a>2.5 Pod 网络</h2><p>Pod 要能够相互通信，Kubernetes Cluster必须部署Pod网络，Pod网络也能算是属于虚拟化网络&#x2F;SDN的一种，比较常见的有<a target="_blank" rel="noopener" href="https://docs.projectcalico.org/v3.11/getting-started/kubernetes/installation/calico">Calico</a>、<a target="_blank" rel="noopener" href="https://github.com/coreos/flannel/blob/master/Documentation/kube-flannel.yml">Flannel</a>等，也有其他更复杂高级的提供同时多种组合网络如<a target="_blank" rel="noopener" href="https://github.com/tigera/canal/tree/master/k8s-install">Canal</a>、<a target="_blank" rel="noopener" href="https://github.com/ZTE/Knitter/">Knitter</a>、<a target="_blank" rel="noopener" href="https://github.com/Intel-Corp/multus-cni">Multus</a>等。</p>
-<h1 id="3、Node节点"><a href="#3、Node节点" class="headerlink" title="3、Node节点"></a>3、Node节点</h1><p>节点组件在每个节点上运行，维护运行的 Pod 并提供 Kubernetes 运行时环境。</p>
-<h2 id="3-1-kubelet"><a href="#3-1-kubelet" class="headerlink" title="3.1 kubelet"></a>3.1 kubelet</h2><p>kubelet是k8s集群中的每个节点上（包括master节点）都会运行的代理。 它能够保证容器都运行在 Pod 中。kubelet 不会管理不是由 Kubernetes 创建的容器。</p>
+<h2 id="2-4-kube-scheduler">2.4 kube-scheduler</h2>
+<p><code>kube-scheduler</code>主要的工作就是调度新创建的<code>Pod</code>，当集群中出现了新的Pod还没有确定分配到哪一个Node节点的时候，<code>kube-scheduler</code>会根据各个节点的负载，以及应用对高可用、性能、数据亲和性的需求等各个方面进行分析并将其分配到最合适的节点上。</p>
+<h2 id="2-5-Pod-网络">2.5 Pod 网络</h2>
+<p>Pod 要能够相互通信，Kubernetes Cluster必须部署Pod网络，Pod网络也能算是属于虚拟化网络/SDN的一种，比较常见的有<a target="_blank" rel="noopener" href="https://docs.projectcalico.org/v3.11/getting-started/kubernetes/installation/calico">Calico</a>、<a target="_blank" rel="noopener" href="https://github.com/coreos/flannel/blob/master/Documentation/kube-flannel.yml">Flannel</a>等，也有其他更复杂高级的提供同时多种组合网络如<a target="_blank" rel="noopener" href="https://github.com/tigera/canal/tree/master/k8s-install">Canal</a>、<a target="_blank" rel="noopener" href="https://github.com/ZTE/Knitter/">Knitter</a>、<a target="_blank" rel="noopener" href="https://github.com/Intel-Corp/multus-cni">Multus</a>等。</p>
+<h1>3、Node节点</h1>
+<p>节点组件在每个节点上运行，维护运行的 Pod 并提供 Kubernetes 运行时环境。</p>
+<h2 id="3-1-kubelet">3.1 kubelet</h2>
+<p>kubelet是k8s集群中的每个节点上（包括master节点）都会运行的代理。 它能够保证容器都运行在 Pod 中。kubelet 不会管理不是由 Kubernetes 创建的容器。</p>
 <p>kubelet 接收一组通过各类机制提供给它的 PodSpecs，确保这些 PodSpecs 中描述的容器处于运行状态且健康。 当Scheduler确定在某个Node上运行Pod后，会将Pod的具体配置信息（image、volume等）发送给该节点的kubelet，kubelet根据这些信息创建和运行容器，并向Master报告运行状态。</p>
-<h2 id="3-2-kube-proxy"><a href="#3-2-kube-proxy" class="headerlink" title="3.2 kube-proxy"></a>3.2 kube-proxy</h2><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-proxy/">kube-proxy</a> 是集群中每个节点上运行的网络代理， kube-proxy通过维护主机上的网络规则并执行连接转发，实现了Kubernetes服务抽象。</p>
-<p>service在逻辑上代表了后端的多个Pod，外界通过service访问Pod。service接收到的请求就是通过kube-proxy转发到Pod上的，kube-proxy服务负责将访问service的TCP&#x2F;UDP数据流转发到后端的容器。<strong>如果有多个副本，kube-proxy会实现负载均衡。</strong></p>
+<h2 id="3-2-kube-proxy">3.2 kube-proxy</h2>
+<p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-proxy/">kube-proxy</a> 是集群中每个节点上运行的网络代理， kube-proxy通过维护主机上的网络规则并执行连接转发，实现了Kubernetes服务抽象。</p>
+<p>service在逻辑上代表了后端的多个Pod，外界通过service访问Pod。service接收到的请求就是通过kube-proxy转发到Pod上的，kube-proxy服务负责将访问service的TCP/UDP数据流转发到后端的容器。<strong>如果有多个副本，kube-proxy会实现负载均衡。</strong></p>
 
             </div>
             <hr>

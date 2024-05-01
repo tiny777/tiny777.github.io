@@ -249,19 +249,20 @@
             <div class="markdown-body">
               <p>nginx中http模块中的sendfile指令及其原理。</p>
 <span id="more"></span>
-
-<h1 id="1、sendfile-介绍"><a href="#1、sendfile-介绍" class="headerlink" title="1、sendfile()介绍"></a>1、sendfile()介绍</h1><p>nginx的http模块中有一个<code>sendfile</code>指令，默认是开启状态，<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile">官网的文档</a>对其解释是：</p>
+<h1>1、sendfile()介绍</h1>
+<p>nginx的http模块中有一个<code>sendfile</code>指令，默认是开启状态，<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#sendfile">官网的文档</a>对其解释是：</p>
 <blockquote>
 <p>Enables or disables the use of <code>sendfile()</code>.</p>
 <p>Starting from nginx 0.8.12 and FreeBSD 5.2.1, <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#aio">aio</a> can be used to pre-load data for <code>sendfile()</code>:</p>
 <blockquote>
 <figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-section">location</span> /video/ &#123;<br>    <span class="hljs-attribute">sendfile</span>       <span class="hljs-literal">on</span>;<br>    <span class="hljs-attribute">tcp_nopush</span>     <span class="hljs-literal">on</span>;<br>    <span class="hljs-attribute">aio</span>            <span class="hljs-literal">on</span>;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 </blockquote>
-<p>In this configuration, <code>sendfile()</code> is called with the <code>SF_NODISKIO</code> flag which causes it not to block on disk I&#x2F;O, but, instead, report back that the data are not in memory. nginx then initiates an asynchronous data load by reading one byte. On the first read, the FreeBSD kernel loads the first 128K bytes of a file into memory, although next reads will only load data in 16K chunks. This can be changed using the <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#read_ahead">read_ahead</a> directive.</p>
+<p>In this configuration, <code>sendfile()</code> is called with the <code>SF_NODISKIO</code> flag which causes it not to block on disk I/O, but, instead, report back that the data are not in memory. nginx then initiates an asynchronous data load by reading one byte. On the first read, the FreeBSD kernel loads the first 128K bytes of a file into memory, although next reads will only load data in 16K chunks. This can be changed using the <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#read_ahead">read_ahead</a> directive.</p>
 </blockquote>
 <p>简单来说就是启用sendfile()系统调用来替换read()和write()调用，减少系统上下文切换从而提高性能，当 nginx 是静态文件服务器时，能极大提高nginx的性能表现，而当 nginx 是反向代理服务器时，则没什么用了。下面我们来分析一下这个sendfile的工作原理：</p>
-<h1 id="2、原理分析"><a href="#2、原理分析" class="headerlink" title="2、原理分析"></a>2、原理分析</h1><p>首先我们需要知道sendfile()和read()、write()之间最大的区别就是前者是属于系统调用，而后者是属于函数调用，我们来看下面这幅图</p>
-<p><img src="https://resource.tinychen.com/blog/20200324/dQBklaVXJ2O5.png" srcset="/img/loading.gif" lazyload></p>
+<h1>2、原理分析</h1>
+<p>首先我们需要知道sendfile()和read()、write()之间最大的区别就是前者是属于系统调用，而后者是属于函数调用，我们来看下面这幅图</p>
+<p><img src="https://resource.tinychen.com/blog/20200324/dQBklaVXJ2O5.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们不难看出，nginx是属于Applicaiton的，而read()、write()属于函数调用，也就是在Lib Func这一层，sendfile()系统调用，位于System Call这一层，而想要对硬盘进行操作，是kernel才有的权限，上面的那些层都需要往下调用。</p>
 <p>作为对比我们先来看一下正常情况下如果nginx调用read()和write()函数的操作过程：</p>
 <p>我们都知道数据是存储在硬盘上面的，当数据被调用的时候会被加载进内存再被层层递进最后被CPU使用，这里个这个过程我们进行简化。</p>
@@ -274,7 +275,7 @@
 <p>这里需要说明两点，一是用户态和内核态之间的切换是需要执行上下文切换操作的，这是十分耗费系统资源和时间的操作，二是因为read()、write()属于函数调用，它们是没有权限在kernel中操作，无法将data直接从Kernel Buffer（Hard Disk）传输到Kernel Buffer（Socket Engine）。</p>
 <p>那么使用sendfile()呢？，由于是系统调用，所以在步骤二和步骤三的时候就可以不需要再将数据传输到User Buffer，直接在kernel中进行操作，省去了两次状态切换，也就是省去了两次的上下文切换，从而大幅度提升了性能。</p>
 <p>我们来看一下下面的这幅图（灵魂画手上线→_→）</p>
-<p><img src="https://resource.tinychen.com/blog/20200324/gkIcm2dmrSK4.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20200324/gkIcm2dmrSK4.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>最后我们再来解释一下，为什么当 nginx 是反向代理服务器时，<code>sendfile()</code>就没什么用了呢。</p>
 <p>顾名思义，<code>sendfile()</code>的作用是发送文件，也就是接收数据的一段是文件句柄，发送数据的那一端是socket。而在做反向代理服务器的时候，两端都是socket，此时无法使用<code>sendfile()</code>，也就不存在性能提升这一说了。</p>
 

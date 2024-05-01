@@ -249,30 +249,26 @@
             <div class="markdown-body">
               <p>CentOS8和RHEL8中新加入了一项功能<code>cockpit</code>，可以使用web浏览器来管理系统的一些常用状态，比如用户管理、软件更新、SELinux以及ssh等操作。</p>
 <span id="more"></span>
-
 <p>首先我们使用<code>yum</code>来安装<code>cockpit</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install cockpit -y<br></code></pre></div></td></tr></table></figure>
-
 <p>安装完成之后我们设置开机启动，同时注意需要在防火墙里面设置放行端口，<code>cockpit</code>默认使用的是<code>9090</code>端口，在CentOS8中的<code>firewall</code>里面有<code>cockpit</code>这个<code>service</code>，所以我们不需要自己手动指定端口放行。</p>
 <blockquote>
 <p>需要特别注意的是这里的服务是<code>cockpit.socket</code>而不是<code>cockpit.service</code></p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> cockpit.socket<br><span class="hljs-comment"># 开启服务</span><br>systemctl start cockpit.socket<br><span class="hljs-comment"># 在防火墙中永久放行服务</span><br>firewall-cmd --permanent --add-service=cockpit<br><span class="hljs-comment"># 重启防火墙</span><br>firewall-cmd --reload<br><span class="hljs-comment"># 查看是否放行成功</span><br>firewall-cmd --list-all<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20191109/CjWPtcc0C8Jh.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/CjWPtcc0C8Jh.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>查看运行状态</p>
-<p><img src="https://resource.tinychen.com/blog/20191109/sJj8mJYlfI5k.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/sJj8mJYlfI5k.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>再次使用ssh登录的时候我们就会看到终端上也会提示我们可以使用web控制台进行管理。</p>
-<p><img src="https://resource.tinychen.com/blog/20191109/hk1wTVssorCR.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/hk1wTVssorCR.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们使用浏览器打开来看看。可以使用IP或者域名来进行登录，注意需要使用https协议并且指定端口为9090。</p>
-<p><img src="https://resource.tinychen.com/blog/20191109/LvlIwPMH1C7h.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/LvlIwPMH1C7h.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里浏览器会提示我们不安全，因为使用的是https协议，而我们并没有导入权威CA颁发的证书，如果有需要的话也可以在<code>/etc/cockpit/ws-certs.d</code>这个目录下面导入cert证书来进行认证。同时我们可以使用<code>sudo remotectl certificate</code>命令来查看正在使用的是什么证书</p>
 <p>接着我们使用系统中的用户账号密码登录。</p>
-<p><img src="https://resource.tinychen.com/blog/20191109/q8igqLYDrTeG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/q8igqLYDrTeG.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>登录进去之后可以查看系统的各种状态和服务，也可以在浏览器中使用终端进行更多操作。</p>
-<p><img src="https://resource.tinychen.com/blog/20191109/PL8Xo1dCI0xN.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20191109/NL4ljV1Y1EcX.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/PL8Xo1dCI0xN.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20191109/NL4ljV1Y1EcX.png" srcset="/img/loading.gif" lazyload alt=""></p>
 
             </div>
             <hr>

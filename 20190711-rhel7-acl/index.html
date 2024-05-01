@@ -18,12 +18,12 @@
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
-    <meta name="description" content="RHEL7中的ACL的简单介绍。 1、ACL简介ACL是Access Control List的缩写，主要的目的是在提供传统的owner，group，others的read(r)，write(w)，execute(x) 权限之外的细部权限设定。 ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。ACL主要可以针对以下三者：  使用者（user">
+    <meta name="description" content="RHEL7中的ACL的简单介绍。 1、ACL简介 ACL是Access Control List的缩写，主要的目的是在提供传统的owner，group，others的read(r)，write(w)，execute(x) 权限之外的细部权限设定。 ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。 ACL主要可以针对以下三者：  使用者（us">
 <meta property="og:type" content="article">
 <meta property="og:title" content="RHEL7的ACL简介">
 <meta property="og:url" content="https://tinychen.com/20190711-rhel7-acl/index.html">
 <meta property="og:site_name" content="TinyChen&#39;s Studio - 互联网技术学习工作经验分享">
-<meta property="og:description" content="RHEL7中的ACL的简单介绍。 1、ACL简介ACL是Access Control List的缩写，主要的目的是在提供传统的owner，group，others的read(r)，write(w)，execute(x) 权限之外的细部权限设定。 ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。ACL主要可以针对以下三者：  使用者（user">
+<meta property="og:description" content="RHEL7中的ACL的简单介绍。 1、ACL简介 ACL是Access Control List的缩写，主要的目的是在提供传统的owner，group，others的read(r)，write(w)，execute(x) 权限之外的细部权限设定。 ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。 ACL主要可以针对以下三者：  使用者（us">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://resource.tinychen.com/20210617170553.jpg">
 <meta property="article:published_time" content="2019-07-11T03:00:00.000Z">
@@ -248,50 +248,45 @@
             
             <div class="markdown-body">
               <p>RHEL7中的ACL的简单介绍。</p>
-<h1 id="1、ACL简介"><a href="#1、ACL简介" class="headerlink" title="1、ACL简介"></a>1、ACL简介</h1><p><code>ACL</code>是<code>Access Control List</code>的缩写，主要的目的是在提供传统的<code>owner</code>，<code>group</code>，<code>others</code>的<code>read(r)</code>，<code>write(w)</code>，<code>execute(x)</code> 权限之外的细部权限设定。</p>
-<p>ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。<br>ACL主要可以针对以下三者：</p>
+<h1>1、ACL简介</h1>
+<p><code>ACL</code>是<code>Access Control List</code>的缩写，主要的目的是在提供传统的<code>owner</code>，<code>group</code>，<code>others</code>的<code>read(r)</code>，<code>write(w)</code>，<code>execute(x)</code> 权限之外的细部权限设定。</p>
+<p>ACL可以针对单一使用者，单一文件或目录来进行r，w，x的权限规范，对于需要特殊权限的使用状况非常有帮助。<br>
+ACL主要可以针对以下三者：</p>
 <ul>
 <li>使用者（user）：可以针对使用者来设定权限</li>
 <li>群组（group）：针对群组为对象来设定其权限</li>
-<li>默认属性（mask）：还可以针对在该目录下在建立新文件&#x2F;目录时，规范新数据的默认权限</li>
+<li>默认属性（mask）：还可以针对在该目录下在建立新文件/目录时，规范新数据的默认权限</li>
 </ul>
 <span id="more"></span>
-
-<p>也就是说，如果你有一个目录，需要给一堆人使用，每个人或每个群组所需要的权限并不相同时，在过去，传统的Linux三种身份的三种权限是无法达到的，<strong>因为基本上，传统的Linux权限只能针对一个用户、一个群组及非此群组的其他人设定权限而己，无法针对单一用户或个人来设计权限。</strong>而ACL的出现就是为了解决这个问题，实现更加细化的账户文件权限控制。</p>
-<h1 id="2、setfacl"><a href="#2、setfacl" class="headerlink" title="2、setfacl"></a>2、setfacl</h1><p><strong><code>ACL</code>的实现主要是通过<code>setfacl</code>和<code>getfacl</code>命令来操作。</strong></p>
+<p>也就是说，如果你有一个目录，需要给一堆人使用，每个人或每个群组所需要的权限并不相同时，在过去，传统的Linux三种身份的三种权限是无法达到的，**因为基本上，传统的Linux权限只能针对一个用户、一个群组及非此群组的其他人设定权限而己，无法针对单一用户或个人来设计权限。**而ACL的出现就是为了解决这个问题，实现更加细化的账户文件权限控制。</p>
+<h1>2、setfacl</h1>
+<p><strong><code>ACL</code>的实现主要是通过<code>setfacl</code>和<code>getfacl</code>命令来操作。</strong></p>
 <ul>
-<li><code>getfacl</code>：取得某个文件&#x2F;目录的ACL设定项目</li>
-<li><code>setfacl</code>：设定某个文件&#x2F;目录的ACL规范</li>
+<li><code>getfacl</code>：取得某个文件/目录的ACL设定项目</li>
+<li><code>setfacl</code>：设定某个文件/目录的ACL规范</li>
 </ul>
 <blockquote>
 <p><code>getfacl</code>的使用和<code>setfacl</code>一样，主要是用来查看acl权限，因此我们主要来看一下<code>setfacl</code>的用法。</p>
 </blockquote>
 <p><code>setfacl</code>的英文全称是<code>set file access control list </code>,即“设置文件访问控制列表”。改命令可以更精确的控制权限的分配，比如让某一个用户对某一个文件具有某种权限。</p>
-<p>ACL指文件的所有者、所属组、其他人的读&#x2F;写&#x2F;执行之外的特殊的权限， 对于需要特殊权限的使用状况有一定帮助。 如，某一个文件，不让单一的某个用户访问。</p>
+<p>ACL指文件的所有者、所属组、其他人的读/写/执行之外的特殊的权限， 对于需要特殊权限的使用状况有一定帮助。 如，某一个文件，不让单一的某个用户访问。</p>
 <p><strong>语法格式：</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setfacl [-bkndRLP] &#123; -m|-M|-x|-X ... &#125; file ...<br></code></pre></div></td></tr></table></figure>
-
 <p>我们输入<code>setfacl -h</code>查看一下帮助文档，可以看到里面的参数比较多</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setfacl 2.2.51 -- <span class="hljs-built_in">set</span> file access control lists<br>Usage: setfacl [-bkndRLP] &#123; -m|-M|-x|-X ... &#125; file ...<br>  -m, --modify=acl        modify the current ACL(s) of file(s)<br>  -M, --modify-file=file  <span class="hljs-built_in">read</span> ACL entries to modify from file<br>  -x, --remove=acl        remove entries from the ACL(s) of file(s)<br>  -X, --remove-file=file  <span class="hljs-built_in">read</span> ACL entries to remove from file<br>  -b, --remove-all        remove all extended ACL entries<br>  -k, --remove-default    remove the default ACL<br>      --<span class="hljs-built_in">set</span>=acl           <span class="hljs-built_in">set</span> the ACL of file(s), replacing the current ACL<br>      --set-file=file     <span class="hljs-built_in">read</span> ACL entries to <span class="hljs-built_in">set</span> from file<br>      --mask              <span class="hljs-keyword">do</span> recalculate the effective rights mask<br>  -n, --no-mask           don<span class="hljs-string">&#x27;t recalculate the effective rights mask</span><br><span class="hljs-string">  -d, --default           operations apply to the default ACL</span><br><span class="hljs-string">  -R, --recursive         recurse into subdirectories</span><br><span class="hljs-string">  -L, --logical           logical walk, follow symbolic links</span><br><span class="hljs-string">  -P, --physical          physical walk, do not follow symbolic links</span><br><span class="hljs-string">      --restore=file      restore ACLs (inverse of `getfacl -R&#x27;</span>)<br>      --<span class="hljs-built_in">test</span>              <span class="hljs-built_in">test</span> mode (ACLs are not modified)<br>  -v, --version           <span class="hljs-built_in">print</span> version and <span class="hljs-built_in">exit</span><br>  -h, --<span class="hljs-built_in">help</span>              this <span class="hljs-built_in">help</span> text<br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
-<p>这里需要说明一下，-m和-M以及-x和-X的区别就在于，<strong>小写字母是后面直接跟需要设置的acl规则，而大写字母则是在后面跟着一个文件，文件里面写着acl规则，</strong>后者适用于比较复杂的acl规则设定情况。</p>
+<p>这里需要说明一下，-m和-M以及-x和-X的区别就在于，**小写字母是后面直接跟需要设置的acl规则，而大写字母则是在后面跟着一个文件，文件里面写着acl规则，**后者适用于比较复杂的acl规则设定情况。</p>
 </blockquote>
 <p>接下来我们看一些比较常用的选项参数：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setfacl [-bkRd] [&#123;-ml-x）ac1参数]目标文件名选项与参数：<br>-m：设定后续的ac1参数给文件使用，不可与-x合用；<br>-x：删除后续的ac1参数，不可与-m合用；<br>-b：移除[所有的]ACL设定参数；<br>-k：移除[预设的]ACL参数，关于所谓的预设]参数于后续范例中介绍；<br>-R：递归设定acl，亦即包括次目录都会被设定起来；<br>-d：设定预设ac1参数]的意思！只对目录有效，在该目录新建的数据会引用此默认值<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h1 id="3、实例示范"><a href="#3、实例示范" class="headerlink" title="3、实例示范"></a>3、实例示范</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置用户tinychen对acltest1有读写执行权限</span><br>setfacl -m u:tinychen:rwx acltest1<br><span class="hljs-comment"># 设置用户tinychen对acltest2无任何权限</span><br>setfacl -m u:tinychen:- acltest2<br><span class="hljs-comment"># 设置用户组tinychen对acltest3无任何权限</span><br>setfacl -m g:tinychen:- acltest3<br></code></pre></div></td></tr></table></figure>
-
+<h1>3、实例示范</h1>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置用户tinychen对acltest1有读写执行权限</span><br>setfacl -m u:tinychen:rwx acltest1<br><span class="hljs-comment"># 设置用户tinychen对acltest2无任何权限</span><br>setfacl -m u:tinychen:- acltest2<br><span class="hljs-comment"># 设置用户组tinychen对acltest3无任何权限</span><br>setfacl -m g:tinychen:- acltest3<br></code></pre></div></td></tr></table></figure>
 <p>设定了ACL权限之后，我们查看该文件权限的时候会发现多了一个<code>+</code>号。</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/L8jsUw36k13x.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/L8jsUw36k13x.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p><strong>然后我们使用<code>getfacl</code>命令查看文件的权限:</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20190710/tc5cvq601YfM.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190710/tc5cvq601YfM.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 删除acltest1的所有acl权限设置</span><br>setfacl -b acltest1<br>getfacl acltest1<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190711/2b52XYa9ye38.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/2b52XYa9ye38.png" srcset="/img/loading.gif" lazyload alt=""></p>
 
             </div>
             <hr>

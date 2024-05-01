@@ -250,44 +250,44 @@
             <div class="markdown-body">
               <p>运行容器化应用是Kubernetes最重要的核心功能。为满足不同的业务需要，Kubernetes提供了多种Controller，主要包括<code>Deployment</code>、<code>DaemonSet</code>、<code>Job</code>、<code>CronJob</code>等。</p>
 <span id="more"></span>
-
-<h1 id="1、创建资源的两种方式"><a href="#1、创建资源的两种方式" class="headerlink" title="1、创建资源的两种方式"></a>1、创建资源的两种方式</h1><p>创建资源主要有<strong>通过命令行配置参数</strong>和<strong>通过配置文件</strong>这两种方式。</p>
+<h1>1、创建资源的两种方式</h1>
+<p>创建资源主要有<strong>通过命令行配置参数</strong>和<strong>通过配置文件</strong>这两种方式。</p>
 <ul>
-<li><p>通过命令行主要是使用<code>kubectl</code>命令来进行创建，主要可能用到的是<code>kubectl run</code>和<code>kubectl create</code>，具体的用法我们可以在命令后面加上<code>–-help</code>参数来查看帮助文档。</p>
-<p>  这种方式的好处就是简单快捷，部署的速度比较快，但是遇到要求比较复杂多样的资源部署，后面就要附带一大串参数，容易出错，所以这种方式一般来说比较适用于小规模的简单资源部署或者是上线前的简单测试</p>
+<li>
+<p>通过命令行主要是使用<code>kubectl</code>命令来进行创建，主要可能用到的是<code>kubectl run</code>和<code>kubectl create</code>，具体的用法我们可以在命令后面加上<code>–-help</code>参数来查看帮助文档。</p>
+<p>这种方式的好处就是简单快捷，部署的速度比较快，但是遇到要求比较复杂多样的资源部署，后面就要附带一大串参数，容易出错，所以这种方式一般来说比较适用于小规模的简单资源部署或者是上线前的简单测试</p>
 </li>
-<li><p>通过配置文件则主要是<code>json</code>格式或<code>yaml</code>格式的文件，好处是可以详细配置各种参数，保留的配置文件还可以用到其他的集群上进行大规模的部署操作，缺点就是部署比较麻烦，并且需要一定的门槛（要求对<code>json</code>或<code>yaml</code>有一定的了解）</p>
-<p>  配置文件主要是通过<code>kubectl apply -f</code>和<code>kubectl create -f</code>来进行配置。</p>
+<li>
+<p>通过配置文件则主要是<code>json</code>格式或<code>yaml</code>格式的文件，好处是可以详细配置各种参数，保留的配置文件还可以用到其他的集群上进行大规模的部署操作，缺点就是部署比较麻烦，并且需要一定的门槛（要求对<code>json</code>或<code>yaml</code>有一定的了解）</p>
+<p>配置文件主要是通过<code>kubectl apply -f</code>和<code>kubectl create -f</code>来进行配置。</p>
 </li>
 </ul>
-<h1 id="2、Deployment"><a href="#2、Deployment" class="headerlink" title="2、Deployment"></a>2、Deployment</h1><h2 id="2-1-cli部署"><a href="#2-1-cli部署" class="headerlink" title="2.1 cli部署"></a>2.1 cli部署</h2><p>我们先使用命令行（cli）创建一个deployment，名字（<code>NAME</code>）是<code>nginx-clideployment</code>，使用的镜像（<code>image</code>）版本为<code>1.17</code>，创建的副本（<code>replicas</code>）数量为<code>3</code>。</p>
+<h1>2、Deployment</h1>
+<h2 id="2-1-cli部署">2.1 cli部署</h2>
+<p>我们先使用命令行（cli）创建一个deployment，名字（<code>NAME</code>）是<code>nginx-clideployment</code>，使用的镜像（<code>image</code>）版本为<code>1.17</code>，创建的副本（<code>replicas</code>）数量为<code>3</code>。</p>
 <figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">kubectl <span class="hljs-built_in">run</span> nginx-clideployment <span class="hljs-attribute">--image</span>=nginx:1.17 <span class="hljs-attribute">--replicas</span>=3<br></code></pre></div></td></tr></table></figure>
-
 <p>我们查看一下部署是否成功：</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/mClOrDnEL2WF.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/mClOrDnEL2WF.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里的<code>kubectl get rs</code>中的<code>rs</code>其实就是<code>ReplicaSet（RS）</code></p>
 <p>我们还可以发现ReplicaSet的命名就是在我们指定的<code>NAME</code>后面加上了一串哈希数值。</p>
 <p><code>&lt;the name of the Deployment&gt;-&lt;hash value of the pod template&gt;</code>.</p>
 <p>想要查看更详细的pod情况，我们可以这样：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubectl get pod -o wide<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190722/AL5Cu1h0amel.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/AL5Cu1h0amel.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里我们可以发现三个pod被k8s自动的分配到了三个节点上而实现集群中的负载均衡（LB），而这里的IP是创建pod的时候进行随机分配的，我们并不能预知。</p>
 <p>如果想要查看某一个pod部署之后的情况，我们可以这样：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubectl describe pods nginx-clideployment-5696d55d9d-gdtrt<br></code></pre></div></td></tr></table></figure>
-
 <p>如果我们只是输入<code>nginx-clideployment</code>的话就会把所有相关的<code>nginx-clideployment</code>都列出来。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/Jutvf3JCdqkU.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/Jutvf3JCdqkU.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里的信息很多，我们可以看到<code>namespace</code>是使用的默认<code>default</code>（一般都是<code>default</code>，除非是数十人以上在同时使用这个集群，否则一般不建议新建<code>namespace</code>来区分<code>pod</code>，大多数情况下使用<code>label</code>即可区分各类<code>pod</code>。）</p>
 <p><code>Controlled By: </code>则说明了这个deployment是由<code>ReplicaSet</code>控制的。</p>
 <p><code>Conditions:</code>则表明了当前的pod状况</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/Ed0q6L0SUtY0.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/Ed0q6L0SUtY0.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p><code>Volumes</code>称之为卷，这个概念我们暂时还没有接触到，等到我们的宿主机需要与容器内的服务进行数据交互的时候再进行了解。</p>
 <p><code>Events</code>则相当于log，记录了pod运行的所有情况，如果遇到了运行不正常的情况，我们也可以查看这里来了解详情。</p>
-<h2 id="2-2-yaml配置文件部署"><a href="#2-2-yaml配置文件部署" class="headerlink" title="2.2 yaml配置文件部署"></a>2.2 yaml配置文件部署</h2><p>接下来我们尝试使用yaml文件来进行部署。我们新建一个文件，命名为<code>nginx-yamldeployment.yml</code></p>
+<h2 id="2-2-yaml配置文件部署">2.2 yaml配置文件部署</h2>
+<p>接下来我们尝试使用yaml文件来进行部署。我们新建一个文件，命名为<code>nginx-yamldeployment.yml</code></p>
 <figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">extensions/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Deployment</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">nginx-yamldeployment</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">replicas:</span> <span class="hljs-number">5</span><br>  <span class="hljs-attr">template:</span> <br>    <span class="hljs-attr">metadata:</span><br>      <span class="hljs-attr">labels:</span><br>        <span class="hljs-attr">app:</span> <span class="hljs-string">web_server</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">nginx</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">nginx:1.17.1</span><br></code></pre></div></td></tr></table></figure>
-
 <ul>
 <li>apiVersion是当前配置格式的版本。</li>
 <li>kind是要创建的资源类型，这里是Deployment。</li>
@@ -300,21 +300,19 @@
 </ul>
 <p>接下来我们使用<code>kubectl apply</code>指令进行部署。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubectl apply -f nginx-yamldeployment.yml<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190722/1qNQA1MogwjW.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190722/UeztE4dn2Akf.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/1qNQA1MogwjW.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/UeztE4dn2Akf.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们可以看到这里是已经运行正常了，那么如果我们想要修改这个deployment的属性，比如说副本数量从5改为6，那么我们可以直接编辑刚刚的<code>nginx-yamldeployment.yml</code>文件，然后再执行<code>kubectl apply -f nginx-yamldeployment.yml</code>，但是如果文件找不到了，我们可以使用另外的方法：</p>
 <figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">kubectl <span class="hljs-built_in">edit</span> deployments.apps nginx-yamldeployment<br></code></pre></div></td></tr></table></figure>
-
 <p>这样子我们就能直接编辑这个deployment的yaml配置文件，编辑的操作方式和vim相同，修改完成后会自动生效。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/X9zrozUlt8TB.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/X9zrozUlt8TB.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们修改保存退出后，可以看到这里已经生效了。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/Y0t7LlK0agLC.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/Y0t7LlK0agLC.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <blockquote>
 <p>对于使用命令行创建的deployment，我们可以使用命令行来进行修改，也可以直接<code>kubectl edit</code>来编辑对应的<code>yaml</code>配置文件。</p>
 </blockquote>
-<h1 id="3、DaemonSet"><a href="#3、DaemonSet" class="headerlink" title="3、DaemonSet"></a>3、DaemonSet</h1><p>我们先来看一下<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/daemonset/">官网对DaemonSet的解释</a>：</p>
+<h1>3、DaemonSet</h1>
+<p>我们先来看一下<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/workloads/controllers/daemonset/">官网对DaemonSet的解释</a>：</p>
 <p><strong>DaemonSet</strong> 确保全部（或者某些）节点上运行一个 Pod 的副本。当有节点加入集群时，也会为他们新增一个 Pod 。 当有节点从集群移除时，这些 Pod 也会被回收。删除 DaemonSet 将会删除它创建的所有 Pod。</p>
 <p>使用 DaemonSet 的一些典型用法：</p>
 <ul>
@@ -322,10 +320,12 @@
 <li>在每个节点上运行日志收集 daemon，例如<code>fluentd</code>、<code>logstash</code>。</li>
 <li>在每个节点上运行监控 daemon，例如 <code>Prometheus Node Exporter</code>、<code>collectd</code>、<code>Datadog</code> 代理、<code>New Relic</code> 代理，或 <code>Ganglia gmond</code>。</li>
 </ul>
-<p>一个简单的用法是在所有的节点上都启动一个 DaemonSet，将被作为每种类型的 daemon 使用。 一个稍微复杂的用法是单独对每种 daemon 类型使用多个 DaemonSet，但具有不同的标志，和&#x2F;或对不同硬件类型具有不同的内存、CPU要求。</p>
+<p>一个简单的用法是在所有的节点上都启动一个 DaemonSet，将被作为每种类型的 daemon 使用。 一个稍微复杂的用法是单独对每种 daemon 类型使用多个 DaemonSet，但具有不同的标志，和/或对不同硬件类型具有不同的内存、CPU要求。</p>
 <p>实际上，k8s本身的一些系统组件服务就是以DaemonSet的形式运行在各个节点上的。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/urEELjhVL5pJ.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="4、Job"><a href="#4、Job" class="headerlink" title="4、Job"></a>4、Job</h1><h2 id="4-1-部署job"><a href="#4-1-部署job" class="headerlink" title="4.1 部署job"></a>4.1 部署job</h2><ul>
+<p><img src="https://resource.tinychen.com/blog/20190722/urEELjhVL5pJ.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>4、Job</h1>
+<h2 id="4-1-部署job">4.1 部署job</h2>
+<ul>
 <li>Job创建一个或多个Pod并确保指定数量的Pod成功终止。当pod成功完成后，Job会跟踪成功的完成情况。达到指定数量的成功完成时，Job完成。</li>
 <li>删除Job将清理它创建的Pod。</li>
 <li>一个简单的例子是创建一个Job对象，以便可靠地运行一个Pod并成功完成指定任务。如果第一个Pod失败或被删除（例如由于节点硬件故障或节点重启），Job对象将启动一个新的Pod。</li>
@@ -334,40 +334,37 @@
 <p>直接照搬官网的解释可能会有些难以理解，我们来运行一个例子就能很好的说明情况了。</p>
 <p>我们先新建一个job的配置文件，命名为<code>pijob.yml</code>,这个任务是将pi计算到小数点后两千位，然后再打印出来。我们运行一下看看。</p>
 <figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">batch/v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Job</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">pi</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">template:</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">containers:</span><br>      <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">pi</span><br>        <span class="hljs-attr">image:</span> <span class="hljs-string">perl</span><br>        <span class="hljs-attr">command:</span> [<span class="hljs-string">&quot;perl&quot;</span>,  <span class="hljs-string">&quot;-Mbignum=bpi&quot;</span>, <span class="hljs-string">&quot;-wle&quot;</span>, <span class="hljs-string">&quot;print bpi(2000)&quot;</span>]<br>      <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">Never</span><br>  <span class="hljs-attr">backoffLimit:</span> <span class="hljs-number">4</span><br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190722/VP8WHET3smgj.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/VP8WHET3smgj.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们查看它的详细情况</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubectl describe <span class="hljs-built_in">jobs</span>/pi<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190722/0A67XaVCvl2R.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/0A67XaVCvl2R.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里可以看到，运行了37s后成功计算出结果。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/CXlbvVrzRVCF.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/CXlbvVrzRVCF.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>查看pod也可以看到它的状态是<code>Completed</code>，说明已经完成了。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看创建的pod的名称</span><br>pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath=<span class="hljs-string">&#x27;&#123;.items[*].metadata.name&#125;&#x27;</span>)<br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$pods</span><br><br><span class="hljs-comment"># 查看pod的运行结果</span><br>kubectl logs <span class="hljs-variable">$pods</span><br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190722/Rfm3s2p7aiIR.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="4-2-job运行错误"><a href="#4-2-job运行错误" class="headerlink" title="4.2 job运行错误"></a>4.2 job运行错误</h2><p>我们现在来看一下运行失败的情况，我们把command里面的路径改错，使得它无法正常运行。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/bRkqerw0wXID.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/Rfm3s2p7aiIR.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="4-2-job运行错误">4.2 job运行错误</h2>
+<p>我们现在来看一下运行失败的情况，我们把command里面的路径改错，使得它无法正常运行。</p>
+<p><img src="https://resource.tinychen.com/blog/20190722/bRkqerw0wXID.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>注意这里的<code>restartPolicy: Never</code>意味着pod运行失败了也不会重启。但是这个时候job会检测到运行失败，然后再新建一个pod来执行这个任务。</p>
 <p><code>backoffLimit: 4</code>意味着最多只会新建4个pod，避免一直失败一直新建从而耗尽系统资源。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/IoI2e03IUEYS.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/IoI2e03IUEYS.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们查看event可以看到，确实是由于路径修改错误而导致无法正常运行。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/ulE53nGBqDJ4.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/ulE53nGBqDJ4.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来我们把<code>restartPolicy:</code> 改为 <code>OnFailure</code></p>
 <p>这时候我们可以看到并没有启动多个pod，二是对发生错误的pod进行重启操作。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/BL0yke4Je6d6.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="4-3-job并行化"><a href="#4-3-job并行化" class="headerlink" title="4.3 job并行化"></a>4.3 job并行化</h2><p>在多线程早已普及的今天，很多任务我们都可以使用并行化来进行加速运行，这里也不例外。</p>
+<p><img src="https://resource.tinychen.com/blog/20190722/BL0yke4Je6d6.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="4-3-job并行化">4.3 job并行化</h2>
+<p>在多线程早已普及的今天，很多任务我们都可以使用并行化来进行加速运行，这里也不例外。</p>
 <p>我们在配置文件中的<code>spec</code>中加入  <code>completions:</code> 和<code>parallelism:</code> 。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/2BmkmHGd2MmS.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/2BmkmHGd2MmS.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>图中表示需要运行12个，每次并行运行6个。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/Hnip5ybbyy35.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/Hnip5ybbyy35.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>从图中我们可以看到确实是每次运行6个（运行时间相同说明同时开始运行）。</p>
 <p>等待一段时候之后，我们再次查看而已看到任务已经顺利完成了。</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/BKb4TYvbfLuU.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="5、CronJob"><a href="#5、CronJob" class="headerlink" title="5、CronJob"></a>5、CronJob</h1><p>熟悉linux的同学一定不会对cron感到陌生，因为cron就是用来管理linux中的定时任务的工具，所以CronJob我们可以理解为定时版的Job，其定时任务的编写格式也和Cron相似。关于Cron可以<a href="https://tinychen.com/20190710-rhel7-cron/">点击这里</a>查看小七之前的博客。</p>
+<p><img src="https://resource.tinychen.com/blog/20190722/BKb4TYvbfLuU.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>5、CronJob</h1>
+<p>熟悉linux的同学一定不会对cron感到陌生，因为cron就是用来管理linux中的定时任务的工具，所以CronJob我们可以理解为定时版的Job，其定时任务的编写格式也和Cron相似。关于Cron可以<a href="https://tinychen.com/20190710-rhel7-cron/">点击这里</a>查看小七之前的博客。</p>
 <blockquote>
 <p>需要注意的是，CronJob的时间以启动该CronJob任务的Master节点的时间为准。</p>
 </blockquote>
@@ -375,14 +372,11 @@
 <p>这里是CronJob的<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">官方文档</a>。</p>
 <p>我们新建一个<code>hellocronjob.yml</code>来查看一下它的工作情况。</p>
 <figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">batch/v1beta1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">CronJob</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">hello</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">schedule:</span> <span class="hljs-string">&quot;*/1 * * * *&quot;</span><br>  <span class="hljs-attr">jobTemplate:</span><br>    <span class="hljs-attr">spec:</span><br>      <span class="hljs-attr">template:</span><br>        <span class="hljs-attr">spec:</span><br>          <span class="hljs-attr">containers:</span><br>          <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">hello</span><br>            <span class="hljs-attr">image:</span> <span class="hljs-string">busybox</span><br>            <span class="hljs-attr">args:</span><br>            <span class="hljs-bullet">-</span> <span class="hljs-string">/bin/sh</span><br>            <span class="hljs-bullet">-</span> <span class="hljs-string">-c</span><br>            <span class="hljs-bullet">-</span> <span class="hljs-string">date;</span> <span class="hljs-string">echo</span> <span class="hljs-string">Hello</span> <span class="hljs-string">from</span> <span class="hljs-string">the</span> <span class="hljs-string">Kubernetes</span> <span class="hljs-string">cluster</span><br>          <span class="hljs-attr">restartPolicy:</span> <span class="hljs-string">OnFailure</span><br></code></pre></div></td></tr></table></figure>
-
 <p>这个定时任务的操作就是每分钟输出一次时间和<code>Hello from the Kubernetes cluster</code>。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看cronjob的运行状态</span><br>kubectl get cronjobs.batch<br><br>kubectl get jobs.batch --watch<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190722/N47BvxckinQ4.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/N47BvxckinQ4.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们随便查看其中的一个log可以看到输出的结果：</p>
-<p><img src="https://resource.tinychen.com/blog/20190722/6fA1eJo9cNwU.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190722/6fA1eJo9cNwU.png" srcset="/img/loading.gif" lazyload alt=""></p>
 
             </div>
             <hr>

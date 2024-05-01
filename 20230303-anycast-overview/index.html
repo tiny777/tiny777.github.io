@@ -251,49 +251,56 @@
             <div class="markdown-body">
               <p>Anycast 是一种为一组端点提供多个路由路径的技术，主要可以用于扩展无状态服务，例如 DNS 或 HTTP。很多大型的互联网服务商已经将Anycast作为他们的基础组件架构技术之一并用于构建异地多活的高可用服务。本文将主要对什么是Anycast、Anycast的原理和优势、Anycast与DNS结合等方面进行介绍。</p>
 <span id="more"></span>
-
-<h1 id="1、Anycast概述"><a href="#1、Anycast概述" class="headerlink" title="1、Anycast概述"></a>1、Anycast概述</h1><p>本章节主要介绍Anycast相关的基础概念，包括Anycast和其他几种cast的工作方式对比、Anycast的工作原理、Anycast的优势和成本。</p>
-<h2 id="1-1-Anycast基础术语"><a href="#1-1-Anycast基础术语" class="headerlink" title="1.1 Anycast基础术语"></a>1.1 Anycast基础术语</h2><p>在开始介绍Anycast之前，我们先介绍一下计算机的网络中数据包传递的几种方式：</p>
+<h1>1、Anycast概述</h1>
+<p>本章节主要介绍Anycast相关的基础概念，包括Anycast和其他几种cast的工作方式对比、Anycast的工作原理、Anycast的优势和成本。</p>
+<h2 id="1-1-Anycast基础术语">1.1 Anycast基础术语</h2>
+<p>在开始介绍Anycast之前，我们先介绍一下计算机的网络中数据包传递的几种方式：</p>
 <ul>
 <li><strong>单播（Unicast）</strong>：发送者和接收者之间的一对一关联</li>
 </ul>
-<p><img src="https://resource.tinychen.com/202302101635105.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202302101635105.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <ul>
 <li><strong>广播（Broadcast）</strong>：一对多关联，数据包被路由到广播网络上所有可能的端点</li>
 </ul>
-<p><img src="https://resource.tinychen.com/202302101635899.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202302101635899.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <ul>
 <li><strong>多播（Multicast）</strong>：一对多或多对多关联。一次数据包传输被路由到多个接收者（所有可访问节点的一个子集）；还有一种特殊形式的多播，可以将数据包传送到一组由其地理位置标识的目的地，一般称之为<code>Geocast</code>，可以视为多播的分支</li>
 </ul>
-<p><img src="https://resource.tinychen.com/202302101635429.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202302101635429.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <ul>
 <li><strong>任播（Anycast）</strong>：一对多关联；数据包被路由到由算法选择的由相同地址标识的一组收件人中的一个成员</li>
 </ul>
-<p><img src="https://resource.tinychen.com/202302101636216.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202302101636216.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>上面这些都是比较专业的术语介绍，如何通俗易懂地理解它们呢？</p>
 <ul>
-<li><p>假设我们的主人公小陈同学上班的时候，一到饭点就习惯和老陈同学去吃饭，所以每次吃饭之前，小陈会在手机上私聊老陈，问他中午吃什么。</p>
+<li>
+<p>假设我们的主人公小陈同学上班的时候，一到饭点就习惯和老陈同学去吃饭，所以每次吃饭之前，小陈会在手机上私聊老陈，问他中午吃什么。</p>
 <p>这个私聊的过程，我们可以理解为单播。此时的发送者是小陈，接收者是老陈，发送者和接收者之间的一对一关联</p>
 </li>
-<li><p>假设到了晚饭时间，老陈今天回家陪老婆孩子吃饭了，小陈到了饭点了没人和他一起吃饭，于是小陈在办公室里问大家一句：今晚有没有人一起吃饭呀？</p>
+<li>
+<p>假设到了晚饭时间，老陈今天回家陪老婆孩子吃饭了，小陈到了饭点了没人和他一起吃饭，于是小陈在办公室里问大家一句：今晚有没有人一起吃饭呀？</p>
 <p>小陈向办公室里众人喊话的过程，我们可以理解为一种广播。此时的发送者是小陈，接收者是办公室里面能听到小陈说话的所有人。由于小陈说话的范围是有限的（这里为整个办公室），因此我们可以把小陈这次说话（广播）的范围称之为<strong>广播域</strong>。</p>
 </li>
-<li><p>假设可怜的小陈还是找不到人跟他一起吃饭，但是被同事推荐了一个干饭群，群里全是小陈这样孤单的干饭人，所以小陈在群里问有人和他一起吃晚饭吗？</p>
+<li>
+<p>假设可怜的小陈还是找不到人跟他一起吃饭，但是被同事推荐了一个干饭群，群里全是小陈这样孤单的干饭人，所以小陈在群里问有人和他一起吃晚饭吗？</p>
 <p>这个小陈在群里发问的过程，我们可以理解为组播。此时的发送者是小陈，接收者是群里的所有人。</p>
 <p>这里需要注意的是广播和组播的区别，广播的情况下，接收者并不一定想要接受这个消息，而组播则相反。因为只要是广播包，理论上广播域内的所有人都会收到，就好比小陈在办公室里面问的时候，不管办公室里面的人想不想吃饭，都会接收到小陈在找人吃饭的这个消息；作为对比，小陈在干饭群里面发的消息，我们可以理解为群里的人都是想找人一起吃饭的，群友都有接收吃饭相关的消息的意愿。</p>
 </li>
-<li><p>假设小陈回到家之后，晚上肚子饿了想吃宵夜并打开了外卖软件下了一个订单，此时他的订单需要一个骑手帮他配送，但是他不需要操心由谁来给他配送，因为这都是由外卖软件负责的。外卖软件根据自己的大数据杀熟算法，从众多骑手里面挑选了一个骑手并派单给他。</p>
+<li>
+<p>假设小陈回到家之后，晚上肚子饿了想吃宵夜并打开了外卖软件下了一个订单，此时他的订单需要一个骑手帮他配送，但是他不需要操心由谁来给他配送，因为这都是由外卖软件负责的。外卖软件根据自己的大数据杀熟算法，从众多骑手里面挑选了一个骑手并派单给他。</p>
 <p>这里小陈叫外卖的过程可以视为是一个anycast任播。此时消息的发送者依旧可以视为是小陈，但是不同的是他这时候只需要一个骑手给他配送外卖即可，而后面实际上有很多个骑手都是可以配送的，具体由哪个骑手配送，实际上是由系统的算法决定的，而在计算机网络里面。这个分配的算法一般是由路由器决定的。</p>
 </li>
 </ul>
-<h2 id="1-2-Anycast是什么"><a href="#1-2-Anycast是什么" class="headerlink" title="1.2 Anycast是什么"></a>1.2 Anycast是什么</h2><p>Anycast 是一种为一组端点提供多个路由路径的技术，每个端点都分配有相同的 IP 地址。 组中的每个设备在网络上通告相同的地址，路由协议用于选择最佳目的地。Anycast 主要可以用于扩展无状态服务，例如 DNS 或 HTTP，方法是将多个节点放在同一 IP 地址后面，并使用等价多路径 (ECMP) 路由来引导这些节点之间的流量。 任播与单播不同，单播中每个端点都有自己独立的 IP 地址。</p>
+<h2 id="1-2-Anycast是什么">1.2 Anycast是什么</h2>
+<p>Anycast 是一种为一组端点提供多个路由路径的技术，每个端点都分配有相同的 IP 地址。 组中的每个设备在网络上通告相同的地址，路由协议用于选择最佳目的地。Anycast 主要可以用于扩展无状态服务，例如 DNS 或 HTTP，方法是将多个节点放在同一 IP 地址后面，并使用等价多路径 (ECMP) 路由来引导这些节点之间的流量。 任播与单播不同，单播中每个端点都有自己独立的 IP 地址。</p>
 <p>这里需要注意两个点：</p>
 <ul>
 <li>IPv4协议本身是不支持Anycast技术的</li>
 <li>IPv6协议原生支持Anycast技术，但是普及率要远低于IPv4</li>
 </ul>
 <p>因此到这里为止，Anycast技术落地的最大问题其实是如何在IPv4网络中实现Anycast。好在有BGP协议的帮忙，在一个大型的网络内，多个不同的路由器都发布同样的IP的路由，根据BGP协议，不同的客户端被路由到不同的路由器节点上，再由路由器选择对应的端点传输数据，就可以实现IPv4网络下的Anycast。</p>
-<h2 id="1-3-Anycast的优势和成本"><a href="#1-3-Anycast的优势和成本" class="headerlink" title="1.3 Anycast的优势和成本"></a>1.3 Anycast的优势和成本</h2><p>Anycast与传统的单播路由相比，Anycast技术有着不少的优势：</p>
+<h2 id="1-3-Anycast的优势和成本">1.3 Anycast的优势和成本</h2>
+<p>Anycast与传统的单播路由相比，Anycast技术有着不少的优势：</p>
 <ul>
 <li><strong>自动负载平衡</strong>：Anycast技术可以将请求有效地控制在特定的网络区域内（一般是网络路径最短的节点优先被请求），Anycast往往和ECMP搭配使用，利用ECMP可以有效地负载均衡各个 DNS 服务器之间的查询；</li>
 <li><strong>更低的网络延迟</strong>：Anycast会根据路由距离优先转发到最短路径的节点上，这可以有效地降低请求的延迟；</li>
@@ -301,28 +308,35 @@
 <li><strong>简化配置</strong>：使用了Anycast的服务在多个不同地区都可以配置相同的VIP，这可以大幅降低配置成本；</li>
 </ul>
 <p>下图为使用Anycast前后遭到DDoS攻击的变化：</p>
-<p><img src="https://resource.tinychen.com/202302101735401.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202302101735401.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>有利必有弊，Anycast在带来这些优势的同时，也会带来一些额外的维护成本：如外网BGP IP实际上带宽价格可能十分昂贵，一般的用户可能无法承担；Anycast网络架构的建设也需要一定的硬件设备和专业人员进行维护；同时由于有多个地域部署节点，在定位排查问题的时候也会增加一定的难度。部署一个真正的Anycast网络并不容易。 实施时要求CDN提供商维护自己的网络硬件，同时与世界上的多个运营商建立良好的关系，并不断优化其网络路由以确保用户可以通过最佳网络路径访问服务。</p>
-<h1 id="2、Anycast和DNS"><a href="#2、Anycast和DNS" class="headerlink" title="2、Anycast和DNS"></a>2、Anycast和DNS</h1><p>前面我们介绍了IPv4网络中的Anycast实现主要依赖于BGP路由协议，而这可能会存在一定的问题，例如在连接的过程中，路由器后面的某个端点出现故障，那么就可能导致对应的连接出现异常。因此一般认为Anycast和TCP一起使用会有一定的风险，但是如果使用本身就是无状态的UDP，那么就不会存在这个问题。而使用UDP的应用，接触和使用最多的就是DNS了，同时DNS的根域名服务器也广泛地使用了Anycast技术实现多地区高可用，这也就使得DNS成为Anycast技术的首选落地场景。</p>
+<h1>2、Anycast和DNS</h1>
+<p>前面我们介绍了IPv4网络中的Anycast实现主要依赖于BGP路由协议，而这可能会存在一定的问题，例如在连接的过程中，路由器后面的某个端点出现故障，那么就可能导致对应的连接出现异常。因此一般认为Anycast和TCP一起使用会有一定的风险，但是如果使用本身就是无状态的UDP，那么就不会存在这个问题。而使用UDP的应用，接触和使用最多的就是DNS了，同时DNS的根域名服务器也广泛地使用了Anycast技术实现多地区高可用，这也就使得DNS成为Anycast技术的首选落地场景。</p>
 <p>我们来看看下面这张图了解一些Anycast-DNS的工作原理，并借此深入到其他的应用。</p>
-<p><img src="https://resource.tinychen.com/202302101635867.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202302101635867.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>图中紫色的为DNS服务器，深蓝色的是路由器，不同的区块可以表示为不同的地区。路由器之间相互连接并使用BGP协议交换相互之间的路由信息，存在于多个地理位置的DNS服务器使用路由软件（frrouting、bird等）各自向其本地网关（路由器）通告一个相同的 Anycast VIP 地址。当 DNS 客户端发起对Anycast VIP 地址的查询时，路由器将评估可用路由，并根据自身的路由信息（路由距离、跃点信息、ECMP算法等）选择后面的一个DNS服务器来接收这个请求。</p>
-<h1 id="3、Anycast故障迁移"><a href="#3、Anycast故障迁移" class="headerlink" title="3、Anycast故障迁移"></a>3、Anycast故障迁移</h1><p>按照上面的架构，我们不难发现可以将问题出现的位置根据架构从应用本身到机房数据中心开始自底向上进行定位：</p>
+<h1>3、Anycast故障迁移</h1>
+<p>按照上面的架构，我们不难发现可以将问题出现的位置根据架构从应用本身到机房数据中心开始自底向上进行定位：</p>
 <ol>
-<li><p><strong>进程崩溃：</strong></p>
+<li>
+<p><strong>进程崩溃：</strong></p>
 <p>如果核心进程（如DNS）崩溃，则运行在服务器上的<strong>监控守护程序</strong>会检测到故障。 监控守护程序主要用于监控核心进程和路由软件（frrouting、bird等）的运行状态，确保在核心进程崩溃后，主要关闭路由软件（frrouting、bird等）进程，从而使得从上层交换机到该服务器的BGP路由会被撤销，达到摘除线上流量的目的。</p>
 <p>撤消路由后，数据中心的路由器将流量发送到权重次低的路由（优先转发到同数据中心的其他配置了ECMP的其他服务器，如果该数据中心内的所有服务器都崩溃了，则会根据BGP路由的配置转发到下一个数据中心）。</p>
 </li>
-<li><p><strong>服务器崩溃：</strong></p>
-<p>如果整个服务器崩溃，路由软件也随之崩溃。 交换机到该服务器的所有 BGP 路由都被撤销，路由器将流量发送到路由权重次低的服务器（一般来说优先转发到该数据中心的同机房配置了ECMP的其他服务器，如果该机房内的所有服务器都崩溃了，则会根据BGP路由的配置转发到下一个数据中心）。 </p>
+<li>
+<p><strong>服务器崩溃：</strong></p>
+<p>如果整个服务器崩溃，路由软件也随之崩溃。 交换机到该服务器的所有 BGP 路由都被撤销，路由器将流量发送到路由权重次低的服务器（一般来说优先转发到该数据中心的同机房配置了ECMP的其他服务器，如果该机房内的所有服务器都崩溃了，则会根据BGP路由的配置转发到下一个数据中心）。</p>
 </li>
-<li><p><strong>交换机崩溃：</strong></p>
+<li>
+<p><strong>交换机崩溃：</strong></p>
 <p>如果交换机出现故障，所有到交换机后面服务器的BGP路由都会自动撤销。 因为交换机和上层的路由器之间不再有BGP路由，也就不会再有线上流量转发到服务器上。</p>
 </li>
-<li><p><strong>路由器崩溃：</strong></p>
+<li>
+<p><strong>路由器崩溃：</strong></p>
 <p>如果路由器发生故障，则该路由器负责的数据中心的所有的 BGP 路由都将被撤销。 到数据中心的流量会自动故障转移到下一个最近的数据中心。 理论上这种情况出现，意味着整个数据中心内的所有服务的内网调用都有可能不正常。</p>
 </li>
-<li><p><strong>不可抗力：</strong></p>
+<li>
+<p><strong>不可抗力：</strong></p>
 <p>cloudflare在他们的<a target="_blank" rel="noopener" href="https://blog.cloudflare.com/cloudflares-architecture-eliminating-single-p/">博客</a>上面还列举了其他的一些诸如核战争级别的不可抗力故障，这里不作赘述。</p>
 </li>
 </ol>
