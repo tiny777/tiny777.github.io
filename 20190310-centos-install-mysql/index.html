@@ -250,44 +250,47 @@
             <div class="markdown-body">
               <p>主要是在CentOS7上安装MySQL服务。</p>
 <span id="more"></span>
+
 <hr>
-<h1>1、MySQL和MariaDB</h1>
-<p>需要注意的是，在CentOS7中，MySQL已经从默认的程序列表中移除了，并更换为了MariaDB。因此我们可以选择使用MariaDB来替代MySQL又或者是用手动的方式来下载yum资源包再进行安装。</p>
+<h1 id="1、MySQL和MariaDB"><a href="#1、MySQL和MariaDB" class="headerlink" title="1、MySQL和MariaDB"></a>1、MySQL和MariaDB</h1><p>需要注意的是，在CentOS7中，MySQL已经从默认的程序列表中移除了，并更换为了MariaDB。因此我们可以选择使用MariaDB来替代MySQL又或者是用手动的方式来下载yum资源包再进行安装。</p>
 <blockquote>
 <p>MariaDB 数据库管理系统是 MySQL 的一个分支，主要由开源社区在维护，采用 GPL 授权许可。开发这个分支的原因之一是：甲骨文公司收购了 MySQL 后，有将 MySQL 闭源的潜在风险，因此社区采用分支的方式来避开这个风险。<strong>MariaDB的目的是完全兼容MySQL，包括API和命令行，使之能轻松成为MySQL的代替品。</strong></p>
 </blockquote>
-<h1>2、检测并删除MySQL</h1>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">rpm -qa | grep mysql<br></code></pre></div></td></tr></table></figure>
+<h1 id="2、检测并删除MySQL"><a href="#2、检测并删除MySQL" class="headerlink" title="2、检测并删除MySQL"></a>2、检测并删除MySQL</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">rpm -qa | grep mysql<br></code></pre></div></td></tr></table></figure>
+
 <p>这条指令是用rpm来查询安装的所有软件，其中q就是query，而a就是all。使用管道命令将查询到的结果交给grep命令，来抓取里面是否有mysql相关的软件。</p>
 <p>如果查询到没有mysql，就可以直接进入下一步，如果有，就先卸载掉。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">rpm -e mysql<br>//-e 就是erase卸载软件<br><br>rpm -e --nodeps mysql<br>//强力删除模式，如果使用上面命令删除时，提示有依赖的其它文件，则用该命令可以对其进行强力删除<br></code></pre></div></td></tr></table></figure>
-<h1>3、安装MySQL</h1>
-<p>正如上面所说，CentOS7已经将MySQL移除出默认程序列表，所以我们要先去官网下载yum资源包，下载地址：<a target="_blank" rel="noopener" href="https://dev.mysql.com/downloads/repo/yum/">https://dev.mysql.com/downloads/repo/yum/</a></p>
+
+<h1 id="3、安装MySQL"><a href="#3、安装MySQL" class="headerlink" title="3、安装MySQL"></a>3、安装MySQL</h1><p>正如上面所说，CentOS7已经将MySQL移除出默认程序列表，所以我们要先去官网下载yum资源包，下载地址：<a target="_blank" rel="noopener" href="https://dev.mysql.com/downloads/repo/yum/">https://dev.mysql.com/downloads/repo/yum/</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm<br>//使用wget命令下载资源包到本地目录中<br><br>rpm -ivh mysql-community-release-el7-5.noarch.rpm<br>使用rpm命令进行安装<br></code></pre></div></td></tr></table></figure>
+
 <blockquote>
-<p>RPM安装参数解释<br>
--i, --install install package(s)<br>
--v, --verbose provide more detailed output<br>
--h, --hashprint hash marks as package installs (good with -v)</p>
+<p>RPM安装参数解释<br>-i, –install install package(s)<br>-v, –verbose provide more detailed output<br>-h, –hashprint hash marks as package installs (good with -v)</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum update<br>//更新yum<br><br>yum install mysql-server<br>//安装mysql-server<br></code></pre></div></td></tr></table></figure>
-<h1>4、设置权限</h1>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">chown</span> mysql:mysql -R /var/lib/mysql<br>//使用<span class="hljs-built_in">chown</span>命令更改权限，R表示递归处理该目录<br></code></pre></div></td></tr></table></figure>
-<h1>5、启动MySQL</h1>
-<blockquote>
+
+<h1 id="4、设置权限"><a href="#4、设置权限" class="headerlink" title="4、设置权限"></a>4、设置权限</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">chown</span> mysql:mysql -R /var/lib/mysql<br>//使用<span class="hljs-built_in">chown</span>命令更改权限，R表示递归处理该目录<br></code></pre></div></td></tr></table></figure>
+
+<h1 id="5、启动MySQL"><a href="#5、启动MySQL" class="headerlink" title="5、启动MySQL"></a>5、启动MySQL</h1><blockquote>
 <p>在centos7中，service命令已被systemctl命令替代</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">systemctl start mysqld.service<br>//启动mysql服务<br>systemctl status mysqld.service<br>//查询mysql服务状态<br>systemctl restart mysqld.service<br>//重启mysql服务<br></code></pre></div></td></tr></table></figure>
+
 <p>查询mysql版本信息</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mysqladmin --version<br></code></pre></div></td></tr></table></figure>
+
 <p>输出结果如下</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$  mysqladmin --version<br>mysqladmin  Ver 8.42 Distrib 5.6.43, <span class="hljs-keyword">for</span> Linux on x86_64<br></code></pre></div></td></tr></table></figure>
-<h1>6、设置密码</h1>
-<p>mysql安装后，默认的root用户密码为空，因此我们需要设置密码</p>
+
+<h1 id="6、设置密码"><a href="#6、设置密码" class="headerlink" title="6、设置密码"></a>6、设置密码</h1><p>mysql安装后，默认的root用户密码为空，因此我们需要设置密码</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mysql -u root<br>//此时还没有密码，直接使用root用户即可登录<br><br><span class="hljs-built_in">set</span> password <span class="hljs-keyword">for</span> root@localhost = password(<span class="hljs-string">&#x27;a_new_password&#x27;</span>);<br>//此时即可为root用户设置新的密码<br><br>mysql&gt; <span class="hljs-built_in">set</span> password <span class="hljs-keyword">for</span> root@localhost = password(<span class="hljs-string">&#x27;a_new_password&#x27;</span>);<br>Query OK, 0 rows affected (0.00 sec)<br></code></pre></div></td></tr></table></figure>
-<h1>7、登录使用mysql</h1>
-<p>使用mysql -u root -p进行登录，然后输入密码，即可进入mysql命令行，此时如果想要退出mysql命令行，输入quit或者exit或者按下ctrl+C即可。</p>
+
+
+
+<h1 id="7、登录使用mysql"><a href="#7、登录使用mysql" class="headerlink" title="7、登录使用mysql"></a>7、登录使用mysql</h1><p>使用mysql -u root -p进行登录，然后输入密码，即可进入mysql命令行，此时如果想要退出mysql命令行，输入quit或者exit或者按下ctrl+C即可。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs mysql">$  mysql -u root -p<br>Enter password:<br>Welcome to the MySQL monitor.  Commands end with ; or \g.<br>Your MySQL connection id is 2<br>Server version: 5.6.43 MySQL Community Server (GPL)<br><br>Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.<br><br>Oracle is a registered trademark of Oracle Corporation and/or its<br>affiliates. Other names may be trademarks of their respective<br>owners.<br><br>Type &#x27;help;&#x27; or &#x27;\h&#x27; for help. Type &#x27;\c&#x27; to clear the current input statement.<br><br>mysql&gt; show databases;<br>+--------------------+<br>| Database   |<br>+--------------------+<br>| information_schema |<br>| mysql  |<br>| performance_schema |<br>+--------------------+<br>3 rows in set (0.01 sec)<br><br>mysql&gt; Ctrl-C -- exit!<br>Aborted<br></code></pre></div></td></tr></table></figure>
+
 
             </div>
             <hr>

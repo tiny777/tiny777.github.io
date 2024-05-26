@@ -250,32 +250,35 @@
             <div class="markdown-body">
               <p>nginx的upstream模块中的加权轮询负载均衡的算法原理。</p>
 <span id="more"></span>
+
 <p>我们先来看一个简单的负载均衡：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 10.0.0.1:80;		<span class="hljs-comment">#服务器a</span><br>    server 10.0.0.2:80; 	<span class="hljs-comment">#服务器b</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>这是一个简单的负载均衡，将接受到的访问按照默认的均分原则分配给后台的两台服务器，这时候两台server的访问量应该是1：1。如果我们在后面加上权重值，例如</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 10.0.0.1:80   weight=1;	<span class="hljs-comment">#服务器a  </span><br>    server 10.0.0.2:80   weight=2;	<span class="hljs-comment">#服务器b</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>这时候如果进行访问，我们得到的结果就应该是<code>b a b</code>，如果再进行修改权重</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 10.0.0.1:80   weight=5;		<span class="hljs-comment">#服务器a</span><br>    server 10.0.0.2:80   weight=10; 	<span class="hljs-comment">#服务器b</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>虽然两个权重化简之后都是1：2，但是这时候访问策略就有两种选择</p>
 <ul>
-<li>
-<p>第一种是先连续访问<code>server a</code>5次再连续访问<code>server b</code>10次</p>
+<li><p>第一种是先连续访问<code>server a</code>5次再连续访问<code>server b</code>10次</p>
 </li>
-<li>
-<p>第二种是a b两台服务器轮流访问，但是总的访问次数比例符合5：10也就是1：2的比例。</p>
+<li><p>第二种是a b两台服务器轮流访问，但是总的访问次数比例符合5：10也就是1：2的比例。</p>
 </li>
 </ul>
 <p>显然第二种访问策略要更加优秀，可以避免一台服务器被连续访问多次而另一台服务器进入空闲状态。在nginx中的upstream模块实现这个操作使用了一个名为<code>smooth weighted round-robin balancing</code>的算法，直译过来就是平滑加权轮询负载均衡算法，大概意思就是实现上面说的第二种操作，下面我们用一个稍微复杂一点的配置来检验一下。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 127.0.0.1:8080   weight=3;    <br>    server 127.0.0.1:8081   weight=5; <br>    server 127.0.0.1:8082   weight=7;<br>&#125;<br><br>server &#123;<br>    listen 80;<br>    server_name example.com www.example.com;<br><br>    location / &#123;<br>        proxy_pass http://backend;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>这里我们使用nginx监听在本机8080~8081三个端口，然后这三个端口作为本机的80端口的负载均衡后端，接着我们把权重设为比较复杂的<code>3：5：7</code>，然后我们进行实际测试。</p>
-<p><img src="https://resource.tinychen.com/blog/20200318/pwzKS3ftCfn5.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20200318/pwzKS3ftCfn5.png" srcset="/img/loading.gif" lazyload></p>
 <p>得到的结果为，<code>c b a c b c a c b c b c a b c</code>，这里刚好15次也就是符合权重上面的加起来的总和，从结果来看这里的访问顺序比较均衡，但是细看又比较难找出规律。</p>
 <p>我们去Github上面找到<a target="_blank" rel="noopener" href="https://github.com/nginx/nginx">nginx的源码</a>，对应的我们这里使用的测试的版本是稳定版的<code>1.17.9</code>，我们在目录下的<code>nginx-master\src\http\ngx_http_upstream_round_robin.c</code>当中可以看到这部分的实现源码，主要集中在该文件的前面部分。接下来我们需要理解源码中的几个变量：</p>
 <ul>
 <li><code>weight</code>：配置文件中设置的权重值，是定值，在整个选择过程中是不会改变的，对应到这里就是3、5、7。</li>
 <li><code>current_weight</code>：后端服务器的当前权重值，初始值等于0，在每轮选择中，该值最大的服务器就会被选中</li>
 <li><code>effective_weight</code>：变化权重值，初始值等于<code>weight</code>，用于动态调整服务器被选择的概率，即当被选中的服务器出现了failure的时候，该服务器对应的<code>effective_weight</code>就会减小，具体操作我们下面再解释。</li>
-<li><code>total_weight</code>：总的权重值，即所有服务器的权重值相加，在这里为3+5+7=15。</li>
+<li><code>total_weight</code>：总的权重值，即所有服务器的权重值相加，在这里为3+5+7&#x3D;15。</li>
 </ul>
 <p>接下来我们开始逐步解析算法执行过程：</p>
 <ol>
@@ -289,59 +292,57 @@
 <table>
 <thead>
 <tr>
-<th style="text-align:center">操作</th>
-<th style="text-align:center"><code>current_weight</code></th>
-<th style="text-align:center">选中服务器</th>
+<th align="center">操作</th>
+<th align="center"><code>current_weight</code></th>
+<th align="center">选中服务器</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align:center">初始化</td>
-<td style="text-align:center">（0，0，0）</td>
-<td style="text-align:center">-</td>
+<tbody><tr>
+<td align="center">初始化</td>
+<td align="center">（0，0，0）</td>
+<td align="center">-</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤2</td>
-<td style="text-align:center">（3，5，7）</td>
-<td style="text-align:center">-</td>
+<td align="center">步骤2</td>
+<td align="center">（3，5，7）</td>
+<td align="center">-</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤3</td>
-<td style="text-align:center">（3，5，-8）</td>
-<td style="text-align:center">c</td>
+<td align="center">步骤3</td>
+<td align="center">（3，5，-8）</td>
+<td align="center">c</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤2</td>
-<td style="text-align:center">（6，10，-1）</td>
-<td style="text-align:center">-</td>
+<td align="center">步骤2</td>
+<td align="center">（6，10，-1）</td>
+<td align="center">-</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤3</td>
-<td style="text-align:center">（6，-5，-1）</td>
-<td style="text-align:center">b</td>
+<td align="center">步骤3</td>
+<td align="center">（6，-5，-1）</td>
+<td align="center">b</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤2</td>
-<td style="text-align:center">（9，0，6）</td>
-<td style="text-align:center">-</td>
+<td align="center">步骤2</td>
+<td align="center">（9，0，6）</td>
+<td align="center">-</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤3</td>
-<td style="text-align:center">（-6，0，6）</td>
-<td style="text-align:center">a</td>
+<td align="center">步骤3</td>
+<td align="center">（-6，0，6）</td>
+<td align="center">a</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤2</td>
-<td style="text-align:center">（-3，5，13）</td>
-<td style="text-align:center">-</td>
+<td align="center">步骤2</td>
+<td align="center">（-3，5，13）</td>
+<td align="center">-</td>
 </tr>
 <tr>
-<td style="text-align:center">步骤3</td>
-<td style="text-align:center">（-3，5，-2）</td>
-<td style="text-align:center">c</td>
+<td align="center">步骤3</td>
+<td align="center">（-3，5，-2）</td>
+<td align="center">c</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>下面的步骤就不继续演示了，当步骤2和步骤3重复了<code>total_weight</code>次，也就是相当于一轮之后，<code>current_weight</code>就会正好全部变回0，而前提是过程中没有出现服务器failure的情况。</p>
 
             </div>

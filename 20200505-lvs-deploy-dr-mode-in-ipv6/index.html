@@ -250,35 +250,37 @@
             <div class="markdown-body">
               <p>本文主要包括LVS DR模式在IPv4网络和IPv6网络下配置的一些差异对比。</p>
 <span id="more"></span>
-<h1>1、LVS DR via IPv4</h1>
-<p>首先这里我们使用三台主机配置lvs集群，对应的系统和内核版本如下</p>
+
+<h1 id="1、LVS-DR-via-IPv4"><a href="#1、LVS-DR-via-IPv4" class="headerlink" title="1、LVS DR via IPv4"></a>1、LVS DR via IPv4</h1><p>首先这里我们使用三台主机配置lvs集群，对应的系统和内核版本如下</p>
 <figure class="highlight subunit"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs subunit">[root@lvs81 ~]# lsb_release -a<br>LSB Version:    :base<span class="hljs-string">-4</span>.0-amd64:base<span class="hljs-string">-4</span>.0-noarch:core<span class="hljs-string">-4</span>.0-amd64:core<span class="hljs-string">-4</span>.0-noarch:graphics<span class="hljs-string">-4</span>.0-amd64:graphics<span class="hljs-string">-4</span>.0-noarch:printing<span class="hljs-string">-4</span>.0-amd64:printing<span class="hljs-string">-4</span>.0-noarch<br>Distributor ID: CentOS<br>Description:    CentOS release 6.10 (Final)<br>Release:        6.10<br>Codename:       Final<br>[root@lvs81 ~]# uname -r<br>2.6.32<span class="hljs-string">-754</span>.28.1.el6.x86_64<br></code></pre></div></td></tr></table></figure>
+
 <p>对应的IP地址如下</p>
 <figure class="highlight accesslog"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs accesslog"><span class="hljs-number">192.168.100.80</span>  lvsipv4<br><span class="hljs-number">192.168.100.81</span>  lvs81<br><span class="hljs-number">192.168.100.82</span>  lvs82<br><span class="hljs-number">192.168.100.83</span>  lvs83<br><br>240e:c331:dead:beef::3c80 lvsipv6<br>240e:c331:dead:beef::3c81 lvs81<br>240e:c331:dead:beef::3c82 lvs82<br>240e:c331:dead:beef::3c83 lvs83<br></code></pre></div></td></tr></table></figure>
+
 <p><strong>其中lvs81对应为LB，lvs82和lvs83为RS，RS上部署nginx分别监听本机对应ipv4和ipv6地址的80端口用于测试。</strong></p>
-<h2 id="1-1-LB配置">1.1 LB配置</h2>
-<p>此处略去ipvs模块的加载和ipvsadm的安装。</p>
+<h2 id="1-1-LB配置"><a href="#1-1-LB配置" class="headerlink" title="1.1 LB配置"></a>1.1 LB配置</h2><p>此处略去ipvs模块的加载和ipvsadm的安装。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ifconfig eth1:1 192.168.100.80 broadcast 192.168.100.81 netmask 255.255.255.255 up<br>ipvsadm -A -t 192.168.100.80:80 -s rr <br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.82 -g<br>ipvsadm -a -t 192.168.100.80:80 -r 192.168.100.83 -g   <br></code></pre></div></td></tr></table></figure>
+
 <p>修改ip_vs模块对应的哈希表的大小</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;options ip_vs conn_tab_bits=20&#x27;</span> &gt;/etc/modprobe.d/ipvs.conf<br></code></pre></div></td></tr></table></figure>
-<h2 id="1-2-RS配置">1.2 RS配置</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ifconfig lo:1 192.168.100.80 broadcast 192.168.100.80 netmask 255.255.255.255 up<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h2 id="1-2-RS配置"><a href="#1-2-RS配置" class="headerlink" title="1.2 RS配置"></a>1.2 RS配置</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ifconfig lo:1 192.168.100.80 broadcast 192.168.100.80 netmask 255.255.255.255 up<br></code></pre></div></td></tr></table></figure>
+
 <p>同时需要修改内核参数，修改ARP请求对应的响应限制</p>
 <figure class="highlight vim"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vim">$ <span class="hljs-keyword">cat</span> /etc/sysctl.<span class="hljs-keyword">conf</span> | <span class="hljs-keyword">grep</span> arp<br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_ignore=<span class="hljs-number">1</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">all</span>.arp_announce=<span class="hljs-number">2</span><br>net.ipv4.<span class="hljs-keyword">conf</span>.<span class="hljs-keyword">lo</span>.arp_announce=<span class="hljs-number">2</span><br></code></pre></div></td></tr></table></figure>
-<h2 id="1-3-测试">1.3 测试</h2>
-<p><img src="https://resource.tinychen.com/20200427142152.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/20200427142220.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/20200427142536.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h1>2、ipv6和ipv4的一些差别</h1>
-<ul>
-<li>
-<p>ipv6中没有广播地址的概念</p>
+
+<h2 id="1-3-测试"><a href="#1-3-测试" class="headerlink" title="1.3 测试"></a>1.3 测试</h2><p><img src="https://resource.tinychen.com/20200427142152.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200427142220.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200427142536.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="2、ipv6和ipv4的一些差别"><a href="#2、ipv6和ipv4的一些差别" class="headerlink" title="2、ipv6和ipv4的一些差别"></a>2、ipv6和ipv4的一些差别</h1><ul>
+<li><p>ipv6中没有广播地址的概念</p>
 <blockquote>
 <p>在IPv4中广泛的使用单播、广播、组播的方式。而在IPv6的应用环境中，使用单播，组播、任意播的新方式。</p>
 </blockquote>
 </li>
-<li>
-<p>ipv6中没有ARP协议，使用了升级版本的<strong>邻居发现协议</strong>（NDR）协议</p>
+<li><p>ipv6中没有ARP协议，使用了升级版本的<strong>邻居发现协议</strong>（NDR）协议</p>
 <blockquote>
 <p>邻居发现的这些功能主要通过邻居发现协议报文实现，邻居发现协议分组装载在ICMPv6分组内部。邻居发现协议中定义了五种ICMPv6分组类型，它们的名称和作用如下。</p>
 <ul>
@@ -305,68 +307,60 @@
 <p>实际上在IPv6协议过程中使用NDP协议根据IP查找MAC的过程主要使用的是NS和NA两种报文，它们相当于ARP协议中的ARP Request和ARP Reply。</p>
 </li>
 </ul>
-<h2 id="2-1-ipv6的地址分类">2.1 ipv6的地址分类</h2>
-<h3 id="2-1-1-ipv6的地址表示">2.1.1 ipv6的地址表示</h3>
-<p>IPv6地址的长度是IPv4（32位）的4倍，达到了128位，复杂程度大大提升，表达上使用了8组不区分大小写的16进制数来表示，每组由4个16进制数组成。IPv6地址一般使用“零缩法”来表示，主要限制如下：</p>
+<h2 id="2-1-ipv6的地址分类"><a href="#2-1-ipv6的地址分类" class="headerlink" title="2.1 ipv6的地址分类"></a>2.1 ipv6的地址分类</h2><h3 id="2-1-1-ipv6的地址表示"><a href="#2-1-1-ipv6的地址表示" class="headerlink" title="2.1.1 ipv6的地址表示"></a>2.1.1 ipv6的地址表示</h3><p>IPv6地址的长度是IPv4（32位）的4倍，达到了128位，复杂程度大大提升，表达上使用了8组不区分大小写的16进制数来表示，每组由4个16进制数组成。IPv6地址一般使用“零缩法”来表示，主要限制如下：</p>
 <ul>
 <li>16位地址块中的前导0可以省略，如果16位全为0，可以只写一个0</li>
 <li>当IPv6地址中有多个连续的，值为0的16位地址块时，可以用1个双冒号转换这 些连续的0，但双冒号在一个IPv6地址中只能出现一次，也就是在一个IPv6地址只 能用一个双冒号转换一个连续的、值为0的16位地址块</li>
 <li>不能用双冒号转换属于16位地址块中一部分的0，即使是地址块中的最后一个16 进制数0</li>
 </ul>
-<h3 id="2-1-2-ipv6地址类型">2.1.2 ipv6地址类型</h3>
-<p>IPv6协议主要定义了三种地址类型：单播地址（Unicast Address）、组播地址 （Multicast Address）和任播地址（Anycast Address）。相比IPv4而言取消了广播地址，新增了任意播，而IPv4中的广播功能在IPv6中主要通过组播实现。由于两者的组播标准并无过多的改动，因此IPv6中的组播地址其实与IPv4中的组播地址是类似的。</p>
+<h3 id="2-1-2-ipv6地址类型"><a href="#2-1-2-ipv6地址类型" class="headerlink" title="2.1.2 ipv6地址类型"></a>2.1.2 ipv6地址类型</h3><p>IPv6协议主要定义了三种地址类型：单播地址（Unicast Address）、组播地址 （Multicast Address）和任播地址（Anycast Address）。相比IPv4而言取消了广播地址，新增了任意播，而IPv4中的广播功能在IPv6中主要通过组播实现。由于两者的组播标准并无过多的改动，因此IPv6中的组播地址其实与IPv4中的组播地址是类似的。</p>
 <ul>
-<li>单播地址：用来唯一标识一个接口，类似于IPv4中的单播地址。发送到单播地址 的数据报文将被传送给此地址所标识的一个接口。</li>
-<li>组播地址：用来标识一组接口（通常这组接口属于不同的节点），类似于IPv4中的组播地址。发送到组播地址的数据报文被传送给此地址所标识的所有接口。</li>
+<li>单播地址：用来唯一标识一个接口，类似于IPv4中的单播地址。发送到单播地址 的数据报文将被传送给此地址所标识的一个接口。 </li>
+<li>组播地址：用来标识一组接口（通常这组接口属于不同的节点），类似于IPv4中的组播地址。发送到组播地址的数据报文被传送给此地址所标识的所有接口。 </li>
 <li>任播地址：用来标识一组接口（通常这组接口属于不同的节点）。发送到任播地 址的数据报文被传送给此地址所标识的一组接口中距离源节点最近（根据使用的路 由协议进行度量）的一个接口。</li>
 </ul>
-<p><img src="https://resource.tinychen.com/20200428095049.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200428095049.png" srcset="/img/loading.gif" lazyload></p>
 <p>整个IPv6单播地址包括以下五个类型：全局单播地址、链路本地地址、站点本地地址、特殊地址、兼容性地址。由于篇幅有限，这里重点讲一下和LVS要用到的全局单播地址和链路本地地址。</p>
 <p>全局单播地址等同于IPv4中的公网地址，可以在IPv6 Internet上进行全局路由和访问。</p>
 <p>在IPv6中，本地单播地址就是指本地网络使用的单播地址，也就是IPV4地址中经常 所说的局域网专用地址。本地单播地址又有两种，分别是链路本地地址和站点本地 地址。每个接口上至少要有一个链路本地单播地址，另外还可分配任何类型（单 播、任播和组播）或范围的IPv6地址。</p>
 <p>链路本地地址仅用于单个链路（注意，这里的“链路”就相当于IPv4中的子网）， 不能在不同子网中路由。结点使用链路本地地址与同一个链路上的相邻结点进行通 信。</p>
-<p>链路本地地址等效于169.254.0.0/16网段的自动专用IP寻址（APIPA）IPv4地址 （在运行Windows系统的计算机上自动配置）。邻居发现过程要求使用链路本地地 址，该地址始终自动配置（也就是无须手工配置），即使所有其他单播地址都不存 在也是如此。</p>
-<p><img src="https://resource.tinychen.com/20200428100632.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p>从图中可以看出，链路本地地址始终以“1111111010”（FE80）开头。后面紧跟着 的54位均为0，最后的64位是用来标识接口，称为接口ID。在IPv6单播地址中的接 口ID用来标识一个链路上的接口，不能在同一个链路上为不同结点分配相同的接口 ID。所以对于链路本地地址的前缀始终是FE80：/64。IPv6路由器永远不会将链路 本地通信转发出该链路。</p>
-<h2 id="2-2-ipv6的NDP协议">2.2 ipv6的NDP协议</h2>
-<p>要理解IPv6的组播，首先需要明白三个关键点：</p>
+<p>链路本地地址等效于169.254.0.0&#x2F;16网段的自动专用IP寻址（APIPA）IPv4地址 （在运行Windows系统的计算机上自动配置）。邻居发现过程要求使用链路本地地 址，该地址始终自动配置（也就是无须手工配置），即使所有其他单播地址都不存 在也是如此。</p>
+<p><img src="https://resource.tinychen.com/20200428100632.png" srcset="/img/loading.gif" lazyload></p>
+<p>从图中可以看出，链路本地地址始终以“1111111010”（FE80）开头。后面紧跟着 的54位均为0，最后的64位是用来标识接口，称为接口ID。在IPv6单播地址中的接 口ID用来标识一个链路上的接口，不能在同一个链路上为不同结点分配相同的接口 ID。所以对于链路本地地址的前缀始终是FE80：&#x2F;64。IPv6路由器永远不会将链路 本地通信转发出该链路。</p>
+<h2 id="2-2-ipv6的NDP协议"><a href="#2-2-ipv6的NDP协议" class="headerlink" title="2.2 ipv6的NDP协议"></a>2.2 ipv6的NDP协议</h2><p>要理解IPv6的组播，首先需要明白三个关键点：</p>
 <ul>
-<li>
-<p>任何节点都能够成为一个多播组成员也叫做组播组成员</p>
+<li><p>任何节点都能够成为一个多播组成员也叫做组播组成员</p>
 </li>
-<li>
-<p>源节点可以发送数据包到多播组</p>
+<li><p>源节点可以发送数据包到多播组</p>
 </li>
-<li>
-<p>在一个多播组的节点都能收到发往该组播组的数据</p>
+<li><p>在一个多播组的节点都能收到发往该组播组的数据</p>
 </li>
 </ul>
 <p>在IPv4环境的的ARP地址解析协议是使用目标地址为广播（255.255.255.255或者FFFF.FFFF.FFFF）将MAC地址请求消息发送到整个以太网链路上的所有主机，即便是LB（lvs81）主机请求RS（lvs82）主机的MAC，RS（lvs82）主机与RS（lvs83）主机是同样会收到这个请求广播，从性能与效率上讲这明显不科学。</p>
 <p>所以在IPv6的环境中放弃了广播的的方式，而是采用组播方式将MAC地址的解析请求，以点对点的形式直接组播到lvs82主机的请求节点组播地址。而不再将请求消息发送到无关的lvs83主机，所以IPv6的节点请求的确是高效率去替代IPv4的ARP协议。总而言之就是使用点到点的方式去代替广播。</p>
-<p><img src="https://resource.tinychen.com/20200428113025.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200428113025.png" srcset="/img/loading.gif" lazyload></p>
 <p>那么对于IPv6来说，发送组播数据包的时候，也是不知道目标IP主机的MAC地址的，这时候就要用到IPv6中对应的组播IP地址和组播MAC地址了：</p>
-<p><img src="https://resource.tinychen.com/20200505225723.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200505225723.png" srcset="/img/loading.gif" lazyload></p>
 <p>从上图中我们可以看到，组播的IPv6地址是根据目标IPv6地址生成的，组播IPv6地址会取目标IPv6地址的低24位（2进制）来加上固定的前缀<code>FF02::1:FF</code>（16进制）从而生成对应的组播地址，而组播的MAC地址则是根据组播的IPv6地址的低32位（2进制）再加上固定前缀3333（16进制）生成。</p>
 <p>由于在同一个局域网中，IPv6地址低24位相同的概率十分小，因此组播包发送出去之后，接受该组播包的客户端几乎只有一个，就无限接近于一对一的单播效果，从而有效地避免了ARP协议使用广播方式的诸多问题。</p>
-<h1>3、LVS DR via IPv6</h1>
-<p>同样还是使用上面的三台机器，由于IPv6中没有ARP的困扰，所以在配置的时候反而要比IPv4更加简单，我们只需要直接添加ip即可：</p>
+<h1 id="3、LVS-DR-via-IPv6"><a href="#3、LVS-DR-via-IPv6" class="headerlink" title="3、LVS DR via IPv6"></a>3、LVS DR via IPv6</h1><p>同样还是使用上面的三台机器，由于IPv6中没有ARP的困扰，所以在配置的时候反而要比IPv4更加简单，我们只需要直接添加ip即可：</p>
 <blockquote>
 <p>IPv6模式下还使用了elrepo库中的lt版本的4.4.219-1内核进行测试，两者结果一致。均可直接正常工作。</p>
 </blockquote>
-<h2 id="3-1-LB配置">3.1 LB配置</h2>
-<p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
+<h2 id="3-1-LB配置"><a href="#3-1-LB配置" class="headerlink" title="3.1 LB配置"></a>3.1 LB配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ifconfig eth2 inet6 add 240e:c331:dead:beef::3c80/128<br>ipvsadm -A -t [240e:c331:dead:beef::3c80]:80 -s rr<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c82]:80 -g<br>ipvsadm -a -t [240e:c331:dead:beef::3c80]:80 -r [240e:c331:dead:beef::3c83]:80 -g<br></code></pre></div></td></tr></table></figure>
-<h2 id="3-2-RS配置">3.2 RS配置</h2>
-<p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
+
+<h2 id="3-2-RS配置"><a href="#3-2-RS配置" class="headerlink" title="3.2 RS配置"></a>3.2 RS配置</h2><p>不需要对内核参数进行任何修改，确认启用了ipv6网络即可</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ifconfig lo inet6 add 240e:c331:dead:beef::3c80/128<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/20200427143253.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="3-3-测试">3.3 测试</h2>
-<p>使用客户端进行访问，可以看到返回的是ipv6的结果，并且产生了预设的轮询效果。</p>
-<p><img src="https://resource.tinychen.com/20200427142630.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/20200427143253.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="3-3-测试"><a href="#3-3-测试" class="headerlink" title="3.3 测试"></a>3.3 测试</h2><p>使用客户端进行访问，可以看到返回的是ipv6的结果，并且产生了预设的轮询效果。</p>
+<p><img src="https://resource.tinychen.com/20200427142630.png" srcset="/img/loading.gif" lazyload></p>
 <p>查看ipv6网络中的邻居表，可以看到对应的两个RS状态为可达（REACHABLE）,并且对应的MAC地址为RIP的ipv6地址所在的网卡。此外和IPv4中不同的是，对应的两台RS上面的Link-local地址在邻居表中的状态也显示为可达（REACHABLE）。</p>
-<p><img src="https://resource.tinychen.com/Inkedimage-20200427142653585_LI.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/Inkedimage-20200427142653585_LI.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>查看LB上面的ipvsadm中的连接状态，我们可以看到连接已经建立并且确实转发到了后端的RS上。</p>
-<p><img src="https://resource.tinychen.com/20200427142833.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200427142833.png" srcset="/img/loading.gif" lazyload></p>
 
             </div>
             <hr>
