@@ -27,7 +27,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://resource.tinychen.com/202307131730364.jpg">
 <meta property="article:published_time" content="2023-05-06T07:00:00.000Z">
-<meta property="article:modified_time" content="2023-07-13T07:00:00.000Z">
+<meta property="article:modified_time" content="2024-06-07T15:30:00.000Z">
 <meta property="article:author" content="TinyChen">
 <meta property="article:tag" content="k8s">
 <meta property="article:tag" content="argocd">
@@ -244,7 +244,7 @@
             
               <p class="note note-info">
                 
-                  本文最后更新于：July 13, 2023 pm
+                  本文最后更新于：June 7, 2024 pm
                 
               </p>
             
@@ -326,6 +326,14 @@
 
 <p>最后检查对应的svc是否存在，同理此时所有的svc应该也都在argocd这个namespace下。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get svc -n argocd<br>NAME                                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE<br>argocd-applicationset-controller          ClusterIP   10.33.182.73    &lt;none&gt;        7000/TCP,8080/TCP            12m<br>argocd-dex-server                         ClusterIP   10.33.130.105   &lt;none&gt;        5556/TCP,5557/TCP,5558/TCP   12m<br>argocd-metrics                            ClusterIP   10.33.167.226   &lt;none&gt;        8082/TCP                     12m<br>argocd-notifications-controller-metrics   ClusterIP   10.33.191.67    &lt;none&gt;        9001/TCP                     12m<br>argocd-redis-ha                           ClusterIP   None            &lt;none&gt;        6379/TCP,26379/TCP           12m<br>argocd-redis-ha-announce-0                ClusterIP   10.33.182.204   &lt;none&gt;        6379/TCP,26379/TCP           12m<br>argocd-redis-ha-announce-1                ClusterIP   10.33.158.122   &lt;none&gt;        6379/TCP,26379/TCP           12m<br>argocd-redis-ha-announce-2                ClusterIP   10.33.147.25    &lt;none&gt;        6379/TCP,26379/TCP           12m<br>argocd-redis-ha-haproxy                   ClusterIP   10.33.190.134   &lt;none&gt;        6379/TCP                     12m<br>argocd-repo-server                        ClusterIP   10.33.187.87    &lt;none&gt;        8081/TCP,8084/TCP            12m<br>argocd-server                             ClusterIP   10.33.160.176   &lt;none&gt;        80/TCP,443/TCP               12m<br>argocd-server-metrics                     ClusterIP   10.33.177.208   &lt;none&gt;        8083/TCP                     12m<br></code></pre></div></td></tr></table></figure>
+
+<blockquote>
+<p>需要注意的是，在较新版本的namespace-install.yaml文件中，因为默认开启了redis的认证功能，还需要我们自己手动创建一个对应的secret</p>
+</blockquote>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">kind:</span> <span class="hljs-string">Secret</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">labels:</span><br>    <span class="hljs-attr">app.kubernetes.io/name:</span> <span class="hljs-string">argocd-redis</span><br>    <span class="hljs-attr">app.kubernetes.io/part-of:</span> <span class="hljs-string">argocd</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">argocd-redis</span><br>  <span class="hljs-attr">namespace:</span> <span class="hljs-string">argocd</span><br><span class="hljs-attr">type:</span> <span class="hljs-string">Opaque</span><br><span class="hljs-attr">data:</span><br>  <span class="hljs-attr">auth:</span> <span class="hljs-string">dGlueWNoZW4uY29tCg==</span><br></code></pre></div></td></tr></table></figure>
+
+<p>注意上面的auth值应该是原密码经过base64编码后的值，例如</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># echo tinychen.com | base64</span><br>dGlueWNoZW4uY29tCg==<br></code></pre></div></td></tr></table></figure>
 
 <h1 id="5、部署CLI"><a href="#5、部署CLI" class="headerlink" title="5、部署CLI"></a>5、部署CLI</h1><p>CLI的部署可以参考文档</p>
 <figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">https:<span class="hljs-regexp">//</span>argo-cd.readthedocs.io<span class="hljs-regexp">/en/</span>latest<span class="hljs-regexp">/cli_installation/</span><br></code></pre></div></td></tr></table></figure>
@@ -508,6 +516,12 @@
                 <div class="post-prevnext">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/20240607-crictl-config-endpoint/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">crictl配置endpoint</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
