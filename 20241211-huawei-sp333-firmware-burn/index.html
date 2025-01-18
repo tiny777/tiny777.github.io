@@ -1,0 +1,579 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="https://resource.tinychen.com/logos.png">
+  <link rel="icon" href="https://resource.tinychen.com/logos.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="TinyChen">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="华为的SP333和SP380网卡应该就是MCX4121A-XCAT和MCX4121A-ACAT的OEM版本，本文主要介绍如何将10G的网卡SP333刷入25G网卡固件从而变为25G网卡。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="华为SP333网卡刷入25G固件">
+<meta property="og:url" content="https://tinychen.com/20241211-huawei-sp333-firmware-burn/index.html">
+<meta property="og:site_name" content="TinyChen&#39;s Studio - 互联网技术学习工作经验分享">
+<meta property="og:description" content="华为的SP333和SP380网卡应该就是MCX4121A-XCAT和MCX4121A-ACAT的OEM版本，本文主要介绍如何将10G的网卡SP333刷入25G网卡固件从而变为25G网卡。">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://resource.tinychen.com/202501181443167.jpg">
+<meta property="article:published_time" content="2024-12-11T11:00:00.000Z">
+<meta property="article:modified_time" content="2025-01-18T11:00:00.000Z">
+<meta property="article:author" content="TinyChen">
+<meta property="article:tag" content="sp380">
+<meta property="article:tag" content="sp333">
+<meta property="article:tag" content="mellanox">
+<meta property="article:tag" content="MCX4121A">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://resource.tinychen.com/202501181443167.jpg">
+  
+  
+  <title>华为SP333网卡刷入25G固件 - TinyChen&#39;s Studio - 互联网技术学习工作经验分享</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hint.css@2/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/dracula.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+  
+<link rel="stylesheet" href="/css/fluid-extention.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"tinychen.com","root":"/","version":"1.8.14","typing":{"enable":true,"typeSpeed":30,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"baidu":"7a96963a1145ac7fde1442d739a11ffd","google":"UA-166769908-1","gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.2"><link rel="alternate" href="/atom.xml" title="TinyChen's Studio - 互联网技术学习工作经验分享" type="application/atom+xml">
+</head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>TinyChen</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('https://resource.tinychen.com/202501181446992.jpg') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="华为SP333网卡刷入25G固件">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2024-12-11 19:00" pubdate>
+        December 11, 2024 pm
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      18k 字
+    </span>
+  
+
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">华为SP333网卡刷入25G固件</h1>
+            
+              <p class="note note-info">
+                
+                  本文最后更新于：January 18, 2025 pm
+                
+              </p>
+            
+            <div class="markdown-body">
+              <p>华为的SP333和SP380网卡应该就是MCX4121A-XCAT和MCX4121A-ACAT的OEM版本，本文主要介绍如何将10G的网卡SP333刷入25G网卡固件从而变为25G网卡。</p>
+<span id="more"></span>
+
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><p>固件我们直接去官网下载</p>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk"><span class="hljs-comment"># 官方的固件下载地址</span><br>https:<span class="hljs-regexp">//</span>network.nvidia.com<span class="hljs-regexp">/support/</span>firmware<span class="hljs-regexp">/connectx4lxen/</span><br><br><span class="hljs-comment"># 刷固件需要用到的MFT工具</span><br>https:<span class="hljs-regexp">//</span>network.nvidia.com<span class="hljs-regexp">/products/</span>adapter-software<span class="hljs-regexp">/firmware-tools/</span><br><br><span class="hljs-comment"># 网卡驱动</span><br>https:<span class="hljs-regexp">//</span>network.nvidia.com<span class="hljs-regexp">/products/</span>adapter-software<span class="hljs-regexp">/ethernet/</span>windows<span class="hljs-regexp">/winof-2/</span><br></code></pre></div></td></tr></table></figure>
+
+<p>华子的网卡固件在官网没办法下载，但是在超聚合官网可以下载</p>
+<figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">https:<span class="hljs-regexp">//</span>support.xfusion.com<span class="hljs-regexp">/support/</span><span class="hljs-comment">#/zh/software-basics/d4b7de78-c4c0-46db-bbbd-98926e13e2da</span><br></code></pre></div></td></tr></table></figure>
+
+<p>关于SP333和SP380这两个型号的华子官网介绍</p>
+<figure class="highlight gcode"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs gcode"><span class="hljs-attr"># SP333</span>是<span class="hljs-number">2</span>*<span class="hljs-number">10</span><span class="hljs-keyword">GE</span> SFP+，向下兼容<span class="hljs-number">1</span><span class="hljs-keyword">GE</span>速率（使用<span class="hljs-number">10</span><span class="hljs-keyword">GE</span> SFP+光模块）。<br>https:<span class="hljs-comment">//support.huawei.com/enterprise/zh/doc/EDOC1100198574/672e0978</span><br><span class="hljs-attr"># SP380</span>是<span class="hljs-number">2</span>*<span class="hljs-number">25</span><span class="hljs-keyword">GE</span> SFP<span class="hljs-number">28</span>，向下兼容<span class="hljs-number">10</span><span class="hljs-keyword">GE</span>速率（使用<span class="hljs-number">10</span>G SFP+光模块）。<br>https:<span class="hljs-comment">//support.huawei.com/enterprise/zh/doc/EDOC1100056515/c20b2897</span><br></code></pre></div></td></tr></table></figure>
+
+<p>根据之前对MCX4网卡的了解，这两个应该就是MCX4121A-XCAT和MCX4121A-ACAT的OEM版本</p>
+<figure class="highlight vim"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vim">https://network.nvidia.<span class="hljs-keyword">com</span>/<span class="hljs-keyword">files</span>/doc-<span class="hljs-number">2020</span>/pb-connectx-<span class="hljs-number">4</span>-lx-<span class="hljs-keyword">en</span>-card.pdf<br></code></pre></div></td></tr></table></figure>
+
+<p><img src="https://resource.tinychen.com/202501181429483.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>这里需要提前说一下结论，这里刷固件的时候分别刷入了mellanox官方的MCX4121A-ACAT固件和华为的SP380固件：</p>
+<p>刷入mellanox官方固件的时候，网卡只有一个网口能正常识别到模块，另一个网口在系统中能看到网卡，但是无法识别线缆（手头的AOC和DAC都不行，换另一个网口则都正常），并且正常识别的网卡在win11中没办法正常通过DHCP获取IP（其他系统暂时没测试）</p>
+<p>刷入华为的SP380固件的时候，网卡信息能正常识别，两个网口各项功能看起来正常。建议还是刷入华为的固件比较稳妥。</p>
+</blockquote>
+<h1 id="windows-刷机"><a href="#windows-刷机" class="headerlink" title="windows 刷机"></a>windows 刷机</h1><p>刷机命令参考如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">flint --no_fw_ctrl -allow_psid_change -d &#123;设备号&#125; -i &#123;文件路径(注:这里最好为根目录下,如不为根目录注意目录名中不要含有中文)&#125; burn<br></code></pre></div></td></tr></table></figure>
+
+<p>这里我用powershell执行的命令参考如下：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs powershell"><span class="hljs-built_in">PS</span> C:\Users\Mr7th\Desktop\NIC<span class="hljs-literal">-SP380-CX4Lx-FW-14</span>.<span class="hljs-number">31.1014</span>&gt; flint <span class="hljs-literal">--no_fw_ctrl</span> <span class="hljs-literal">-allow_psid_change</span> <span class="hljs-literal">-d</span> mt4117_pciconf0 <span class="hljs-literal">-i</span> .\fw<span class="hljs-literal">-ConnectX4Lx-rel-14_31_1014_H_SP380-FlexBoot-3</span>.<span class="hljs-number">6.403</span>_4117_14_24_13_RELEASE_X64_AARCH64_20210706_VPD.bin burn<br>Done.<br>    Current <span class="hljs-built_in">FW</span> version on flash:  <span class="hljs-number">14.32</span>.<span class="hljs-number">1900</span><br>    New <span class="hljs-built_in">FW</span> version:               <span class="hljs-number">14.31</span>.<span class="hljs-number">1014</span><br><br>    Note: The new <span class="hljs-built_in">FW</span> version is older than the current <span class="hljs-built_in">FW</span> version on flash.<br><br> <span class="hljs-keyword">Do</span> you want to <span class="hljs-keyword">continue</span> ? (y/n) [<span class="hljs-type">n</span>] : y<br><br><br>    You are about to replace current PSID on flash - <span class="hljs-string">&quot;MT_2420110034&quot;</span> with a different PSID - <span class="hljs-string">&quot;HUA0000000023&quot;</span>.<br>    Note: It is highly recommended not to change the PSID.<br><br> <span class="hljs-keyword">Do</span> you want to <span class="hljs-keyword">continue</span> ? (y/n) [<span class="hljs-type">n</span>] : y<br>Burning <span class="hljs-built_in">FW</span> image without signatures - OK<br>Restoring signature                     - OK<br><span class="hljs-literal">-I-</span> To load new <span class="hljs-built_in">FW</span> run mlxfwreset or reboot machine.<br></code></pre></div></td></tr></table></figure>
+
+<p>刷固件需要等待挺长一段时间的，要有耐心，刷完之后我们使用<code>mlxfwmanager</code>命令检查当前固件信息</p>
+<figure class="highlight powershell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs powershell"><span class="hljs-built_in">PS</span> C:\Users\Mr7th\Desktop\NIC<span class="hljs-literal">-SP380-CX4Lx-FW-14</span>.<span class="hljs-number">31.1014</span>&gt; mlxfwmanager<br>Querying Mellanox devices firmware ...<br><br>Device <span class="hljs-comment">#1:</span><br><span class="hljs-literal">----------</span><br><br>  Device <span class="hljs-built_in">Type</span>:      ConnectX4LX<br>  Part Number:      MCX4121A<span class="hljs-literal">-ACA_Ax</span><br>  Description:      ConnectX<span class="hljs-literal">-4</span> Lx EN network interface card; <span class="hljs-number">25</span>GbE dual<span class="hljs-literal">-port</span> SFP28; PCIe3.<span class="hljs-number">0</span> x8; ROHS R6<br>  PSID:             MT_2420110034<br>  PCI Device Name:  mt4117_pciconf0<br>  Base MAC:         N/A<br>  Versions:         Current        Available<br>     <span class="hljs-built_in">FW</span>             <span class="hljs-number">14.31</span>.<span class="hljs-number">1014</span>     N/A<br>     <span class="hljs-built_in">FW</span> (Running)   <span class="hljs-number">14.32</span>.<span class="hljs-number">1900</span>     N/A<br>     PXE            <span class="hljs-number">3.6</span>.<span class="hljs-number">0502</span>       N/A<br>     UEFI           <span class="hljs-number">14.25</span>.<span class="hljs-number">0017</span>     N/A<br><br>  Status:           No matching image found<br></code></pre></div></td></tr></table></figure>
+
+<p>看起来没问题，我们直接重启电脑，再看看网卡的信息</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-string">PS</span> <span class="hljs-string">C:\Users\Mr7th&gt;</span> <span class="hljs-string">mlxfwmanager</span><br><span class="hljs-string">Querying</span> <span class="hljs-string">Mellanox</span> <span class="hljs-string">devices</span> <span class="hljs-string">firmware</span> <span class="hljs-string">...</span><br><br><span class="hljs-string">Device</span> <span class="hljs-comment">#1:</span><br><span class="hljs-string">----------</span><br><br>  <span class="hljs-attr">Device Type:</span>      <span class="hljs-string">ConnectX4LX</span><br>  <span class="hljs-attr">Part Number:</span>      <span class="hljs-string">Huawei_SP380_ConnectX4Lx_2P_25GbE_Ax</span><br>  <span class="hljs-attr">Description:</span>      <span class="hljs-string">Huawei</span> <span class="hljs-string">SP380</span> <span class="hljs-number">2</span><span class="hljs-string">-port</span> <span class="hljs-string">25G</span> <span class="hljs-string">Ethernet</span> <span class="hljs-string">Adapter</span> <span class="hljs-string">PCIE</span> <span class="hljs-string">Gen3</span> <span class="hljs-string">x8</span><br>  <span class="hljs-attr">PSID:</span>             <span class="hljs-string">HUA0000000023</span><br>  <span class="hljs-attr">PCI Device Name:</span>  <span class="hljs-string">mt4117_pciconf0</span><br>  <span class="hljs-attr">Base MAC:</span>         <span class="hljs-string">N/A</span><br>  <span class="hljs-attr">Versions:</span>         <span class="hljs-string">Current</span>        <span class="hljs-string">Available</span><br>     <span class="hljs-string">FW</span>             <span class="hljs-number">14.31</span><span class="hljs-number">.1014</span>     <span class="hljs-string">N/A</span><br>     <span class="hljs-string">PXE</span>            <span class="hljs-number">3.6</span><span class="hljs-number">.0403</span>       <span class="hljs-string">N/A</span><br>     <span class="hljs-string">UEFI</span>           <span class="hljs-number">14.24</span><span class="hljs-number">.0013</span>     <span class="hljs-string">N/A</span><br><br>  <span class="hljs-attr">Status:</span>           <span class="hljs-literal">No</span> <span class="hljs-string">matching</span> <span class="hljs-string">image</span> <span class="hljs-string">found</span><br>  <br>  <br><span class="hljs-string">PS</span> <span class="hljs-string">C:\Users\Mr7th&gt;</span> <span class="hljs-string">flint</span> <span class="hljs-string">-d</span> <span class="hljs-string">mt4117_pciconf0</span> <span class="hljs-string">q</span><br><span class="hljs-attr">Image type:</span>            <span class="hljs-string">FS3</span><br><span class="hljs-attr">FW Version:</span>            <span class="hljs-number">14.31</span><span class="hljs-number">.1014</span><br><span class="hljs-attr">FW Release Date:</span>       <span class="hljs-number">30.6</span><span class="hljs-number">.2021</span><br><span class="hljs-attr">Product Version:</span>       <span class="hljs-number">14.31</span><span class="hljs-number">.1014</span><br><span class="hljs-attr">Rom Info:</span>              <span class="hljs-string">type=UEFI</span> <span class="hljs-string">version=14.24.13</span> <span class="hljs-string">cpu=AMD64,AARCH64</span><br>                       <span class="hljs-string">type=PXE</span> <span class="hljs-string">version=3.6.403</span> <span class="hljs-string">cpu=AMD64</span><br><span class="hljs-attr">Description:</span>           <span class="hljs-string">UID</span>                <span class="hljs-string">GuidsNumber</span><br><span class="hljs-attr">Base GUID:</span>             <span class="hljs-string">N/A</span>                     <span class="hljs-number">8</span><br><span class="hljs-attr">Base MAC:</span>              <span class="hljs-string">N/A</span>                     <span class="hljs-number">8</span><br><span class="hljs-attr">Image VSD:</span>             <span class="hljs-string">N/A</span><br><span class="hljs-attr">Device VSD:</span>            <span class="hljs-string">N/A</span><br><span class="hljs-attr">PSID:</span>                  <span class="hljs-string">HUA0000000023</span><br><span class="hljs-attr">Security Attributes:</span>   <span class="hljs-string">N/A</span><br><br></code></pre></div></td></tr></table></figure>
+
+<p>按下<code>win+R</code>键，输入<code>ncpa.cpl</code>进去管理界面查看网卡信息</p>
+<img src="https://resource.tinychen.com/202501181429964.png" srcset="/img/loading.gif" lazyload alt="image-20241129140302532" style="zoom:50%;" />
+
+<img src="https://resource.tinychen.com/202411291705200.png" srcset="/img/loading.gif" lazyload alt="image-20241129140351473" style="zoom:50%;" />
+
+<p>可以看到这两个网卡都正常协商到了10G速率（只有10G交换机），并且都通过DHCP的方式正常获取到了IP、DNS等信息</p>
+<p>也可以通过下面这两个命令来查看网卡的速率信息</p>
+<figure class="highlight powershell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs powershell"><span class="hljs-built_in">PS</span> C:\Users\Mr7th&gt; wmic nic <span class="hljs-built_in">where</span> netEnabled=true get name,speed<br>Name                                        Speed<br>Realtek Gaming <span class="hljs-number">2.5</span>GbE Family Controller <span class="hljs-comment">#2  2500000000</span><br>Mellanox ConnectX<span class="hljs-literal">-4</span> Lx Ethernet Adapter <span class="hljs-comment">#5  10000000000</span><br>Mellanox ConnectX<span class="hljs-literal">-4</span> Lx Ethernet Adapter <span class="hljs-comment">#6  10000000000</span><br><br><span class="hljs-built_in">PS</span> C:\Users\Mr7th&gt; <span class="hljs-built_in">Get-NetAdapter</span> | <span class="hljs-built_in">select</span> interfaceDescription,name,status,linkSpeed<br><br>interfaceDescription                        name                  Status       LinkSpeed<br><span class="hljs-literal">--------------------</span>                        <span class="hljs-literal">----</span>                  <span class="hljs-literal">------</span>       <span class="hljs-literal">---------</span><br>Mellanox ConnectX<span class="hljs-literal">-4</span> Lx Ethernet Adapter <span class="hljs-comment">#6  以太网 9              Up           10 Gbps</span><br>Mellanox ConnectX<span class="hljs-literal">-4</span> Lx Ethernet Adapter <span class="hljs-comment">#5  以太网 8              Up           10 Gbps</span><br>Intel(<span class="hljs-built_in">R</span>) Wi<span class="hljs-literal">-Fi</span> <span class="hljs-number">6</span>E AX211 <span class="hljs-number">160</span>MHz              AX211                 Disconnected <span class="hljs-number">0</span> bps<br>Bluetooth Device (Personal Area Network) <span class="hljs-comment">#3 蓝牙网络连接 3        Disconnected 3 Mbps</span><br>Realtek Gaming <span class="hljs-number">2.5</span>GbE Family Controller <span class="hljs-comment">#2  Realtek Gaming 2.5GbE Up           2.5 Gbps</span><br></code></pre></div></td></tr></table></figure>
+
+<p>进到unraid里面之后我们能看到速率有25G的选项，说明正常</p>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">root@tiny-unraid:~<span class="hljs-comment"># ethtool eth0</span><br>Settings <span class="hljs-keyword">for</span> eth0:<br>        Supported ports: [ Backplane ]<br>        Supported <span class="hljs-built_in">link</span> modes:   1000baseKX/Full<br>                                10000baseKR/Full<br>                                25000baseCR/Full<br>                                25000baseKR/Full<br>                                25000baseSR/Full<br>        Supported pause frame use: Symmetric<br>        Supports auto-negotiation: Yes<br>        Supported FEC modes: None        RS      BASER<br>        Advertised <span class="hljs-built_in">link</span> modes:  1000baseKX/Full<br>                                10000baseKR/Full<br>                                25000baseCR/Full<br>                                25000baseKR/Full<br>                                25000baseSR/Full<br>        Advertised pause frame use: Symmetric<br>        Advertised auto-negotiation: Yes<br>        Advertised FEC modes: None<br>        Speed: 10000Mb/s<br>        Duplex: Full<br>        Auto-negotiation: on<br>        Port: Direct Attach Copper<br>        PHYAD: 0<br>        Transceiver: internal<br>        Supports Wake-on: d<br>        Wake-on: d<br>        Link detected: <span class="hljs-built_in">yes</span><br>root@tiny-unraid:~<span class="hljs-comment"># ethtool eth1</span><br>Settings <span class="hljs-keyword">for</span> eth1:<br>        Supported ports: [ Backplane ]<br>        Supported <span class="hljs-built_in">link</span> modes:   1000baseKX/Full<br>                                10000baseKR/Full<br>                                25000baseCR/Full<br>                                25000baseKR/Full<br>                                25000baseSR/Full<br>        Supported pause frame use: Symmetric<br>        Supports auto-negotiation: Yes<br>        Supported FEC modes: None        RS      BASER<br>        Advertised <span class="hljs-built_in">link</span> modes:  1000baseKX/Full<br>                                10000baseKR/Full<br>                                25000baseCR/Full<br>                                25000baseKR/Full<br>                                25000baseSR/Full<br>        Advertised pause frame use: Symmetric<br>        Advertised auto-negotiation: Yes<br>        Advertised FEC modes: None<br>        Speed: 10000Mb/s<br>        Duplex: Full<br>        Auto-negotiation: on<br>        Port: Direct Attach Copper<br>        PHYAD: 0<br>        Transceiver: internal<br>        Supports Wake-on: d<br>        Wake-on: d<br>        Link detected: <span class="hljs-built_in">yes</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="unraid-刷机"><a href="#unraid-刷机" class="headerlink" title="unraid 刷机"></a>unraid 刷机</h1><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">root</span>@tiny-unraid:~# mstflint --no_fw_ctrl -allow_psid_change -d <span class="hljs-number">01</span>:<span class="hljs-number">00</span>.<span class="hljs-number">0</span> -i fw-ConnectX4Lx-rel-<span class="hljs-number">14</span>_32_1900-MCX4121A-ACA_Ax-UEFI-<span class="hljs-number">14</span>.<span class="hljs-number">25</span>.<span class="hljs-number">17</span>-FlexBoot-<span class="hljs-number">3</span>.<span class="hljs-number">6</span>.<span class="hljs-number">502</span>.bin burn<br><span class="hljs-attribute">Done</span>.<br>    <span class="hljs-attribute">Current</span> FW version <span class="hljs-literal">on</span> flash:  <span class="hljs-number">14</span>.<span class="hljs-number">16</span>.<span class="hljs-number">0034</span><br>    <span class="hljs-attribute">New</span> FW version:               <span class="hljs-number">14</span>.<span class="hljs-number">32</span>.<span class="hljs-number">1900</span><br><br><br>    <span class="hljs-attribute">You</span> are about to replace current PSID <span class="hljs-literal">on</span> flash - <span class="hljs-string">&quot;HUA0010110034&quot;</span> with a different PSID - <span class="hljs-string">&quot;MT_2420110034&quot;</span>.<br>    <span class="hljs-attribute">Note</span>: It is highly recommended not to change the PSID.<br><br> <span class="hljs-attribute">Do</span> you want to continue ? (y/n)<span class="hljs-meta"> [n] : y</span><br><span class="hljs-meta">Burning FW image without signatures -  22%</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+<p>直接刷入会有这个报错</p>
+<figure class="highlight applescript"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs applescript">root@tiny-unraid:~<span class="hljs-comment"># mstflint -d 01:00.0 -i fw-ConnectX4Lx-rel-14_32_1900-MCX4121A-ACA_Ax-UEFI-14.25.17-FlexBoot-3.6.502.bin burn</span><br>Done.<br>    Current FW <span class="hljs-built_in">version</span> <span class="hljs-keyword">on</span> flash:  <span class="hljs-number">14.16</span><span class="hljs-number">.0034</span><br>    New FW <span class="hljs-built_in">version</span>:               <span class="hljs-number">14.32</span><span class="hljs-number">.1900</span><br><br><br>-E- PSID mismatch. The PSID <span class="hljs-keyword">on</span> flash (HUA0010110034) differs <span class="hljs-keyword">from</span> <span class="hljs-keyword">the</span> PSID <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> <span class="hljs-keyword">given</span> image (MT_2420110034).<br></code></pre></div></td></tr></table></figure>
+
+<p>先通过系统自带的lspci查看网卡信息</p>
+<figure class="highlight maxima"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs maxima"><span class="hljs-number">01</span>:<span class="hljs-number">00.0</span> Ethernet controller [<span class="hljs-number">0200</span>]: Mellanox Technologies MT27710 Family [ConnectX-<span class="hljs-number">4</span> Lx] [<span class="hljs-number">15b3</span>:<span class="hljs-number">1015</span>]<br>        Subsystem: Mellanox Technologies Device [<span class="hljs-number">15b3</span>:df30]<br>        Flags: fast devsel, IOMMU group <span class="hljs-number">14</span><br>        Expansion ROM <span class="hljs-built_in">at</span> <span class="hljs-number">80800000</span> [disabled] [size=1M]<br>        Capabilities: [<span class="hljs-number">60</span>] Express Endpoint, IntMsgNum <span class="hljs-number">0</span><br>        Capabilities: [<span class="hljs-number">48</span>] Vital Product Data<br>        Capabilities: [9c] MSI-X: Enable- Count=<span class="hljs-number">64</span> Masked-<br>        Capabilities: [c0] Vendor Specific Information: Len=<span class="hljs-number">18</span> &lt;?&gt;<br>        Capabilities: [<span class="hljs-number">40</span>] Power Management version <span class="hljs-number">3</span><br>        Capabilities: [<span class="hljs-number">100</span>] Alternative Routing-ID Interpretation (ARI)<br>        Capabilities: [<span class="hljs-number">110</span>] Advanced Error Reporting<br>        Capabilities: [<span class="hljs-number">180</span>] Single Root I/O Virtualization (SR-IOV)<br>        Capabilities: [1c0] Secondary PCI Express<br>        Kernel modules: mlx5_core<br><br><span class="hljs-number">01</span>:<span class="hljs-number">00.1</span> Ethernet controller [<span class="hljs-number">0200</span>]: Mellanox Technologies MT27710 Family [ConnectX-<span class="hljs-number">4</span> Lx] [<span class="hljs-number">15b3</span>:<span class="hljs-number">1015</span>]<br>        Subsystem: Mellanox Technologies Device [<span class="hljs-number">15b3</span>:df30]<br>        Flags: fast devsel, IOMMU group <span class="hljs-number">14</span><br>        Expansion ROM <span class="hljs-built_in">at</span> <span class="hljs-number">80900000</span> [disabled] [size=1M]<br>        Capabilities: [<span class="hljs-number">60</span>] Express Endpoint, IntMsgNum <span class="hljs-number">0</span><br>        Capabilities: [<span class="hljs-number">48</span>] Vital Product Data<br>        Capabilities: [9c] MSI-X: Enable- Count=<span class="hljs-number">64</span> Masked-<br>        Capabilities: [c0] Vendor Specific Information: Len=<span class="hljs-number">18</span> &lt;?&gt;<br>        Capabilities: [<span class="hljs-number">40</span>] Power Management version <span class="hljs-number">3</span><br>        Capabilities: [<span class="hljs-number">100</span>] Alternative Routing-ID Interpretation (ARI)<br>        Capabilities: [<span class="hljs-number">110</span>] Advanced Error Reporting<br>        Capabilities: [<span class="hljs-number">180</span>] Single Root I/O Virtualization (SR-IOV)<br>        Kernel modules: mlx5_core<br></code></pre></div></td></tr></table></figure>
+
+<p>查看网卡信息</p>
+<figure class="highlight mathematica"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs mathematica"><span class="hljs-variable">root</span><span class="hljs-operator">@</span><span class="hljs-variable">tiny</span><span class="hljs-operator">-</span><span class="hljs-variable">unraid</span><span class="hljs-operator">:~</span><span class="hljs-type">#</span> <span class="hljs-variable">mstconfig</span> <span class="hljs-operator">-</span><span class="hljs-variable">d</span> <span class="hljs-number">01</span><span class="hljs-operator">:</span><span class="hljs-number">00.0</span> <span class="hljs-variable">query</span><br><br><span class="hljs-variable">Device</span> <span class="hljs-type">#1</span><span class="hljs-operator">:</span><br><span class="hljs-operator">----------</span><br><br><span class="hljs-variable">Device</span> <span class="hljs-variable">type</span><span class="hljs-operator">:</span>        <span class="hljs-variable">ConnectX4LX</span><br><span class="hljs-variable">Name</span><span class="hljs-operator">:</span>               <span class="hljs-built_in">N</span><span class="hljs-operator">/</span><span class="hljs-variable">A</span><br><span class="hljs-variable">Description</span><span class="hljs-operator">:</span>        <span class="hljs-built_in">N</span><span class="hljs-operator">/</span><span class="hljs-variable">A</span><br><span class="hljs-variable">Device</span><span class="hljs-operator">:</span>             <span class="hljs-number">01</span><span class="hljs-operator">:</span><span class="hljs-number">00.0</span><br><br><span class="hljs-variable">Configurations</span><span class="hljs-operator">:</span>                                     <span class="hljs-built_in">Next</span> <span class="hljs-variable">Boot</span><br>        <span class="hljs-type">ROCE_NEXT</span><span class="hljs-type">_PROTOCOL</span>                          <span class="hljs-number">254</span><br>        <span class="hljs-type">NUM_PF</span><span class="hljs-type">_MSIX</span><span class="hljs-type">_VALID</span>                           <span class="hljs-built_in">True</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VFS</span>                                  <span class="hljs-number">8</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_PF</span>                                   <span class="hljs-number">2</span><br>        <span class="hljs-type">SRIOV_EN</span>                                    <span class="hljs-built_in">True</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">PF_LOG</span><span class="hljs-type">_BAR</span><span class="hljs-type">_SIZE</span>                             <span class="hljs-number">5</span><br>        <span class="hljs-type">VF_LOG</span><span class="hljs-type">_BAR</span><span class="hljs-type">_SIZE</span>                             <span class="hljs-number">20</span><br>        <span class="hljs-type">NUM_PF</span><span class="hljs-type">_MSIX</span>                                 <span class="hljs-number">63</span><br>        <span class="hljs-type">NUM_VF</span><span class="hljs-type">_MSIX</span>                                 <span class="hljs-number">11</span><br>        <span class="hljs-type">INT_LOG</span><span class="hljs-type">_MAX</span><span class="hljs-type">_PAYLOAD</span><span class="hljs-type">_SIZE</span>                    <span class="hljs-variable">AUTOMATIC</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">LOG_DCR</span><span class="hljs-type">_HASH</span><span class="hljs-type">_TABLE</span><span class="hljs-type">_SIZE</span>                     <span class="hljs-number">14</span><br>        <span class="hljs-type">MAX_PACKET</span><span class="hljs-type">_LIFETIME</span>                         <span class="hljs-number">0</span><br>        <span class="hljs-type">DCR_LIFO</span><span class="hljs-type">_SIZE</span>                               <span class="hljs-number">16384</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_PLANES</span><span class="hljs-type">_P1</span>                            <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_PLANES</span><span class="hljs-type">_P2</span>                            <span class="hljs-number">0</span><br>        <span class="hljs-type">IB_PROTO</span><span class="hljs-type">_WIDTH</span><span class="hljs-type">_EN</span><span class="hljs-type">_MASK</span><span class="hljs-type">_P1</span>                   <span class="hljs-number">0</span><br>        <span class="hljs-type">IB_PROTO</span><span class="hljs-type">_WIDTH</span><span class="hljs-type">_EN</span><span class="hljs-type">_MASK</span><span class="hljs-type">_P2</span>                   <span class="hljs-number">0</span><br>        <span class="hljs-type">ROCE_CC</span><span class="hljs-type">_PRIO</span><span class="hljs-type">_MASK</span><span class="hljs-type">_P1</span>                        <span class="hljs-number">0</span><br>        <span class="hljs-type">ROCE_CC</span><span class="hljs-type">_CNP</span><span class="hljs-type">_MODERATION</span><span class="hljs-type">_P1</span>                   <span class="hljs-type">DEVICE_DEFAULT</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">ROCE_CC</span><span class="hljs-type">_PRIO</span><span class="hljs-type">_MASK</span><span class="hljs-type">_P2</span>                        <span class="hljs-number">0</span><br>        <span class="hljs-type">ROCE_CC</span><span class="hljs-type">_CNP</span><span class="hljs-type">_MODERATION</span><span class="hljs-type">_P2</span>                   <span class="hljs-type">DEVICE_DEFAULT</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">CLAMP_TGT</span><span class="hljs-type">_RATE</span><span class="hljs-type">_AFTER</span><span class="hljs-type">_TIME</span><span class="hljs-type">_INC</span><span class="hljs-type">_P1</span>            <span class="hljs-built_in">True</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">CLAMP_TGT</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P1</span>                           <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">RPG_TIME</span><span class="hljs-type">_RESET</span><span class="hljs-type">_P1</span>                           <span class="hljs-number">100</span><br>        <span class="hljs-type">RPG_BYTE</span><span class="hljs-type">_RESET</span><span class="hljs-type">_P1</span>                           <span class="hljs-number">28000</span><br>        <span class="hljs-type">RPG_THRESHOLD</span><span class="hljs-type">_P1</span>                            <span class="hljs-number">5</span><br>        <span class="hljs-type">RPG_MAX</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P1</span>                             <span class="hljs-number">0</span><br>        <span class="hljs-type">RPG_AI</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P1</span>                              <span class="hljs-number">30</span><br>        <span class="hljs-type">RPG_HAI</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P1</span>                             <span class="hljs-number">70</span><br>        <span class="hljs-type">RPG_GD</span><span class="hljs-type">_P1</span>                                   <span class="hljs-number">11</span><br>        <span class="hljs-type">RPG_MIN</span><span class="hljs-type">_DEC</span><span class="hljs-type">_FAC</span><span class="hljs-type">_P1</span>                          <span class="hljs-number">90</span><br>        <span class="hljs-type">RPG_MIN</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P1</span>                             <span class="hljs-number">1</span><br>        <span class="hljs-type">RATE_TO</span><span class="hljs-type">_SET</span><span class="hljs-type">_ON</span><span class="hljs-type">_FIRST</span><span class="hljs-type">_CNP</span><span class="hljs-type">_P1</span>                 <span class="hljs-number">0</span><br>        <span class="hljs-type">DCE_TCP</span><span class="hljs-type">_G</span><span class="hljs-type">_P1</span>                                <span class="hljs-number">32</span><br>        <span class="hljs-type">DCE_TCP</span><span class="hljs-type">_RTT</span><span class="hljs-type">_P1</span>                              <span class="hljs-number">1</span><br>        <span class="hljs-type">RATE_REDUCE</span><span class="hljs-type">_MONITOR</span><span class="hljs-type">_PERIOD</span><span class="hljs-type">_P1</span>               <span class="hljs-number">4</span><br>        <span class="hljs-type">INITIAL_ALPHA</span><span class="hljs-type">_VALUE</span><span class="hljs-type">_P1</span>                      <span class="hljs-number">0</span><br>        <span class="hljs-type">MIN_TIME</span><span class="hljs-type">_BETWEEN</span><span class="hljs-type">_CNPS</span><span class="hljs-type">_P1</span>                    <span class="hljs-number">0</span><br>        <span class="hljs-type">CNP_</span><span class="hljs-number">802</span><span class="hljs-type">P_PRIO</span><span class="hljs-type">_P1</span>                            <span class="hljs-number">0</span><br>        <span class="hljs-type">CNP_DSCP</span><span class="hljs-type">_P1</span>                                 <span class="hljs-number">7</span><br>        <span class="hljs-type">CLAMP_TGT</span><span class="hljs-type">_RATE</span><span class="hljs-type">_AFTER</span><span class="hljs-type">_TIME</span><span class="hljs-type">_INC</span><span class="hljs-type">_P2</span>            <span class="hljs-built_in">True</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">CLAMP_TGT</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P2</span>                           <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">RPG_TIME</span><span class="hljs-type">_RESET</span><span class="hljs-type">_P2</span>                           <span class="hljs-number">100</span><br>        <span class="hljs-type">RPG_BYTE</span><span class="hljs-type">_RESET</span><span class="hljs-type">_P2</span>                           <span class="hljs-number">28000</span><br>        <span class="hljs-type">RPG_THRESHOLD</span><span class="hljs-type">_P2</span>                            <span class="hljs-number">5</span><br>        <span class="hljs-type">RPG_MAX</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P2</span>                             <span class="hljs-number">0</span><br>        <span class="hljs-type">RPG_AI</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P2</span>                              <span class="hljs-number">30</span><br>        <span class="hljs-type">RPG_HAI</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P2</span>                             <span class="hljs-number">70</span><br>        <span class="hljs-type">RPG_GD</span><span class="hljs-type">_P2</span>                                   <span class="hljs-number">11</span><br>        <span class="hljs-type">RPG_MIN</span><span class="hljs-type">_DEC</span><span class="hljs-type">_FAC</span><span class="hljs-type">_P2</span>                          <span class="hljs-number">90</span><br>        <span class="hljs-type">RPG_MIN</span><span class="hljs-type">_RATE</span><span class="hljs-type">_P2</span>                             <span class="hljs-number">1</span><br>        <span class="hljs-type">RATE_TO</span><span class="hljs-type">_SET</span><span class="hljs-type">_ON</span><span class="hljs-type">_FIRST</span><span class="hljs-type">_CNP</span><span class="hljs-type">_P2</span>                 <span class="hljs-number">0</span><br>        <span class="hljs-type">DCE_TCP</span><span class="hljs-type">_G</span><span class="hljs-type">_P2</span>                                <span class="hljs-number">32</span><br>        <span class="hljs-type">DCE_TCP</span><span class="hljs-type">_RTT</span><span class="hljs-type">_P2</span>                              <span class="hljs-number">1</span><br>        <span class="hljs-type">RATE_REDUCE</span><span class="hljs-type">_MONITOR</span><span class="hljs-type">_PERIOD</span><span class="hljs-type">_P2</span>               <span class="hljs-number">4</span><br>        <span class="hljs-type">INITIAL_ALPHA</span><span class="hljs-type">_VALUE</span><span class="hljs-type">_P2</span>                      <span class="hljs-number">0</span><br>        <span class="hljs-type">MIN_TIME</span><span class="hljs-type">_BETWEEN</span><span class="hljs-type">_CNPS</span><span class="hljs-type">_P2</span>                    <span class="hljs-number">0</span><br>        <span class="hljs-type">CNP_</span><span class="hljs-number">802</span><span class="hljs-type">P_PRIO</span><span class="hljs-type">_P2</span>                            <span class="hljs-number">0</span><br>        <span class="hljs-type">CNP_DSCP</span><span class="hljs-type">_P2</span>                                 <span class="hljs-number">7</span><br>        <span class="hljs-type">ROCE_RTT</span><span class="hljs-type">_RESP</span><span class="hljs-type">_DSCP</span><span class="hljs-type">_P1</span>                       <span class="hljs-number">0</span><br>        <span class="hljs-type">ROCE_RTT</span><span class="hljs-type">_RESP</span><span class="hljs-type">_DSCP</span><span class="hljs-type">_MODE</span><span class="hljs-type">_P1</span>                  <span class="hljs-type">DEVICE_DEFAULT</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">ROCE_RTT</span><span class="hljs-type">_RESP</span><span class="hljs-type">_DSCP</span><span class="hljs-type">_P2</span>                       <span class="hljs-number">0</span><br>        <span class="hljs-type">ROCE_RTT</span><span class="hljs-type">_RESP</span><span class="hljs-type">_DSCP</span><span class="hljs-type">_MODE</span><span class="hljs-type">_P2</span>                  <span class="hljs-type">DEVICE_DEFAULT</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DCBX_IEEE</span><span class="hljs-type">_P1</span>                                <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DCBX_CEE</span><span class="hljs-type">_P1</span>                                 <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DCBX_WILLING</span><span class="hljs-type">_P1</span>                             <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DCBX_IEEE</span><span class="hljs-type">_P2</span>                                <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DCBX_CEE</span><span class="hljs-type">_P2</span>                                 <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DCBX_WILLING</span><span class="hljs-type">_P2</span>                             <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">KEEP_ETH</span><span class="hljs-type">_LINK</span><span class="hljs-type">_UP</span><span class="hljs-type">_P1</span>                         <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">KEEP_ETH</span><span class="hljs-type">_LINK</span><span class="hljs-type">_UP</span><span class="hljs-type">_P2</span>                         <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P1</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P1</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P2</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P2</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P3</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P3</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P4</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P4</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P5</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P5</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P6</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P6</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P7</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P7</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_VL</span><span class="hljs-type">_P8</span>                                <span class="hljs-number">0</span><br>        <span class="hljs-type">NUM_OF</span><span class="hljs-type">_TC</span><span class="hljs-type">_P8</span>                                <span class="hljs-type">_</span><span class="hljs-number">8</span><span class="hljs-type">_TCs</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DUP_MAC</span><span class="hljs-type">_ACTION</span><span class="hljs-type">_P1</span>                           <span class="hljs-type">LAST_CFG</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">DUP_MAC</span><span class="hljs-type">_ACTION</span><span class="hljs-type">_P2</span>                           <span class="hljs-type">LAST_CFG</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">PORT_OWNER</span>                                  <span class="hljs-built_in">True</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">ALLOW_RD</span><span class="hljs-type">_COUNTERS</span>                           <span class="hljs-built_in">True</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">TRACER_ENABLE</span>                               <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">IP_VER</span>                                      <span class="hljs-variable">IPv4</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">BOOT_UNDI</span><span class="hljs-type">_NETWORK</span><span class="hljs-type">_WAIT</span>                      <span class="hljs-number">0</span><br>        <span class="hljs-type">BOOT_VLAN</span>                                   <span class="hljs-number">1</span><br>        <span class="hljs-type">LEGACY_BOOT</span><span class="hljs-type">_PROTOCOL</span>                        <span class="hljs-variable">PXE</span><span class="hljs-punctuation">(</span><span class="hljs-number">1</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">BOOT_VLAN</span><span class="hljs-type">_EN</span>                                <span class="hljs-built_in">False</span><span class="hljs-punctuation">(</span><span class="hljs-number">0</span><span class="hljs-punctuation">)</span><br>        <span class="hljs-type">BOOT_PKEY</span>                                   <span class="hljs-number">0</span><br></code></pre></div></td></tr></table></figure>
+
+<p>查看固件版本信息</p>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">root</span>@tiny-unraid:~# mstflint -d <span class="hljs-number">01</span>:<span class="hljs-number">00</span>.<span class="hljs-number">0</span> q<br><span class="hljs-attribute">Image</span> type:            FS3<br><span class="hljs-attribute">FW</span> Version:            <span class="hljs-number">14</span>.<span class="hljs-number">16</span>.<span class="hljs-number">0034</span><br><span class="hljs-attribute">FW</span> Release Date:       <span class="hljs-number">4</span>.<span class="hljs-number">3</span>.<span class="hljs-number">2016</span><br><span class="hljs-attribute">Rom</span> Info:              type=PXE version=<span class="hljs-number">3</span>.<span class="hljs-number">4</span>.<span class="hljs-number">716</span><br><span class="hljs-attribute">Description</span>:           UID                GuidsNumber<br><span class="hljs-attribute">Base</span> GUID:             <span class="hljs-number">2</span>c9d1e03003ddde7        <span class="hljs-number">8</span><br><span class="hljs-attribute">Orig</span> Base GUID:        N/A                     <span class="hljs-number">8</span><br><span class="hljs-attribute">Base</span> MAC:              <span class="hljs-number">2</span>c9d1e3dd549            <span class="hljs-number">8</span><br><span class="hljs-attribute">Orig</span> Base MAC:         N/A                     <span class="hljs-number">8</span><br><span class="hljs-attribute">Image</span> VSD:             N/A<br><span class="hljs-attribute">Device</span> VSD:            N/A<br><span class="hljs-attribute">PSID</span>:                  HUA0010110034<br><span class="hljs-attribute">Security</span> Attributes:   N/A<br></code></pre></div></td></tr></table></figure>
+
+<p>检查image信息</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs x86asm">root@tiny-unraid:~# mstflint -d <span class="hljs-number">01</span>:<span class="hljs-number">00.0</span> v<br><br>FS3 failsafe image<br><br>     /<span class="hljs-number">0x00000038</span>-<span class="hljs-number">0x0000153f</span> (<span class="hljs-number">0x001508</span>)/ (BOOT2) - OK<br>     /<span class="hljs-number">0x00002000</span>-<span class="hljs-number">0x0000201f</span> (<span class="hljs-number">0x000020</span>)/ (ITOC_HEADER) - OK<br>     /<span class="hljs-number">0x00004000</span>-<span class="hljs-number">0x000040ff</span> (<span class="hljs-number">0x000100</span>)/ (RESET_INFO) - OK<br>     /<span class="hljs-number">0x00005000</span>-<span class="hljs-number">0x000058ff</span> (<span class="hljs-number">0x000900</span>)/ (FW_MAIN_CFG) - OK<br>     /<span class="hljs-number">0x00006000</span>-<span class="hljs-number">0x000064bf</span> (<span class="hljs-number">0x0004c0</span>)/ (FW_BOOT_CFG) - OK<br>     /<span class="hljs-number">0x00007000</span>-<span class="hljs-number">0x00007aff</span> (<span class="hljs-number">0x000b00</span>)/ (HW_MAIN_CFG) - OK<br>     /<span class="hljs-number">0x00008000</span>-<span class="hljs-number">0x000080ff</span> (<span class="hljs-number">0x000100</span>)/ (HW_BOOT_CFG) - OK<br>     /<span class="hljs-number">0x00009000</span>-<span class="hljs-number">0x0000c3ff</span> (<span class="hljs-number">0x003400</span>)/ (PHY_UC_CONSTS) - OK<br>     /<span class="hljs-number">0x0000d000</span>-<span class="hljs-number">0x00023fff</span> (<span class="hljs-number">0x017000</span>)/ (ROM_CODE) - OK<br>     /<span class="hljs-number">0x00024000</span>-<span class="hljs-number">0x0002abcf</span> (<span class="hljs-number">0x006bd0</span>)/ (PHY_UC_CODE) - OK<br>     /<span class="hljs-number">0x0002b000</span>-<span class="hljs-number">0x0004e61b</span> (<span class="hljs-number">0x02361c</span>)/ (PCI_CODE) - OK<br>     /<span class="hljs-number">0x0004f000</span>-<span class="hljs-number">0x0005cea3</span> (<span class="hljs-number">0x00dea4</span>)/ (IRON_PREP_CODE) - OK<br>     /<span class="hljs-number">0x0005d000</span>-<span class="hljs-number">0x00231faf</span> (<span class="hljs-number">0x1d4fb0</span>)/ (MAIN_CODE) - OK<br>     /<span class="hljs-number">0x00232000</span>-<span class="hljs-number">0x0023f563</span> (<span class="hljs-number">0x00d564</span>)/ (PCIE_LINK_CODE) - OK<br>     /<span class="hljs-number">0x00240000</span>-<span class="hljs-number">0x0024324f</span> (<span class="hljs-number">0x003250</span>)/ (POST_IRON_BOOT_CODE) - OK<br>     /<span class="hljs-number">0x00244000</span>-<span class="hljs-number">0x002443ff</span> (<span class="hljs-number">0x000400</span>)/ (IMAGE_INFO) - OK<br>     /<span class="hljs-number">0x00244400</span>-<span class="hljs-number">0x0026217b</span> (<span class="hljs-number">0x01dd7c</span>)/ (FW_ADB) - OK<br>     /<span class="hljs-number">0x0026217c</span>-<span class="hljs-number">0x002628df</span> (<span class="hljs-number">0x000764</span>)/ (DBG_FW_INI) - OK<br>     /<span class="hljs-number">0x002628e0</span>-<span class="hljs-number">0x002628e7</span> (<span class="hljs-number">0x000008</span>)/ (DBG_FW_PARAMS) - OK<br>     /<span class="hljs-number">0x00fa0000</span>-<span class="hljs-number">0x00faffff</span> (<span class="hljs-number">0x010000</span>)/ (NV_DATA) - CRC IGNORED<br>     /<span class="hljs-number">0x00fb0000</span>-<span class="hljs-number">0x00fbffff</span> (<span class="hljs-number">0x010000</span>)/ (NV_DATA) - CRC IGNORED<br>     /<span class="hljs-number">0x00fc0000</span>-<span class="hljs-number">0x00fcffff</span> (<span class="hljs-number">0x010000</span>)/ (FW_NV_LOG) - CRC IGNORED<br>     /<span class="hljs-number">0x00fee000</span>-<span class="hljs-number">0x00fee1ff</span> (<span class="hljs-number">0x000200</span>)/ (DEV_INFO) - OK<br>     /<span class="hljs-number">0x00ff8000</span>-<span class="hljs-number">0x00ff813f</span> (<span class="hljs-number">0x000140</span>)/ (MFG_INFO) - OK<br>     /<span class="hljs-number">0x00ff8140</span>-<span class="hljs-number">0x00ff813f</span> (<span class="hljs-number">0x000000</span>)/ (VPD_R0) - OK<br><br>-I- FW image verification succeeded. Image is bootable.<br><br></code></pre></div></td></tr></table></figure>
+
+<p>同样的操作可以检查固件信息</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs x86asm">root@tiny-unraid:~# mstflint -i fw-ConnectX4Lx-<span class="hljs-built_in">rel</span>-<span class="hljs-number">14_32_1900</span>-MCX4121A-ACA_Ax-UEFI-<span class="hljs-number">14.25</span><span class="hljs-number">.17</span>-FlexBoot-<span class="hljs-number">3.6</span><span class="hljs-number">.502</span><span class="hljs-number">.</span>bin v<br><br>FS3 failsafe image<br><br>     /<span class="hljs-number">0x00000038</span>-<span class="hljs-number">0x00001e8b</span> (<span class="hljs-number">0x001e54</span>)/ (BOOT2) - OK<br>     /<span class="hljs-number">0x00002000</span>-<span class="hljs-number">0x0000201f</span> (<span class="hljs-number">0x000020</span>)/ (ITOC_HEADER) - OK<br>     /<span class="hljs-number">0x00004000</span>-<span class="hljs-number">0x0001472b</span> (<span class="hljs-number">0x01072c</span>)/ (IRON_PREP_CODE) - OK<br>     /<span class="hljs-number">0x00015000</span>-<span class="hljs-number">0x000150ff</span> (<span class="hljs-number">0x000100</span>)/ (RESET_INFO) - OK<br>     /<span class="hljs-number">0x00016000</span>-<span class="hljs-number">0x00016bff</span> (<span class="hljs-number">0x000c00</span>)/ (FW_MAIN_CFG) - OK<br>     /<span class="hljs-number">0x00017000</span>-<span class="hljs-number">0x000174bf</span> (<span class="hljs-number">0x0004c0</span>)/ (FW_BOOT_CFG) - OK<br>     /<span class="hljs-number">0x00018000</span>-<span class="hljs-number">0x000195ff</span> (<span class="hljs-number">0x001600</span>)/ (HW_MAIN_CFG) - OK<br>     /<span class="hljs-number">0x0001a000</span>-<span class="hljs-number">0x0001a13f</span> (<span class="hljs-number">0x000140</span>)/ (HW_BOOT_CFG) - OK<br>     /<span class="hljs-number">0x0001b000</span>-<span class="hljs-number">0x0001dc7f</span> (<span class="hljs-number">0x002c80</span>)/ (PHY_UC_CONSTS) - OK<br>     /<span class="hljs-number">0x0001e000</span>-<span class="hljs-number">0x0001e13f</span> (<span class="hljs-number">0x000140</span>)/ (IMAGE_SIGNATURE_256) - OK<br>     /<span class="hljs-number">0x0001f000</span>-<span class="hljs-number">0x0001f8ff</span> (<span class="hljs-number">0x000900</span>)/ (PUBLIC_KEYS_2048) - OK<br>     /<span class="hljs-number">0x00020000</span>-<span class="hljs-number">0x0002008f</span> (<span class="hljs-number">0x000090</span>)/ (FORBIDDEN_VERSIONS) - OK<br>     /<span class="hljs-number">0x00021000</span>-<span class="hljs-number">0x0002123f</span> (<span class="hljs-number">0x000240</span>)/ (IMAGE_SIGNATURE_512) - OK<br>     /<span class="hljs-number">0x00022000</span>-<span class="hljs-number">0x000230ff</span> (<span class="hljs-number">0x001100</span>)/ (PUBLIC_KEYS_4096) - OK<br>     /<span class="hljs-number">0x00024000</span>-<span class="hljs-number">0x00073fff</span> (<span class="hljs-number">0x050000</span>)/ (PROGRAMMABLE_HW_FW) - OK<br>     /<span class="hljs-number">0x00074000</span>-<span class="hljs-number">0x00125e27</span> (<span class="hljs-number">0x0b1e28</span>)/ (ROM_CODE) - OK<br>     /<span class="hljs-number">0x00126000</span>-<span class="hljs-number">0x00135fff</span> (<span class="hljs-number">0x010000</span>)/ (CRDUMP_MASK_DATA) - OK<br>     /<span class="hljs-number">0x00136000</span>-<span class="hljs-number">0x001369ff</span> (<span class="hljs-number">0x000a00</span>)/ (PCIE_PHY_UC_CODE) - OK<br>     /<span class="hljs-number">0x00137000</span>-<span class="hljs-number">0x0014091f</span> (<span class="hljs-number">0x009920</span>)/ (PHY_UC_CODE) - OK<br>     /<span class="hljs-number">0x00141000</span>-<span class="hljs-number">0x0016c457</span> (<span class="hljs-number">0x02b458</span>)/ (PCI_CODE) - OK<br>     /<span class="hljs-number">0x0016d000</span>-<span class="hljs-number">0x004bb8bf</span> (<span class="hljs-number">0x34e8c0</span>)/ (MAIN_CODE) - OK<br>     /<span class="hljs-number">0x004bc000</span>-<span class="hljs-number">0x004c9cbf</span> (<span class="hljs-number">0x00dcc0</span>)/ (PCIE_LINK_CODE) - OK<br>     /<span class="hljs-number">0x004ca000</span>-<span class="hljs-number">0x004cae3f</span> (<span class="hljs-number">0x000e40</span>)/ (POST_IRON_BOOT_CODE) - OK<br>     /<span class="hljs-number">0x004cb000</span>-<span class="hljs-number">0x004cce0f</span> (<span class="hljs-number">0x001e10</span>)/ (UPGRADE_CODE) - OK<br>     /<span class="hljs-number">0x004cd000</span>-<span class="hljs-number">0x004cd3ff</span> (<span class="hljs-number">0x000400</span>)/ (IMAGE_INFO) - OK<br>     /<span class="hljs-number">0x004cd400</span>-<span class="hljs-number">0x004cdbcb</span> (<span class="hljs-number">0x0007cc</span>)/ (DBG_FW_INI) - OK<br>     /<span class="hljs-number">0x004cdbcc</span>-<span class="hljs-number">0x004cdbd3</span> (<span class="hljs-number">0x000008</span>)/ (DBG_FW_PARAMS) - OK<br>     /<span class="hljs-number">0x00fa0000</span>-<span class="hljs-number">0x00faffff</span> (<span class="hljs-number">0x010000</span>)/ (NV_DATA) - CRC IGNORED<br>     /<span class="hljs-number">0x00fb0000</span>-<span class="hljs-number">0x00fbffff</span> (<span class="hljs-number">0x010000</span>)/ (NV_DATA) - CRC IGNORED<br>     /<span class="hljs-number">0x00fc0000</span>-<span class="hljs-number">0x00fcffff</span> (<span class="hljs-number">0x010000</span>)/ (FW_NV_LOG) - CRC IGNORED<br>     /<span class="hljs-number">0x00fee000</span>-<span class="hljs-number">0x00fee1ff</span> (<span class="hljs-number">0x000200</span>)/ (DEV_INFO) - OK<br>     /<span class="hljs-number">0x00ff8000</span>-<span class="hljs-number">0x00ff813f</span> (<span class="hljs-number">0x000140</span>)/ (MFG_INFO) - OK<br>     /<span class="hljs-number">0x00ff8140</span>-<span class="hljs-number">0x00ff813f</span> (<span class="hljs-number">0x000000</span>)/ (VPD_R0) - OK<br><br>-I- FW image verification succeeded. Image is bootable.<br><br></code></pre></div></td></tr></table></figure>
+
+<p>更新固件完成后</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql">root@tiny-unraid:~# mstflint <span class="hljs-comment">--no_fw_ctrl -allow_psid_change -d 01:00.0 -i fw-ConnectX4Lx-rel-14_32_1900-MCX4121A-ACA_Ax-UEFI-14.25.17-FlexBoot-3.6.502.bin burn</span><br>Done.<br>    <span class="hljs-keyword">Current</span> FW <span class="hljs-keyword">version</span> <span class="hljs-keyword">on</span> flash:  <span class="hljs-number">14.16</span><span class="hljs-number">.0034</span><br>    <span class="hljs-built_in">New</span> FW <span class="hljs-keyword">version</span>:               <span class="hljs-number">14.32</span><span class="hljs-number">.1900</span><br><br><br>    You are about <span class="hljs-keyword">to</span> replace <span class="hljs-keyword">current</span> PSID <span class="hljs-keyword">on</span> flash - &quot;HUA0010110034&quot; <span class="hljs-keyword">with</span> a different PSID - &quot;MT_2420110034&quot;.<br>    Note: It <span class="hljs-keyword">is</span> highly recommended <span class="hljs-keyword">not</span> <span class="hljs-keyword">to</span> change the PSID.<br><br> <span class="hljs-keyword">Do</span> you want <span class="hljs-keyword">to</span> <span class="hljs-keyword">continue</span> ? (y/n) [n] : y<br>Burning FW image <span class="hljs-keyword">without</span> signatures - OK<br>Restoring signature                     - OK<br>-I- <span class="hljs-keyword">To</span> <span class="hljs-keyword">load</span> <span class="hljs-built_in">new</span> FW run mstfwreset <span class="hljs-keyword">or</span> reboot machine.<br></code></pre></div></td></tr></table></figure>
+
+<p>我们再次检查固件信息</p>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">root</span>@tiny-unraid:~# mstflint -d <span class="hljs-number">01</span>:<span class="hljs-number">00</span>.<span class="hljs-number">0</span> q<br><span class="hljs-attribute">Image</span> type:            FS3<br><span class="hljs-attribute">FW</span> Version:            <span class="hljs-number">14</span>.<span class="hljs-number">32</span>.<span class="hljs-number">1900</span><br><span class="hljs-attribute">FW</span> Version(Running):   <span class="hljs-number">14</span>.<span class="hljs-number">16</span>.<span class="hljs-number">0034</span><br><span class="hljs-attribute">FW</span> Release Date:       <span class="hljs-number">25</span>.<span class="hljs-number">8</span>.<span class="hljs-number">2024</span><br><span class="hljs-attribute">Product</span> Version:       rel-<span class="hljs-number">14</span>_32_1900<br><span class="hljs-attribute">Rom</span> Info:              type=UEFI version=<span class="hljs-number">14</span>.<span class="hljs-number">25</span>.<span class="hljs-number">17</span> cpu=AMD64,AARCH64<br>                       <span class="hljs-attribute">type</span>=PXE version=<span class="hljs-number">3</span>.<span class="hljs-number">6</span>.<span class="hljs-number">502</span> cpu=AMD64<br><span class="hljs-attribute">Description</span>:           UID                GuidsNumber<br><span class="hljs-attribute">Base</span> GUID:             <span class="hljs-number">2</span>c9d1e03003ddde7        <span class="hljs-number">8</span><br><span class="hljs-attribute">Orig</span> Base GUID:        N/A                     <span class="hljs-number">8</span><br><span class="hljs-attribute">Base</span> MAC:              <span class="hljs-number">2</span>c9d1e3dd549            <span class="hljs-number">8</span><br><span class="hljs-attribute">Orig</span> Base MAC:         N/A                     <span class="hljs-number">8</span><br><span class="hljs-attribute">Image</span> VSD:             N/A<br><span class="hljs-attribute">Device</span> VSD:            N/A<br><span class="hljs-attribute">PSID</span>:                  MT_2420110034<br><span class="hljs-attribute">Orig</span> PSID:             HUA0010110034<br><span class="hljs-attribute">Security</span> Attributes:   N/A<br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight x86asm"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs x86asm">root@tiny-unraid:~# mstflint -d <span class="hljs-number">01</span>:<span class="hljs-number">00.0</span> v<br><br>FS3 failsafe image<br><br>     /<span class="hljs-number">0x00800038</span>-<span class="hljs-number">0x00801e8b</span> (<span class="hljs-number">0x001e54</span>)/ (BOOT2) - OK<br>     /<span class="hljs-number">0x00802000</span>-<span class="hljs-number">0x0080201f</span> (<span class="hljs-number">0x000020</span>)/ (ITOC_HEADER) - OK<br>     /<span class="hljs-number">0x00804000</span>-<span class="hljs-number">0x0081472b</span> (<span class="hljs-number">0x01072c</span>)/ (IRON_PREP_CODE) - OK<br>     /<span class="hljs-number">0x00815000</span>-<span class="hljs-number">0x008150ff</span> (<span class="hljs-number">0x000100</span>)/ (RESET_INFO) - OK<br>     /<span class="hljs-number">0x00816000</span>-<span class="hljs-number">0x00816bff</span> (<span class="hljs-number">0x000c00</span>)/ (FW_MAIN_CFG) - OK<br>     /<span class="hljs-number">0x00817000</span>-<span class="hljs-number">0x008174bf</span> (<span class="hljs-number">0x0004c0</span>)/ (FW_BOOT_CFG) - OK<br>     /<span class="hljs-number">0x00818000</span>-<span class="hljs-number">0x008195ff</span> (<span class="hljs-number">0x001600</span>)/ (HW_MAIN_CFG) - OK<br>     /<span class="hljs-number">0x0081a000</span>-<span class="hljs-number">0x0081a13f</span> (<span class="hljs-number">0x000140</span>)/ (HW_BOOT_CFG) - OK<br>     /<span class="hljs-number">0x0081b000</span>-<span class="hljs-number">0x0081dc7f</span> (<span class="hljs-number">0x002c80</span>)/ (PHY_UC_CONSTS) - OK<br>     /<span class="hljs-number">0x0081e000</span>-<span class="hljs-number">0x0081e13f</span> (<span class="hljs-number">0x000140</span>)/ (IMAGE_SIGNATURE_256) - OK<br>     /<span class="hljs-number">0x0081f000</span>-<span class="hljs-number">0x0081f8ff</span> (<span class="hljs-number">0x000900</span>)/ (PUBLIC_KEYS_2048) - OK<br>     /<span class="hljs-number">0x00820000</span>-<span class="hljs-number">0x0082008f</span> (<span class="hljs-number">0x000090</span>)/ (FORBIDDEN_VERSIONS) - OK<br>     /<span class="hljs-number">0x00821000</span>-<span class="hljs-number">0x0082123f</span> (<span class="hljs-number">0x000240</span>)/ (IMAGE_SIGNATURE_512) - OK<br>     /<span class="hljs-number">0x00822000</span>-<span class="hljs-number">0x008230ff</span> (<span class="hljs-number">0x001100</span>)/ (PUBLIC_KEYS_4096) - OK<br>     /<span class="hljs-number">0x00824000</span>-<span class="hljs-number">0x00873fff</span> (<span class="hljs-number">0x050000</span>)/ (PROGRAMMABLE_HW_FW) - OK<br>     /<span class="hljs-number">0x00874000</span>-<span class="hljs-number">0x00925e27</span> (<span class="hljs-number">0x0b1e28</span>)/ (ROM_CODE) - OK<br>     /<span class="hljs-number">0x00926000</span>-<span class="hljs-number">0x00935fff</span> (<span class="hljs-number">0x010000</span>)/ (CRDUMP_MASK_DATA) - OK<br>     /<span class="hljs-number">0x00936000</span>-<span class="hljs-number">0x009369ff</span> (<span class="hljs-number">0x000a00</span>)/ (PCIE_PHY_UC_CODE) - OK<br>     /<span class="hljs-number">0x00937000</span>-<span class="hljs-number">0x0094091f</span> (<span class="hljs-number">0x009920</span>)/ (PHY_UC_CODE) - OK<br>     /<span class="hljs-number">0x00941000</span>-<span class="hljs-number">0x0096c457</span> (<span class="hljs-number">0x02b458</span>)/ (PCI_CODE) - OK<br>     /<span class="hljs-number">0x0096d000</span>-<span class="hljs-number">0x00cbb8bf</span> (<span class="hljs-number">0x34e8c0</span>)/ (MAIN_CODE) - OK<br>     /<span class="hljs-number">0x00cbc000</span>-<span class="hljs-number">0x00cc9cbf</span> (<span class="hljs-number">0x00dcc0</span>)/ (PCIE_LINK_CODE) - OK<br>     /<span class="hljs-number">0x00cca000</span>-<span class="hljs-number">0x00ccae3f</span> (<span class="hljs-number">0x000e40</span>)/ (POST_IRON_BOOT_CODE) - OK<br>     /<span class="hljs-number">0x00ccb000</span>-<span class="hljs-number">0x00ccce0f</span> (<span class="hljs-number">0x001e10</span>)/ (UPGRADE_CODE) - OK<br>     /<span class="hljs-number">0x00ccd000</span>-<span class="hljs-number">0x00ccd3ff</span> (<span class="hljs-number">0x000400</span>)/ (IMAGE_INFO) - OK<br>     /<span class="hljs-number">0x00ccd400</span>-<span class="hljs-number">0x00ccdbcb</span> (<span class="hljs-number">0x0007cc</span>)/ (DBG_FW_INI) - OK<br>     /<span class="hljs-number">0x00ccdbcc</span>-<span class="hljs-number">0x00ccdbd3</span> (<span class="hljs-number">0x000008</span>)/ (DBG_FW_PARAMS) - OK<br>     /<span class="hljs-number">0x00fa0000</span>-<span class="hljs-number">0x00faffff</span> (<span class="hljs-number">0x010000</span>)/ (NV_DATA) - CRC IGNORED<br>     /<span class="hljs-number">0x00fb0000</span>-<span class="hljs-number">0x00fbffff</span> (<span class="hljs-number">0x010000</span>)/ (NV_DATA) - CRC IGNORED<br>     /<span class="hljs-number">0x00fc0000</span>-<span class="hljs-number">0x00fcffff</span> (<span class="hljs-number">0x010000</span>)/ (FW_NV_LOG) - CRC IGNORED<br>     /<span class="hljs-number">0x00fee000</span>-<span class="hljs-number">0x00fee1ff</span> (<span class="hljs-number">0x000200</span>)/ (DEV_INFO) - OK<br>     /<span class="hljs-number">0x00ff8000</span>-<span class="hljs-number">0x00ff813f</span> (<span class="hljs-number">0x000140</span>)/ (MFG_INFO) - OK<br>     /<span class="hljs-number">0x00ff8140</span>-<span class="hljs-number">0x00ff813f</span> (<span class="hljs-number">0x000000</span>)/ (VPD_R0) - OK<br><br>-I- FW image verification succeeded. Image is bootable.<br><br></code></pre></div></td></tr></table></figure>
+
+<p>重启机器之后查看固件信息</p>
+<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">root</span>@tiny-unraid:~# mstflint -d <span class="hljs-number">01</span>:<span class="hljs-number">00</span>.<span class="hljs-number">0</span> q<br><span class="hljs-attribute">Image</span> type:            FS3<br><span class="hljs-attribute">FW</span> Version:            <span class="hljs-number">14</span>.<span class="hljs-number">32</span>.<span class="hljs-number">1900</span><br><span class="hljs-attribute">FW</span> Release Date:       <span class="hljs-number">25</span>.<span class="hljs-number">8</span>.<span class="hljs-number">2024</span><br><span class="hljs-attribute">Product</span> Version:       <span class="hljs-number">14</span>.<span class="hljs-number">32</span>.<span class="hljs-number">1900</span><br><span class="hljs-attribute">Rom</span> Info:              type=UEFI version=<span class="hljs-number">14</span>.<span class="hljs-number">25</span>.<span class="hljs-number">17</span> cpu=AMD64,AARCH64<br>                       <span class="hljs-attribute">type</span>=PXE version=<span class="hljs-number">3</span>.<span class="hljs-number">6</span>.<span class="hljs-number">502</span> cpu=AMD64<br><span class="hljs-attribute">Description</span>:           UID                GuidsNumber<br><span class="hljs-attribute">Base</span> GUID:             N/A                     <span class="hljs-number">8</span><br><span class="hljs-attribute">Base</span> MAC:              N/A                     <span class="hljs-number">8</span><br><span class="hljs-attribute">Image</span> VSD:             N/A<br><span class="hljs-attribute">Device</span> VSD:            N/A<br><span class="hljs-attribute">PSID</span>:                  MT_2420110034<br><span class="hljs-attribute">Security</span> Attributes:   N/A<br></code></pre></div></td></tr></table></figure>
+
+<p>查看网卡速率可以看到有25G的参数</p>
+<figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-string">root@tiny-unraid:~#</span> <span class="hljs-string">ethtool</span> <span class="hljs-string">eth1</span><br><span class="hljs-attr">Settings for eth1:</span><br>        <span class="hljs-attr">Supported ports:</span> [ <span class="hljs-string">FIBRE</span> ]<br>        <span class="hljs-attr">Supported link modes:</span>   <span class="hljs-string">1000baseKX/Full</span><br>                                <span class="hljs-string">10000baseKR/Full</span><br>                                <span class="hljs-string">25000baseCR/Full</span><br>                                <span class="hljs-string">25000baseKR/Full</span><br>                                <span class="hljs-string">25000baseSR/Full</span><br>        <span class="hljs-attr">Supported pause frame use:</span> <span class="hljs-string">Symmetric</span><br>        <span class="hljs-attr">Supports auto-negotiation:</span> <span class="hljs-literal">Yes</span><br>        <span class="hljs-attr">Supported FEC modes:</span> <span class="hljs-string">None</span>        <span class="hljs-string">RS</span>      <span class="hljs-string">BASER</span><br>        <span class="hljs-attr">Advertised link modes:</span>  <span class="hljs-string">1000baseKX/Full</span><br>                                <span class="hljs-string">10000baseKR/Full</span><br>                                <span class="hljs-string">25000baseCR/Full</span><br>                                <span class="hljs-string">25000baseKR/Full</span><br>                                <span class="hljs-string">25000baseSR/Full</span><br>        <span class="hljs-attr">Advertised pause frame use:</span> <span class="hljs-string">Symmetric</span><br>        <span class="hljs-attr">Advertised auto-negotiation:</span> <span class="hljs-literal">Yes</span><br>        <span class="hljs-attr">Advertised FEC modes:</span> <span class="hljs-string">None</span><br>        <span class="hljs-attr">Speed:</span> <span class="hljs-string">Unknown!</span><br>        <span class="hljs-attr">Duplex:</span> <span class="hljs-string">Unknown!</span> <span class="hljs-string">(255)</span><br>        <span class="hljs-attr">Auto-negotiation:</span> <span class="hljs-string">on</span><br>        <span class="hljs-attr">Port:</span> <span class="hljs-string">FIBRE</span><br>        <span class="hljs-attr">PHYAD:</span> <span class="hljs-number">0</span><br>        <span class="hljs-attr">Transceiver:</span> <span class="hljs-string">internal</span><br>        <span class="hljs-attr">Supports Wake-on:</span> <span class="hljs-string">d</span><br>        <span class="hljs-attr">Wake-on:</span> <span class="hljs-string">d</span><br>        <span class="hljs-attr">Link detected:</span> <span class="hljs-literal">no</span><br><span class="hljs-string">root@tiny-unraid:~#</span> <span class="hljs-string">ethtool</span> <span class="hljs-string">eth2</span><br><span class="hljs-attr">Settings for eth2:</span><br>        <span class="hljs-attr">Supported ports:</span> [  ]<br>        <span class="hljs-attr">Supported link modes:</span>   <span class="hljs-string">1000baseKX/Full</span><br>                                <span class="hljs-string">10000baseKR/Full</span><br>                                <span class="hljs-string">25000baseCR/Full</span><br>                                <span class="hljs-string">25000baseKR/Full</span><br>                                <span class="hljs-string">25000baseSR/Full</span><br>        <span class="hljs-attr">Supported pause frame use:</span> <span class="hljs-string">Symmetric</span><br>        <span class="hljs-attr">Supports auto-negotiation:</span> <span class="hljs-literal">Yes</span><br>        <span class="hljs-attr">Supported FEC modes:</span> <span class="hljs-string">None</span>        <span class="hljs-string">RS</span>      <span class="hljs-string">BASER</span><br>        <span class="hljs-attr">Advertised link modes:</span>  <span class="hljs-string">1000baseKX/Full</span><br>                                <span class="hljs-string">10000baseKR/Full</span><br>                                <span class="hljs-string">25000baseCR/Full</span><br>                                <span class="hljs-string">25000baseKR/Full</span><br>                                <span class="hljs-string">25000baseSR/Full</span><br>        <span class="hljs-attr">Advertised pause frame use:</span> <span class="hljs-string">Symmetric</span><br>        <span class="hljs-attr">Advertised auto-negotiation:</span> <span class="hljs-literal">Yes</span><br>        <span class="hljs-attr">Advertised FEC modes:</span> <span class="hljs-string">Not</span> <span class="hljs-string">reported</span><br>        <span class="hljs-attr">Speed:</span> <span class="hljs-string">Unknown!</span><br>        <span class="hljs-attr">Duplex:</span> <span class="hljs-string">Unknown!</span> <span class="hljs-string">(255)</span><br>        <span class="hljs-attr">Auto-negotiation:</span> <span class="hljs-string">on</span><br>        <span class="hljs-attr">Port:</span> <span class="hljs-string">Other</span><br>        <span class="hljs-attr">PHYAD:</span> <span class="hljs-number">0</span><br>        <span class="hljs-attr">Transceiver:</span> <span class="hljs-string">internal</span><br>        <span class="hljs-attr">Supports Wake-on:</span> <span class="hljs-string">d</span><br>        <span class="hljs-attr">Wake-on:</span> <span class="hljs-string">d</span><br>        <span class="hljs-attr">Link detected:</span> <span class="hljs-literal">no</span><br></code></pre></div></td></tr></table></figure>
+
+<p>这里虽然看起来网卡的速度正常，但是确无法正确识别到光模块和线缆，建议不要刷入mellanox官方的固件，换为华为的官方固件即可，刷入的方法是一样的。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/others/">others</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/sp380/">sp380</a>
+                    
+                      <a class="hover-with-bg" href="/tags/sp333/">sp333</a>
+                    
+                      <a class="hover-with-bg" href="/tags/mellanox/">mellanox</a>
+                    
+                      <a class="hover-with-bg" href="/tags/MCX4121A/">MCX4121A</a>
+                    
+                  </div>
+                
+              </div>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/20240624-qemu-img-to-qcow2/">
+                        <span class="hidden-mobile">镜像文件从raw格式转换为qcow2</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;TOC</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <i class="iconfont icon-copyright"></i> <a href="https://tinychen.com/" target="_blank" rel="nofollow noopener"><span>Since 2017 By TinyChen </span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Hexo-Fluid</span></a> 
+  </div>
+  
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        粤ICP备18140640号
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+        typing(title);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    <!-- Baidu Analytics -->
+    <script defer>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?7a96963a1145ac7fde1442d739a11ffd";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  
+
+  
+    <!-- Google Analytics -->
+    <script defer>
+      window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) };
+      ga.l = +new Date;
+      ga('create', 'UA-166769908-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
