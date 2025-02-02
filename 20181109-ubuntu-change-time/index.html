@@ -249,27 +249,24 @@
             <div class="markdown-body">
               <p>最近在安装Ubuntu18.04和win10双系统的时候发现两个系统的时间总是相差八个小时，即win10的时间要比Ubuntu早八个小时，这里介绍一个在Ubuntu下的解决方案。</p>
 <span id="more"></span>
-
-<h1 id="1、为什么时间会不一致"><a href="#1、为什么时间会不一致" class="headerlink" title="1、为什么时间会不一致"></a>1、为什么时间会不一致</h1><p>在我们电脑的BIOS中，有着一个记录的时间，windows系统会将BIOS中的时间视为本地时间，即你windows中设置为中国地区，那么这个BIOS的时间对于windows来说就是中国时间。</p>
+<h1>1、为什么时间会不一致</h1>
+<p>在我们电脑的BIOS中，有着一个记录的时间，windows系统会将BIOS中的时间视为本地时间，即你windows中设置为中国地区，那么这个BIOS的时间对于windows来说就是中国时间。</p>
 <p>在Ubuntu中，会将BIOS中的时间视为UTC时间，即Universal Time Coordinated(协调世界时)，而中国这边的时间是UTC+8，即正好相差八个小时。</p>
 <blockquote>
-<p>协调世界时是以原子时秒长为基础，在时刻上尽量接近于世界时的一种时间计量系统。中国大陆采用ISO 8601-1988的《数据元和交换格式信息交换日期和时间表示法》（GB&#x2F;T 7408-1994）称之为国际协调时间，代替原来的GB&#x2F;T 7408-1994；中国台湾采用CNS 7648的《资料元及交换格式–资讯交换–日期及时间的表示法》，称之为世界统一时间。</p>
+<p>协调世界时是以原子时秒长为基础，在时刻上尽量接近于世界时的一种时间计量系统。中国大陆采用ISO 8601-1988的《数据元和交换格式信息交换日期和时间表示法》（GB/T 7408-1994）称之为国际协调时间，代替原来的GB/T 7408-1994；中国台湾采用CNS 7648的《资料元及交换格式–资讯交换–日期及时间的表示法》，称之为世界统一时间。</p>
 <p>中国大陆、中国香港、中国澳门、中国台湾、蒙古国、新加坡、马来西亚、菲律宾、西澳大利亚州的时间与UTC的时差均为+8，也就是UTC+8。</p>
 </blockquote>
-<h1 id="2、如何修改"><a href="#2、如何修改" class="headerlink" title="2、如何修改"></a>2、如何修改</h1><p>先介绍在Ubuntu下的解决方案。</p>
+<h1>2、如何修改</h1>
+<p>先介绍在Ubuntu下的解决方案。</p>
 <p>首先我们把硬件时间（BIOS时间）将默认的UTC改为CST，然后重启，使得两个系统的时间保持一致。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo timedatectl set-local-rtc 1<br><span class="hljs-comment">#上述代码中的1改为0即可将硬件时间修改为默认的UTC时间</span><br>sudo reboot<br><span class="hljs-comment">#重启系统使改动生效</span><br></code></pre></div></td></tr></table></figure>
-
 <p>接着我们更新一下系统时间</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo apt-get install ntpdate<br><span class="hljs-comment">#这里的操作是安装ntpdate工具</span><br>sudo ntpdate time.windows.com<br><span class="hljs-comment">#使用ntpdate工具从time.windows.com上面同步时间</span><br></code></pre></div></td></tr></table></figure>
-
 <p>最后我们将时间更新到硬件上，以保证重启后改动不会被还原</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo hwclock --localtime --systohc<br><span class="hljs-comment">#这里的代码意思是使用hwclock命令将本地时间localtime从sysclock同步到hwclock</span><br></code></pre></div></td></tr></table></figure>
-
 <p><strong>到这里双系统的时间就都正常了。</strong></p>
 <p>或者也可以使用windows下的解决方案，使用管理员权限打开powershell，然后输入下面的命令，接着重启就可以了。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">reg add HKLM\SYSTEM\CurrentControlSet\Control\TimeZoneInformation /v RealTimeIsUniversal /t REG_DWORD /d 1<br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
 <p>原理就是：在注册表项<code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation</code>中添加一个名为<code>RealTimeIsUniversal</code>的值，类型为<code>REG_DWORD</code>，数据为<code>1</code>。此项的作用就是让Windows将硬件时间当作UTC，与Ubuntu的默认设置一致。</p>
 </blockquote>

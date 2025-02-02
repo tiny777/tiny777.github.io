@@ -249,14 +249,12 @@
             <div class="markdown-body">
               <p>nginx的map模块配置语法。</p>
 <span id="more"></span>
-
-<p>map模块是由<code>ngx_http_map_module</code>模块提供的，<strong>只能在<code>http模块</code>下使用</strong>，nginx默认自带安装。<strong>map 的主要作用简单来说就和编程语言中的赋值语句有点像，只不过这里称为映射（map）。</strong>具体来说是创建一个自定义变量，去匹配某些指定的字符串或者是正则表达式，如果匹配成功则将该匹配值赋值给该自定义变量，然后该自定义变量可以作其他用途。</p>
-<h1 id="1、语法格式"><a href="#1、语法格式" class="headerlink" title="1、语法格式"></a>1、语法格式</h1><p>我们先来看一下<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_map_module.html">官网</a>给出的语法格式：</p>
+<p>map模块是由<code>ngx_http_map_module</code>模块提供的，<strong>只能在<code>http模块</code>下使用</strong>，nginx默认自带安装。**map 的主要作用简单来说就和编程语言中的赋值语句有点像，只不过这里称为映射（map）。**具体来说是创建一个自定义变量，去匹配某些指定的字符串或者是正则表达式，如果匹配成功则将该匹配值赋值给该自定义变量，然后该自定义变量可以作其他用途。</p>
+<h1>1、语法格式</h1>
+<p>我们先来看一下<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_map_module.html">官网</a>给出的语法格式：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Syntax:	map string <span class="hljs-variable">$variable</span> &#123; ... &#125;<br>Default:	—<br>Context:	http<br></code></pre></div></td></tr></table></figure>
-
 <p>实际上现在的版本中map指令后面的第一个参数也就是源变量可以是字符串、正则表达式或者是另一个变量。因此这样表示会更容易理解一些。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Syntax:	map <span class="hljs-variable">$source_var</span> <span class="hljs-variable">$result_var</span> &#123; ... &#125;<br></code></pre></div></td></tr></table></figure>
-
 <p>此外，map模块内还有<code>default</code>、<code>hostnames</code>、<code>include</code>、<code>volatile</code>这四个关键字可以使用</p>
 <ul>
 <li><code>default</code>：使用方法为 <code>default</code> <em>value</em>，主要用于给源变量设定默认值，如果源变量没有匹配到模块中指定的任何一个，则设为指定的<em>value</em>，如果不指定<code>default</code>，则会设定为一个空字符串（NULL）</li>
@@ -266,14 +264,12 @@
 </ul>
 <p>我们来看一个复杂一点的配置文件</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">map <span class="hljs-variable">$http_host</span> <span class="hljs-variable">$name</span> &#123;<br>    default 0;<br>    hostnames;<br>    volatile;<br>    *.example.com 1;<br>    *.example.org 2;<br>    *.example.net 3;<br>    mail.* 4;<br>    mail.example.com 5;<br>    include /var/www/html/host.list;<br>&#125;<br></code></pre></div></td></tr></table></figure>
-
 <p>需要注意这里的include使用的文件格式应该如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-variable">$source_var0</span> <span class="hljs-variable">$result_var0</span>;<br><span class="hljs-variable">$source_var1</span> <span class="hljs-variable">$result_var1</span>;<br>...<br><span class="hljs-variable">$source_varN</span> <span class="hljs-variable">$result_varN</span>;<br></code></pre></div></td></tr></table></figure>
-
 <p>例如：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">nginx.example.com 7;<br>awesome.example.com 8;<br></code></pre></div></td></tr></table></figure>
-
-<h1 id="2、注意事项"><a href="#2、注意事项" class="headerlink" title="2、注意事项"></a>2、注意事项</h1><p>这里有几点需要注意：</p>
+<h1>2、注意事项</h1>
+<p>这里有几点需要注意：</p>
 <ul>
 <li>map指令只能在http块中使用；</li>
 <li>如果源变量是字符串，那么在匹配的时候是不区分大小写的；</li>
@@ -284,7 +280,8 @@
 <li>0.9.0版本中源变量可以使用变量，1.11.0版本中源变量可以使用变量和字符串的组合；</li>
 <li><strong>map指令对应的结果变量（<code>$result_var</code>）只有在之后的配置文件中使用到了该结果变量的时候，才会使用前面定义的map模块来进行映射，因此即使定义了很多个map模块，也不会对性能有额外的影响；</strong></li>
 </ul>
-<h1 id="3、匹配顺序"><a href="#3、匹配顺序" class="headerlink" title="3、匹配顺序"></a>3、匹配顺序</h1><p>当map块中指定的映射关系有多个可以匹配的时候，按照以下的优先顺序进行匹配：</p>
+<h1>3、匹配顺序</h1>
+<p>当map块中指定的映射关系有多个可以匹配的时候，按照以下的优先顺序进行匹配：</p>
 <ol>
 <li>完整指定没有使用掩码的指定变量，e.g.“<code>mail.example.com</code>”；</li>
 <li>带有前缀掩码的最长字符串值, e.g. “<code>*.nginx.example.com</code>”就会比 “<code>*.example.com</code>”优先匹配；</li>

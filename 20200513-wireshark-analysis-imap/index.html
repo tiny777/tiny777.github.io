@@ -250,88 +250,112 @@
             <div class="markdown-body">
               <p>本文主要使用Wireshark对邮件客户端使用IMAP协议接收邮件的过程进行抓包分析并使用telnet命令进行简单操作。</p>
 <span id="more"></span>
-
-<h1 id="1、IMAP简介"><a href="#1、IMAP简介" class="headerlink" title="1、IMAP简介"></a>1、IMAP简介</h1><p>IMAP和POP3两个协议基本上是目前支持和使用最广泛的邮件接收协议，IMAP和POP3相比有着许多优点，参考<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%9B%A0%E7%89%B9%E7%BD%91%E4%BF%A1%E6%81%AF%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE">wiki</a>和后面的抓包结果进行分析，这里列出一些后面抓包的时候可以验证的优点：</p>
+<h1>1、IMAP简介</h1>
+<p>IMAP和POP3两个协议基本上是目前支持和使用最广泛的邮件接收协议，IMAP和POP3相比有着许多优点，参考<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%9B%A0%E7%89%B9%E7%BD%91%E4%BF%A1%E6%81%AF%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE">wiki</a>和后面的抓包结果进行分析，这里列出一些后面抓包的时候可以验证的优点：</p>
 <ul>
-<li><p><strong>支持连接和断开两种操作模式</strong></p>
+<li>
+<p><strong>支持连接和断开两种操作模式</strong></p>
 <p>和POP3协议在接收完邮件之后就和服务器断开连接不同，IMAP协议可以一直和服务器保持连接从而使得接收新邮件的延迟大大降低。</p>
 </li>
-<li><p><strong>支持多个客户同时连接到一个邮箱</strong></p>
+<li>
+<p><strong>支持多个客户同时连接到一个邮箱</strong></p>
 <p>POP3协议假定邮箱当前的连接是唯一的连接。相反，IMAP4协议允许多个用户同时访问邮箱同时提供一种机制让客户能够感知其他当前连接到这个邮箱的用户所做的操作。</p>
 </li>
-<li><p><strong>支持在服务器保留消息状态信息</strong></p>
+<li>
+<p><strong>支持在服务器保留消息状态信息</strong></p>
 <p>通过使用在IMAP4协议中定义的标志客户端可以跟踪消息状态，例如邮件是否被读取，回复，或者删除。这些标识存储在服务器，所以多个客户在不同时间访问一个邮箱可以感知其他用户所做的操作。</p>
 </li>
-<li><p><strong>支持在服务器上访问多个邮箱</strong></p>
+<li>
+<p><strong>支持在服务器上访问多个邮箱</strong></p>
 <p>IMAP4客户端可以在服务器上创建，重命名，或删除邮箱（通常以文件夹形式显现给用户）。支持多个邮箱还允许服务器提供对于共享和公共文件夹的访问。</p>
 </li>
-<li><p><strong>支持访问消息中的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/MIME">MIME</a>部分和部分获取。</strong></p>
+<li>
+<p><strong>支持访问消息中的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/MIME">MIME</a>部分和部分获取。</strong></p>
 <p>几乎所有的Internet邮件都是以MIME格式传输的。MIME允许消息包含一个树型结构，这个树型结构的叶子节点都是单一内容类型而非叶子节点都是多块类型的组合。IMAP4协议允许客户端获取任何独立的MIME部分和获取信息的一部分或者全部。这些机制使得用户无需下载附件就可以浏览消息内容或者在获取内容的同时浏览。</p>
 </li>
 </ul>
-<h1 id="2、抓包分析"><a href="#2、抓包分析" class="headerlink" title="2、抓包分析"></a>2、抓包分析</h1><p>MUA中的设置如下，同样不使用加密协议方便分析数据。</p>
-<p><img src="https://resource.tinychen.com/image-20200513153605340.png" srcset="/img/loading.gif" lazyload></p>
+<h1>2、抓包分析</h1>
+<p>MUA中的设置如下，同样不使用加密协议方便分析数据。</p>
+<p><img src="https://resource.tinychen.com/image-20200513153605340.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>配置完成开始抓包之后发现邮箱大师有多线程并发收件的操作，这也算是利用了IMAP协议的能够允许多个客户端连接到同一个服务器的特点，但是显然不利于我们分析串行模式下单个连接收件的完整过程，不过也可以对比多个连接之间的差异。</p>
 <p>由于建立IMAP通信连接必须要登录，所以我们只需要查看报文就可以知道一共并行发起了多少个连接，在这次的报文中一共发现了有三个LOGIN的请求报文，因此可以判断应该一共先后发起了三个连接，其中第三个连接是在第一个连接结束之后发起的，具体分析如下：</p>
 <p>可以看到最开始几乎同时发起了两个IMAP连接：</p>
-<p><img src="https://resource.tinychen.com/image-20200513175632166.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-1-第一个连接"><a href="#2-1-第一个连接" class="headerlink" title="2.1 第一个连接"></a>2.1 第一个连接</h2><p>我们先来对第一个连接进行分析：</p>
-<p><img src="https://resource.tinychen.com/image-20200513154801579.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/image-20200513175632166.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="2-1-第一个连接">2.1 第一个连接</h2>
+<p>我们先来对第一个连接进行分析：</p>
+<p><img src="https://resource.tinychen.com/image-20200513154801579.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>首先我们可以确定IMAP的传输层协议也是使用的TCP协议，同样这里略去TCP三握四挥的分析，直接看IMAP相关部分的报文：</p>
-<p><img src="https://resource.tinychen.com/image-20200513154645248.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/image-20200513154645248.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <ul>
-<li><p>客户端与IMAP服务器在TCP三次握手之后建立连接</p>
+<li>
+<p>客户端与IMAP服务器在TCP三次握手之后建立连接</p>
 </li>
-<li><p>IMAP服务器返回OK信息，并说明自身邮件系统的类型为coremail</p>
+<li>
+<p>IMAP服务器返回OK信息，并说明自身邮件系统的类型为coremail</p>
 </li>
-<li><p>客户端发送CAPABILITY命令查询可用的命令，这个和POP3中的CAPA命令功能相同</p>
+<li>
+<p>客户端发送CAPABILITY命令查询可用的命令，这个和POP3中的CAPA命令功能相同</p>
 </li>
-<li><p>IMAP服务器返回可以执行的命令</p>
+<li>
+<p>IMAP服务器返回可以执行的命令</p>
 </li>
-<li><p>客户端发送ID命令，附带了MUA和OS的相关信息</p>
+<li>
+<p>客户端发送ID命令，附带了MUA和OS的相关信息</p>
 </li>
-<li><p>IMAP服务器返回ID字符串，同样附带了邮件服务器的相关信息</p>
+<li>
+<p>IMAP服务器返回ID字符串，同样附带了邮件服务器的相关信息</p>
 </li>
-<li><p>客户端发送LOGIN命令进行登录，双引号内的为邮箱账号，后面加一个空格然后紧跟着的是密码</p>
+<li>
+<p>客户端发送LOGIN命令进行登录，双引号内的为邮箱账号，后面加一个空格然后紧跟着的是密码</p>
 </li>
-<li><p>IMAP服务器返回OK指令提示登录成功</p>
+<li>
+<p>IMAP服务器返回OK指令提示登录成功</p>
 </li>
-<li><p>客户端发送LIST命令查询该账号内的邮件信息，但是可能命令的格式不对，并没有查询到任何有用的信息</p>
+<li>
+<p>客户端发送LIST命令查询该账号内的邮件信息，但是可能命令的格式不对，并没有查询到任何有用的信息</p>
 </li>
-<li><p>IMAP服务器返回查询结果为空：</p>
+<li>
+<p>IMAP服务器返回查询结果为空：</p>
 <p>如果把查询命令换为<code>LIST &quot;&quot; &quot;*&quot;</code>则可以查询到该账号的所有邮箱文件夹：</p>
 </li>
 </ul>
-<p><img src="https://resource.tinychen.com/image-20200514104230070.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/image-20200514104230070.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <ul>
-<li><p>客户端发送NOOP指令，与之前的POP3协议类似，NOOP指令的作用应该是用于保持连接，默认相当于无操作，但是在此次连接还没使用过SELECT命令并且是第一次发送NOOP指令的时候，IMAP服务器会返回该账号下所有目录的邮件总数</p>
+<li>
+<p>客户端发送NOOP指令，与之前的POP3协议类似，NOOP指令的作用应该是用于保持连接，默认相当于无操作，但是在此次连接还没使用过SELECT命令并且是第一次发送NOOP指令的时候，IMAP服务器会返回该账号下所有目录的邮件总数</p>
 </li>
-<li><p>IMAP服务器返回OK指令并且返回了邮件总数、</p>
+<li>
+<p>IMAP服务器返回OK指令并且返回了邮件总数、</p>
 </li>
-<li><p>客户端使用SELECT指令，并且选中了INBOX文件夹（一般对应收件箱），相当于在数据库中选中了一个数据表</p>
+<li>
+<p>客户端使用SELECT指令，并且选中了INBOX文件夹（一般对应收件箱），相当于在数据库中选中了一个数据表</p>
 </li>
-<li><p>然后连接就莫名没了</p>
+<li>
+<p>然后连接就莫名没了</p>
 </li>
 </ul>
-<h2 id="2-2-第二个连接"><a href="#2-2-第二个连接" class="headerlink" title="2.2 第二个连接"></a>2.2 第二个连接</h2><p>第二次连接的数据包较长，我们截取部分客户端发送的请求：</p>
-<p><img src="https://resource.tinychen.com/image-20200515173802081.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-第二个连接">2.2 第二个连接</h2>
+<p>第二次连接的数据包较长，我们截取部分客户端发送的请求：</p>
+<p><img src="https://resource.tinychen.com/image-20200515173802081.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>对比第一次连接，主要有以下不同点：</p>
 <ul>
 <li>使用了<code>XLIST &quot;&quot; &quot;*&quot;</code>查询到了邮件账号下的所有文件夹（收件箱、发件箱、草稿箱、垃圾箱、垃圾邮件等）</li>
 <li>依次使用<code>SELECT</code>命令和<code>UID SEARCH UID </code>命令来对每个文件夹进行操作，进而获取到该账号对应的文件夹下的<strong>所有邮件的总数和对应的UID</strong></li>
 </ul>
-<h2 id="2-3-第三个连接"><a href="#2-3-第三个连接" class="headerlink" title="2.3 第三个连接"></a>2.3 第三个连接</h2><p>从wireshark上对数据包标记的序号来看，第三个连接是在第一个连接结束之后才发起的。对应的客户端主要操作如下：</p>
-<p><img src="https://resource.tinychen.com/image-20200515174121534.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-3-第三个连接">2.3 第三个连接</h2>
+<p>从wireshark上对数据包标记的序号来看，第三个连接是在第一个连接结束之后才发起的。对应的客户端主要操作如下：</p>
+<p><img src="https://resource.tinychen.com/image-20200515174121534.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>上面的内容重复操作较多，主要就是对每个文件夹都进行SELECT，然后获取里面的邮件具体内容，主要的核心操作有以下两个</p>
 <ul>
 <li><code>UID FETCH 1557156839:1557156846 (UID FLAGS RFC822.SIZE BODYSTRUCTURE INTERNALDATE BODY.PEEK[HEADER.FIELDS (Date Subject From Sender Reply-To To Cc Bcc Message-ID References In-Reply-To X-MailMaster-ShowOneRcpt X-CUSTOM-MAIL-MASTER-SENT-ID Disposition-Notification-To X-CM-CTRLMSGS)])</code></li>
 <li><code>UID FETCH 1557156844 BODY.PEEK[1]</code></li>
 </ul>
 <p>上面两个请求命令中的<code>1557156844</code>就是在第一个连接中使用UID SEARCH命令查询到的邮件的UID，这里使用了<code>UID FETCH</code>命令来获取邮件的对应内容。由于前面我们提到邮件的格式是符合MIME标准的，而IMAP协议又是允许MUA下载符合MIME标准的部分邮件内容，因此这两条UID命令就是<strong>用于获取对应的邮件的特定部分的内容</strong>。</p>
-<h2 id="2-4-小结"><a href="#2-4-小结" class="headerlink" title="2.4 小结"></a>2.4 小结</h2><p>在换了另一个测试账号进行同样的抓包操作之后我发现两次的数据请求操作几乎是一模一样的，都是有三个连接，操作也和上面相同。由此可以分析IMAP协议的可操作性要比POP3强很多，因此在具体的功能实现上对于不同的MUA而言也有不同。</p>
-<h1 id="3、telnet操作"><a href="#3、telnet操作" class="headerlink" title="3、telnet操作"></a>3、telnet操作</h1><p>同样的我们也可以telnet到邮件服务器的143端口来进行命令操作：</p>
+<h2 id="2-4-小结">2.4 小结</h2>
+<p>在换了另一个测试账号进行同样的抓包操作之后我发现两次的数据请求操作几乎是一模一样的，都是有三个连接，操作也和上面相同。由此可以分析IMAP协议的可操作性要比POP3强很多，因此在具体的功能实现上对于不同的MUA而言也有不同。</p>
+<h1>3、telnet操作</h1>
+<p>同样的我们也可以telnet到邮件服务器的143端口来进行命令操作：</p>
 <figure class="highlight livescript"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs livescript">[root@www coremail]<span class="hljs-comment"># telnet localhost 143</span><br>Trying <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>...<br>Connected <span class="hljs-keyword">to</span> localhost.<br>Escape character <span class="hljs-keyword">is</span> <span class="hljs-string">&#x27;^]&#x27;</span>.<br>* OK Coremail System IMap Server Ready(<span class="hljs-number">126com</span>[c92b4e18679ada4069d0bde6e2528ad1])<br>C1 LOGIN <span class="hljs-string">&quot;test02@coremail.cn&quot;</span> password<br>C1 OK LOGIN completed<br>C2 LIST <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;&quot;</span><br>* LIST (<span class="hljs-string">\Noselect)</span> <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;&quot;</span><br>C2 OK LIST Completed<br>C3 LIST <span class="hljs-string">&quot;&quot;</span> <span class="hljs-string">&quot;*&quot;</span><br>* LIST () <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;INBOX&quot;</span><br>* LIST (<span class="hljs-string">\Drafts)</span> <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Drafts&quot;</span><br>* LIST (<span class="hljs-string">\Sent)</span> <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Sent Items&quot;</span><br>* LIST (<span class="hljs-string">\Trash)</span> <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Trash&quot;</span><br>* LIST (<span class="hljs-string">\Junk)</span> <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Junk E-mail&quot;</span><br>* LIST () <span class="hljs-string">&quot;/&quot;</span> <span class="hljs-string">&quot;Virus Items&quot;</span><br>C3 OK LIST Completed<br>C4 SELECT INBOX<br>* <span class="hljs-number">8</span> EXISTS<br>* <span class="hljs-number">0</span> RECENT<br>* OK [UIDVALIDITY <span class="hljs-number">1</span>] UIDs valid<br>* FLAGS (<span class="hljs-string">\Answered</span> <span class="hljs-string">\Seen</span> <span class="hljs-string">\Deleted</span> <span class="hljs-string">\Draft</span> <span class="hljs-string">\Flagged)</span><br>* OK [PERMANENTFLAGS (<span class="hljs-string">\Answered</span> <span class="hljs-string">\Seen</span> <span class="hljs-string">\Deleted</span> <span class="hljs-string">\Draft</span> <span class="hljs-string">\Flagged)]</span> Limited<br>C4 OK [READ-WRITE] SELECT completed<br>C5 UID SEARCH <span class="hljs-number">1</span>:*<br>* SEARCH <span class="hljs-number">1557156839</span> <span class="hljs-number">1557156840</span> <span class="hljs-number">1557156841</span> <span class="hljs-number">1557156842</span> <span class="hljs-number">1557156843</span> <span class="hljs-number">1557156844</span> <span class="hljs-number">1557156845</span> <span class="hljs-number">1557156846</span><br>C5 OK SEARCH completed<br>C6 UID FETCH <span class="hljs-number">1557156839</span><br>C6 BAD Parse command error<br>C7 UID FETCH <span class="hljs-number">1557156839</span> FULL<br>* <span class="hljs-number">1</span> FETCH (UID <span class="hljs-number">1557156839</span> INTERNALDATE <span class="hljs-string">&quot; 6-May-2019 23:33:59 +0800&quot;</span> FLAGS (<span class="hljs-string">\Seen)</span> ENVELOPE (<span class="hljs-string">&quot;Mon, 6 May 2019 23:33:59 +0800 (GMT+08:00)&quot;</span> <span class="hljs-string">&quot;=?UTF-8?B?5qyi6L+O5L2/55SoQ29yZW1haWznlLXlrZDpgq7ku7bns7vnu58vV2VsY29tZSB0byB0aGUgQ29yZW1haWwgZS1tYWlsIHN5c3RlbQ==?=&quot;</span> ((NIL NIL <span class="hljs-string">&quot;postmaster&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((NIL NIL <span class="hljs-string">&quot;postmaster&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((NIL NIL <span class="hljs-string">&quot;postmaster&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((NIL NIL <span class="hljs-string">&quot;test02&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) NIL NIL NIL <span class="hljs-string">&quot;&lt;1106604853.1.1557156839490@www.example.com&gt;&quot;</span>) BODY ((<span class="hljs-string">&quot;text&quot;</span> <span class="hljs-string">&quot;html&quot;</span> (<span class="hljs-string">&quot;charset&quot;</span> <span class="hljs-string">&quot;UTF-8&quot;</span>) NIL NIL <span class="hljs-string">&quot;quoted-printable&quot;</span> <span class="hljs-number">7274</span> <span class="hljs-number">152</span>) <span class="hljs-string">&quot;related&quot;</span>) RFC822.SIZE <span class="hljs-number">7959</span>)<br>C7 OK Fetch completed<br>C8 UID FETCH <span class="hljs-number">1557156846</span> FULL<br>* <span class="hljs-number">8</span> FETCH (UID <span class="hljs-number">1557156846</span> INTERNALDATE <span class="hljs-string">&quot; 8-May-2019 09:43:11 +0800&quot;</span> FLAGS (<span class="hljs-string">\Seen)</span> ENVELOPE (<span class="hljs-string">&quot;Wed, 8 May 2019 09:43:11 +0800 (CST)&quot;</span> <span class="hljs-string">&quot;=?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbCBBdXRoZW50aWNhdGVk?=&quot;</span> ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> NIL <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> NIL <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> NIL <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMiI=?=&quot;</span> NIL <span class="hljs-string">&quot;test02&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) NIL NIL NIL <span class="hljs-string">&quot;&lt;5CD2342F.000006.02460@coremail.cn&gt;&quot;</span>) BODY (<span class="hljs-string">&quot;TEXT&quot;</span> <span class="hljs-string">&quot;PLAIN&quot;</span> NIL NIL NIL <span class="hljs-string">&quot;7BIT&quot;</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>) RFC822.SIZE <span class="hljs-number">656</span>)<br>C8 OK Fetch completed<br>C9 UID FETCH <span class="hljs-number">1557156844</span> FULL<br>* <span class="hljs-number">6</span> FETCH (UID <span class="hljs-number">1557156844</span> INTERNALDATE <span class="hljs-string">&quot; 8-May-2019 16:59:38 +0800&quot;</span> FLAGS (<span class="hljs-string">\Seen)</span> ENVELOPE (<span class="hljs-string">&quot;Wed, 8 May 2019 16:59:38 +0800 (CST)&quot;</span> <span class="hljs-string">&quot;=?UTF-8?B?dGVsbmV0IHRlc3QgbWFpbA==?=&quot;</span> ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> NIL <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> NIL <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMSI=?=&quot;</span> NIL <span class="hljs-string">&quot;test01&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) ((<span class="hljs-string">&quot;=?UTF-8?B?InRlc3QwMiI=?=&quot;</span> NIL <span class="hljs-string">&quot;test02&quot;</span> <span class="hljs-string">&quot;coremail.cn&quot;</span>)) NIL NIL NIL <span class="hljs-string">&quot;&lt;5CD29A7A.000004.02460@coremail.cn&gt;&quot;</span>) BODY (<span class="hljs-string">&quot;TEXT&quot;</span> <span class="hljs-string">&quot;PLAIN&quot;</span> NIL NIL NIL <span class="hljs-string">&quot;7BIT&quot;</span> <span class="hljs-number">0</span> <span class="hljs-number">0</span>) RFC822.SIZE <span class="hljs-number">642</span>)<br>C9 OK Fetch completed<br></code></pre></div></td></tr></table></figure>
-
 
             </div>
             <hr>

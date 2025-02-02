@@ -250,47 +250,74 @@
             <div class="markdown-body">
               <p>使用qemu-kvm在CentOS8上通过GUI创建虚拟机。</p>
 <span id="more"></span>
-
-<h1 id="1、安装系统组件"><a href="#1、安装系统组件" class="headerlink" title="1、安装系统组件"></a>1、安装系统组件</h1><p>首先我们需要安装epel源和相应的虚拟机工具</p>
+<h1>1、安装系统组件</h1>
+<p>首先我们需要安装epel源和相应的虚拟机工具</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install epel-release -y<br>yum install qemu-kvm qemu-img libvirt virt-manager virt-top.x86_64 virtio-win.noarch virt-viewer.x86_64 virt-install.noarch -y<br><br>virt-install <br>libvirt <span class="hljs-comment">#安装libvirt会将libvirt-client作为依赖进行安装，libvirt-client即libvirt的客户端，最重要的功能之一就是就在宿主机关机时可以通知虚拟机也关机，使虚拟机系统正常关机，而不是被强制关机，造成数据丢失</span><br>ipxe-roms-qemu <span class="hljs-comment">#虚拟机iPXE的启动固件，支持虚拟机从网络启动</span><br>qemu-kvm <span class="hljs-comment">#KVM在用户空间运行的程序</span><br>virt-manager  <span class="hljs-comment">#基于 Libvirt 的图像化虚拟机管理软件</span><br>libvirt   <span class="hljs-comment">#用于管理虚拟机，它提供了一套虚拟机操作API</span><br>virt-viewer  <span class="hljs-comment">#显示虚拟机的控制台console</span><br>virt-top  <span class="hljs-comment">#类似于top命令，查看虚拟机的资源使用情况</span><br>virt-what  <span class="hljs-comment">#在虚拟机内部执行，查看虚拟机运行的虚拟化平台</span><br>qemu-img  <span class="hljs-comment">#用于操作虚拟机硬盘镜像的创建、查看和格式转化</span><br></code></pre></div></td></tr></table></figure>
-
 <p>一些主要组件的功能介绍如下：</p>
 <ul>
-<li><p><code>virt-install</code></p>
-<p>Description  : Package includes several command line utilities, including virt-install<br>      : (build and install new VMs) and virt-clone (clone an existing virtual<br>      : machine).</p>
+<li>
+<p><code>virt-install</code></p>
+<p>Description  : Package includes several command line utilities, including virt-install<br>
+: (build and install new VMs) and virt-clone (clone an existing virtual<br>
+: machine).</p>
 </li>
-<li><p><code>virt-who</code></p>
-<p>Description  : Agent that collects information about virtual guests present in the system and<br>      : report them to the subscription manager.</p>
+<li>
+<p><code>virt-who</code></p>
+<p>Description  : Agent that collects information about virtual guests present in the system and<br>
+: report them to the subscription manager.</p>
 </li>
-<li><p><code>virt-top</code></p>
-<p>Description  : virt-top is a ‘top(1)’-like utility for showing stats of virtualized<br>      : domains.  Many keys and command line options are the same as for<br>      : ordinary ‘top’.<br>      :<br>      : It uses libvirt so it is capable of showing stats across a variety of<br>      : different virtualization systems.</p>
+<li>
+<p><code>virt-top</code></p>
+<p>Description  : virt-top is a ‘top(1)’-like utility for showing stats of virtualized<br>
+: domains.  Many keys and command line options are the same as for<br>
+: ordinary ‘top’.<br>
+:<br>
+: It uses libvirt so it is capable of showing stats across a variety of<br>
+: different virtualization systems.</p>
 </li>
-<li><p><code>virt-viewer</code></p>
-<p>Description  : Virtual Machine Viewer provides a graphical console client for connecting<br>      : to virtual machines. It uses the GTK-VNC or SPICE-GTK widgets to provide<br>      : the display, and libvirt for looking up VNC&#x2F;SPICE server details.</p>
+<li>
+<p><code>virt-viewer</code></p>
+<p>Description  : Virtual Machine Viewer provides a graphical console client for connecting<br>
+: to virtual machines. It uses the GTK-VNC or SPICE-GTK widgets to provide<br>
+: the display, and libvirt for looking up VNC/SPICE server details.</p>
 </li>
-<li><p><code>virt-manager</code></p>
-<p>Description  : Virtual Machine Manager provides a graphical tool for administering virtual<br>      : machines for KVM, Xen, and LXC. Start, stop, add or remove virtual devices,<br>      : connect to a graphical or serial console, and see resource usage statistics<br>      : for existing VMs on local or remote machines. Uses libvirt as the backend<br>      : management API.</p>
+<li>
+<p><code>virt-manager</code></p>
+<p>Description  : Virtual Machine Manager provides a graphical tool for administering virtual<br>
+: machines for KVM, Xen, and LXC. Start, stop, add or remove virtual devices,<br>
+: connect to a graphical or serial console, and see resource usage statistics<br>
+: for existing VMs on local or remote machines. Uses libvirt as the backend<br>
+: management API.</p>
 </li>
-<li><p><code>libvirt</code></p>
-<p>Description  : Libvirt is a C toolkit to interact with the virtualization capabilities<br>      : of recent versions of Linux (and other OSes). The main package includes<br>      : the libvirtd server exporting the virtualization support.</p>
+<li>
+<p><code>libvirt</code></p>
+<p>Description  : Libvirt is a C toolkit to interact with the virtualization capabilities<br>
+: of recent versions of Linux (and other OSes). The main package includes<br>
+: the libvirtd server exporting the virtualization support.</p>
 </li>
-<li><p><code>qemu-kvm</code></p>
-<p>Description  : qemu-kvm is an open source virtualizer that provides hardware<br>      : emulation for the KVM hypervisor. qemu-kvm acts as a virtual<br>      : machine monitor together with the KVM kernel modules, and emulates the<br>      : hardware for a full system such as a PC and its associated peripherals.</p>
+<li>
+<p><code>qemu-kvm</code></p>
+<p>Description  : qemu-kvm is an open source virtualizer that provides hardware<br>
+: emulation for the KVM hypervisor. qemu-kvm acts as a virtual<br>
+: machine monitor together with the KVM kernel modules, and emulates the<br>
+: hardware for a full system such as a PC and its associated peripherals.</p>
 </li>
 </ul>
-<h1 id="2、创建虚拟机"><a href="#2、创建虚拟机" class="headerlink" title="2、创建虚拟机"></a>2、创建虚拟机</h1><h2 id="2-1-配置虚拟机存储目录"><a href="#2-1-配置虚拟机存储目录" class="headerlink" title="2.1 配置虚拟机存储目录"></a>2.1 配置虚拟机存储目录</h2><p>这里我们直接开启宿主机Linux系统上面的GUI模式并且使用xrdp远程到桌面，然后使用<code>virt-manager</code>来进行GUI模式的创建虚拟机。</p>
+<h1>2、创建虚拟机</h1>
+<h2 id="2-1-配置虚拟机存储目录">2.1 配置虚拟机存储目录</h2>
+<p>这里我们直接开启宿主机Linux系统上面的GUI模式并且使用xrdp远程到桌面，然后使用<code>virt-manager</code>来进行GUI模式的创建虚拟机。</p>
 <blockquote>
 <p>这里需要注意的是因为我们使用的是ISO镜像文件来进行虚拟机系统的安装，因此必须需要一个GUI界面来进行最开始的系统安装，等待系统安装完成之后，我们可以直接使用命令行操作来克隆虚拟机，就不用每次都打开GUI模式安装系统这么麻烦了。</p>
 </blockquote>
 <p>接着我们创建一个目录专门用来存放虚拟机相关的镜像和文件，同时我们还需要注意权限的问题：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo <span class="hljs-built_in">mkdir</span> -p /kvm/iso<br>sudo <span class="hljs-built_in">chown</span> tinychen:tinychen /kvm -R<br></code></pre></div></td></tr></table></figure>
-
 <p>接着我们把相应的系统安装镜像复制进去（对应的系统安装镜像文件均可直接在对应的官网下载），然后打开<code>Virtual Machine Manager</code>（以下简称VMM）来创建虚拟机</p>
-<p><img src="https://resource.tinychen.com/20200407222046.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200407222046.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>首先我们在<code>Edit→Preferences</code>里面开启XML文件编辑功能，XML模式可以最大程度的控制虚拟机的所有配置，一些特殊的配置或者组件操作无法通过VMM的GUI界面完成的我们可以直接编辑对应的XML文件块来实现。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/91RrPRPkxwoW.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-2-创建虚拟机"><a href="#2-2-创建虚拟机" class="headerlink" title="2.2 创建虚拟机"></a>2.2 创建虚拟机</h2><p>直接点击<code>加号</code>或者上面的<code>File→New Virtual Machine</code>然后选择使用本地媒体创建虚拟机（这里我们使用刚刚复制进去的ISO镜像文件）</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/qBG6f4K8RFTr.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/91RrPRPkxwoW.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="2-2-创建虚拟机">2.2 创建虚拟机</h2>
+<p>直接点击<code>加号</code>或者上面的<code>File→New Virtual Machine</code>然后选择使用本地媒体创建虚拟机（这里我们使用刚刚复制进去的ISO镜像文件）</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/qBG6f4K8RFTr.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接着我们可以看到有四种创建虚拟机的方式：</p>
 <ul>
 <li>从本地的媒体资源安装（iso文件或者CD光盘）</li>
@@ -299,21 +326,21 @@
 <li>导入已有的虚拟机硬盘镜像文件</li>
 </ul>
 <p>我们选择第一种方式进行新建虚拟机操作。</p>
-<p><img src="https://resource.tinychen.com/20200407222856.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200407222856.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>由于是第一次创建虚拟机，我们需要先在VMM中添加一个池（pool），把先前创建的存放iso镜像文件的目录作为一个池添加到VMM中。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/89XGBr704Dfa.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/89XGBr704Dfa.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>添加完成之后我们就可以看到里面的镜像文件，这里我们选择CentOS7的版本进行安装。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/K4HnyMvgqE9O.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/K4HnyMvgqE9O.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>选择镜像之后VMM会自动检测镜像文件内包含的操作系统。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/F8PIaR58VKl2.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/F8PIaR58VKl2.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来是设定CPU和内存，注意这里的内存单位是MB，而CPU的单位是个，即并不是我们常说的CPU核心数量或者是超线程的线程数量，而是虚拟设定的多少个CPU，这里选择4即为4个CPU而不是一个4核CPU，<strong>这个选项我们后面需要再进行修改</strong>。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/9MRcgr72BaSj.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/9MRcgr72BaSj.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来便是进行虚拟机的硬盘参数设置，我们这里选择手动创建一个硬盘。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/VSyuFbMf2B2p.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/VSyuFbMf2B2p.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>和之前一样我们再创建一个池专门用来存放虚拟机的系统镜像文件。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/iBtfNknt1AfQ.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/iBtfNknt1AfQ.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接着在对应的池中新建一个qcow2磁盘文件。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/Ytw3FHQ40o80.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/Ytw3FHQ40o80.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里我们可以看到硬盘的格式主要有raw和qcow2两种。qcow2 镜像格式是 QEMU 模拟器支持的一种磁盘镜像。它也是可以用一个文件的形式来表示一块固定大小的块设备磁盘。与普通的 raw 格式的镜像相比，有以下特性：</p>
 <ul>
 <li>更小的空间占用，即使文件系统不支持空洞(holes)；</li>
@@ -323,33 +350,32 @@
 <li>可以选择 AES 加密</li>
 </ul>
 <p>qcow2最大的特点就是可以节省硬盘空间，只有在虚拟机实际占用了磁盘空间时，其文件才会增长。比如这里我们创建了一个40G的硬盘镜像文件，但是实际占用并没有40G，只有在虚拟机实际使用了硬盘空间之后，qcow2格式的镜像文件才会增大。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/cf1T1J4cVIXl.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/ib6Kd21DvzIP.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/cf1T1J4cVIXl.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/ib6Kd21DvzIP.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>最后需要设置的就是虚拟机的网卡，这里我们要勾选<code>Customize configuration before install</code>，在系统开始安装之前进行一些参数的设置。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/j6YvgD4OwvDS.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-3-配置虚拟机其他参数"><a href="#2-3-配置虚拟机其他参数" class="headerlink" title="2.3 配置虚拟机其他参数"></a>2.3 配置虚拟机其他参数</h2><p>首先我们看到<code>Overview</code>中的<code>Chipset</code>和<code>Firmware</code>两个参数，它们分别相当于物理机电脑主板的芯片组和固件模式（BIOS或UEFI），如果有新版本的需求（如虚拟机KVM直通GPU）可以选择UEFI（OVMF）来进行启动，需要注意VMM中的快照（snapshot）功能不支持UEFI（OVMF）固件的虚拟机，因此这里我们选择默认的Q35和BIOS即可。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/qDsvA9Bjbo7M.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/j6YvgD4OwvDS.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="2-3-配置虚拟机其他参数">2.3 配置虚拟机其他参数</h2>
+<p>首先我们看到<code>Overview</code>中的<code>Chipset</code>和<code>Firmware</code>两个参数，它们分别相当于物理机电脑主板的芯片组和固件模式（BIOS或UEFI），如果有新版本的需求（如虚拟机KVM直通GPU）可以选择UEFI（OVMF）来进行启动，需要注意VMM中的快照（snapshot）功能不支持UEFI（OVMF）固件的虚拟机，因此这里我们选择默认的Q35和BIOS即可。</p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/qDsvA9Bjbo7M.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来我们需要对前面设定的CPU参数进行更改。这里我们编辑对应的XML文件将CPU模式修改为<code>host-passthrough</code>以便将CPU的全部特性传递到虚拟机中，同时修改CPU个数为1，核心数为4，每个核心的线程数为1。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/vRQpHOifxppU.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/vRQpHOifxppU.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight abnf"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs abnf">&lt;cpu mode<span class="hljs-operator">=</span><span class="hljs-string">&quot;host-passthrough&quot;</span>&gt;<br>  &lt;topology sockets<span class="hljs-operator">=</span><span class="hljs-string">&quot;1&quot;</span> cores<span class="hljs-operator">=</span><span class="hljs-string">&quot;4&quot;</span> threads<span class="hljs-operator">=</span><span class="hljs-string">&quot;1&quot;</span>/&gt;<br>&lt;/cpu&gt;<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/oQANCFXRzPE9.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/oQANCFXRzPE9.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>设定安装系统的ISO为只读，保证ISO文件不会被修改，同时设置数据总线方式为SATA保证最好的兼容性。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/nCeP9DhIJ3pr.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/nCeP9DhIJ3pr.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>配置两个网卡，分别为桥接宿主机的网卡和NAT模式，其中桥接网卡使用e1000e型号保证最好的兼容性，NAT模式的网卡使用VirtIO型号可以达到最大100G的传输速度。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/gasot4Fqknrk.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/EEYNsA6KwRCo.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/gasot4Fqknrk.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/EEYNsA6KwRCo.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>其他还会默认添加一些常用的组件，我们根据自己的需求进行修改，这里我只保留了常用的USB重定向设备，声卡、网卡、串行总线等基本设备，如果不清楚具体需求，建议保留。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/rI4NlOMgUI2P.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/rI4NlOMgUI2P.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>最后整个完整的xml文件如下：</p>
 <figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">domain</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;kvm&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>centos7_demo<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">uuid</span>&gt;</span>2e80a698-c4f9-464b-bb3e-28c4987cbe9a<span class="hljs-tag">&lt;/<span class="hljs-name">uuid</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">metadata</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">libosinfo:libosinfo</span> <span class="hljs-attr">xmlns:libosinfo</span>=<span class="hljs-string">&quot;http://libosinfo.org/xmlns/libvirt/domain/1.0&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">libosinfo:os</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;http://centos.org/centos/7.0&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">libosinfo:libosinfo</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">metadata</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">memory</span>&gt;</span>8388608<span class="hljs-tag">&lt;/<span class="hljs-name">memory</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">currentMemory</span>&gt;</span>8388608<span class="hljs-tag">&lt;/<span class="hljs-name">currentMemory</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">vcpu</span> <span class="hljs-attr">current</span>=<span class="hljs-string">&quot;4&quot;</span>&gt;</span>4<span class="hljs-tag">&lt;/<span class="hljs-name">vcpu</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">os</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">type</span> <span class="hljs-attr">arch</span>=<span class="hljs-string">&quot;x86_64&quot;</span> <span class="hljs-attr">machine</span>=<span class="hljs-string">&quot;q35&quot;</span>&gt;</span>hvm<span class="hljs-tag">&lt;/<span class="hljs-name">type</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">boot</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;hd&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">os</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">features</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">acpi</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">apic</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">vmport</span> <span class="hljs-attr">state</span>=<span class="hljs-string">&quot;off&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">features</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">cpu</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;host-passthrough&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">topology</span> <span class="hljs-attr">sockets</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">cores</span>=<span class="hljs-string">&quot;4&quot;</span> <span class="hljs-attr">threads</span>=<span class="hljs-string">&quot;1&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">cpu</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">clock</span> <span class="hljs-attr">offset</span>=<span class="hljs-string">&quot;utc&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">timer</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;rtc&quot;</span> <span class="hljs-attr">tickpolicy</span>=<span class="hljs-string">&quot;catchup&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">timer</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;pit&quot;</span> <span class="hljs-attr">tickpolicy</span>=<span class="hljs-string">&quot;delay&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">timer</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;hpet&quot;</span> <span class="hljs-attr">present</span>=<span class="hljs-string">&quot;no&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">clock</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">pm</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">suspend-to-mem</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">&quot;no&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">suspend-to-disk</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">&quot;no&quot;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">pm</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">devices</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">emulator</span>&gt;</span>/usr/libexec/qemu-kvm<span class="hljs-tag">&lt;/<span class="hljs-name">emulator</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">disk</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;file&quot;</span> <span class="hljs-attr">device</span>=<span class="hljs-string">&quot;disk&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">driver</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;qemu&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;qcow2&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">file</span>=<span class="hljs-string">&quot;/kvm/vm/centos7_demo.qcow2&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;vda&quot;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&quot;virtio&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">disk</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">disk</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;file&quot;</span> <span class="hljs-attr">device</span>=<span class="hljs-string">&quot;cdrom&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">driver</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;qemu&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;raw&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">file</span>=<span class="hljs-string">&quot;/kvm/iso/centos7.7.iso&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;sda&quot;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&quot;sata&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">readonly</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">disk</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">interface</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;network&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">network</span>=<span class="hljs-string">&quot;default&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">mac</span> <span class="hljs-attr">address</span>=<span class="hljs-string">&quot;52:54:00:83:cc:6d&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">model</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;virtio&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">interface</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">console</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;pty&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">channel</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;unix&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;bind&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;virtio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;org.qemu.guest_agent.0&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">channel</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">channel</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;spicevmc&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;virtio&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;com.redhat.spice.0&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">channel</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;tablet&quot;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&quot;usb&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">graphics</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;spice&quot;</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;-1&quot;</span> <span class="hljs-attr">tlsPort</span>=<span class="hljs-string">&quot;-1&quot;</span> <span class="hljs-attr">autoport</span>=<span class="hljs-string">&quot;yes&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">image</span> <span class="hljs-attr">compression</span>=<span class="hljs-string">&quot;off&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">graphics</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">video</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">model</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;qxl&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">video</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">memballoon</span> <span class="hljs-attr">model</span>=<span class="hljs-string">&quot;virtio&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">rng</span> <span class="hljs-attr">model</span>=<span class="hljs-string">&quot;virtio&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">backend</span> <span class="hljs-attr">model</span>=<span class="hljs-string">&quot;random&quot;</span>&gt;</span>/dev/urandom<span class="hljs-tag">&lt;/<span class="hljs-name">backend</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">rng</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">interface</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;direct&quot;</span>&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&quot;enp6s0&quot;</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">&quot;bridge&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">mac</span> <span class="hljs-attr">address</span>=<span class="hljs-string">&quot;52:54:00:31:ad:1d&quot;</span>/&gt;</span><br>      <span class="hljs-tag">&lt;<span class="hljs-name">model</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;e1000e&quot;</span>/&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">interface</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">devices</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">domain</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
-
-<h2 id="2-4开始安装"><a href="#2-4开始安装" class="headerlink" title="2.4开始安装"></a>2.4开始安装</h2><p><img src="https://resource.tinychen.com/blogphotos/20200407/8Vpx09lXQTBp.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-4开始安装">2.4开始安装</h2>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/8Vpx09lXQTBp.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来的安装就和正常的物理机安装操作系统一样，这里我们就不再赘述了，由于是CentOS的虚拟机，为了节约系统资源，我选择了最小化安装（Minimal Install）、关闭了KDUMP功能，并且使用LVM来设定分区以便后期扩容</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/HJ6YRVr8Xo2t.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/HJ6YRVr8Xo2t.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>最后可以通过virsh命令来查看虚拟机的状态</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200407/ILuYhcJWiObV.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blogphotos/20200407/ILuYhcJWiObV.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>如果需要开启虚拟机只需要使用<code>virsh start 虚拟机名</code>即可。</p>
 
             </div>

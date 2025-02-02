@@ -250,55 +250,65 @@
             <div class="markdown-body">
               <p>主要介绍虚拟化技术的历史演进过程和KVM虚拟化的一些特点。</p>
 <span id="more"></span>
-
-<h1 id="0、简介"><a href="#0、简介" class="headerlink" title="0、简介"></a>0、简介</h1><p>虚拟化技术的演变过程可以分为<strong>软件模拟、虚拟化层翻译、容器虚拟化</strong>三个大的阶段。其中，虚拟化层翻译又可以分为：<strong>软件捕获翻译（软件全虚拟化）</strong>、<strong>改造虚拟机系统内核加虚拟化层翻译（半虚拟化）</strong>和<strong>硬件支持的虚拟化层翻译（硬件支持的全虚拟化）</strong>三种。</p>
-<h1 id="1、软件模拟"><a href="#1、软件模拟" class="headerlink" title="1、软件模拟"></a>1、软件模拟</h1><p>软件模拟是<strong>通过软件完全模拟</strong>CPU、芯片组、磁盘、网卡等计算机硬件。因为是软件模拟，所以理论上可以模拟任何硬件，<strong>甚至是不存在的硬件</strong>。但是因为这种方式全部是软件模拟硬件，所以非常低效，<strong>性能很差</strong>，因此一般只用于研究测试的场景。采用这种技术的典型产品有<a target="_blank" rel="noopener" href="http://bochs.sourceforge.net/">Bochs</a>、<a target="_blank" rel="noopener" href="https://www.qemu.org/">QEMU</a>等。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/iC7twu8IzcUB.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="2、虚拟化层翻译"><a href="#2、虚拟化层翻译" class="headerlink" title="2、虚拟化层翻译"></a>2、虚拟化层翻译</h1><p>X86平台指令集划分为4个特权模式：Ring 0、Ring 1、Ring 2、Ring 3。操作系统一般使用Ring 0级别，应用程序使用Ring 3级别，驱动程序使用Ring 1和Ring 2级别。<strong>X86平台在虚拟化方面的一个难点就是如何将虚拟机越级的指令使用进行隔离。</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20200316/saHItFzI3ptv.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="2-1-软件全虚拟化"><a href="#2-1-软件全虚拟化" class="headerlink" title="2.1 软件全虚拟化"></a>2.1 软件全虚拟化</h2><p>VMware公司首先想到了通过虚拟化引擎，捕获虚拟机的指令，并进行处理的解决方法。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/oOf6IYhAXMoN.png" srcset="/img/loading.gif" lazyload></p>
+<h1>0、简介</h1>
+<p>虚拟化技术的演变过程可以分为<strong>软件模拟、虚拟化层翻译、容器虚拟化</strong>三个大的阶段。其中，虚拟化层翻译又可以分为：<strong>软件捕获翻译（软件全虚拟化）</strong>、**改造虚拟机系统内核加虚拟化层翻译（半虚拟化）<strong>和</strong>硬件支持的虚拟化层翻译（硬件支持的全虚拟化）**三种。</p>
+<h1>1、软件模拟</h1>
+<p>软件模拟是<strong>通过软件完全模拟</strong>CPU、芯片组、磁盘、网卡等计算机硬件。因为是软件模拟，所以理论上可以模拟任何硬件，<strong>甚至是不存在的硬件</strong>。但是因为这种方式全部是软件模拟硬件，所以非常低效，<strong>性能很差</strong>，因此一般只用于研究测试的场景。采用这种技术的典型产品有<a target="_blank" rel="noopener" href="http://bochs.sourceforge.net/">Bochs</a>、<a target="_blank" rel="noopener" href="https://www.qemu.org/">QEMU</a>等。</p>
+<p><img src="https://resource.tinychen.com/blog/20200316/iC7twu8IzcUB.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>2、虚拟化层翻译</h1>
+<p>X86平台指令集划分为4个特权模式：Ring 0、Ring 1、Ring 2、Ring 3。操作系统一般使用Ring 0级别，应用程序使用Ring 3级别，驱动程序使用Ring 1和Ring 2级别。<strong>X86平台在虚拟化方面的一个难点就是如何将虚拟机越级的指令使用进行隔离。</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20200316/saHItFzI3ptv.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="2-1-软件全虚拟化">2.1 软件全虚拟化</h2>
+<p>VMware公司首先想到了通过虚拟化引擎，捕获虚拟机的指令，并进行处理的解决方法。</p>
+<p><img src="https://resource.tinychen.com/blog/20200316/oOf6IYhAXMoN.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>通过虚拟化引擎VMM来对虚拟机上的指令进行捕获并解释执行，就可以有效地隔离开虚拟机和物理机上的操作，最常见的表现就是关闭虚拟机并不会关闭物理机。这种方案也因此叫做软件全虚拟化的解决方案。</p>
 <blockquote>
 <p>Hypervisor，又称虚拟机监视器（英语：virtual machine monitor，缩写为 VMM），是用来建立与执行虚拟机器的软件、固件或硬件。</p>
-<p>被Hypervisor用来执行一个或多个虚拟机器的电脑称为主体机器&#x2F;宿主机&#x2F;物理机（host machine），这些虚拟机器则称为客体机器&#x2F;虚拟机（guest machine）。hypervisor提供虚拟的作业平台来执行客体操作系统（guest operating systems），负责管理其他客体操作系统的执行阶段；这些客体操作系统，共同分享虚拟化后的硬件资源。</p>
+<p>被Hypervisor用来执行一个或多个虚拟机器的电脑称为主体机器/宿主机/物理机（host machine），这些虚拟机器则称为客体机器/虚拟机（guest machine）。hypervisor提供虚拟的作业平台来执行客体操作系统（guest operating systems），负责管理其他客体操作系统的执行阶段；这些客体操作系统，共同分享虚拟化后的硬件资源。</p>
 </blockquote>
-<h2 id="2-2-半虚拟化"><a href="#2-2-半虚拟化" class="headerlink" title="2.2 半虚拟化"></a>2.2 半虚拟化</h2><p>软件全虚拟化的解决方案虽然可行，但是由于指令需要经过VMM，所以要在虚拟化层做大量的工作，性能上比较一般，因此Xen项目提出了使用修改虚拟机操作系统内核的解决方案。具体来说就是在虚拟机上使用修改过的内核，在修改过的内核中对特殊指令进行修改使其与物理机隔离开来，这样就可以有效地减少虚拟化层的工作，从而提高性能。但是劣势也是显而易见的，由于需要使用特殊的内核，因此在配置上也会相对麻烦一些，且由于内核原因一开始不支持windows系统的虚拟化，直到后来才加入支持。</p>
-<p>不过由于将一部分的指令翻译工作从虚拟化层转移到了修改过的内核当中，因此性能比上面提到的软件全虚拟化要高很多，这种虚拟化方式也称为<strong>半虚拟化（paravirtualization）</strong>或者是<strong>准虚拟化</strong>。</p>
-<h2 id="2-3-硬件全虚拟化"><a href="#2-3-硬件全虚拟化" class="headerlink" title="2.3 硬件全虚拟化"></a>2.3 硬件全虚拟化</h2><p>2005年，Intel推出了硬件的方案，对CPU指令进行改造，即VT-x，如图1-5所示。VT-x增加了两种操作模式：VMX root operation和VMX non-root operation。VMM运行在VMX root operation模式，虚拟机运行在VMX non-root operation模式。这两种操作模式都支持Ring 0～Ring 3这4个特权级。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/HcrpDc5oVu1v.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-半虚拟化">2.2 半虚拟化</h2>
+<p>软件全虚拟化的解决方案虽然可行，但是由于指令需要经过VMM，所以要在虚拟化层做大量的工作，性能上比较一般，因此Xen项目提出了使用修改虚拟机操作系统内核的解决方案。具体来说就是在虚拟机上使用修改过的内核，在修改过的内核中对特殊指令进行修改使其与物理机隔离开来，这样就可以有效地减少虚拟化层的工作，从而提高性能。但是劣势也是显而易见的，由于需要使用特殊的内核，因此在配置上也会相对麻烦一些，且由于内核原因一开始不支持windows系统的虚拟化，直到后来才加入支持。</p>
+<p>不过由于将一部分的指令翻译工作从虚拟化层转移到了修改过的内核当中，因此性能比上面提到的软件全虚拟化要高很多，这种虚拟化方式也称为<strong>半虚拟化（paravirtualization）<strong>或者是</strong>准虚拟化</strong>。</p>
+<h2 id="2-3-硬件全虚拟化">2.3 硬件全虚拟化</h2>
+<p>2005年，Intel推出了硬件的方案，对CPU指令进行改造，即VT-x，如图1-5所示。VT-x增加了两种操作模式：VMX root operation和VMX non-root operation。VMM运行在VMX root operation模式，虚拟机运行在VMX non-root operation模式。这两种操作模式都支持Ring 0～Ring 3这4个特权级。</p>
+<p><img src="https://resource.tinychen.com/blog/20200316/HcrpDc5oVu1v.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <blockquote>
 <p>2005年，随着Intel推出支持x86虚拟化技术的CPU，Xen亦加入全虚拟化模式。Xen的全虚拟化模式允许在虚拟机中运行Windows等非Linux系统。</p>
 </blockquote>
-<p>因为是基于硬件的，所以效率非常高，这种方案也称为硬件支持的全虚拟化方案。现在的一个发展趋势是不仅CPU指令有硬件解决方案，I&#x2F;O通信也有硬件解决方案，称为VT-d；网络通信也有硬件解决方案，称为VT-c。</p>
+<p>因为是基于硬件的，所以效率非常高，这种方案也称为硬件支持的全虚拟化方案。现在的一个发展趋势是不仅CPU指令有硬件解决方案，I/O通信也有硬件解决方案，称为VT-d；网络通信也有硬件解决方案，称为VT-c。</p>
 <blockquote>
 <p>除了Intel，AMD也在自家的处理器上加入了对硬件级虚拟化的支持，命名为AMD-v。</p>
 </blockquote>
-<p><img src="https://resource.tinychen.com/blog/20200316/WT68pw0flJ4K.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20200316/WT68pw0flJ4K.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <blockquote>
 <p>当前的虚拟化引擎，都是使用硬件支持的虚拟化解决方案。并且最新的操作系统一般都支持一些半虚拟化的特性，所以宿主机和虚拟机使用比较新的版本，性能也会好一些。</p>
 </blockquote>
-<h1 id="3、容器虚拟化"><a href="#3、容器虚拟化" class="headerlink" title="3、容器虚拟化"></a>3、容器虚拟化</h1><p>容器虚拟化的原理是基于CGroups、Namespace等技术将进程隔离，每个进程就像一台单独的虚拟机一样，有自己被隔离出来的资源，也有自己的根目录、独立的进程编号、被隔离的内存空间。基于容器的虚拟化可以实现在单一内核上运行多个实例，因此是一个更高效率的虚拟化方式。目前基于Docker+k8s的容器级虚拟化技术已经在国内许多互联网公司的生产环境中大量使用。</p>
-<h1 id="4、KVM虚拟化"><a href="#4、KVM虚拟化" class="headerlink" title="4、KVM虚拟化"></a>4、KVM虚拟化</h1><h2 id="4-1-kvm简介"><a href="#4-1-kvm简介" class="headerlink" title="4.1 kvm简介"></a>4.1 kvm简介</h2><p>KVM（Kernel-based Virtual Machine）最初是由以色列的公司Qumranet开发的。KVM在2007年2月被正式合并到Linux 2.6.20核心中，成为内核源代码的一部分。2008年9月4日，RedHat公司收购了Qumranet，开始在RHEL中用KVM替换Xen，第一个包含KVM的版本是RHEL 5.4。<strong>从RHEL 6开始，KVM成为默认的虚拟化引擎。</strong>KVM必须在具备Intel VT或AMD-V功能的X86平台上运行。在Linux内核3.9版中，加入了对ARM架构的支持。</p>
+<h1>3、容器虚拟化</h1>
+<p>容器虚拟化的原理是基于CGroups、Namespace等技术将进程隔离，每个进程就像一台单独的虚拟机一样，有自己被隔离出来的资源，也有自己的根目录、独立的进程编号、被隔离的内存空间。基于容器的虚拟化可以实现在单一内核上运行多个实例，因此是一个更高效率的虚拟化方式。目前基于Docker+k8s的容器级虚拟化技术已经在国内许多互联网公司的生产环境中大量使用。</p>
+<h1>4、KVM虚拟化</h1>
+<h2 id="4-1-kvm简介">4.1 kvm简介</h2>
+<p>KVM（Kernel-based Virtual Machine）最初是由以色列的公司Qumranet开发的。KVM在2007年2月被正式合并到Linux 2.6.20核心中，成为内核源代码的一部分。2008年9月4日，RedHat公司收购了Qumranet，开始在RHEL中用KVM替换Xen，第一个包含KVM的版本是RHEL 5.4。**从RHEL 6开始，KVM成为默认的虚拟化引擎。**KVM必须在具备Intel VT或AMD-V功能的X86平台上运行。在Linux内核3.9版中，加入了对ARM架构的支持。</p>
 <blockquote>
 <p>具体kvm虚拟化支持的处理器可以通过<a target="_blank" rel="noopener" href="https://www.linux-kvm.org/page/Processor_support">官网</a>进行查询。</p>
 </blockquote>
 <p>KVM包含一个为处理器提供底层虚拟化、可加载的核心模块<code>kvm.ko</code>（<code>kvm-intel.ko</code>或<code>kvm-amd.ko</code>），使用QEMU（QEMU-KVM）作为虚拟机上层控制工具。KVM不需要改变Linux或Windows系统就能运行。</p>
 <p>实际上，在Linux中，kvm就是内核中的一个模块，用户空间通过QEMU模拟硬件提供给虚拟机使用，而一台使用kvm创建的虚拟机就是一个Linux中的进程，管理这个对应的进程就是相当于管理整个对应的虚拟机。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/CirIGJLtOkIo.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="4-2-QEMU和KVM"><a href="#4-2-QEMU和KVM" class="headerlink" title="4.2 QEMU和KVM"></a>4.2 QEMU和KVM</h2><blockquote>
+<p><img src="https://resource.tinychen.com/blog/20200316/CirIGJLtOkIo.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="4-2-QEMU和KVM">4.2 QEMU和KVM</h2>
+<blockquote>
 <p>以下摘录自wiki：</p>
 <p>QEMU有多种模式</p>
 <ul>
-<li>User mod：又称作“使用者模式”，在这种模块下，QEMU运行针对不同指令编译的单个Linux或Darwin&#x2F;macOS程序。系统调用与32&#x2F;64位接口适应。在这种模式下，我们可以实现交叉编译（cross-compilation）与交叉偵错（cross- debugging）。</li>
+<li>User mod：又称作“使用者模式”，在这种模块下，QEMU运行针对不同指令编译的单个Linux或Darwin/macOS程序。系统调用与32/64位接口适应。在这种模式下，我们可以实现交叉编译（cross-compilation）与交叉偵错（cross- debugging）。</li>
 <li>System mod：“系统模式”，在这种模式下，QEMU模拟一个完整的计算机系统，包括外围设备。它可以用于在一台计算机上提供多台虚拟计算机的虚拟主机。 QEMU可以实现许多客户机OS的引导，比如x86，MIPS，32-bit ARMv7，PowerPC等等。</li>
 <li>KVM Hosting：QEMU在这时处理KVM镜像的设置与迁移，并参加硬件的仿真，但是客户端的执行则由KVM完成。</li>
 <li>Xen Hosting：在这种托管下，客户端的执行几乎完全在Xen中完成，并且对QEMU屏蔽。QEMU只提供硬件仿真的支持。</li>
 </ul>
 </blockquote>
-<p>前面我们提到过QEMU的架构是纯软件实现的，因此灵活性很强，但是性能很差，因此可以搭配KVM模块使用从而有效地提升性能表现，也就是我们常说的<code>QEMU-KVM</code>，此时的QEMU运行在上面提到的<code>KVM Hosting</code>模式下，处理KVM镜像的设置与迁移，并参加硬件的仿真，可以存储及还原虚拟机运行状态，还可以虚拟多种设备，包括网卡、多CPU、IDE设备、软驱、显卡、声卡、多种并口设备、多种串口设备、多种USB设备、PC喇叭、PS&#x2F;2键盘鼠标（默认）和USB键盘鼠标、蓝牙设备，但是客户端的执行则由KVM完成。</p>
+<p>前面我们提到过QEMU的架构是纯软件实现的，因此灵活性很强，但是性能很差，因此可以搭配KVM模块使用从而有效地提升性能表现，也就是我们常说的<code>QEMU-KVM</code>，此时的QEMU运行在上面提到的<code>KVM Hosting</code>模式下，处理KVM镜像的设置与迁移，并参加硬件的仿真，可以存储及还原虚拟机运行状态，还可以虚拟多种设备，包括网卡、多CPU、IDE设备、软驱、显卡、声卡、多种并口设备、多种串口设备、多种USB设备、PC喇叭、PS/2键盘鼠标（默认）和USB键盘鼠标、蓝牙设备，但是客户端的执行则由KVM完成。</p>
 <p>QEMU-KVM的分支版本发布了3个正式的版本1.1、1.2、1.3，随后和QEMU的主版本合并，也就是说<strong>现在的QEMU版本默认支持KVM</strong>，而KVM的最后一个自己的版本是KVM 83，随后和内核版本一起发布，和内核版本号保持一致，所以要使用KVM的最新版本，就要使用最新的内核。</p>
-<h2 id="4-3-Libvirt和KVM"><a href="#4-3-Libvirt和KVM" class="headerlink" title="4.3 Libvirt和KVM"></a>4.3 Libvirt和KVM</h2><p>前面我们提到，基于KVM的虚拟机在Linux中可以视为一个进程，而为了方便管理，红帽公司发布了一个开源项目Libvirt，Libvirt有API，也有一套命令行工具，可以完成对虚拟机的管理，大多数的管理平台都是通过Libvirt来完成对KVM虚拟机的管理的，比如OpenStack、CloudStack、OpenNebula等。</p>
+<h2 id="4-3-Libvirt和KVM">4.3 Libvirt和KVM</h2>
+<p>前面我们提到，基于KVM的虚拟机在Linux中可以视为一个进程，而为了方便管理，红帽公司发布了一个开源项目Libvirt，Libvirt有API，也有一套命令行工具，可以完成对虚拟机的管理，大多数的管理平台都是通过Libvirt来完成对KVM虚拟机的管理的，比如OpenStack、CloudStack、OpenNebula等。</p>
 <p>Libvirt主要由3部分组成：</p>
 <ul>
 <li>一套API的lib库，支持主流的编程语言，包括C、Python、Ruby等</li>
@@ -306,15 +316,19 @@
 <li>命令行工具virsh</li>
 </ul>
 <p>Libvirt的设计目标是通过相同的方式管理不同的虚拟化引擎，但是目前实际上多数场景使用Libvirt的是KVM。Libvirt可以实现对虚拟机的管理，比如虚拟机的创建、启动、关闭、暂停、恢复、迁移、销毁，以及虚拟机网卡、硬盘、CPU、内存等多种设备的热添加。Libvirt还可以通过SSH、TCP、基于TCP的TLS来实现远程的宿主机管理。</p>
-<h2 id="4-4-KVM的优势"><a href="#4-4-KVM的优势" class="headerlink" title="4.4 KVM的优势"></a>4.4 KVM的优势</h2><p>KVM虚拟化的主要优势在我看来有三点：</p>
+<h2 id="4-4-KVM的优势">4.4 KVM的优势</h2>
+<p>KVM虚拟化的主要优势在我看来有三点：</p>
 <ul>
-<li><p>开源免费</p>
+<li>
+<p>开源免费</p>
 <p>kvm是开源的，同时也是可以免费使用的，这也意味着有很多新技术会先在kvm上尝鲜，再推广到其他的虚拟化平台，而且对于企业来说，免费这一对个人用户而言感知不强的特性就会被放大很多倍，这也是诸如openstack等云平台使用kvm作为首选虚拟化的原因。</p>
 </li>
-<li><p>性能优越</p>
+<li>
+<p>性能优越</p>
 <p>同样的硬件条件下，相比起软件模拟、半虚拟化等，kvm虚拟化可以提供更好的性能甚至于接近物理机的性能。</p>
 </li>
-<li><p>支持广泛</p>
+<li>
+<p>支持广泛</p>
 <p>除了广泛的社区技术支持，还可以付费购买红帽公司的技术支持。</p>
 </li>
 </ul>

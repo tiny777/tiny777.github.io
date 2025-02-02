@@ -251,18 +251,20 @@
             <div class="markdown-body">
               <p>在虚拟机中的CentOS7集群中部署单master节点的k8s环境(v1.15)。</p>
 <span id="more"></span>
-
-
-
-<h1 id="1、安装docker-ce"><a href="#1、安装docker-ce" class="headerlink" title="1、安装docker-ce"></a>1、安装docker-ce</h1><h2 id="1-1-docker简介"><a href="#1-1-docker简介" class="headerlink" title="1.1 docker简介"></a>1.1 docker简介</h2><p>最早的时候docker其实不是开源的，后来docker混得不太好，无奈之下创始人决定将docker开源（然后docker就火了），然后就有了docker这个开源项目，现在主要是由docker公司维护。</p>
+<h1>1、安装docker-ce</h1>
+<h2 id="1-1-docker简介">1.1 docker简介</h2>
+<p>最早的时候docker其实不是开源的，后来docker混得不太好，无奈之下创始人决定将docker开源（然后docker就火了），然后就有了docker这个开源项目，现在主要是由docker公司维护。</p>
 <p>2017年年初，docker公司将原先的docker项目改名为moby，并创建了docker-ce和docker-ee。</p>
 <p>这三者的关系是：</p>
 <ul>
-<li><p>moby是继承了原先的docker的项目，是社区维护的的开源项目，谁都可以在moby的基础打造自己的容器产品</p>
+<li>
+<p>moby是继承了原先的docker的项目，是社区维护的的开源项目，谁都可以在moby的基础打造自己的容器产品</p>
 </li>
-<li><p>docker-ce（ Community Edition）是docker公司维护的开源项目，是一个基于moby项目的<strong>免费</strong>的容器产品</p>
+<li>
+<p>docker-ce（ Community Edition）是docker公司维护的开源项目，是一个基于moby项目的<strong>免费</strong>的容器产品</p>
 </li>
-<li><p>docker-ee（ Enterprise Edition）是docker公司维护的闭源产品，是docker公司的<strong>商业</strong>产品。</p>
+<li>
+<p>docker-ee（ Enterprise Edition）是docker公司维护的闭源产品，是docker公司的<strong>商业</strong>产品。</p>
 </li>
 </ul>
 <p>我们这里还是使用docker-ce的稳定版本，关于ce版本其实也有三个分支：</p>
@@ -273,218 +275,201 @@
 <li><strong>Nightly</strong> gives you latest builds of work in progress for the next major release.</li>
 </ul>
 <p>简单的打个比方来说就是：<strong>Stable</strong>就是稳定版，<strong>Test</strong>就是开发版，<strong>Nightly</strong>就是内测版</p>
-<h2 id="1-2-安装docker-ce"><a href="#1-2-安装docker-ce" class="headerlink" title="1.2 安装docker-ce"></a>1.2 安装docker-ce</h2><p>centos版本的decker-ce官方安装指导：</p>
+<h2 id="1-2-安装docker-ce">1.2 安装docker-ce</h2>
+<p>centos版本的decker-ce官方安装指导：</p>
 <p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/">https://docs.docker.com/install/linux/docker-ce/centos/</a></p>
 <p>这里我们主要是通过yum的方式来安装，如果出现无法连接docker官网的情况，建议检查一下网络，或者使用rpm的方式进行安装。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 导入官网提供的repo</span><br>sudo yum install -y yum-utils device-mapper-persistent-data lvm2<br>sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo<br><br><span class="hljs-comment"># 安装docker及其相关组件</span><br>sudo yum install docker-ce docker-ce-cli containerd.io<br><br></code></pre></div></td></tr></table></figure>
-
-
-
 <p>注意这里我们需要校对一下密钥，确保和官网提供的无误。</p>
-<p><img src="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190712/Je1FaoVF0MN5.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/BP9JtWLG2gfP.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/Je1FaoVF0MN5.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 启动docker</span><br>sudo systemctl start docker<br><br><span class="hljs-comment"># 跑个helloworld看看</span><br>sudo docker run hello-world<br><br><span class="hljs-comment"># 最后我们还要设置一下开机启动</span><br>sudo systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190712/R2uWM3SndVT0.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="2、准备工作"><a href="#2、准备工作" class="headerlink" title="2、准备工作"></a>2、准备工作</h1><h2 id="2-1-修改host文件-所有机器"><a href="#2-1-修改host文件-所有机器" class="headerlink" title="2.1 修改host文件(所有机器)"></a>2.1 修改host文件(所有机器)</h2><p>为了保证通信方便，<strong>每台主机</strong>上的<code>/etc/hosts</code>文件都需要进行修改，添加节点的<code>IP地址</code>和<code>hostname</code></p>
-<p><img src="https://resource.tinychen.com/blog/20190712/hJQG4vsWGvdv.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/R2uWM3SndVT0.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>2、准备工作</h1>
+<h2 id="2-1-修改host文件-所有机器">2.1 修改host文件(所有机器)</h2>
+<p>为了保证通信方便，<strong>每台主机</strong>上的<code>/etc/hosts</code>文件都需要进行修改，添加节点的<code>IP地址</code>和<code>hostname</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/hJQG4vsWGvdv.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p><strong>同时最好把每台主机的hostname也修改成和上面的host文件一样。</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 可以直接编辑文件</span><br>vim /etc/hostname<br><br><span class="hljs-comment"># 或者使用命令</span><br>hostnamectl set-hostname<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h2 id="2-2-关闭防火墙-所有机器"><a href="#2-2-关闭防火墙-所有机器" class="headerlink" title="2.2 关闭防火墙(所有机器)"></a>2.2 关闭防火墙(所有机器)</h2><p>因为k8s涉及的端口非常多，我们先把防火墙关了，如果安装了iptable也先关掉。</p>
+<h2 id="2-2-关闭防火墙-所有机器">2.2 关闭防火墙(所有机器)</h2>
+<p>因为k8s涉及的端口非常多，我们先把防火墙关了，如果安装了iptable也先关掉。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 关闭centos7自带的firewall防火墙</span><br>systemctl <span class="hljs-built_in">disable</span> firewalld.service <br>systemctl stop firewalld.service <br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190712/XK1VTkSOoj8S.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/XK1VTkSOoj8S.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>我们来看一下官网对这些端口的描述。</p>
 <p><strong>Master 节点</strong></p>
 <table>
 <thead>
 <tr>
-<th align="left">规则</th>
-<th align="left">方向</th>
-<th align="left">端口范围</th>
-<th align="left">作用</th>
-<th align="left">使用者</th>
+<th style="text-align:left">规则</th>
+<th style="text-align:left">方向</th>
+<th style="text-align:left">端口范围</th>
+<th style="text-align:left">作用</th>
+<th style="text-align:left">使用者</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">6443*</td>
-<td align="left">Kubernetes API server</td>
-<td align="left">All</td>
+<tbody>
+<tr>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">6443*</td>
+<td style="text-align:left">Kubernetes API server</td>
+<td style="text-align:left">All</td>
 </tr>
 <tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">2379-2380</td>
-<td align="left">etcd server client API</td>
-<td align="left">kube-apiserver, etcd</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">2379-2380</td>
+<td style="text-align:left">etcd server client API</td>
+<td style="text-align:left">kube-apiserver, etcd</td>
 </tr>
 <tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">10250</td>
-<td align="left">Kubelet API</td>
-<td align="left">Self, Control plane</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">10250</td>
+<td style="text-align:left">Kubelet API</td>
+<td style="text-align:left">Self, Control plane</td>
 </tr>
 <tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">10251</td>
-<td align="left">kube-scheduler</td>
-<td align="left">Self</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">10251</td>
+<td style="text-align:left">kube-scheduler</td>
+<td style="text-align:left">Self</td>
 </tr>
 <tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">10252</td>
-<td align="left">kube-controller-manager</td>
-<td align="left">Self</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">10252</td>
+<td style="text-align:left">kube-controller-manager</td>
+<td style="text-align:left">Self</td>
 </tr>
-</tbody></table>
-<p> <strong>Worker 节点</strong></p>
+</tbody>
+</table>
+<p><strong>Worker 节点</strong></p>
 <table>
 <thead>
 <tr>
-<th align="left">规则</th>
-<th align="left">方向</th>
-<th align="left">端口范围</th>
-<th align="left">作用</th>
-<th align="left">使用者</th>
+<th style="text-align:left">规则</th>
+<th style="text-align:left">方向</th>
+<th style="text-align:left">端口范围</th>
+<th style="text-align:left">作用</th>
+<th style="text-align:left">使用者</th>
 </tr>
 </thead>
-<tbody><tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">10250</td>
-<td align="left">Kubelet API</td>
-<td align="left">Self, Control plane</td>
+<tbody>
+<tr>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">10250</td>
+<td style="text-align:left">Kubelet API</td>
+<td style="text-align:left">Self, Control plane</td>
 </tr>
 <tr>
-<td align="left">TCP</td>
-<td align="left">Inbound</td>
-<td align="left">30000-32767</td>
-<td align="left">NodePort Services**</td>
-<td align="left">All</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">Inbound</td>
+<td style="text-align:left">30000-32767</td>
+<td style="text-align:left">NodePort Services**</td>
+<td style="text-align:left">All</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>** <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/services-networking/service/">NodePort 服务</a> 的默认端口范围。</p>
 <p>任何使用 * 标记的端口号都有可能被覆盖，所以您需要保证您的自定义端口的状态是开放的。</p>
 <p>虽然主节点已经包含了 etcd 的端口，您也可以使用自定义的外部 etcd 集群，或是指定自定义端口。 您使用的 pod 网络插件 (见下) 也可能需要某些特定端口开启。由于各个 pod 网络插件都有所不同，请参阅他们各自文档中对端口的要求。</p>
 <blockquote>
 <p>如果对安全性有要求，不放心关闭防火墙的话，最好还是修改一下防火墙的配置，放行这些端口。</p>
 </blockquote>
-<h2 id="2-3-同步时间-所有机器"><a href="#2-3-同步时间-所有机器" class="headerlink" title="2.3 同步时间(所有机器)"></a>2.3 同步时间(所有机器)</h2><p>这里我们使用ntpdate来进行时间同步</p>
+<h2 id="2-3-同步时间-所有机器">2.3 同步时间(所有机器)</h2>
+<p>这里我们使用ntpdate来进行时间同步</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装ntpdate工具</span><br>yum install ntpdate -y<br><br><span class="hljs-comment"># 使用阿里云的源同步时间</span><br>ntpdate ntp1.aliyun.com<br><br><span class="hljs-comment"># 最后查看一下时间</span><br>hwclock<br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
 <p>我们也可以在<code>/etc/cron.hourly/</code>下面直接新建一个文件，将<code>ntpdate ntp1.aliyun.com</code>这条命令写进去，这样cron就会每小时执行一次这个同步时间操作。<a href="https://tinychen.com/20190710-rhel7-cron/">关于cron可以点击这里了解。</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">cat</span> &gt;&gt;/etc/cron.hourly/synctime &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">ntpdate ntp1.aliyun.com</span><br><span class="hljs-string">EOF</span><br></code></pre></div></td></tr></table></figure>
-
-
 </blockquote>
-<h2 id="2-4-设置selinux-所有机器"><a href="#2-4-设置selinux-所有机器" class="headerlink" title="2.4 设置selinux(所有机器)"></a>2.4 设置selinux(所有机器)</h2><p><strong>来自官网的说明，必须把selinux改为permissive（直接生效无需重启）或者disabled（需要重启生效）</strong></p>
+<h2 id="2-4-设置selinux-所有机器">2.4 设置selinux(所有机器)</h2>
+<p><strong>来自官网的说明，必须把selinux改为permissive（直接生效无需重启）或者disabled（需要重启生效）</strong></p>
 <blockquote>
 <p>通过命令 <code>setenforce 0</code> 和 <code>sed ...</code> 可以将 SELinux 设置为 permissive 模式(将其禁用)。 只有执行这一操作之后，容器才能访问宿主的文件系统，进而能够正常使用 Pod 网络。您必须这么做，直到 kubelet 做出升级支持 SELinux 为止。</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">setenforce 0<br>sed -i <span class="hljs-string">&#x27;s/^SELINUX=enforcing$/SELINUX=permissive/&#x27;</span> /etc/selinux/config<br><br><span class="hljs-comment"># 也可以直接修改/etc/selinux/config文件</span><br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
 <p>关于SELinux的简单介绍，可以<a href="https://tinychen.com/20190707-rhel7-selinux/">点击这里</a>查看之前的博客。</p>
 </blockquote>
-<h1 id="3、安装kubeadm-kubelet-和-kubectl"><a href="#3、安装kubeadm-kubelet-和-kubectl" class="headerlink" title="3、安装kubeadm, kubelet 和 kubectl"></a>3、安装kubeadm, kubelet 和 kubectl</h1><h2 id="3-1-简介"><a href="#3-1-简介" class="headerlink" title="3.1 简介"></a>3.1 简介</h2><p>我们需要在<strong>每台机器</strong>上都安装以下的软件包：</p>
+<h1>3、安装kubeadm, kubelet 和 kubectl</h1>
+<h2 id="3-1-简介">3.1 简介</h2>
+<p>我们需要在<strong>每台机器</strong>上都安装以下的软件包：</p>
 <ul>
 <li><code>kubeadm</code>: 用来初始化集群的指令。</li>
 <li><code>kubelet</code>: 在集群中的每个节点上用来启动 pod 和 container 等。</li>
 <li><code>kubectl</code>: 用来与集群通信的命令行工具。</li>
 </ul>
 <p>kubeadm <strong>不能</strong> 帮我们安装或管理 <code>kubelet</code> 或 <code>kubectl</code> ，所以我们需要保证他们满足通过 kubeadm 安装的 Kubernetes 控制层对版本的要求。然而控制层与 kubelet 间的 <em>小版本号</em> 不一致无伤大雅，不过请记住 kubelet 的版本不可以超过 API server 的版本。<strong>例如 1.8.0 的 API server 可以适配 1.7.0 的 kubelet，反之就不行了。</strong></p>
-<h2 id="3-2-添加yum仓库-所有机器"><a href="#3-2-添加yum仓库-所有机器" class="headerlink" title="3.2 添加yum仓库(所有机器)"></a>3.2 添加yum仓库(所有机器)</h2><p>由于众所周知的原因，k8s官网提供的yum源并不能在国内正常使用，好在我们还可以使用阿里的镜像源。</p>
+<h2 id="3-2-添加yum仓库-所有机器">3.2 添加yum仓库(所有机器)</h2>
+<p>由于众所周知的原因，k8s官网提供的yum源并不能在国内正常使用，好在我们还可以使用阿里的镜像源。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 新建一个yum源</span><br>vim /etc/yum.repos.d/kubernetes.repo<br><br><span class="hljs-comment"># 添加下列内容到repo中</span><br>[kubernetes]<br>name=Kubernetes<br>baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/<br>enabled=1<br>gpgcheck=1<br>repo_gpgcheck=1<br>gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg<br>exclude=kube*<br></code></pre></div></td></tr></table></figure>
-
 <p>使用yum安装kubeadm, kubelet 和 kubectl</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum clean all<br>yum repolist<br><br>yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes<br><span class="hljs-comment"># 启动kubelet并设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h2 id="3-3-修改cgroup相关配置-所有机器"><a href="#3-3-修改cgroup相关配置-所有机器" class="headerlink" title="3.3 修改cgroup相关配置(所有机器)"></a>3.3 修改cgroup相关配置(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br><span class="hljs-built_in">mkdir</span> /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br><span class="hljs-built_in">cat</span> &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-built_in">mkdir</span> -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="3-4-编辑环境变量-所有机器"><a href="#3-4-编辑环境变量-所有机器" class="headerlink" title="3.4 编辑环境变量(所有机器)"></a>3.4 编辑环境变量(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/sysctl.conf<br><span class="hljs-comment"># 添加两行</span><br>net.bridge.bridge-nf-call-ip6tables = 1<br>net.bridge.bridge-nf-call-iptables = 1<br><br>sysctl -p<br>systemctl daemon-reload<br><br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/RjGz0wYLLfz8.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="3-5-关闭swap分区-所有机器"><a href="#3-5-关闭swap分区-所有机器" class="headerlink" title="3.5 关闭swap分区(所有机器)"></a>3.5 关闭swap分区(所有机器)</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">swapoff -a<br><br>vim /etc/fstab<br><span class="hljs-comment"># 注释掉swap分区启动挂载的那一行</span><br><br><span class="hljs-comment"># 重启机器</span><br>reboot<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h2 id="3-6-拉取镜像"><a href="#3-6-拉取镜像" class="headerlink" title="3.6 拉取镜像"></a>3.6 拉取镜像</h2><p>我们可以使用<code>kubeadm config images pull</code>看看需要拉取哪些镜像版本，然后根据错误提示来对下面的版本进行修改。</p>
+<h2 id="3-3-修改cgroup相关配置-所有机器">3.3 修改cgroup相关配置(所有机器)</h2>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment">## Create /etc/docker directory.</span><br><span class="hljs-built_in">mkdir</span> /etc/docker<br><br><span class="hljs-comment"># Setup daemon.</span><br><span class="hljs-built_in">cat</span> &gt; /etc/docker/daemon.json &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">&#123;</span><br><span class="hljs-string">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],</span><br><span class="hljs-string">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="hljs-string">  &quot;log-opts&quot;: &#123;</span><br><span class="hljs-string">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="hljs-string">  &#125;,</span><br><span class="hljs-string">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="hljs-string">  &quot;storage-opts&quot;: [</span><br><span class="hljs-string">    &quot;overlay2.override_kernel_check=true&quot;</span><br><span class="hljs-string">  ]</span><br><span class="hljs-string">&#125;</span><br><span class="hljs-string">EOF</span><br><br><span class="hljs-built_in">mkdir</span> -p /etc/systemd/system/docker.service.d<br><br><span class="hljs-comment"># Restart Docker</span><br>systemctl daemon-reload<br>systemctl restart docker<br></code></pre></div></td></tr></table></figure>
+<h2 id="3-4-编辑环境变量-所有机器">3.4 编辑环境变量(所有机器)</h2>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/sysctl.conf<br><span class="hljs-comment"># 添加两行</span><br>net.bridge.bridge-nf-call-ip6tables = 1<br>net.bridge.bridge-nf-call-iptables = 1<br><br>sysctl -p<br>systemctl daemon-reload<br><br></code></pre></div></td></tr></table></figure>
+<p><img src="https://resource.tinychen.com/blog/20190715/RjGz0wYLLfz8.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="3-5-关闭swap分区-所有机器">3.5 关闭swap分区(所有机器)</h2>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">swapoff -a<br><br>vim /etc/fstab<br><span class="hljs-comment"># 注释掉swap分区启动挂载的那一行</span><br><br><span class="hljs-comment"># 重启机器</span><br>reboot<br></code></pre></div></td></tr></table></figure>
+<h2 id="3-6-拉取镜像">3.6 拉取镜像</h2>
+<p>我们可以使用<code>kubeadm config images pull</code>看看需要拉取哪些镜像版本，然后根据错误提示来对下面的版本进行修改。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br></code></pre></div></td></tr></table></figure>
-
 <p>由于国内不能访问k8s官网，所以我们需要先使用docker拉取镜像，然后使用tag对其更改名称。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 拉取docker上的镜像到本地</span><br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-apiserver/tags</span><br>docker pull mirrorgooglecontainers/kube-apiserver:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-proxy/tags</span><br>docker pull mirrorgooglecontainers/kube-proxy:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-controller-manager/tags</span><br>docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kube-scheduler/tags</span><br>docker pull mirrorgooglecontainers/kube-scheduler:v1.15.0<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/etcd/tags</span><br>docker pull mirrorgooglecontainers/etcd:3.3.10<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/pause/tags</span><br>docker pull mirrorgooglecontainers/pause:3.1<br><span class="hljs-comment"># https://hub.docker.com/r/mirrorgooglecontainers/kubernetes-dashboard-amd64/tags</span><br>docker pull mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br><span class="hljs-comment"># https://hub.docker.com/r/coredns/coredns/tags</span><br>docker pull coredns/coredns:1.3.1<br><br><br><span class="hljs-comment"># 使用tag对其改名，方便kubeadm直接拉取使用</span><br>docker tag mirrorgooglecontainers/kube-apiserver:v1.15.0 k8s.gcr.io/kube-apiserver:v1.15.0<br>docker tag mirrorgooglecontainers/kube-proxy:v1.15.0 k8s.gcr.io/kube-proxy:v1.15.0<br>docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.0 k8s.gcr.io/kube-controller-manager:v1.15.0<br>docker tag mirrorgooglecontainers/kube-scheduler:v1.15.0 k8s.gcr.io/kube-scheduler:v1.15.0<br>docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10<br>docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1<br>docker tag mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1 k8s.gcr.io/kubernetes-dashboard-amd64:v1.10.1<br>docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1<br><br><br><span class="hljs-comment"># 删除掉多余的images</span><br>docker rmi mirrorgooglecontainers/kube-apiserver:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-proxy:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-controller-manager:v1.15.0<br>docker rmi mirrorgooglecontainers/kube-scheduler:v1.15.0<br>docker rmi mirrorgooglecontainers/etcd:3.3.10<br>docker rmi mirrorgooglecontainers/pause:3.1<br>docker rmi mirrorgooglecontainers/kubernetes-dashboard-amd64:v1.10.1<br>docker rmi coredns/coredns:1.3.1<br><br></code></pre></div></td></tr></table></figure>
-
 <p>最后效果如下</p>
-<p><img src="https://resource.tinychen.com/blog/20190715/UFeKeu1f2ExI.png" srcset="/img/loading.gif" lazyload></p>
-<h2 id="3-7-初始化master节点"><a href="#3-7-初始化master节点" class="headerlink" title="3.7 初始化master节点"></a>3.7 初始化master节点</h2><ul>
-<li><p><code>--kubernetes-version</code>就是我们这里使用的k8s版本</p>
+<p><img src="https://resource.tinychen.com/blog/20190715/UFeKeu1f2ExI.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="3-7-初始化master节点">3.7 初始化master节点</h2>
+<ul>
+<li>
+<p><code>--kubernetes-version</code>就是我们这里使用的k8s版本</p>
 </li>
-<li><p><code>--apiserver-advertise-address</code> 指明用Master的哪个interface与Cluster的其他节点通信。如果Master有多个interface，建议明确指定，如果不指定，kubeadm会自动选择有默认网关的interface</p>
+<li>
+<p><code>--apiserver-advertise-address</code> 指明用Master的哪个interface与Cluster的其他节点通信。如果Master有多个interface，建议明确指定，如果不指定，kubeadm会自动选择有默认网关的interface</p>
 </li>
-<li><p><code>--pod-network-cidr</code> 指定Pod网络的范围。Kubernetes支持多种网络方案，而且不同网络方案对–pod-network-cidr有自己的要求，这里设置为10.244.0.0&#x2F;16是因为我们将使用flannel网络方案，必须设置成这个CIDR</p>
+<li>
+<p><code>--pod-network-cidr</code> 指定Pod网络的范围。Kubernetes支持多种网络方案，而且不同网络方案对–pod-network-cidr有自己的要求，这里设置为10.244.0.0/16是因为我们将使用flannel网络方案，必须设置成这个CIDR</p>
 </li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubeadm init --kubernetes-version=v1.15.0 --apiserver-advertise-address 192.168.100.50 --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/12<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/SUFO45fFoCFu.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190715/SUFO45fFoCFu.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p><strong>注意红框中的那一串密钥要保存好，后面我们添加节点的时候需要用到。</strong></p>
-<h2 id="3-8在master上配置kubectl"><a href="#3-8在master上配置kubectl" class="headerlink" title="3.8在master上配置kubectl"></a>3.8在master上配置kubectl</h2><p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
+<h2 id="3-8在master上配置kubectl">3.8在master上配置kubectl</h2>
+<p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <p><strong>注意这里要切换到普通用户而不能使用root用户！</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> -p <span class="hljs-variable">$HOME</span>/.kube<br>sudo <span class="hljs-built_in">cp</span> -i /etc/kubernetes/admin.conf <span class="hljs-variable">$HOME</span>/.kube/config<br>sudo <span class="hljs-built_in">chown</span> $(<span class="hljs-built_in">id</span> -u):$(<span class="hljs-built_in">id</span> -g)<br> <span class="hljs-variable">$HOME</span>/.kube/config<br><span class="hljs-comment"># 多加一个kubectl的自动补全动能方便我们使用</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;source &lt;(kubectl completion bash)&quot;</span> &gt;&gt; ~/.bashrc<br></code></pre></div></td></tr></table></figure>
-
-
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/I8fH62Yw0lGO.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190715/I8fH62Yw0lGO.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>到这里我们检查一下是否安装顺利</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 获取集群状态</span><br>kubectl get cs<br><span class="hljs-comment"># 获取集群节点信息</span><br>kubectl get nodes<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/aKGUvuJIU440.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="4、安装flannel网络-Master"><a href="#4、安装flannel网络-Master" class="headerlink" title="4、安装flannel网络(Master)"></a>4、安装flannel网络(Master)</h1><p>安装flannel</p>
+<p><img src="https://resource.tinychen.com/blog/20190715/aKGUvuJIU440.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>4、安装flannel网络(Master)</h1>
+<p>安装flannel</p>
 <figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">wget https:<span class="hljs-regexp">//</span>raw.githubusercontent.com<span class="hljs-regexp">/coreos/</span>flannel<span class="hljs-regexp">/master/</span>Documentation/kube-flannel.yml -O kube-flannel.yml<br>kubectl apply -f kube-flannel.yml<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/txGwdrFwgVbw.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190715/txGwdrFwgVbw.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>到这里master节点上面的操作就算是完成了</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看pod运行情况</span><br>kubectl get pods -n kube-system<br><span class="hljs-comment"># 查看并验证节点信息是否成功</span><br>kubectl get nodes<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/sC3ASl1YgTcS.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="5、添加node"><a href="#5、添加node" class="headerlink" title="5、添加node"></a>5、添加node</h1><p>在node节点上使用root用户运行下列命令将node节点加入到集群中，下面的密钥就是刚刚前面生成的密钥，而这个<code>192.168.100.50:6443</code>就是master节点的IP地址和对应端口。</p>
+<p><img src="https://resource.tinychen.com/blog/20190715/sC3ASl1YgTcS.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>5、添加node</h1>
+<p>在node节点上使用root用户运行下列命令将node节点加入到集群中，下面的密钥就是刚刚前面生成的密钥，而这个<code>192.168.100.50:6443</code>就是master节点的IP地址和对应端口。</p>
 <figure class="highlight llvm"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs llvm">kubeadm join --token <span class="hljs-number">3</span>pyvba.siol<span class="hljs-number">4</span>xy<span class="hljs-number">1</span>rvf<span class="hljs-number">2</span>om<span class="hljs-number">8</span>k --discovery-token-ca-cert-hash sha<span class="hljs-number">256</span>:<span class="hljs-keyword">c</span><span class="hljs-number">61</span>cdd<span class="hljs-number">8</span>b<span class="hljs-number">8</span>ad<span class="hljs-number">5</span>d<span class="hljs-number">34</span>faece<span class="hljs-number">61867e76</span>d<span class="hljs-number">539</span>dbc<span class="hljs-number">243</span><span class="hljs-keyword">c</span><span class="hljs-number">1</span>f<span class="hljs-number">206</span>eacbab<span class="hljs-number">163895777</span><span class="hljs-keyword">c</span><span class="hljs-number">099</span>e <span class="hljs-number">192.168</span>.<span class="hljs-number">100.50</span>:<span class="hljs-number">6443</span><br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190715/ANXz4UKJdrPP.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190715/ANXz4UKJdrPP.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>最后顺利启动之后应该是如下图所示</p>
-<p><img src="https://resource.tinychen.com/blog/20190715/IC3JIliuKcWP.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190715/IC3JIliuKcWP.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <blockquote>
 <p>提示：</p>
 <p><strong>如果node节点上没有顺利出现running的话，很有可能是因为镜像被墙了无法顺利拉取镜像，这时我们需要按照步骤3.6中的操作来手动拉取镜像。</strong></p>
 </blockquote>
 <p>查看pod运行情况的命令</p>
 <figure class="highlight actionscript"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs actionscript">kubectl describe pod &lt;PodName&gt; --<span class="hljs-keyword">namespace</span>=&lt;<span class="hljs-keyword">namespace</span>&gt;<br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
 <p>输出内容太长了，这里只截取一部分。</p>
 </blockquote>
-<p><img src="https://resource.tinychen.com/blog/20190715/ysakuW2dsKJF.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190715/ysakuW2dsKJF.png" srcset="/img/loading.gif" lazyload alt=""></p>
 
             </div>
             <hr>

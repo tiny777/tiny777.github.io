@@ -30,8 +30,8 @@
 <meta property="article:modified_time" content="2019-05-21T07:00:00.000Z">
 <meta property="article:author" content="TinyChen">
 <meta property="article:tag" content="mysql">
-<meta property="article:tag" content="database">
 <meta property="article:tag" content="centos">
+<meta property="article:tag" content="database">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://resource.tinychen.com/20210617170538.jpg">
   
@@ -250,57 +250,43 @@
             <div class="markdown-body">
               <p>主要是在CentOS7上安装MariaDB服务。</p>
 <span id="more"></span>
-
-<h1 id="1、为什么换用MariaDB？"><a href="#1、为什么换用MariaDB？" class="headerlink" title="1、为什么换用MariaDB？"></a>1、为什么换用MariaDB？</h1><p>之前写过一篇教程是把<a href="https://tinychen.com/20190310-centos-install-mysql/">内置的MariaDB卸载然后换用MySQL</a>，最近因为MySQL不支持Check子句，还有一次插入多条数据也不行，反正就是想用一下MariaDB，就又换回来了。</p>
-<h1 id="2、卸载MySQL"><a href="#2、卸载MySQL" class="headerlink" title="2、卸载MySQL"></a>2、卸载MySQL</h1><p><strong>注意，在卸载MySQL之前请先使用dump命令备份数据库。</strong></p>
+<h1>1、为什么换用MariaDB？</h1>
+<p>之前写过一篇教程是把<a href="https://tinychen.com/20190310-centos-install-mysql/">内置的MariaDB卸载然后换用MySQL</a>，最近因为MySQL不支持Check子句，还有一次插入多条数据也不行，反正就是想用一下MariaDB，就又换回来了。</p>
+<h1>2、卸载MySQL</h1>
+<p><strong>注意，在卸载MySQL之前请先使用dump命令备份数据库。</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看系统中安装的MySQL服务</span><br>rpm -qa | grep mysql<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190523/aeGO7MB94uBm.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190523/aeGO7MB94uBm.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用rpm卸载掉对应的组件</span><br>rpm -e &lt;packege&gt;<br><span class="hljs-comment"># 如果出现提示依赖的问题，加上--nodeps</span><br>rpm -e --nodeps &lt;packege&gt;<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190523/iRLHKs5GSwvh.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="3、新建yum源"><a href="#3、新建yum源" class="headerlink" title="3、新建yum源"></a>3、新建yum源</h1><p>MariaDB的yum安装官网链接：</p>
+<p><img src="https://resource.tinychen.com/blog/20190523/iRLHKs5GSwvh.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>3、新建yum源</h1>
+<p>MariaDB的yum安装官网链接：</p>
 <p><a target="_blank" rel="noopener" href="http://yum.mariadb.org/">http://yum.mariadb.org/</a></p>
 <p>进去可以看到目前最新的应该是10.4.5版本，于是我们就在<code>/etc/yum.repos.d</code>目录下面新建一个yum源文件。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/yum.repos.d/MariaDB.repo<br></code></pre></div></td></tr></table></figure>
-
 <p>在repo文件中写入下列内容，注意<code>baseurl</code>可以根据版本的更新而改变。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[MariaDB]<br>name = MariaDB<br>baseurl = http://yum.mariadb.org/10.4.5/centos7-amd64/<br>gpgkey = http://yum.mariadb.org/RPM-GPG-KEY-MariaDB<br>gpgcheck = 1<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190523/AaO0ChTlCCeb.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190523/AaO0ChTlCCeb.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 输入下列命令清除并更新yum源</span><br>yum clean all -v<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190523/EBfeojo0q0lv.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="4、安装MariaDB"><a href="#4、安装MariaDB" class="headerlink" title="4、安装MariaDB"></a>4、安装MariaDB</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看yum源中的Maria，注意字母的大小写要和上面写的yum源文件一样</span><br>yum list | grep Maria<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190523/Iz1jFMiTk9Nj.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190523/EBfeojo0q0lv.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>4、安装MariaDB</h1>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看yum源中的Maria，注意字母的大小写要和上面写的yum源文件一样</span><br>yum list | grep Maria<br></code></pre></div></td></tr></table></figure>
+<p><img src="https://resource.tinychen.com/blog/20190523/Iz1jFMiTk9Nj.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这里应该是10.4.5，就说明是之前我们写的yum源。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 输入下面这条指令进行安装MariaDB，注意不要加-y选项，先确定一下版本是否正确</span><br>yum install MariaDB<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190523/3JQoFyQA0Gdq.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190523/3JQoFyQA0Gdq.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>确定版本无误后，按y确定安装。</p>
-<p><img src="https://resource.tinychen.com/blog/20190523/ykqByqkrMiSm.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190523/ykqByqkrMiSm.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> mariadb<br><br><span class="hljs-comment"># 开启mariadb服务</span><br>systemctl start mariadb<br></code></pre></div></td></tr></table></figure>
-
-
-
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看安装后的mysql版本</span><br>mysql --version<br></code></pre></div></td></tr></table></figure>
-
 <p>这里可以看到MariaDB，使用的方法还是和之前一样，账号也还是之前的Mysql的账号。</p>
-<p><img src="https://resource.tinychen.com/blog/20190523/SnG8Alx0uzrf.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="5、安装过程的一些意外"><a href="#5、安装过程的一些意外" class="headerlink" title="5、安装过程的一些意外"></a>5、安装过程的一些意外</h1><p>小七在安装的时候，启动的过程中出现了报错。</p>
+<p><img src="https://resource.tinychen.com/blog/20190523/SnG8Alx0uzrf.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>5、安装过程的一些意外</h1>
+<p>小七在安装的时候，启动的过程中出现了报错。</p>
 <p>虽然使用<code>systemctl</code>可以成功开启服务，但是无法顺利登录进去</p>
 <p>使用<code>-l</code>参数查看详细状态</p>
-<p><img src="https://resource.tinychen.com/blog/20190523/bl8knrFMJfNM.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190523/bl8knrFMJfNM.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>看到这里有两个ERROR，再按照提示输入下列命令升级mysql即可</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">mysql_upgrade -u root -p<br></code></pre></div></td></tr></table></figure>
-
 <p>报错的原因应该是因为mysql换为mariadb之后配置信息的链接没有及时更新导致无法正常启动，因此需要upgrade。</p>
 
             </div>
@@ -321,9 +307,9 @@
                     
                       <a class="hover-with-bg" href="/tags/mysql/">mysql</a>
                     
-                      <a class="hover-with-bg" href="/tags/database/">database</a>
-                    
                       <a class="hover-with-bg" href="/tags/centos/">centos</a>
+                    
+                      <a class="hover-with-bg" href="/tags/database/">database</a>
                     
                   </div>
                 

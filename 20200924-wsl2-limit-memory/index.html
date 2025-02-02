@@ -248,26 +248,27 @@
             <div class="markdown-body">
               <p>本文主要记录使用wsl2长时间开启后占用过多系统内存的解决办法。</p>
 <span id="more"></span>
-
-<h1 id="1、前言"><a href="#1、前言" class="headerlink" title="1、前言"></a>1、前言</h1><p>前几天笔记本一直没有关机，后面发现系统内存已经被占满了，我的笔记本扣掉核显内存占用之后可用容量大概还有15G多一点，用任务管理器里面查看发现是<code>Vmmem</code>这个进程占用了大量的内存，这个就是<code>wsl</code>对应的虚拟机进程。</p>
-<p><img src="https://resource.tinychen.com//20200924093325.png" srcset="/img/loading.gif" lazyload></p>
+<h1>1、前言</h1>
+<p>前几天笔记本一直没有关机，后面发现系统内存已经被占满了，我的笔记本扣掉核显内存占用之后可用容量大概还有15G多一点，用任务管理器里面查看发现是<code>Vmmem</code>这个进程占用了大量的内存，这个就是<code>wsl</code>对应的虚拟机进程。</p>
+<p><img src="https://resource.tinychen.com//20200924093325.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>查询了相关资料发现这并不是个例，wsl2本身的机制似乎会不断地拿宿主机的内存来给自己当cache使用，并且拿了还不还，之前使用台式机的时候有关机的习惯因此并不会太明显，现在使用笔记本长时间不关机就触发了这个问题。目前来说主要有以下几个解决方案：</p>
 <ul>
 <li>重启wsl2</li>
 <li>使用.wslconfig文件限制资源</li>
 <li>调整内核参数定期释放cache内存</li>
 </ul>
-<h1 id="2、重启wsl2"><a href="#2、重启wsl2" class="headerlink" title="2、重启wsl2"></a>2、重启wsl2</h1><p>如果我们直接关闭<code>wsl2</code>的窗口并不会关闭该<code>wsl2</code>的虚拟机，它依旧会在后台运行，需要关闭wsl2的话我们可以打开<code>powershell</code>，在里面使用<code>wsl --shutdown</code>命令就可以关闭全部的<code>wsl2</code>虚拟机了。之后再随意打开一个wsl2的窗口就会再次开启虚拟机。</p>
+<h1>2、重启wsl2</h1>
+<p>如果我们直接关闭<code>wsl2</code>的窗口并不会关闭该<code>wsl2</code>的虚拟机，它依旧会在后台运行，需要关闭wsl2的话我们可以打开<code>powershell</code>，在里面使用<code>wsl --shutdown</code>命令就可以关闭全部的<code>wsl2</code>虚拟机了。之后再随意打开一个wsl2的窗口就会再次开启虚拟机。</p>
 <p>这种方式释放内存最彻底，效果和物理机内存不足卡死然后直接重启是一样的。</p>
-<p><img src="https://resource.tinychen.com//20200924094350.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="3、限制wsl2内存使用"><a href="#3、限制wsl2内存使用" class="headerlink" title="3、限制wsl2内存使用"></a>3、限制wsl2内存使用</h1><p>这个解决方案来自<a target="_blank" rel="noopener" href="https://github.com/microsoft/WSL/issues/4166">github</a>，简单来说就是创建一个<code>%UserProfile%\.wslconfig</code>文件来限制wsl使用的内存总量。比如说我在Windows中使用的用户是tinychen，那么我就在<code>C:\Users\tinychen</code>中创建了一个<code>.wslconfig</code>文件，在里面加入以下内容来限制wsl2的内存总大小：</p>
+<p><img src="https://resource.tinychen.com//20200924094350.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>3、限制wsl2内存使用</h1>
+<p>这个解决方案来自<a target="_blank" rel="noopener" href="https://github.com/microsoft/WSL/issues/4166">github</a>，简单来说就是创建一个<code>%UserProfile%\.wslconfig</code>文件来限制wsl使用的内存总量。比如说我在Windows中使用的用户是tinychen，那么我就在<code>C:\Users\tinychen</code>中创建了一个<code>.wslconfig</code>文件，在里面加入以下内容来限制wsl2的内存总大小：</p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-section">[wsl2]</span><br><span class="hljs-attr">processors</span>=<span class="hljs-number">8</span><br><span class="hljs-attr">memory</span>=<span class="hljs-number">8</span>GB<br><span class="hljs-attr">swap</span>=<span class="hljs-number">8</span>GB<br><span class="hljs-attr">localhostForwarding</span>=<span class="hljs-literal">true</span><br></code></pre></div></td></tr></table></figure>
-
 <p>注意修改完成之后需要重启wsl2才能生效。更多详细的配置可以查看<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/wsl/wsl-config#configure-global-options-with-wslconfig">官方文档</a>。</p>
-<p><img src="https://resource.tinychen.com//20200924095936.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="4、定期释放cache内存"><a href="#4、定期释放cache内存" class="headerlink" title="4、定期释放cache内存"></a>4、定期释放cache内存</h1><p>Linux内核中有一个参数<code>/proc/sys/vm/drop_caches</code>，是可以用来手动释放Linux中的cache缓存，如果发现wsl2的cache过大影响到宿主机正常运行了，可以手动执行以下命令来释放cache：</p>
+<p><img src="https://resource.tinychen.com//20200924095936.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>4、定期释放cache内存</h1>
+<p>Linux内核中有一个参数<code>/proc/sys/vm/drop_caches</code>，是可以用来手动释放Linux中的cache缓存，如果发现wsl2的cache过大影响到宿主机正常运行了，可以手动执行以下命令来释放cache：</p>
 <figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">echo <span class="hljs-number">3</span> &gt; <span class="hljs-regexp">/proc/</span>sys<span class="hljs-regexp">/vm/</span>drop_caches<br></code></pre></div></td></tr></table></figure>
-
 <p>当然也可以设置成定时任务，每隔一段时间释放一次。</p>
 
             </div>
