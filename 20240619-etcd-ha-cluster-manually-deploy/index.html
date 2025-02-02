@@ -249,8 +249,8 @@
             <div class="markdown-body">
               <p>本文主要介绍如何手动部署高可用的双向加密认证etcd集群。</p>
 <span id="more"></span>
-
-<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>这里我们大概介绍一下部署一个etcd集群的思路，如果是不使用证书加密可以跳过配置证书的环节</p>
+<h1>思路</h1>
+<p>这里我们大概介绍一下部署一个etcd集群的思路，如果是不使用证书加密可以跳过配置证书的环节</p>
 <ul>
 <li>检查机器环境，确定etcd使用的端口是默认的2379还是说需要使用自定义端口</li>
 <li>初始化环境，创建对应的数据存储目录和证书存储目录</li>
@@ -259,7 +259,8 @@
 <li>拉取etcd二进制文件</li>
 <li>启动etcd服务，查看集群状态</li>
 </ul>
-<h1 id="定义环境变量"><a href="#定义环境变量" class="headerlink" title="定义环境变量"></a>定义环境变量</h1><p>在开始部署etcd集群之前，我们需要确定在部署过程中用到的各种变量和目录。</p>
+<h1>定义环境变量</h1>
+<p>在开始部署etcd集群之前，我们需要确定在部署过程中用到的各种变量和目录。</p>
 <p>首先是etcd本身需要使用到的三个端口，etcd 使用三个端口进行通信和提供服务：</p>
 <p><strong>1. 客户端端口 (Client Port):</strong></p>
 <ul>
@@ -278,22 +279,20 @@
 </ul>
 <p><strong>使用 shell 定义环境变量:</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> ETCD_CLIENT_PORT=2379<br><span class="hljs-built_in">export</span> ETCD_PEER_PORT=2380<br><span class="hljs-built_in">export</span> ETCD_METRICS_PORT=2381<br></code></pre></div></td></tr></table></figure>
-
 <p>另外就是我们需要定义一个用于存储etcd的证书目录和数据目录</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">export ETCD_CERTS_DIR=/data/etcd/certs<br>export ETCD_DATA_DIR=/data/etcd/data<br></code></pre></div></td></tr></table></figure>
-
 <p>最后就是定义我们这次搭建集群需要用到的三个机器ip</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">export etcd1=10.31.110.1<br>export etcd2=10.31.110.2<br>export etcd3=10.31.110.3<br></code></pre></div></td></tr></table></figure>
-
-<h1 id="初始化环境"><a href="#初始化环境" class="headerlink" title="初始化环境"></a>初始化环境</h1><p>开始之前我们在这次集群用到的三台机器上面配置对应的环境变量并创建目录</p>
+<h1>初始化环境</h1>
+<p>开始之前我们在这次集群用到的三台机器上面配置对应的环境变量并创建目录</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">mkdir -p $ETCD_CERTS_DIR<br>chown root.root -R $ETCD_CERTS_DIR<br>chmod 755 -R $ETCD_CERTS_DIR<br><br>mkdir -p $ETCD_DATA_DIR<br>chown root.root -R $ETCD_DATA_DIR<br>chmod 755 -R $ETCD_DATA_DIR<br></code></pre></div></td></tr></table></figure>
-
-<h1 id="配置CA证书"><a href="#配置CA证书" class="headerlink" title="配置CA证书"></a>配置CA证书</h1><h2 id="配置私钥"><a href="#配置私钥" class="headerlink" title="配置私钥"></a>配置私钥</h2><p>不论是哪种方式配置CA证书，我们都需要先生成一个私钥。</p>
+<h1>配置CA证书</h1>
+<h2 id="配置私钥">配置私钥</h2>
+<p>不论是哪种方式配置CA证书，我们都需要先生成一个私钥。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> <span class="hljs-variable">$ETCD_CERTS_DIR</span><br><span class="hljs-comment"># 生成 CA 私钥:</span><br>openssl genrsa -out ca-key.pem 2048<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="配置CSR"><a href="#配置CSR" class="headerlink" title="配置CSR"></a>配置CSR</h2><p>我们继续配置CSR证书，注意CSR证书并不是必须的，很多流程中都会省略</p>
+<h2 id="配置CSR">配置CSR</h2>
+<p>我们继续配置CSR证书，注意CSR证书并不是必须的，很多流程中都会省略</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">创建 CA 证书签名请求 (CSR):</span><br>openssl req -new -key ca-key.pem -out ca.csr -subj &quot;/CN=TC Test CA/O=tinychen&quot;<br></code></pre></div></td></tr></table></figure>
-
 <p>上面的这个 OpenSSL 命令用于生成一个自签名证书的证书签名请求 (CSR)。</p>
 <p><strong>参数解析:</strong></p>
 <ul>
@@ -301,15 +300,16 @@
 <li><code>-new</code>:  生成一个新的证书请求。</li>
 <li><code>-key ca-key.pem</code>:  指定用于签署 CSR 的私钥文件。这里使用的是名为 <code>ca-key.pem</code> 的私钥文件，应该是您预先生成的。</li>
 <li><code>-out ca.csr</code>:  指定生成的 CSR 文件的输出路径和文件名。这里将生成名为 <code>ca.csr</code> 的 CSR 文件。</li>
-<li><code>-subj &quot;/CN=TC Test CA/O=tinychen&quot;</code>:  指定证书主题信息，采用 X.509 证书规范的格式。 <ul>
-<li><code>/CN=TC Test CA</code>:  通用名称 (Common Name)，通常是域名或服务器主机名，这里”TC Test CA”表示 “tinychen test ca”。</li>
+<li><code>-subj &quot;/CN=TC Test CA/O=tinychen&quot;</code>:  指定证书主题信息，采用 X.509 证书规范的格式。
+<ul>
+<li><code>/CN=TC Test CA</code>:  通用名称 (Common Name)，通常是域名或服务器主机名，这里&quot;TC Test CA&quot;表示 “tinychen test ca”。</li>
 <li><code>/O=tinychen</code>:  组织 (Organization) 名称，这里也就是 “tinychen”。</li>
 </ul>
 </li>
 </ul>
-<h2 id="配置CA证书-1"><a href="#配置CA证书-1" class="headerlink" title="配置CA证书"></a>配置CA证书</h2><p>最后我们来生成一个ca证书</p>
+<h2 id="配置CA证书">配置CA证书</h2>
+<p>最后我们来生成一个ca证书</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">自签名 CA 证书:</span><br>openssl x509 -req -in ca.csr -signkey ca-key.pem -out ca.crt -days 36500 -extensions v3_ca -extfile &lt;(cat &lt;&lt; EOF<br>[ v3_ca ]<br>basicConstraints = critical,CA:TRUE<br>keyUsage = critical, cRLSign, keyCertSign<br>subjectKeyIdentifier = hash<br>EOF<br>)<br></code></pre></div></td></tr></table></figure>
-
 <p>这个 OpenSSL 命令使用之前生成的 CSR (ca.csr) 和私钥 (ca-key.pem) 来生成一个自签名的 CA 证书 (ca.crt)。</p>
 <p><strong>参数解析:</strong></p>
 <ul>
@@ -329,59 +329,67 @@
 <li><code>keyUsage = critical, cRLSign, keyCertSign</code>:  设置密钥用法扩展，指定该证书可以用于签署证书吊销列表 (CRL) 和签发其他证书。</li>
 <li><code>subjectKeyIdentifier = hash</code>:  设置主题密钥标识符扩展，使用证书公钥的哈希值作为标识符。</li>
 </ul>
-<h2 id="复制CA证书"><a href="#复制CA证书" class="headerlink" title="复制CA证书"></a>复制CA证书</h2><p>不论我们使用的是单向认证还是双向认证，最后集群内的所有节点，使用的ca证书应该都是一致的，因此我们在其中一台机器生成ca证书之后，可以将其复制到对应剩余的机器上面。这里以rsync为例进行复制。</p>
+<h2 id="复制CA证书">复制CA证书</h2>
+<p>不论我们使用的是单向认证还是双向认证，最后集群内的所有节点，使用的ca证书应该都是一致的，因此我们在其中一台机器生成ca证书之后，可以将其复制到对应剩余的机器上面。这里以rsync为例进行复制。</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">rsync -avz -e ssh ./ca* root@10.31.110.2:/data/etcd/certs/<br>rsync -avz -e ssh ./ca* root@10.31.110.3:/data/etcd/certs/<br></code></pre></div></td></tr></table></figure>
-
-<h1 id="关于CSR证书"><a href="#关于CSR证书" class="headerlink" title="关于CSR证书"></a>关于CSR证书</h1><p>使用 OpenSSL 生成 CA 证书，我们可以选择使用 CSR（证书签名请求）或直接生成自签名证书。两种方法都需要先生成一个私钥。</p>
-<h2 id="使用-CSR-生成-CA-证书"><a href="#使用-CSR-生成-CA-证书" class="headerlink" title="使用 CSR 生成 CA 证书"></a>使用 CSR 生成 CA 证书</h2><p>这种方法更常见，因为它将私钥的生成和证书请求的创建分离，提高了安全性。</p>
+<h1>关于CSR证书</h1>
+<p>使用 OpenSSL 生成 CA 证书，我们可以选择使用 CSR（证书签名请求）或直接生成自签名证书。两种方法都需要先生成一个私钥。</p>
+<h2 id="使用-CSR-生成-CA-证书">使用 CSR 生成 CA 证书</h2>
+<p>这种方法更常见，因为它将私钥的生成和证书请求的创建分离，提高了安全性。</p>
 <p><strong>步骤：</strong></p>
 <ol>
-<li><p><strong>生成私钥:</strong></p>
+<li>
+<p><strong>生成私钥:</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl genrsa -out ca-key.pem 2048<br></code></pre></div></td></tr></table></figure>
-
 <p>这将生成一个 2048 位的 RSA 私钥，并将其保存到 <code>ca-key.pem</code> 文件中。</p>
 </li>
-<li><p><strong>创建证书签名请求 (CSR):</strong></p>
+<li>
+<p><strong>创建证书签名请求 (CSR):</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl req -new -key ca-key.pem -out ca.csr -subj <span class="hljs-string">&quot;/CN=MyCA/O=MyOrganization&quot;</span><br></code></pre></div></td></tr></table></figure>
-
 <p>这将使用私钥生成一个 CSR，并将其保存到 <code>ca.csr</code> 文件中。<code>-subj</code> 参数用于指定证书主题信息，例如通用名称 (CN) 和组织 (O)。</p>
 </li>
-<li><p><strong>生成自签名 CA 证书:</strong></p>
+<li>
+<p><strong>生成自签名 CA 证书:</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl x509 -req -<span class="hljs-keyword">in</span> ca.csr -signkey ca-key.pem -out ca.crt -days 3650 -extensions v3_ca -extfile &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[ v3_ca ]</span><br><span class="hljs-string">basicConstraints = critical,CA:TRUE</span><br><span class="hljs-string">keyUsage = critical, cRLSign, keyCertSign</span><br><span class="hljs-string">subjectKeyIdentifier = hash</span><br><span class="hljs-string">EOF</span><br>)<br></code></pre></div></td></tr></table></figure>
-
 <p>这将使用 CSR 和私钥生成一个自签名 CA 证书，并将其保存到 <code>ca.crt</code> 文件中。<code>-days</code> 参数指定证书的有效期，<code>-extensions</code> 和 <code>-extfile</code> 参数用于添加必要的 CA 扩展信息。</p>
 </li>
 </ol>
-<h2 id="直接生成自签名-CA-证书"><a href="#直接生成自签名-CA-证书" class="headerlink" title="直接生成自签名 CA 证书"></a>直接生成自签名 CA 证书</h2><p>这种方法将私钥生成和证书创建合并到一个步骤中，更加方便，但安全性稍低。</p>
+<h2 id="直接生成自签名-CA-证书">直接生成自签名 CA 证书</h2>
+<p>这种方法将私钥生成和证书创建合并到一个步骤中，更加方便，但安全性稍低。</p>
 <p><strong>步骤：</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl req -x509 -newkey rsa:2048 -keyout ca-key.pem -out ca.crt -days 3650 -subj <span class="hljs-string">&quot;/CN=MyCA/O=MyOrganization&quot;</span> -extensions v3_ca -extfile &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[ v3_ca ]</span><br><span class="hljs-string">basicConstraints = critical,CA:TRUE</span><br><span class="hljs-string">keyUsage = critical, cRLSign, keyCertSign</span><br><span class="hljs-string">subjectKeyIdentifier = hash</span><br><span class="hljs-string">EOF</span><br>)<br></code></pre></div></td></tr></table></figure>
-
 <p>这将生成一个 2048 位的 RSA 私钥，并使用该私钥直接生成一个自签名 CA 证书，并将它们分别保存到 <code>ca-key.pem</code> 和 <code>ca.crt</code> 文件中。</p>
 <p><strong>关于 CSR 的必要性:</strong></p>
 <ul>
 <li><strong>安全性:</strong> 使用 CSR 可以将私钥的生成和证书请求的创建分离，提高安全性。私钥始终保存在您的本地机器上，不会被发送到 CA 服务器。</li>
 <li><strong>灵活性:</strong>  CSR 可以用于向不同的 CA 服务器申请证书，而无需每次都重新生成私钥。</li>
 </ul>
-<h2 id="证书文件"><a href="#证书文件" class="headerlink" title="证书文件"></a>证书文件</h2><p>无论我们选择哪种方式生成 CA 证书，最终都会生成两个关键文件：</p>
-<h3 id="私钥文件-例如-ca-key-pem"><a href="#私钥文件-例如-ca-key-pem" class="headerlink" title="私钥文件 (例如 ca-key.pem):"></a>私钥文件 (例如 ca-key.pem):</h3><ul>
-<li><p><strong>作用:</strong>  这是 CA 的私钥，用于签署证书和证书吊销列表 (CRL)。私钥必须严格保密，因为它可以用来伪造证书。</p>
+<h2 id="证书文件">证书文件</h2>
+<p>无论我们选择哪种方式生成 CA 证书，最终都会生成两个关键文件：</p>
+<h3 id="私钥文件-例如-ca-key-pem">私钥文件 (例如 ca-key.pem):</h3>
+<ul>
+<li>
+<p><strong>作用:</strong>  这是 CA 的私钥，用于签署证书和证书吊销列表 (CRL)。私钥必须严格保密，因为它可以用来伪造证书。</p>
 </li>
-<li><p><strong>查看内容:</strong>  由于私钥文件包含敏感信息，不建议直接查看其内容。如果需要查看私钥信息，可以使用以下命令：</p>
+<li>
+<p><strong>查看内容:</strong>  由于私钥文件包含敏感信息，不建议直接查看其内容。如果需要查看私钥信息，可以使用以下命令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl rsa -<span class="hljs-keyword">in</span> ca-key.pem -text -noout<br></code></pre></div></td></tr></table></figure>
-
 <p><strong>注意:</strong>  执行此命令时，请确保您位于安全的终端环境中，并且不要将私钥信息泄露给他人。</p>
 </li>
 </ul>
-<h3 id="证书文件-例如-ca-crt"><a href="#证书文件-例如-ca-crt" class="headerlink" title="证书文件 (例如 ca.crt):"></a>证书文件 (例如 ca.crt):</h3><ul>
-<li><p><strong>作用:</strong>  这是 CA 的证书，包含 CA 的公钥、主题信息、有效期、扩展信息等。证书可以公开分享，用于验证由该 CA 签发的其他证书。</p>
+<h3 id="证书文件-例如-ca-crt">证书文件 (例如 ca.crt):</h3>
+<ul>
+<li>
+<p><strong>作用:</strong>  这是 CA 的证书，包含 CA 的公钥、主题信息、有效期、扩展信息等。证书可以公开分享，用于验证由该 CA 签发的其他证书。</p>
 </li>
-<li><p><strong>查看内容:</strong>  我们可以使用以下命令查看证书的详细信息：</p>
+<li>
+<p><strong>查看内容:</strong>  我们可以使用以下命令查看证书的详细信息：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl x509 -<span class="hljs-keyword">in</span> ca.crt -text -noout<br></code></pre></div></td></tr></table></figure>
-
 <p>该命令会以文本格式输出证书的详细信息，包括版本号、序列号、签名算法、颁发者、主题、有效期、公钥信息、扩展信息等。</p>
 </li>
 </ul>
-<h3 id="证书签名请求文件-例如-ca-csr"><a href="#证书签名请求文件-例如-ca-csr" class="headerlink" title="证书签名请求文件 (例如 ca.csr)"></a>证书签名请求文件 (例如 ca.csr)</h3><p>准确地说，CSR 不是证书，而是一个 **证书签名请求 (Certificate Signing Request)**。它本身并没有实际证书的功能，而是用于向证书颁发机构 (CA) 申请证书。</p>
+<h3 id="证书签名请求文件-例如-ca-csr">证书签名请求文件 (例如 ca.csr)</h3>
+<p>准确地说，CSR 不是证书，而是一个 <strong>证书签名请求 (Certificate Signing Request)</strong>。它本身并没有实际证书的功能，而是用于向证书颁发机构 (CA) 申请证书。</p>
 <p><strong>CSR 的作用可以概括为：</strong></p>
 <ol>
 <li><strong>包含公钥信息：</strong> CSR 文件包含申请者生成的公钥信息，以及一些身份识别信息，例如域名、组织名称等。</li>
@@ -391,7 +399,6 @@
 <p><strong>简单来说，CSR 就像一张申请表，您填写好个人信息和需求（公钥），提交给相关部门（CA）审核签字，最终获得正式的文件（证书）。</strong></p>
 <p><strong>查看 CSR 文件内容的命令:</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl req -<span class="hljs-keyword">in</span> ca.csr -text -noout<br></code></pre></div></td></tr></table></figure>
-
 <ul>
 <li><code>openssl req</code>: 调用 OpenSSL 工具集中的 <code>req</code> 命令，用于处理证书请求。</li>
 <li><code>-in ca.csr</code>: 指定要查看的 CSR 文件名为 <code>ca.csr</code>。</li>
@@ -401,7 +408,6 @@
 <p><strong>CSR 文件内容解析:</strong></p>
 <p>执行上述命令后，我们会看到类似以下内容的输出：</p>
 <figure class="highlight nestedtext"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nestedtext"><span class="hljs-attribute">Certificate Request</span><span class="hljs-punctuation">:</span><br>    <span class="hljs-attribute">Data</span><span class="hljs-punctuation">:</span><br>        <span class="hljs-attribute">Version</span><span class="hljs-punctuation">:</span> <span class="hljs-string">0 (0x0)</span><br>        <span class="hljs-attribute">Subject</span><span class="hljs-punctuation">:</span> <span class="hljs-string">CN=MyCA, O=MyOrganization</span><br>        <span class="hljs-attribute">Subject Public Key Info</span><span class="hljs-punctuation">:</span><br>            <span class="hljs-attribute">Public Key Algorithm</span><span class="hljs-punctuation">:</span> <span class="hljs-string">rsaEncryption</span><br>            <span class="hljs-attribute">RSA Public Key</span><span class="hljs-punctuation">:</span> <span class="hljs-string">(2048 bit)</span><br>                <span class="hljs-attribute">...</span><br><span class="hljs-attribute">        Attributes</span><span class="hljs-punctuation">:</span><br>            <span class="hljs-attribute">...</span><br><span class="hljs-attribute">    Signature Algorithm</span><span class="hljs-punctuation">:</span> <span class="hljs-string">sha256WithRSAEncryption</span><br>        ...<br></code></pre></div></td></tr></table></figure>
-
 <p><strong>主要信息包括:</strong></p>
 <ul>
 <li><strong>Version:</strong>  证书请求的版本号。</li>
@@ -411,26 +417,30 @@
 <li><strong>Signature Algorithm:</strong>  用于对证书请求进行签名的算法。</li>
 <li><strong>Signature:</strong>  对证书请求信息的数字签名。</li>
 </ul>
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<h2 id="小结">小结</h2>
+<ul>
 <li>对于测试环境或个人使用，直接生成自签名 CA 证书更为方便。</li>
 <li>使用 CSR 生成 CA 证书可以提高安全性，对于生产环境或需要更高安全性的场景，建议使用 CSR 生成 CA 证书。</li>
 <li>私钥文件 (ca-key.pem) 包含 CA 的私钥，必须严格保密。</li>
 <li>证书文件 (ca.crt) 包含 CA 的公钥和其他信息，可以公开分享。</li>
 </ul>
-<h1 id="生成server证书"><a href="#生成server证书" class="headerlink" title="生成server证书"></a>生成server证书</h1><h2 id="生成服务器私钥"><a href="#生成服务器私钥" class="headerlink" title="生成服务器私钥:"></a>生成服务器私钥:</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl genrsa -out server-key.pem 2048<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="创建服务器证书签名请求-CSR"><a href="#创建服务器证书签名请求-CSR" class="headerlink" title="创建服务器证书签名请求 (CSR):"></a>创建服务器证书签名请求 (CSR):</h2><p>该命令使用指定的私钥和主题信息生成一个 CSR 文件，并添加了三个 IP 地址作为 SAN 扩展信息。生成的 CSR 文件可以提交给 CA 进行签名，最终获得包含指定主题信息和 SAN 扩展信息的证书。</p>
+<h1>生成server证书</h1>
+<h2 id="生成服务器私钥">生成服务器私钥:</h2>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl genrsa -out server-key.pem 2048<br></code></pre></div></td></tr></table></figure>
+<h2 id="创建服务器证书签名请求-CSR">创建服务器证书签名请求 (CSR):</h2>
+<p>该命令使用指定的私钥和主题信息生成一个 CSR 文件，并添加了三个 IP 地址作为 SAN 扩展信息。生成的 CSR 文件可以提交给 CA 进行签名，最终获得包含指定主题信息和 SAN 扩展信息的证书。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl req -new -key server-key.pem -out server.csr -subj <span class="hljs-string">&quot;/C=CN/ST=GuangDong/L=Guangzhou/O=system:server/OU=TC/CN=server&quot;</span> -reqexts SAN -config &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[req]</span><br><span class="hljs-string">distinguished_name = req_distinguished_name</span><br><span class="hljs-string">[req_distinguished_name]</span><br><span class="hljs-string">[SAN]</span><br><span class="hljs-string">subjectAltName=IP:$etcd1,IP:$etcd2,IP:$etcd3</span><br><span class="hljs-string">EOF</span><br>)<br><br><span class="hljs-comment"># 检查输出</span><br>openssl req -<span class="hljs-keyword">in</span> server.csr -text -noout<br></code></pre></div></td></tr></table></figure>
-
 <p>这是一个使用 OpenSSL 命令行工具生成证书签名请求 (CSR) 的命令，让我们逐步解析：</p>
-<h3 id="命令主体"><a href="#命令主体" class="headerlink" title="命令主体:"></a>命令主体:</h3><ul>
+<h3 id="命令主体">命令主体:</h3>
+<ul>
 <li><code>openssl req</code>: 调用 OpenSSL 工具的 req 命令，用于处理证书请求。</li>
 <li><code>-new</code>:  指示 OpenSSL 生成一个新的 CSR。</li>
 <li><code>-key server-key.pem</code>: 指定用于签署 CSR 的私钥文件路径，这里是 <code>server-key.pem</code>。</li>
 <li><code>-out server.csr</code>: 指定生成的 CSR 文件的输出路径和文件名，这里是 <code>server.csr</code>。</li>
-<li><code>-subj &quot;/C=CN/ST=GuangDong/L=Guangzhou/O=system:server/OU=TC/CN=server&quot;</code>:  指定 CSR 中包含的主题信息，采用 X.509 证书规范： <ul>
+<li><code>-subj &quot;/C=CN/ST=GuangDong/L=Guangzhou/O=system:server/OU=TC/CN=server&quot;</code>:  指定 CSR 中包含的主题信息，采用 X.509 证书规范：
+<ul>
 <li><code>C=CN</code>: 国家代码，这里是中国 (CN)。</li>
-<li><code>ST=GuangDong</code>: 州&#x2F;省份名称，这里是广东。</li>
+<li><code>ST=GuangDong</code>: 州/省份名称，这里是广东。</li>
 <li><code>L=Guangzhou</code>: 城市名称，这里是广州。</li>
 <li><code>O=system:server</code>:  组织名称，这里是 “system:server”。</li>
 <li><code>OU=Shopee</code>:  组织单位名称，这里是 “TC”。</li>
@@ -438,12 +448,13 @@
 </ul>
 </li>
 </ul>
-<h3 id="扩展信息"><a href="#扩展信息" class="headerlink" title="扩展信息:"></a>扩展信息:</h3><ul>
+<h3 id="扩展信息">扩展信息:</h3>
+<ul>
 <li><code>-reqexts SAN</code>:  指定要添加的证书扩展信息，这里是 <code>SAN</code> (Subject Alternative Name)，用于添加额外的域名或 IP 地址。</li>
 <li><code>-config &lt;(cat &lt;&lt; EOF ... EOF)</code>:  使用内联文档的方式指定 OpenSSL 配置文件内容，主要用于配置 SAN 扩展信息。</li>
 </ul>
-<h3 id="配置文件内容"><a href="#配置文件内容" class="headerlink" title="配置文件内容:"></a>配置文件内容:</h3><figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-section">[req]</span><br><span class="hljs-attr">distinguished_name</span> = req_distinguished_name<br><span class="hljs-section">[req_distinguished_name]</span><br><span class="hljs-section">[SAN]</span><br><span class="hljs-attr">subjectAltName</span>=IP:<span class="hljs-variable">$etcd1</span>,IP:<span class="hljs-variable">$etcd2</span>,IP:<span class="hljs-variable">$etcd3</span><br></code></pre></div></td></tr></table></figure>
-
+<h3 id="配置文件内容">配置文件内容:</h3>
+<figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-section">[req]</span><br><span class="hljs-attr">distinguished_name</span> = req_distinguished_name<br><span class="hljs-section">[req_distinguished_name]</span><br><span class="hljs-section">[SAN]</span><br><span class="hljs-attr">subjectAltName</span>=IP:<span class="hljs-variable">$etcd1</span>,IP:<span class="hljs-variable">$etcd2</span>,IP:<span class="hljs-variable">$etcd3</span><br></code></pre></div></td></tr></table></figure>
 <ul>
 <li><code>[req]</code>:  定义与证书请求相关的配置。</li>
 <li><code>distinguished_name = req_distinguished_name</code>:  指定使用名为 <code>req_distinguished_name</code> 的节来配置主题信息。</li>
@@ -451,22 +462,25 @@
 <li><code>[SAN]</code>:  定义 SAN 扩展信息的配置。</li>
 <li><code>subjectAltName=IP:$etcd1,IP:$etcd2,IP:$etcd3</code>:  指定要添加的 SAN 信息，这里是三个 IP 地址，分别存储在环境变量 <code>$etcd1</code>、<code>$etcd2</code> 和 <code>$etcd3</code> 中。</li>
 </ul>
-<h2 id="使用-CA-证书签发服务器证书"><a href="#使用-CA-证书签发服务器证书" class="headerlink" title="使用 CA 证书签发服务器证书"></a>使用 CA 证书签发服务器证书</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl x509 -req -<span class="hljs-keyword">in</span> server.csr -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out server.pem -days 36500 -extensions v3_req -extfile etcd-server/server-ext.cnf<br><br><br>openssl x509 -req -<span class="hljs-keyword">in</span> server.csr -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out server.pem -days 36500 -extensions v3_req -extfile &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ v3_req ]</span><br><span class="hljs-string">basicConstraints = critical, CA:FALSE</span><br><span class="hljs-string">keyUsage = critical, digitalSignature, keyEncipherment</span><br><span class="hljs-string">extendedKeyUsage = clientAuth, serverAuth</span><br><span class="hljs-string">subjectAltName = @alt_names</span><br><span class="hljs-string">authorityKeyIdentifier=keyid:always</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ alt_names ]</span><br><span class="hljs-string">IP.1 = $etcd1</span><br><span class="hljs-string">IP.2 = $etcd2</span><br><span class="hljs-string">IP.3 = $etcd3</span><br><span class="hljs-string">EOF</span><br>)<br><br><span class="hljs-comment"># 检查输出</span><br>openssl x509 -<span class="hljs-keyword">in</span> server.pem -text -noout<br></code></pre></div></td></tr></table></figure>
-
+<h2 id="使用-CA-证书签发服务器证书">使用 CA 证书签发服务器证书</h2>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl x509 -req -<span class="hljs-keyword">in</span> server.csr -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out server.pem -days 36500 -extensions v3_req -extfile etcd-server/server-ext.cnf<br><br><br>openssl x509 -req -<span class="hljs-keyword">in</span> server.csr -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out server.pem -days 36500 -extensions v3_req -extfile &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ v3_req ]</span><br><span class="hljs-string">basicConstraints = critical, CA:FALSE</span><br><span class="hljs-string">keyUsage = critical, digitalSignature, keyEncipherment</span><br><span class="hljs-string">extendedKeyUsage = clientAuth, serverAuth</span><br><span class="hljs-string">subjectAltName = @alt_names</span><br><span class="hljs-string">authorityKeyIdentifier=keyid:always</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ alt_names ]</span><br><span class="hljs-string">IP.1 = $etcd1</span><br><span class="hljs-string">IP.2 = $etcd2</span><br><span class="hljs-string">IP.3 = $etcd3</span><br><span class="hljs-string">EOF</span><br>)<br><br><span class="hljs-comment"># 检查输出</span><br>openssl x509 -<span class="hljs-keyword">in</span> server.pem -text -noout<br></code></pre></div></td></tr></table></figure>
 <p><strong>解释</strong>：</p>
 <ul>
-<li><code>basicConstraints = critical, CA:FALSE</code>: <ul>
+<li><code>basicConstraints = critical, CA:FALSE</code>:
+<ul>
 <li><code>critical</code>:  表示这是一个关键扩展，如果证书使用者不支持该扩展，则必须拒绝该证书。</li>
 <li><code>CA:FALSE</code>:  表示该证书不能用作证书颁发机构 (CA)。</li>
 </ul>
 </li>
-<li><code>keyUsage = critical, digitalSignature, keyEncipherment</code>: <ul>
+<li><code>keyUsage = critical, digitalSignature, keyEncipherment</code>:
+<ul>
 <li><code>critical</code>:  表示这是一个关键扩展。</li>
 <li><code>digitalSignature</code>:  表示该证书可以用于数字签名。</li>
 <li><code>keyEncipherment</code>:  表示该证书可以用于密钥加密。</li>
 </ul>
 </li>
-<li><code>extendedKeyUsage = clientAuth, serverAuth</code>: <ul>
+<li><code>extendedKeyUsage = clientAuth, serverAuth</code>:
+<ul>
 <li><code>clientAuth</code>:  表示该证书可以用于 TLS Web 客户端身份验证。</li>
 <li><code>serverAuth</code>:  表示该证书可以用于 TLS Web 服务器身份验证。</li>
 </ul>
@@ -496,7 +510,6 @@
 <p>如果您需要手动配置 AKI 扩展，可以使用 <code>-ext</code> 参数和配置文件。例如，以下命令使用 <code>server-ext.cnf</code> 文件中的 <code>aki</code> 扩展来生成服务器证书：</p>
 <p><code>server-ext.cnf</code> 文件中的 <code>aki</code> 扩展配置如下：</p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-section">[ v3_req ]</span><br><span class="hljs-attr">authorityKeyIdentifier</span>=keyid:always<br></code></pre></div></td></tr></table></figure>
-
 <p>这将强制 OpenSSL 在生成的服务器证书中包含 AKI 扩展，并将 <code>keyid</code> 设置为 <code>always</code>，表示始终使用 CA 证书的 <code>Subject Key Identifier</code> 作为 AKI 信息。</p>
 <p><strong>小结：</strong></p>
 <ul>
@@ -505,13 +518,14 @@
 <li>您可以根据需要手动配置 AKI 扩展，例如指定特定的密钥标识符或禁用 AKI 扩展。</li>
 </ul>
 </blockquote>
-<h1 id="生成client证书"><a href="#生成client证书" class="headerlink" title="生成client证书"></a>生成client证书</h1><p>client证书的配置过程和前面的server证书一样，这里就不再赘述。</p>
+<h1>生成client证书</h1>
+<p>client证书的配置过程和前面的server证书一样，这里就不再赘述。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl genrsa -out client-key.pem 2048<br><br>openssl req -new -key client-key.pem -out client.csr -subj <span class="hljs-string">&quot;/C=SG/ST=Singapore/L=Singapore/O=system:client/OU=Shopee/CN=client&quot;</span> -reqexts SAN -config &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[req]</span><br><span class="hljs-string">distinguished_name = req_distinguished_name</span><br><span class="hljs-string">[req_distinguished_name]</span><br><span class="hljs-string">[SAN]</span><br><span class="hljs-string">subjectAltName=IP:$etcd1,IP:$etcd2,IP:$etcd3</span><br><span class="hljs-string">EOF</span><br>)<br><br>openssl x509 -req -<span class="hljs-keyword">in</span> client.csr -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out client.pem -days 36500 -extensions v3_req -extfile &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ v3_req ]</span><br><span class="hljs-string">basicConstraints = critical, CA:FALSE</span><br><span class="hljs-string">keyUsage = critical, digitalSignature, keyEncipherment</span><br><span class="hljs-string">extendedKeyUsage = clientAuth, serverAuth</span><br><span class="hljs-string">subjectAltName = @alt_names</span><br><span class="hljs-string">authorityKeyIdentifier=keyid:always</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ alt_names ]</span><br><span class="hljs-string">IP.1 = $etcd1</span><br><span class="hljs-string">IP.2 = $etcd2</span><br><span class="hljs-string">IP.3 = $etcd3</span><br><span class="hljs-string">EOF</span><br>) <br></code></pre></div></td></tr></table></figure>
-
-<h1 id="生成peer证书"><a href="#生成peer证书" class="headerlink" title="生成peer证书"></a>生成peer证书</h1><p>peer证书的配置过程也和前面二者一样，这里就不再赘述。</p>
+<h1>生成peer证书</h1>
+<p>peer证书的配置过程也和前面二者一样，这里就不再赘述。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl genrsa -out peer-key.pem 2048<br><br>openssl req -new -key peer-key.pem -out peer.csr -subj <span class="hljs-string">&quot;/C=SG/ST=Singapore/L=Singapore/O=system:peer/OU=Shopee/CN=peer&quot;</span> -reqexts SAN -config &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string">[req]</span><br><span class="hljs-string">distinguished_name = req_distinguished_name</span><br><span class="hljs-string">[req_distinguished_name]</span><br><span class="hljs-string">[SAN]</span><br><span class="hljs-string">subjectAltName=IP:$etcd1,IP:$etcd2,IP:$etcd3</span><br><span class="hljs-string">EOF</span><br>)<br><br>openssl x509 -req -<span class="hljs-keyword">in</span> peer.csr -CA ca.crt -CAkey ca-key.pem -CAcreateserial -out peer.pem -days 36500 -extensions v3_req -extfile &lt;(<span class="hljs-built_in">cat</span> &lt;&lt; <span class="hljs-string">EOF</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ v3_req ]</span><br><span class="hljs-string">basicConstraints = critical, CA:FALSE</span><br><span class="hljs-string">keyUsage = critical, digitalSignature, keyEncipherment</span><br><span class="hljs-string">extendedKeyUsage = clientAuth, serverAuth</span><br><span class="hljs-string">subjectAltName = @alt_names</span><br><span class="hljs-string">authorityKeyIdentifier=keyid:always</span><br><span class="hljs-string"></span><br><span class="hljs-string">[ alt_names ]</span><br><span class="hljs-string">IP.1 = $etcd1</span><br><span class="hljs-string">IP.2 = $etcd2</span><br><span class="hljs-string">IP.3 = $etcd3</span><br><span class="hljs-string">EOF</span><br>) <br></code></pre></div></td></tr></table></figure>
-
-<h1 id="关于证书"><a href="#关于证书" class="headerlink" title="关于证书"></a>关于证书</h1><p>三台机器的所有证书文件都要一模一样吗？</p>
+<h1>关于证书</h1>
+<p>三台机器的所有证书文件都要一模一样吗？</p>
 <p>在部署 etcd 集群时，证书文件的使用方式取决于我们选择的认证方式和安全需求。</p>
 <p><strong>1. 单向认证:</strong></p>
 <ul>
@@ -531,33 +545,32 @@
 </ul>
 <p><strong>建议:</strong></p>
 <p>为了提高安全性，建议在部署 etcd 集群时使用双向 TLS 认证，并为每个节点生成唯一的证书和私钥。</p>
-<h1 id="下载etcd"><a href="#下载etcd" class="headerlink" title="下载etcd"></a>下载etcd</h1><p>etcd和etcdctl一般都在同样的地方，我们可以一并下载安装配置</p>
+<h1>下载etcd</h1>
+<p>etcd和etcdctl一般都在同样的地方，我们可以一并下载安装配置</p>
 <figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">https:<span class="hljs-regexp">//gi</span>thub.com<span class="hljs-regexp">/etcd-io/</span>etcd<span class="hljs-regexp">/releases/</span><br></code></pre></div></td></tr></table></figure>
-
 <p>从GitHub上面的官方release页面我们可以找到并下载最新的etcd二进制文件，然后我们可以将解压后的文件放到我们需要使用的目录中，本文以常用的<code>/usr/local/bin/</code>为例</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">wget https://github.com/etcd-io/etcd/releases/download/v3.5.15/etcd-v3.5.15-linux-amd64.tar.gz<br>tar -zxvf etcd-v3.5.15-linux-amd64.tar.gz<br>cp -rp etcd-v3.5.15-linux-amd64/etcdctl /usr/local/bin/etcdctl<br>cp -rp etcd-v3.5.15-linux-amd64/etcdutl /usr/local/bin/etcdutl<br>cp -rp etcd-v3.5.15-linux-amd64/etcd /usr/local/bin/etcd<br>chmod a+x /usr/local/bin/etcd /usr/local/bin/etcdutl /usr/local/bin/etcdctl<br>chwon root:root /usr/local/bin/etcd /usr/local/bin/etcdutl /usr/local/bin/etcdctl<br></code></pre></div></td></tr></table></figure>
-
-
-
-<h1 id="配置systemd"><a href="#配置systemd" class="headerlink" title="配置systemd"></a>配置systemd</h1><h2 id="配置环境变量"><a href="#配置环境变量" class="headerlink" title="配置环境变量"></a>配置环境变量</h2><figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">注意这里在配置环境变量的时候要参考最前面的环境变量参数配置</span><br>export etcd1=10.31.110.1<br>export etcd2=10.31.110.2<br>export etcd3=10.31.110.3<br><br>etcd_role=etcd1<br>local_ip=10.31.110.1<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="unit-file"><a href="#unit-file" class="headerlink" title="unit file"></a>unit file</h2><p>然后这里要配置systemd文件</p>
+<h1>配置systemd</h1>
+<h2 id="配置环境变量">配置环境变量</h2>
+<figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">注意这里在配置环境变量的时候要参考最前面的环境变量参数配置</span><br>export etcd1=10.31.110.1<br>export etcd2=10.31.110.2<br>export etcd3=10.31.110.3<br><br>etcd_role=etcd1<br>local_ip=10.31.110.1<br></code></pre></div></td></tr></table></figure>
+<h2 id="unit-file">unit file</h2>
+<p>然后这里要配置systemd文件</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">cat &lt;&lt; EOF &gt; /etc/systemd/system/etcd.service<br><br>[Unit]<br>Description=etcd - highly-available key value store<br>Documentation=https://github.com/coreos/etcd<br>Documentation=man:etcd<br>After=network.target<br>Wants=network-online.target<br><br>[Service]<br>Type=simple<br>User=root<br>PermissionsStartOnly=true<br>ExecStart=  /usr/local/bin/etcd \<br>    --name $etcd_role \<br>    --quota-backend-bytes=8589934592 \<br>    --initial-advertise-peer-urls https://$local_ip:$ETCD_PEER_PORT \<br>    --listen-peer-urls https://$local_ip:$ETCD_PEER_PORT \<br>    --listen-client-urls https://$local_ip:$ETCD_CLIENT_PORT,https://127.0.0.1:$ETCD_CLIENT_PORT \<br>    --advertise-client-urls https://$local_ip:$ETCD_CLIENT_PORT \<br>    --initial-cluster etcd1=https://$etcd1:$ETCD_PEER_PORT,etcd2=https://$etcd2:$ETCD_PEER_PORT,etcd3=https://$etcd3:$ETCD_PEER_PORT \<br>    --cert-file=$ETCD_CERTS_DIR/server.pem \<br>    --key-file=$ETCD_CERTS_DIR/server-key.pem \<br>    --peer-cert-file=$ETCD_CERTS_DIR/peer.pem \<br>    --peer-key-file=$ETCD_CERTS_DIR/peer-key.pem \<br>    --trusted-ca-file=$ETCD_CERTS_DIR/ca.crt \<br>    --peer-trusted-ca-file=$ETCD_CERTS_DIR/ca.crt \<br>    --peer-client-cert-auth \<br>    --client-cert-auth \<br>    --initial-cluster-token etcd-cluster-tinychen \<br>    --initial-cluster-state new \<br>    --listen-metrics-urls=http://0.0.0.0:$METRICS_PORT \<br>    --auto-compaction-retention=1h \<br>    --metrics=extensive \<br>    --data-dir=$ETCD_DATA_DIR<br>LimitNOFILE=655360<br>KillMode=process<br>Restart=always<br>RestartSec=20<br><br>[Install]<br>WantedBy=multi-user.target<br><br>EOF<br></code></pre></div></td></tr></table></figure>
-
 <p>这里对上面的systemd unit文件做一个简单介绍：</p>
 <p><strong>[Unit] 部分</strong></p>
 <ul>
 <li><strong>Description</strong>:  对服务的简短描述，这里描述为 “etcd - highly-available key value store”。</li>
 <li><strong>Documentation</strong>:  指向服务文档的链接，这里提供了 etcd 的 GitHub 页面和 man 手册链接。</li>
-<li><strong>After&#x3D;network.target</strong>:  指定 etcd 服务在 <code>network.target</code> 之后启动，确保网络已就绪。</li>
-<li><strong>Wants&#x3D;network-online.target</strong>:  表示 etcd 服务希望 <code>network-online.target</code> 能够启动，但即使后者失败，etcd 也会继续启动。</li>
+<li><strong>After=network.target</strong>:  指定 etcd 服务在 <code>network.target</code> 之后启动，确保网络已就绪。</li>
+<li><strong>Wants=network-online.target</strong>:  表示 etcd 服务希望 <code>network-online.target</code> 能够启动，但即使后者失败，etcd 也会继续启动。</li>
 </ul>
 <p><strong>[Service] 部分</strong></p>
 <ul>
-<li><strong>Type&#x3D;simple</strong>:  指定服务类型为简单类型，即启动一个守护进程，并由 systemd 直接管理。</li>
-<li><strong>User&#x3D;root</strong>:  指定以 root 用户身份运行服务。</li>
-<li><strong>PermissionsStartOnly&#x3D;true</strong>:  表示仅在启动服务时需要提升权限，启动后会放弃权限。</li>
-<li><strong>ExecStart</strong>:  指定启动服务的命令行，这里包含了 etcd 的可执行文件路径和一系列参数：<ul>
+<li><strong>Type=simple</strong>:  指定服务类型为简单类型，即启动一个守护进程，并由 systemd 直接管理。</li>
+<li><strong>User=root</strong>:  指定以 root 用户身份运行服务。</li>
+<li><strong>PermissionsStartOnly=true</strong>:  表示仅在启动服务时需要提升权限，启动后会放弃权限。</li>
+<li><strong>ExecStart</strong>:  指定启动服务的命令行，这里包含了 etcd 的可执行文件路径和一系列参数：
+<ul>
 <li><code>/usr/local/bin/etcd</code>: etcd 可执行文件的路径，可以根据实际安装路径修改。</li>
 <li><code>--name $etcd_role</code>:  指定 etcd 节点的角色名称，通常使用主机名或其他唯一标识符。</li>
 <li><code>--quota-backend-bytes=8589934592</code>:  设置 etcd 后端存储空间配额，单位为字节，这里设置为 8GB。</li>
@@ -582,14 +595,14 @@
 <li><code>--data-dir=$ETCD_DATA_DIR</code>:  指定 etcd 数据存储目录路径。</li>
 </ul>
 </li>
-<li><strong>LimitNOFILE&#x3D;655360</strong>:  设置 etcd 进程可以打开的最大文件描述符数量。</li>
-<li><strong>KillMode&#x3D;process</strong>:  指定停止服务时，仅杀死主进程，不杀死子进程。</li>
-<li><strong>Restart&#x3D;always</strong>:  指定服务在退出时自动重启，无论退出原因是什么。</li>
-<li><strong>RestartSec&#x3D;20</strong>:  指定服务重启的间隔时间，这里设置为 20 秒。</li>
+<li><strong>LimitNOFILE=655360</strong>:  设置 etcd 进程可以打开的最大文件描述符数量。</li>
+<li><strong>KillMode=process</strong>:  指定停止服务时，仅杀死主进程，不杀死子进程。</li>
+<li><strong>Restart=always</strong>:  指定服务在退出时自动重启，无论退出原因是什么。</li>
+<li><strong>RestartSec=20</strong>:  指定服务重启的间隔时间，这里设置为 20 秒。</li>
 </ul>
 <p><strong>[Install] 部分</strong></p>
 <ul>
-<li><strong>WantedBy&#x3D;multi-user.target</strong>:  指定服务在 <code>multi-user.target</code> 运行级别启动，这是一个通用的多用户运行级别。</li>
+<li><strong>WantedBy=multi-user.target</strong>:  指定服务在 <code>multi-user.target</code> 运行级别启动，这是一个通用的多用户运行级别。</li>
 </ul>
 <blockquote>
 <p><code>--initial-cluster-state</code> 参数用于指定 etcd 集群的初始状态，它有两个可选值：</p>
@@ -611,15 +624,14 @@
 <p><strong>总结：</strong></p>
 <p><code>--initial-cluster-state</code> 参数是 etcd 集群初始化过程中非常重要的一个参数，它决定了集群的初始状态和节点的行为。在配置 etcd 集群时，务必根据实际情况选择正确的参数值，以避免数据丢失和服务中断。</p>
 </blockquote>
-<h2 id="cipher-suite"><a href="#cipher-suite" class="headerlink" title="cipher-suite"></a>cipher-suite</h2><p>这里则是作为可选部分，调整etcd使用的加密算法从而进一步提高安全性，但是同时需要注意客户端侧的兼容性，并非强制需求配置。</p>
+<h2 id="cipher-suite">cipher-suite</h2>
+<p>这里则是作为可选部分，调整etcd使用的加密算法从而进一步提高安全性，但是同时需要注意客户端侧的兼容性，并非强制需求配置。</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">mkdir -p /etc/systemd/system/etcd.service.d<br><br>cat &lt;&lt; EOF &gt; /etc/systemd/system/etcd.service.d/cipher-suites.conf <br>[Service]<br>Environment=ETCD_CIPHER_SUITES=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_GCM_SHA384<br>EOF<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="检查集群"><a href="#检查集群" class="headerlink" title="检查集群"></a>检查集群</h2><p>完成之后我们重启服务检查集群状态</p>
+<h2 id="检查集群">检查集群</h2>
+<p>完成之后我们重启服务检查集群状态</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">systemctl daemon-reload<br>systemctl restart etcd.service<br>systemctl status etcd.service<br></code></pre></div></td></tr></table></figure>
-
 <p>当然我们还可以使用<code>etcdctl</code>命令来查看更详细的集群信息</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">etcdctl --endpoints https://$local_ip:$ETCD_CLIENT_PORT --cacert $ETCD_CERTS_DIR/ca.crt --cert $ETCD_CERTS_DIR/server.pem --key $ETCD_CERTS_DIR/server-key.pem endpoint status -w=table --cluster<br></code></pre></div></td></tr></table></figure>
-
 <p>其他的更多指令操作和内容，我们后面再慢慢探索吧。</p>
 
             </div>

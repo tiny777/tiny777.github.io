@@ -249,7 +249,6 @@
             <div class="markdown-body">
               <p>为微软windows系统自带的RDP远程桌面配置权威CA签发的证书，使得可以安全加密远程。</p>
 <span id="more"></span>
-
 <p>首先我们需要确定可以通过<code>公网IP:端口号</code>的方式来远程访问自己的windows主机，如果只是在内网远程，windows本身自己签发的证书便足够了，但是如果暴露在公网上还是使用权威CA签发的可信证书比较安全。</p>
 <blockquote>
 <p>如果家里的宽带有公网IP的可以使用DDNS+端口转发的方式暴露出远程桌面端口号，没有公网IP则可以考虑FRP内网穿透等方式。</p>
@@ -257,17 +256,16 @@
 <p>接下来我们要准备一个域名和一张域名相关的证书，这里我使用的是阿里云购买的万网域名，证书也是使用的阿里云上申请的免费证书。下载证书一般来说可以得到一个pem文件和一个key文件。</p>
 <p>首先我们使用openssl来生成p12文件，命令格式如下。如果没有安装openssl，可以先安装一个git，然后打开git bash即可使用openssl。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl pkcs12 -<span class="hljs-built_in">export</span> -clcerts -<span class="hljs-keyword">in</span> [your_domain_crt.pem] -inkey [your_domain_key.key] -out [your_domain.p12]<br></code></pre></div></td></tr></table></figure>
-
 <p>首先我们按win+r然后输入mmc打开管理台：</p>
 <p>然后在<strong>文件</strong>里面<strong>添加管理单元</strong>，选择<strong>证书</strong>，注意这里账户要选择<strong>计算机账户</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20200331/poHgymNCpHvY.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20200331/poHgymNCpHvY.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>然后在<strong>个人</strong>这里<strong>右键</strong>选择<strong>导入证书</strong>，接着按照默认设置导入我们刚刚生成的p12证书：</p>
-<p><img src="https://resource.tinychen.com/blog/20200331/roqTF8z1GQgX.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20200331/roqTF8z1GQgX.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接着我们需要修改该证书的属性使得远程桌面能够使用它</p>
-<p>然后找到我们刚刚导入的证书，点击 <strong>右键</strong> ，选择 <strong>所有任务-管理私钥</strong> ，然后把<strong>读取</strong> 权限分配给 <strong>NETWORK SERVICE</strong> </p>
-<p><img src="https://resource.tinychen.com/blog/20200331/WJbgRbClo8BK.png" srcset="/img/loading.gif" lazyload></p>
+<p>然后找到我们刚刚导入的证书，点击 <strong>右键</strong> ，选择 <strong>所有任务-管理私钥</strong> ，然后把<strong>读取</strong> 权限分配给 <strong>NETWORK SERVICE</strong></p>
+<p><img src="https://resource.tinychen.com/blog/20200331/WJbgRbClo8BK.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>成功之后我们使用证书对应的域名进行远程的时候就不会再弹出证书不安全的提醒了，如果不是使用域名进行连接而是使用IP或者局域网名的话还是会提醒证书不安全。</p>
-<p><img src="https://resource.tinychen.com/blog/20200331/f60KOXWLBdkc.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20200331/f60KOXWLBdkc.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <blockquote>
 <p>默认情况下是会使用windows自带的自签证书进行连接。</p>
 </blockquote>

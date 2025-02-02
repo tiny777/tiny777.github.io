@@ -18,12 +18,12 @@
   <meta name="author" content="TinyChen">
   <meta name="keywords" content="">
   
-    <meta name="description" content="本文主要介绍如何使用给nginx服务添加客户端证书认证从而实现双向加密。 对于一般的https网站来说，实际上https所使用的证书是属于单向验证，即客户端单向验证服务器的安全性，而服务器端是没有对客户端的身份进行验证的。关于https的原理，可以查看这篇文章：《SSL&#x2F;TLS、对称加密和非对称加密和TLSv1.3》 如果自己部署了一些安全性较高的网站不希望被其他人随意访问，就可以尝试部">
+    <meta name="description" content="本文主要介绍如何使用给nginx服务添加客户端证书认证从而实现双向加密。 对于一般的https网站来说，实际上https所使用的证书是属于单向验证，即客户端单向验证服务器的安全性，而服务器端是没有对客户端的身份进行验证的。关于https的原理，可以查看这篇文章：《SSL&#x2F;TLS、对称加密和非对称加密和TLSv1.3》 如果自己部署了一些安全性较高的网站不希望被其他人随意访问，就可以尝试部署http">
 <meta property="og:type" content="article">
 <meta property="og:title" content="nginx篇08-添加客户端证书认证">
 <meta property="og:url" content="https://tinychen.com/20210304-nginx-08-ssl-client-certificate/index.html">
 <meta property="og:site_name" content="TinyChen&#39;s Studio - 互联网技术学习工作经验分享">
-<meta property="og:description" content="本文主要介绍如何使用给nginx服务添加客户端证书认证从而实现双向加密。 对于一般的https网站来说，实际上https所使用的证书是属于单向验证，即客户端单向验证服务器的安全性，而服务器端是没有对客户端的身份进行验证的。关于https的原理，可以查看这篇文章：《SSL&#x2F;TLS、对称加密和非对称加密和TLSv1.3》 如果自己部署了一些安全性较高的网站不希望被其他人随意访问，就可以尝试部">
+<meta property="og:description" content="本文主要介绍如何使用给nginx服务添加客户端证书认证从而实现双向加密。 对于一般的https网站来说，实际上https所使用的证书是属于单向验证，即客户端单向验证服务器的安全性，而服务器端是没有对客户端的身份进行验证的。关于https的原理，可以查看这篇文章：《SSL&#x2F;TLS、对称加密和非对称加密和TLSv1.3》 如果自己部署了一些安全性较高的网站不希望被其他人随意访问，就可以尝试部署http">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://resource.tinychen.com/20210305113315s.jpg">
 <meta property="article:published_time" content="2021-03-04T07:00:00.000Z">
@@ -250,39 +250,36 @@
             
             <div class="markdown-body">
               <p>本文主要介绍如何使用给nginx服务添加客户端证书认证从而实现双向加密。</p>
-<p>对于一般的https网站来说，实际上https所使用的证书是属于单向验证，即客户端单向验证服务器的安全性，而服务器端是没有对客户端的身份进行验证的。关于https的原理，可以查看这篇文章：<a href="https://tinychen.com/20200602-encryption-intro/">《SSL&#x2F;TLS、对称加密和非对称加密和TLSv1.3》</a></p>
+<p>对于一般的https网站来说，实际上https所使用的证书是属于单向验证，即客户端单向验证服务器的安全性，而服务器端是没有对客户端的身份进行验证的。关于https的原理，可以查看这篇文章：<a href="https://tinychen.com/20200602-encryption-intro/">《SSL/TLS、对称加密和非对称加密和TLSv1.3》</a></p>
 <p>如果自己部署了一些安全性较高的网站不希望被其他人随意访问，就可以尝试部署https的双向认证，对客户端也添加证书认证。本文将会使用openssl自签证书来完成最简单的一个https双向认证。</p>
 <span id="more"></span>
-
-<h1 id="1、openssl自签证书"><a href="#1、openssl自签证书" class="headerlink" title="1、openssl自签证书"></a>1、openssl自签证书</h1><p>在开始之前我们新建一个目录专门用来存放这次生成证书相关的全部文件。openssl生成自签证书的命令非常简单，总结如下：</p>
+<h1>1、openssl自签证书</h1>
+<p>在开始之前我们新建一个目录专门用来存放这次生成证书相关的全部文件。openssl生成自签证书的命令非常简单，总结如下：</p>
 <figure class="highlight xquery"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xquery">openssl genrsa -out<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span> <span class="hljs-number">1024</span><br><br>openssl req -new -out<span class="hljs-built_in"> root</span>.csr -key<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span><br><br>openssl x509 -req -<span class="hljs-keyword">in</span><span class="hljs-built_in"> root</span>.csr -out<span class="hljs-built_in"> root</span>.crt -signkey<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span> -CAcreateserial -days <span class="hljs-number">3650</span><br></code></pre></div></td></tr></table></figure>
-
 <p>接下来我们开始逐个命令进行讲解，首先我们需要生成一个<code>root.key</code>文件</p>
-<p><img src="https://resource.tinychen.com/20210304165627.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/20210304165631.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20210304165627.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20210304165631.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p><code>root.key</code>文件生成之后，我们就可以根据<code>key</code>文件来生成一个记录证书信息的<code>csr</code>文件用于申请证书。<code>csr</code>文件需要记录相关的证书申请人的地址和邮件等信息，最后还可以设置一个密码，当需要使用这个<code>csr</code>文件来申请证书的适合就需要输入这个密码，否则无法使用，如果不想设置的话直接回车即可跳过</p>
-<p><img src="https://resource.tinychen.com/20210304165634.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/20210304165638.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20210304165634.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20210304165638.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>生成了<code>key</code>和<code>csr</code>文件之后，我们就可以自己生成一个<code>crt</code>的证书文件，由于这里是测试，我们可以直接把时间设定为10年</p>
-<p><img src="https://resource.tinychen.com/20210304165643.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20210304165643.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p><strong>到这一步，我们已经生成了一个完整的自签CA证书，其中包含了私钥key文件，证书信息csr文件和公钥crt文件。</strong></p>
-<p><img src="https://resource.tinychen.com/20210304165646.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="2、生成p12证书"><a href="#2、生成p12证书" class="headerlink" title="2、生成p12证书"></a>2、生成p12证书</h1><p>为了方便使用，我们需要把证书打包成p12格式的证书文件，然后在客户端的电脑上导入。同样的在生成p12文件的时候我们最好添加一个密码保护，这样就算证书泄露了也不会导致安全问题。</p>
+<p><img src="https://resource.tinychen.com/20210304165646.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>2、生成p12证书</h1>
+<p>为了方便使用，我们需要把证书打包成p12格式的证书文件，然后在客户端的电脑上导入。同样的在生成p12文件的时候我们最好添加一个密码保护，这样就算证书泄露了也不会导致安全问题。</p>
 <figure class="highlight xquery"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xquery">openssl pkcs12 -export -clcerts -<span class="hljs-keyword">in</span><span class="hljs-built_in"> root</span>.crt -inkey<span class="hljs-built_in"> root</span><span class="hljs-built_in">.key</span> -out<span class="hljs-built_in"> root</span>.p12<br></code></pre></div></td></tr></table></figure>
-
-<p><img src="https://resource.tinychen.com/20210304165650.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="3、配置nginx"><a href="#3、配置nginx" class="headerlink" title="3、配置nginx"></a>3、配置nginx</h1><p>最后我们只需要在nginx中需要使用双向认证的部分添加以下配置然后重启即可生效</p>
+<p><img src="https://resource.tinychen.com/20210304165650.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>3、配置nginx</h1>
+<p>最后我们只需要在nginx中需要使用双向认证的部分添加以下配置然后重启即可生效</p>
 <figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-comment"># 客户端公钥证书</span><br><span class="hljs-attribute">ssl_client_certificate</span> /path/to/root.crt;<br><span class="hljs-comment"># 开启客户端证书验证</span><br><span class="hljs-attribute">ssl_verify_client</span> <span class="hljs-literal">on</span>;<br></code></pre></div></td></tr></table></figure>
-
 <p>最后我们在windows或者mac上面导入p12文件之后，打开对应的网站就会有相应的提示了：</p>
-<p><img src="https://resource.tinychen.com/20210304165654.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20210304165654.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>如果不进行证书验证，则服务器会返回400错误。</p>
 <p>我们还可以使用curl来进行测试，如果不带上证书，会直接报400错误。</p>
 <figure class="highlight gherkin"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs gherkin"><span class="hljs-comment"># curl https://ip.tinychen.com</span><br><span class="hljs-variable">&lt;html&gt;</span><br><span class="hljs-variable">&lt;head&gt;</span><span class="hljs-variable">&lt;title&gt;</span>400 No required SSL certificate was sent<span class="hljs-variable">&lt;/title&gt;</span><span class="hljs-variable">&lt;/head&gt;</span><br><span class="hljs-variable">&lt;body&gt;</span><br><span class="hljs-variable">&lt;center&gt;</span><span class="hljs-variable">&lt;h1&gt;</span>400 Bad Request<span class="hljs-variable">&lt;/h1&gt;</span><span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;center&gt;</span>No required SSL certificate was sent<span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;hr&gt;</span><span class="hljs-variable">&lt;center&gt;</span>nginx<span class="hljs-variable">&lt;/center&gt;</span><br><span class="hljs-variable">&lt;/body&gt;</span><br><span class="hljs-variable">&lt;/html&gt;</span><br></code></pre></div></td></tr></table></figure>
-
 <p>带上证书之后则访问正常</p>
 <figure class="highlight jboss-cli"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs jboss-cli">$ curl <span class="hljs-params">--cert</span> <span class="hljs-string">./root.crt</span> <span class="hljs-params">--key</span> <span class="hljs-string">./root.key</span> https:<span class="hljs-string">//ip.tinychen.com</span><br>hello world<br></code></pre></div></td></tr></table></figure>
-
 <p>如果想要查看curl的详细过程，我们可以加上-v参数来查看。</p>
 
             </div>

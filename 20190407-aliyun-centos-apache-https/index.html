@@ -248,97 +248,85 @@
             <div class="markdown-body">
               <p>记录一下给Hexo博客配置https域名过程中踩的各种坑。</p>
 <span id="more"></span>
-
-<h1 id="1、申请证书"><a href="#1、申请证书" class="headerlink" title="1、申请证书"></a>1、申请证书</h1><p>SSL的证书基本可以分为申请的和自己创建的，阿里云上面有免费的可以申请，本着多一事不如少一事的原则（其实是太菜了），果断选择阿里云的SSL证书申请。</p>
+<h1>1、申请证书</h1>
+<p>SSL的证书基本可以分为申请的和自己创建的，阿里云上面有免费的可以申请，本着多一事不如少一事的原则（其实是太菜了），果断选择阿里云的SSL证书申请。</p>
 <p>▼点击<strong>SSL证书（应用安全）</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20190407/V86YoJAf1O9h.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/V86YoJAf1O9h.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>▼选择免费的那个。</p>
-<p><img src="https://resource.tinychen.com/blog/20190407/PCNH2aBNwo5T.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190407/vaezJD4QVjtk.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/PCNH2aBNwo5T.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/vaezJD4QVjtk.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>▼填写一些申请的信息。</p>
-<p><img src="https://resource.tinychen.com/blog/20190407/8SPnmycdcig1.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/8SPnmycdcig1.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>▼然后需要进行信息验证，一般都是DNS验证，如果是在阿里云购买的域名，会自动添加DNS解析验证，其他的就需要到域名管理里面手动添加了。</p>
-<p><img src="https://resource.tinychen.com/blog/20190407/zsLtXQPJy8JQ.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190407/W9J2DCU9jI3s.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/zsLtXQPJy8JQ.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190407/W9J2DCU9jI3s.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>▼提交成功之后耐心等待一下，很快就会申请通过。</p>
-<p><img src="https://resource.tinychen.com/blog/20190407/wKz3bxESUmvW.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="2、安装Apache和openssl"><a href="#2、安装Apache和openssl" class="headerlink" title="2、安装Apache和openssl"></a>2、安装Apache和openssl</h1><h2 id="2-1-安装Apache"><a href="#2-1-安装Apache" class="headerlink" title="2.1 安装Apache"></a>2.1 安装Apache</h2><p>由于是在apache服务器上面搭建的博客，所以我的服务器已经安装好了apache，输入下列命令可以查看apache的版本信息。</p>
+<p><img src="https://resource.tinychen.com/blog/20190407/wKz3bxESUmvW.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>2、安装Apache和openssl</h1>
+<h2 id="2-1-安装Apache">2.1 安装Apache</h2>
+<p>由于是在apache服务器上面搭建的博客，所以我的服务器已经安装好了apache，输入下列命令可以查看apache的版本信息。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">httpd -v<br><span class="hljs-comment"># 输入该命令查看apache的版本信息</span><br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190408/dPXnVqobh7Er.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/dPXnVqobh7Er.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>如果没有安装apache的话，可以选择手动下载安装包安装或者是使用yum进行安装，不同的安装方式生成的文件目录会有一些不太一样，这对后面的SSL证书配置有着很大的影响。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install httpd<br><span class="hljs-comment"># 使用yum安装apache，这样安装的httpd的默认目录是在/etc/httpd文件夹里面</span><br></code></pre></div></td></tr></table></figure>
-
 <p>接着再安装一些必要的工具和扩展</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum -y install gcc* make* apr apr-util pcre apr-devel apr-util-devel  pcre-devel<br></code></pre></div></td></tr></table></figure>
-
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum -y install httpd-manual mod_ssl mod_perl mod_auth_mysql<br></code></pre></div></td></tr></table></figure>
-
-<h2 id="2-2-安装openssl"><a href="#2-2-安装openssl" class="headerlink" title="2.2 安装openssl"></a>2.2 安装openssl</h2><p>接着是使用yum安装openssl模块。如果有特殊需求的，可以到官网下载openssl自行编译，在这里只需要使用yum进行安装即可。</p>
+<h2 id="2-2-安装openssl">2.2 安装openssl</h2>
+<p>接着是使用yum安装openssl模块。如果有特殊需求的，可以到官网下载openssl自行编译，在这里只需要使用yum进行安装即可。</p>
 <figure class="highlight cmake"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> openssl openssl-devel<br></code></pre></div></td></tr></table></figure>
-
 <p>查看openssl版本</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl version -a<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190408/QTIlgANAT4sn.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/QTIlgANAT4sn.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>确认安装好apache和openssl之后，我们进入下一步。</p>
-<h1 id="3、上传证书到服务器"><a href="#3、上传证书到服务器" class="headerlink" title="3、上传证书到服务器"></a>3、上传证书到服务器</h1><p>阿里云那边的证书申请好之后，我们下载证书到自己的电脑里面，解压可以得到类似这样子的三个文件。</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/TW5JLvUOCKDc.png" srcset="/img/loading.gif" lazyload></p>
+<h1>3、上传证书到服务器</h1>
+<p>阿里云那边的证书申请好之后，我们下载证书到自己的电脑里面，解压可以得到类似这样子的三个文件。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/TW5JLvUOCKDc.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>图中的是默认的名字，改不改都可以，不要搞混了就行，接下来我们把它们上传到服务器中的apache的安装目录下面，给他们专门新建一个cert文件夹。</p>
 <p>首先我们在服务器中给他新建一个目录</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> /etc/httpd/cert<br></code></pre></div></td></tr></table></figure>
-
-
-
 <p>然后把本机的证书上传到服务器，我们可以直接使用scp命令上传文件，也可以使用Xshell中的Xftp来传输，还有其他的各种方式也都可以，反正传上去了就行。</p>
 <p>我这里使用scp命令为例：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># scp命令的最基本用法是：</span><br>scp fileLocation username@hostIP: DestinationLocation<br><span class="hljs-comment"># 以在桌面传送一个文件到/etc/httpd/cert目录为例（此时我是在桌面直接打开gitbash）</span><br>scp 1692315_tiny777.com.key root@47.107.188.168:/etc/httpd/cert<br></code></pre></div></td></tr></table></figure>
-
-<h1 id="4、开启443端口"><a href="#4、开启443端口" class="headerlink" title="4、开启443端口"></a>4、开启443端口</h1><p>https默认是使用443端口进行监听，虽然阿里云默认是开启了443端口的，但是为了保险起见，我们还是确认一下。</p>
+<h1>4、开启443端口</h1>
+<p>https默认是使用443端口进行监听，虽然阿里云默认是开启了443端口的，但是为了保险起见，我们还是确认一下。</p>
 <p>点开阿里云的控制台，点击轻量级应用服务器。如下图所示：</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/GqIHot50UgPD.png" srcset="/img/loading.gif" lazyload></p>
-<h1 id="5、配置ssl"><a href="#5、配置ssl" class="headerlink" title="5、配置ssl"></a>5、配置ssl</h1><h2 id="5-1-启用ssl模块支持"><a href="#5-1-启用ssl模块支持" class="headerlink" title="5.1 启用ssl模块支持"></a>5.1 启用ssl模块支持</h2><p>这里就是比较坑的地方了，<a target="_blank" rel="noopener" href="https://help.aliyun.com/knowledge_detail/95493.html?spm=5176.2020520154.cas.26.15e456a71TICkj">阿里云的帮助文档</a>说的可能是别的方式安装的apache服务器，和我的情况不太一样。但是思路却还是正确的。</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/L2RWziR8m2kT.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/GqIHot50UgPD.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1>5、配置ssl</h1>
+<h2 id="5-1-启用ssl模块支持">5.1 启用ssl模块支持</h2>
+<p>这里就是比较坑的地方了，<a target="_blank" rel="noopener" href="https://help.aliyun.com/knowledge_detail/95493.html?spm=5176.2020520154.cas.26.15e456a71TICkj">阿里云的帮助文档</a>说的可能是别的方式安装的apache服务器，和我的情况不太一样。但是思路却还是正确的。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/L2RWziR8m2kT.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>这两步，第一步的主要作用是开启apache的ssl模块支持，第二步则是Include代码ssl的配置文件使其生效。</p>
 <p>使用yum安装的apache有一些不太一样，相对应的配置文件都在<code>/etc/httpd/conf.modules.d</code>这个目录下面，我们接下来主要会用到的就是这个<code>00-ssl.conf</code>和<code>00-base.conf</code>文件。</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/x6jUOPJ0dTks.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/x6jUOPJ0dTks.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>打开<code>00-ssl.conf</code>就能看到对应阿里云教程里面的第一步操作，启用ssl模块支持。</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/Vzy8oMhQxVrQ.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/Vzy8oMhQxVrQ.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来我们在<code>/etc/httpd/conf/httpd.conf</code>这个文件里面，可以找到这一行（在56行左右的位置）</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Include conf.modules.d/*.conf<br></code></pre></div></td></tr></table></figure>
-
 <p>这一行代码的意思就是Include了整个<code>conf.modules.d</code>文件夹里面的所有<code>conf</code>后缀的文件，这个<code>00-ssl.conf</code>文件当然也不例外。</p>
-<h2 id="5-2-配置ssl"><a href="#5-2-配置ssl" class="headerlink" title="5.2 配置ssl"></a>5.2 配置ssl</h2><p>完成上面的两步操作之后，我们就要配置ssl的配置文件了。我们再看阿里云的文档。</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/pj1wWPbyUbdv.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="5-2-配置ssl">5.2 配置ssl</h2>
+<p>完成上面的两步操作之后，我们就要配置ssl的配置文件了。我们再看阿里云的文档。</p>
+<p><img src="https://resource.tinychen.com/blog/20190408/pj1wWPbyUbdv.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 添加 SSL 协议支持协议，去掉不安全的协议</span><br>SSLProtocol all -SSLv2 -SSLv3<br><span class="hljs-comment"># 修改加密套件如下</span><br>SSLCipherSuite HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM<br>SSLHonorCipherOrder on<br><span class="hljs-comment"># 证书公钥配置</span><br>SSLCertificateFile cert/a_public.crt<br><span class="hljs-comment"># 证书私钥配置</span><br>SSLCertificateKeyFile cert/a.key<br><span class="hljs-comment"># 证书链配置，如果该属性开头有 &#x27;#&#x27;字符，请删除掉</span><br>SSLCertificateChainFile cert/a_chain.crt<br></code></pre></div></td></tr></table></figure>
-
 <p>还是一样的问题，路径不太正确，我们这里找到的文件路径是<code>/etc/httpd/conf.d/ssl.conf</code></p>
-<p><img src="https://resource.tinychen.com/blog/20190408/E3iYqx2ohyuF.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/E3iYqx2ohyuF.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>在更改配置文件之前，为了保险起见，咱们先备份一下，以备不时之需。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> ssl.conf ssl.conf.bak<br></code></pre></div></td></tr></table></figure>
-
 <p>这里再给出我自己的<code>ssl.conf</code>文件和大家交流一下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Listen 443<br>&lt;VirtualHost *:443&gt;<br><br>DocumentRoot <span class="hljs-string">&quot;/var/www/html&quot;</span><br>ServerName tiny777.com<br>ServerAlias www.tiny777.com<br><br><br>SSLEngine on<br><br>SSLProtocol all -SSLv2 -SSLv3<br><br>SSLCertificateFile /etc/httpd/cert/1692315_tiny777.com_public.crt<br><br>SSLCertificateKeyFile /etc/httpd/cert/1692315_tiny777.com.key<br><br>SSLCertificateChainFile /etc/httpd/cert/1692315_tiny777.com_chain.crt<br><br>DirectoryIndex index.html index.htm index.php<br>&lt;Directory <span class="hljs-string">&quot;/var/www/html&quot;</span>&gt;<br>     Options Indexes FollowSymLinks<br>     AllowOverride None<br>     Require all granted<br>&lt;/Directory&gt;<br>&lt;/VirtualHost&gt;<br></code></pre></div></td></tr></table></figure>
-
 <p>理论上这个时候重启apache服务已经可以输入https加上我们的域名来开启https访问了，但是这个时候的https和http相互独立，默认是访问http的域名，我们需要开启http域名自动跳转到https域名。</p>
-<h2 id="5-3-自动跳转到https"><a href="#5-3-自动跳转到https" class="headerlink" title="5.3 自动跳转到https"></a>5.3 自动跳转到https</h2><p>保险起见，我们坚持一下自动跳转需要用到的rewrite模块是否开启了，还是在之前说的<code>/etc/httpd/conf.d/00-base.conf</code>文件里面查找一下rewrite模块，确定已经启用。</p>
+<h2 id="5-3-自动跳转到https">5.3 自动跳转到https</h2>
+<p>保险起见，我们坚持一下自动跳转需要用到的rewrite模块是否开启了，还是在之前说的<code>/etc/httpd/conf.d/00-base.conf</code>文件里面查找一下rewrite模块，确定已经启用。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">LoadModule rewrite_module modules/mod_rewrite.so<br></code></pre></div></td></tr></table></figure>
-
-
-<p><img src="https://resource.tinychen.com/blog/20190408/DWjiOTE3pJKJ.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/DWjiOTE3pJKJ.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <p>接下来我们定位到这个目录</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> /etc/httpd/conf<br></code></pre></div></td></tr></table></figure>
-
 <p>更改<code>httpd.conf</code>文件，在最后面加入这几行代码：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">RewriteEngine on<br>RewriteCond %&#123;SERVER_PORT&#125; !^443$<br>RewriteRule ^.*$ https://%&#123;SERVER_NAME&#125;%&#123;REQUEST_URI&#125; [L,R=301]<br></code></pre></div></td></tr></table></figure>
-
 <p>最后我们重启apache服务，就能开启域名的https访问了。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">systemctl restart httpd.service<br></code></pre></div></td></tr></table></figure>
-
 <p>最终效果如下：</p>
-<p><img src="https://resource.tinychen.com/blog/20190408/a4AX9fsON750.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190408/a4AX9fsON750.png" srcset="/img/loading.gif" lazyload alt=""></p>
 
             </div>
             <hr>

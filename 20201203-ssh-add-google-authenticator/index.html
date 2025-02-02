@@ -249,34 +249,28 @@
             <div class="markdown-body">
               <p>本文主要讲解在centos7系统中添加谷歌验证器来开启ssh的双重认证从而提高ssh服务在使用密码登录的时候的安全性。</p>
 <span id="more"></span>
-
 <p><a target="_blank" rel="noopener" href="https://linux.cn/article-3725-1.html">本文参考链接。</a></p>
-<h1 id="1、Linux上安装google验证器"><a href="#1、Linux上安装google验证器" class="headerlink" title="1、Linux上安装google验证器"></a>1、Linux上安装google验证器</h1><p>首先我们需要启用epel仓库</p>
+<h1>1、Linux上安装google验证器</h1>
+<p>首先我们需要启用epel仓库</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install epel-release<br></code></pre></div></td></tr></table></figure>
-
 <p>然后我们需要安装相关依赖库</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install pam-devel<br></code></pre></div></td></tr></table></figure>
-
 <p>接着直接安装google验证器</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看版本信息</span><br>yum list google-authenticator<br><span class="hljs-comment"># 直接安装</span><br>yum install google-authenticator<br></code></pre></div></td></tr></table></figure>
-
 <p>安装完成之后进行初始化配置，直接运行下面命令开始初始化配置</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">google-authenticator<br></code></pre></div></td></tr></table></figure>
-
 <p>初始化过程中生成二维码需要通过手机端的<code>google身份验证器</code>这个软件来扫描然后就可以添加到一个30s变化一次的动态密码；</p>
 <p>另外还有一个生成的<code>emergency scratch codes</code>记得自己小心保存起来，这个是当手机丢失的时候用来紧急登录的；</p>
 <p>其他的选项根据自己的需求进行选择，不知道的话就默认选择<code>y</code>即可。</p>
-<h1 id="2、给ssh启用google验证"><a href="#2、给ssh启用google验证" class="headerlink" title="2、给ssh启用google验证"></a>2、给ssh启用google验证</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;auth required pam_google_authenticator.so&quot;</span> &gt;&gt; /etc/pam.d/sshd <br></code></pre></div></td></tr></table></figure>
-
+<h1>2、给ssh启用google验证</h1>
+<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;auth required pam_google_authenticator.so&quot;</span> &gt;&gt; /etc/pam.d/sshd <br></code></pre></div></td></tr></table></figure>
 <p>修改ssh的配置文件<code>/etc/ssh/sshd_config</code>，将下列参数调整为<code>yes</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ChallengeResponseAuthentication <span class="hljs-built_in">yes</span><br></code></pre></div></td></tr></table></figure>
-
 <p>最后我们重启ssh服务即可</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">systemctl restart sshd<br></code></pre></div></td></tr></table></figure>
-
-<h1 id="3、效果"><a href="#3、效果" class="headerlink" title="3、效果"></a>3、效果</h1><p>重启之后需要再次使用密码进行ssh登录的时候就需要先输入前面的谷歌验证码才能再输入密码登录。</p>
+<h1>3、效果</h1>
+<p>重启之后需要再次使用密码进行ssh登录的时候就需要先输入前面的谷歌验证码才能再输入密码登录。</p>
 <figure class="highlight nestedtext"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nestedtext"><span class="hljs-attribute">Verification code</span><span class="hljs-punctuation">:</span><br><span class="hljs-attribute">Password</span><span class="hljs-punctuation">:</span><br></code></pre></div></td></tr></table></figure>
-
 
             </div>
             <hr>

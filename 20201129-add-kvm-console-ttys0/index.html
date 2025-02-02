@@ -249,15 +249,12 @@
             <div class="markdown-body">
               <p>本文主要介绍如何给KVM虚拟机添加ttyS0终端实现宿主机的console操作。</p>
 <span id="more"></span>
-
 <p>一般来说直接创建的虚拟机是没办法在宿主机上直接通过console命令来操作，在使用console命令的时候会卡在下列界面</p>
-<p><img src="https://resource.tinychen.com/20201130101109.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20201130101109.png" srcset="/img/loading.gif" lazyload alt=""></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 添加到securetty中允许登录</span><br>grep ttyS0 /etc/securetty || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;ttyS0&quot;</span> &gt;&gt; /etc/securetty<br><span class="hljs-comment"># 使用grubby在内核参数中添加ttyS0</span><br>grubby --update-kernel=ALL --args=console=ttyS0<br><span class="hljs-comment"># 添加到inittab中实现开机初始化tty</span><br>grep ttyS0 /etc/inittab || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;S0:12345:respawn:/sbin/agetty ttyS0 115200&quot;</span> &gt;&gt; /etc/inittab<br><span class="hljs-comment"># 重启生效</span><br>reboot<br></code></pre></div></td></tr></table></figure>
-
 <blockquote>
-<p> <code>/etc/inittab</code>文件中的配置按照以下格式进行书写</p>
+<p><code>/etc/inittab</code>文件中的配置按照以下格式进行书写</p>
 <figure class="highlight applescript"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs applescript"><span class="hljs-built_in">id</span>：runlevels：action：process<br></code></pre></div></td></tr></table></figure>
-
 <ul>
 <li>id：它是每个登记项的标识符，用于唯一标识每个登记项，不能重复</li>
 <li>runlevels：系统的运行级别，表示process的action要在哪个级别下运行，该段中可以定义多个运行级别，各级别之间直接写不用分隔符；如果为空，表示在所有的运行级别运行</li>
@@ -266,7 +263,7 @@
 </ul>
 </blockquote>
 <p>之后再次尝试就可以正常操作了</p>
-<p><img src="https://resource.tinychen.com/20201130101844.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20201130101844.png" srcset="/img/loading.gif" lazyload alt=""></p>
 
             </div>
             <hr>
