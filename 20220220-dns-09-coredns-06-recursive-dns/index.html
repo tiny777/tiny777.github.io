@@ -250,31 +250,39 @@
             <div class="markdown-body">
               <p>本文主要用于介绍CoreDNS实现递归服务器的几种方式以及在生产环境中遇到的一些问题和解决方案。</p>
 <span id="more"></span>
+
 <p>在开始之前我们需要知道一些关于CoreDNS的基本知识：CoreDNS本身是没有能力作为一个递归查询的DNS服务器（Recursive DNS），但是它有着众多的插件，可以通过插件来实现对域名的递归查询和缓存等功能从而加速客户端的DNS查询性能。这里主要实现的插件有<a target="_blank" rel="noopener" href="https://coredns.io/plugins/forward/">内部插件（Plugins）<code>forward</code></a>或<a target="_blank" rel="noopener" href="https://coredns.io/explugins/unbound/">外部插件（External Plugins）<code>unbound</code></a>。</p>
 <blockquote>
 <p>CoreDNS官方对External Plugins的描述为：</p>
 <p>Out of tree plugins for CoreDNS. A plugin listed here is <em>not automatically</em> endorsed by the CoreDNS team. Issues should be reported to owner(s) of the plugin.</p>
 <p>我们可以将CoreDNS的External Plugins简单理解为第三方插件，但是其中少部分会有官方的维护支持或者是直接默认内置在官方编译好的版本中。</p>
 </blockquote>
-<h1>1、unbound</h1>
-<p>我们先来了解一下不依靠外部程序实现递归查询功能的unbound插件，<a target="_blank" rel="noopener" href="https://www.nlnetlabs.nl/projects/unbound/about/">unbound</a>是一个非常优秀的DNS软件，专注于递归查询和缓存，但对于权威DNS服务器这方面的功能稍显不足，因此理论上将unbound和CoreDNS结合就可以很好的弥补两者的不足。</p>
-<h2 id="1-1-编译安装">1.1 编译安装</h2>
-<p>unbound插件的编译安装稍显麻烦，<a href="https://tinychen.com/20210713-dns07-coredns-04-unbound/">此前的文章</a>中有详细介绍操作步骤和注意事项，需要特别注意的是<strong>编译安装了<code>unbound</code>插件的CoreDNS会从原来的静态二进制文件，变成了需要动态加载依赖库。因此如果需要提前编译然后大范围使用，最好保证编译环境的系统和最终的使用环境系统一致或全兼容。</strong></p>
-<h2 id="1-2-一些问题">1.2 一些问题</h2>
-<p>unbound插件已经很长一段时间没有更新维护了，尽管它有<code>Maintained by CoreDNS</code>的标注，因此如果使用较新版本的go编译之后，在启动的时候会有报警。</p>
+<h1 id="1、unbound"><a href="#1、unbound" class="headerlink" title="1、unbound"></a>1、unbound</h1><p>我们先来了解一下不依靠外部程序实现递归查询功能的unbound插件，<a target="_blank" rel="noopener" href="https://www.nlnetlabs.nl/projects/unbound/about/">unbound</a>是一个非常优秀的DNS软件，专注于递归查询和缓存，但对于权威DNS服务器这方面的功能稍显不足，因此理论上将unbound和CoreDNS结合就可以很好的弥补两者的不足。</p>
+<h2 id="1-1-编译安装"><a href="#1-1-编译安装" class="headerlink" title="1.1 编译安装"></a>1.1 编译安装</h2><p>unbound插件的编译安装稍显麻烦，<a href="https://tinychen.com/20210713-dns07-coredns-04-unbound/">此前的文章</a>中有详细介绍操作步骤和注意事项，需要特别注意的是<strong>编译安装了<code>unbound</code>插件的CoreDNS会从原来的静态二进制文件，变成了需要动态加载依赖库。因此如果需要提前编译然后大范围使用，最好保证编译环境的系统和最终的使用环境系统一致或全兼容。</strong></p>
+<h2 id="1-2-一些问题"><a href="#1-2-一些问题" class="headerlink" title="1.2 一些问题"></a>1.2 一些问题</h2><p>unbound插件已经很长一段时间没有更新维护了，尽管它有<code>Maintained by CoreDNS</code>的标注，因此如果使用较新版本的go编译之后，在启动的时候会有报警。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">Jan 18 02:29:16 coredns1 coredns: [WARNING] An external plugin (/home/gopath/pkg/mod/github.com/coredns/unbound@v0.0.7/setup.go line 63) is using the deprecated <span class="hljs-keyword">function</span> Normalize. This will be removed <span class="hljs-keyword">in</span> a future versions of CoreDNS. The plugin should be updated to use OriginsFromArgsOrServerBlock or NormalizeExact instead.<br></code></pre></div></td></tr></table></figure>
+
 <p>另外就是在运行的过程中会出现panic异常，一开始怀疑是和负载有关，后面测试发现当请求量极低（个位数qps）的时候也会出现此类异常。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ ./coredns -dns.port=53 -conf /home/coredns/corefile<br>.:53 on 0.0.0.0<br>CoreDNS-1.8.3<br>linux/amd64, go1.16.4, 7b43d042-dirty<br>[INFO] 127.0.0.1:46007 - 37929 <span class="hljs-string">&quot;A IN baidu.com. udp 50 false 4096&quot;</span> NOERROR qr,rd,ra 484 0.614542s<br>[INFO] 127.0.0.1:32946 - 43201 <span class="hljs-string">&quot;A IN baidu.com. udp 50 false 4096&quot;</span> NOERROR qr,aa,rd,ra 484 0.0000971s<br>[INFO] 127.0.0.1:38201 - 44652 <span class="hljs-string">&quot;A IN baidu.com. udp 50 false 4096&quot;</span> NOERROR qr,aa,rd,ra 484 0.0001522s<br>[INFO] 127.0.0.1:50863 - 63692 <span class="hljs-string">&quot;A IN tinychen.com. udp 53 false 4096&quot;</span> NOERROR qr,rd,ra 58 0.3613896s<br>[ERROR] Recovered from panic <span class="hljs-keyword">in</span> server: <span class="hljs-string">&quot;dns://0.0.0.0:53&quot;</span><br>[ERROR] Recovered from panic <span class="hljs-keyword">in</span> server: <span class="hljs-string">&quot;dns://0.0.0.0:53&quot;</span><br>[ERROR] Recovered from panic <span class="hljs-keyword">in</span> server: <span class="hljs-string">&quot;dns://0.0.0.0:53&quot;</span><br></code></pre></div></td></tr></table></figure>
+
 <p>经过多次测试之后，我们发现针对unbound插件出现<code>panic</code>的情况<strong>和请求的频率无关，而是和请求的内容有关</strong>。简单来说就是：<strong>当请求的域名本身就不存在解析的时候，就会触发panic异常；当然还可以再进一步：当CoreDNS服务端本身无法和根域名服务器建立连接转发查询的时候，也会出现panic异常。</strong></p>
-<h1>2、forward</h1>
-<h2 id="2-1-配置使用">2.1 配置使用</h2>
-<p><a target="_blank" rel="noopener" href="https://coredns.io/plugins/forward/">forward插件</a>主要的作用就是把DNS请求转发给上游的upstream服务器。<code>forward</code>插件本身并不支持任何的DNS解析功能，但是可以将相应的请求转发到递归服务器上，再结合<code>cache</code>插件做缓存，从而实现递归查询解析缓存的功能。</p>
+<h1 id="2、forward"><a href="#2、forward" class="headerlink" title="2、forward"></a>2、forward</h1><h2 id="2-1-配置使用"><a href="#2-1-配置使用" class="headerlink" title="2.1 配置使用"></a>2.1 配置使用</h2><p><a target="_blank" rel="noopener" href="https://coredns.io/plugins/forward/">forward插件</a>主要的作用就是把DNS请求转发给上游的upstream服务器。<code>forward</code>插件本身并不支持任何的DNS解析功能，但是可以将相应的请求转发到递归服务器上，再结合<code>cache</code>插件做缓存，从而实现递归查询解析缓存的功能。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">.:53 &#123;<br>    forward . 114.114.114.114 114.114.115.115 &#123;<br>        health_check 5s<br>    &#125;<br>    <span class="hljs-built_in">log</span><br>    errors<br>    ready <br>    prometheus <br>    cache &#123;<br>        success 10240 600 60<br>        denial 5120 60 5<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>forward对应的upstream机器可以根据自己的需求选择现有的公共DNS，如国内常见的114、谷歌的8888等免费DNS，或者选择自己使用unbound、bind9之类的DNS服务器单独搭建一个专门用来做递归查询的DNS服务。</p>
-<h2 id="2-2-一些问题">2.2 一些问题</h2>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">Jan</span> <span class="hljs-number">18</span> <span class="hljs-number">05</span>:<span class="hljs-number">29</span>:<span class="hljs-number">16</span> coredns1 coredns:<span class="hljs-meta"> [ERROR] plugin/errors: 2 nonexist.test.tinychen.com. A: read udp 127.0.0.1:7522-&gt;114.114.114.114:53: i/o timeout</span><br></code></pre></div></td></tr></table></figure>
+<h2 id="2-2-一些问题"><a href="#2-2-一些问题" class="headerlink" title="2.2 一些问题"></a>2.2 一些问题</h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">Jan</span> <span class="hljs-number">18</span> <span class="hljs-number">05</span>:<span class="hljs-number">29</span>:<span class="hljs-number">16</span> coredns1 coredns:<span class="hljs-meta"> [ERROR] plugin/errors: 2 nonexist.test.tinychen.com. A: read udp 127.0.0.1:7522-&gt;114.114.114.114:53: i/o timeout</span><br></code></pre></div></td></tr></table></figure>
+
 <p>当查询的域名解析记录不存在或者是网络问题不可达的时候，可能会触发upstream的超时时间限制，导致报错<code>i/o timeout</code>，可以考虑使用<code>error</code>插件的<code>consolidate</code>指令对这类报警进行统一处理并修改报警等级</p>
 <figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">errors &#123;<br>    consolidate 5m <span class="hljs-string">&quot;.* i/o timeout$&quot;</span> <span class="hljs-built_in">warning</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
 
             </div>
             <hr>

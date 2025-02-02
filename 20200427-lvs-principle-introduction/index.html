@@ -208,7 +208,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      6.4k 字
+      6.5k 字
     </span>
   
 
@@ -250,12 +250,9 @@
             <div class="markdown-body">
               <p>本文主要包括LVS三种模式的基本工作原理介绍和可能涉及的ARP问题原理。</p>
 <span id="more"></span>
-<h1>1、LVS简介</h1>
-<h2 id="1-1-LVS起源">1.1 LVS起源</h2>
-<p>LVS是Linux Virtual Server的简称，也叫Linux虚拟服务器, 也就是现在常说的四层负载均衡。 它是一个由章文嵩博士发起的<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org">自由软件项目</a><br>
-。现在LVS已经是 Linux标准内核的一部分，在Linux2.4内核以前，使用LVS时必须要重新编译内核以支持LVS功能模块，但是从Linux2.4内核以后，已经完全内置了LVS的各个功能模块，无需给内核打任何补丁，可以直接使用LVS提供的各种功能。</p>
-<h2 id="1-2-LVS常用名词概念">1.2 LVS常用名词概念</h2>
-<ul>
+
+<h1 id="1、LVS简介"><a href="#1、LVS简介" class="headerlink" title="1、LVS简介"></a>1、LVS简介</h1><h2 id="1-1-LVS起源"><a href="#1-1-LVS起源" class="headerlink" title="1.1 LVS起源"></a>1.1 LVS起源</h2><p>LVS是Linux Virtual Server的简称，也叫Linux虚拟服务器, 也就是现在常说的四层负载均衡。 它是一个由章文嵩博士发起的<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/">自由软件项目</a><br>。现在LVS已经是 Linux标准内核的一部分，在Linux2.4内核以前，使用LVS时必须要重新编译内核以支持LVS功能模块，但是从Linux2.4内核以后，已经完全内置了LVS的各个功能模块，无需给内核打任何补丁，可以直接使用LVS提供的各种功能。</p>
+<h2 id="1-2-LVS常用名词概念"><a href="#1-2-LVS常用名词概念" class="headerlink" title="1.2 LVS常用名词概念"></a>1.2 LVS常用名词概念</h2><ul>
 <li>loadbalance：<code>Load Balancer</code>，负载均衡器，运行LVS负责负载均衡的服务器</li>
 <li>DS：<code>Director Server</code>，指的是前端负载均衡器节点，也就是运行LVS的服务器；</li>
 <li>RS：<code>Real Server</code>，后端真实的工作服务器；</li>
@@ -264,9 +261,8 @@
 <li>RIP：<code>Real Server IP</code>，后端服务器的IP地址；</li>
 <li>CIP：<code>Client IP</code>，访问客户端的IP地址；</li>
 </ul>
-<h1>2、LVS基本原理</h1>
-<p>一般说的LVS集群指的是对于客户端来说的一个大型快速可靠高可用的服务器集群。LVS的核心是在LVS director上的Linux内核中的ip_vs内核模块</p>
-<p><img src="https://resource.tinychen.com/20200420163129.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1 id="2、LVS基本原理"><a href="#2、LVS基本原理" class="headerlink" title="2、LVS基本原理"></a>2、LVS基本原理</h1><p>一般说的LVS集群指的是对于客户端来说的一个大型快速可靠高可用的服务器集群。LVS的核心是在LVS director上的Linux内核中的ip_vs内核模块</p>
+<p><img src="https://resource.tinychen.com/20200420163129.png" srcset="/img/loading.gif" lazyload></p>
 <p>对于LVS集群中的Director Server（以下简称DS）来说：</p>
 <ul>
 <li>LVS属于四层负载均衡，DS属于四层交换，它在网络中显示为路由器，其规则与普通路由器略有不同；</li>
@@ -274,27 +270,25 @@
 <li>RS可以提供正常互联网服务中的任何服务，因为LVS是四层转发，兼容性很好，对业务无侵入性；</li>
 <li>RS可以在客户端无感知的情况下添加或删除到LVS集群中，因此允许后端的RS出现宕机、升级、弹性伸缩。</li>
 </ul>
-<p>在调度器的实现技术中，IP负载均衡技术是效率最高的。在已有的IP负载均衡技术中有通过网络地址转换（Network Address Translation）将一组服务器构成一个高性能的、高可用的虚拟服务器，我们称之为VS/NAT技术（Virtual Server via Network Address Translation），在分析VS/NAT的缺点和网络服务的非对称性的基础上，LVS提出通过IP隧道实现虚拟服务器的方法VS/TUN （Virtual Server via IP Tunneling），和通过直接路由实现虚拟服务器的方法VS/DR（Virtual Server via Direct Routing），它们可以极大地提高系统的伸缩性。所以，IPVS软件实现了这三种IP负载均衡技术，它们的大致原理如下</p>
-<h1>3、LVS NAT模式</h1>
-<p>NAT模式的主要实现原理是通过网络地址转换，LB重写请求报文的目标地址(包括IP和MAC)，根据预设的调度算法，将请求分派给后端的RS；RS的响应报文通过LB返回时，报文的源地址被重写，修改为LB的MAC和IP，再返回给客户，完成整个负载调度过程。</p>
-<p><img src="https://resource.tinychen.com/20200415112219.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p>在调度器的实现技术中，IP负载均衡技术是效率最高的。在已有的IP负载均衡技术中有通过网络地址转换（Network Address Translation）将一组服务器构成一个高性能的、高可用的虚拟服务器，我们称之为VS&#x2F;NAT技术（Virtual Server via Network Address Translation），在分析VS&#x2F;NAT的缺点和网络服务的非对称性的基础上，LVS提出通过IP隧道实现虚拟服务器的方法VS&#x2F;TUN （Virtual Server via IP Tunneling），和通过直接路由实现虚拟服务器的方法VS&#x2F;DR（Virtual Server via Direct Routing），它们可以极大地提高系统的伸缩性。所以，IPVS软件实现了这三种IP负载均衡技术，它们的大致原理如下</p>
+<h1 id="3、LVS-NAT模式"><a href="#3、LVS-NAT模式" class="headerlink" title="3、LVS NAT模式"></a>3、LVS NAT模式</h1><p>NAT模式的主要实现原理是通过网络地址转换，LB重写请求报文的目标地址(包括IP和MAC)，根据预设的调度算法，将请求分派给后端的RS；RS的响应报文通过LB返回时，报文的源地址被重写，修改为LB的MAC和IP，再返回给客户，完成整个负载调度过程。</p>
+<p><img src="https://resource.tinychen.com/20200415112219.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
-<li>当用户访问服务器群集提供的服务时，发往虚拟服务器IP（VIP/LB的外部IP地址）的数据包将到达LB</li>
+<li>当用户访问服务器群集提供的服务时，发往虚拟服务器IP（VIP&#x2F;LB的外部IP地址）的数据包将到达LB</li>
 <li>LB检查数据包的目标地址和端口号。如果符合在LVS的规则表中定义添加的服务，则根据调度算法从后端群集中选择一个RS，并将该连接添加到记录已建立连接的哈希表中</li>
 <li><strong>然后，将数据包的目标地址和端口重写为所选RS的地址和端口，然后将数据包转发到RS</strong></li>
 <li>当传入的数据包符合在LVS的规则表中定义添加的服务并且可以在哈希表中找到所选的RS时，该数据包将被重写并直接转发到所选的RS</li>
 <li>当RS处理完请求之后，会把回复数据包返回给LB，此时<strong>LB会将数据包的源地址和端口重写为虚拟服务的源地址和端口</strong>，然后发送给客户端</li>
 <li>连接终止或超时后，连接记录将在哈希表中删除</li>
 </ul>
-<p><img src="https://resource.tinychen.com/20200427092441.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200427092441.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>LVS的NAT模式需要开启LB的内核中的ip_forward功能</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> 1 &gt; /proc/sys/net/ipv4/ip_forward<br></code></pre></div></td></tr></table></figure>
 </blockquote>
-<h1>4、LVS  via IP Tunneling(TUN)</h1>
-<p>采用NAT技术时，虽然对于客户端来说整个服务器集群中的LVS负载均衡过程是无感的（因为对于客户端来说请求包发送的目标IP和响应包返回的源IP都没有改变），但是由于请求和响应报文都必须经过LB进行重写，当客户请求越来越多时，LB的处理能力将成为整个集群中的瓶颈。</p>
-<p>为了解决这个问题，LB把请求报文通过IP隧道转发至RS，而RS将响应直接返回给客户端，所以LB只需要处理请求报文。由于一般网络服务应答的数据包要比请求数据包大许多，采用 VS/TUN技术后，集群系统的最大吞吐量可以大大提高。</p>
-<p><img src="https://resource.tinychen.com/20200422090745.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1 id="4、LVS-via-IP-Tunneling-TUN"><a href="#4、LVS-via-IP-Tunneling-TUN" class="headerlink" title="4、LVS  via IP Tunneling(TUN)"></a>4、LVS  via IP Tunneling(TUN)</h1><p>采用NAT技术时，虽然对于客户端来说整个服务器集群中的LVS负载均衡过程是无感的（因为对于客户端来说请求包发送的目标IP和响应包返回的源IP都没有改变），但是由于请求和响应报文都必须经过LB进行重写，当客户请求越来越多时，LB的处理能力将成为整个集群中的瓶颈。</p>
+<p>为了解决这个问题，LB把请求报文通过IP隧道转发至RS，而RS将响应直接返回给客户端，所以LB只需要处理请求报文。由于一般网络服务应答的数据包要比请求数据包大许多，采用 VS&#x2F;TUN技术后，集群系统的最大吞吐量可以大大提高。</p>
+<p><img src="https://resource.tinychen.com/20200422090745.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>客户端请求LVS集群提供的服务，数据包发送到VIP</li>
 <li>LB检查数据包的目的地址和端口，如果符合在LVS的规则表中定义添加的服务，则根据调度算法从后端群集中选择一个RS，并将该连接添加到记录已建立连接的哈希表中</li>
@@ -303,16 +297,15 @@
 <li>RS接收到数据包后，对其进行解封并且处理请求，然后将响应数据包直接发送到客户端</li>
 <li>连接终止或超时后，连接记录将在哈希表中删除</li>
 </ul>
-<p><img src="https://resource.tinychen.com/20200427092756.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200427092756.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意在这种模式下的RS可以是在物理位置上分离的服务器（如可以分布在不同地区的机房），只要拥有在任意网络中的任意真实IP即可（相对VIP而言）。此外，此时的RS需要支持IP封装协议并且需要和LB直接配置好IP隧道，同时VIP需要配置到非ARP响应的网卡设备上。</p>
-<p><img src="https://resource.tinychen.com/20200426172658.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200426172658.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>需要LB和RS上面的服务使用的端口必须保持一致，因此在添加配置规则的时候无需指定RS的端口。</p>
 <p>Note that the services running on the real servers must run on the same port as virtual service, so it is not necessary to specify the service port on the real servers.</p>
 </blockquote>
-<h1>5、LVS via Direct Routing(DR)</h1>
-<p>VS/DR通过改写请求报文的MAC地址，将请求发送到RS，而RS将响应直接返回给客户。和VS/TUN技术一样，VS/DR技术可极大地提高集群系统的伸缩性。这种方法没有IP隧道的开销，对集群中的RS也没有必须支持IP隧道协议的要求，但是因为使用的是MAC地址进行二层转发，所以要求LB和RS都有一块网卡连在同一物理网段上。</p>
-<p><img src="https://resource.tinychen.com/20200422090907.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1 id="5、LVS-via-Direct-Routing-DR"><a href="#5、LVS-via-Direct-Routing-DR" class="headerlink" title="5、LVS via Direct Routing(DR)"></a>5、LVS via Direct Routing(DR)</h1><p>VS&#x2F;DR通过改写请求报文的MAC地址，将请求发送到RS，而RS将响应直接返回给客户。和VS&#x2F;TUN技术一样，VS&#x2F;DR技术可极大地提高集群系统的伸缩性。这种方法没有IP隧道的开销，对集群中的RS也没有必须支持IP隧道协议的要求，但是因为使用的是MAC地址进行二层转发，所以要求LB和RS都有一块网卡连在同一物理网段上。</p>
+<p><img src="https://resource.tinychen.com/20200422090907.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>客户端请求LVS集群提供的服务，数据包发送到VIP</li>
 <li>LB检查数据包的目的地址和端口，如果符合在LVS的规则表中定义添加的服务，则根据调度算法从后端群集中选择一个RS，并将该连接添加到记录已建立连接的哈希表中</li>
@@ -321,46 +314,40 @@
 <li>由于RS的本地lo接口上面绑定了VIP，且这时MAC地址是RS自身的MAC地址，所以RS接收到数据包后会处理请求，然后将响应数据包直接发送到客户端</li>
 <li>连接终止或超时后，连接记录将在哈希表中删除</li>
 </ul>
-<p><img src="https://resource.tinychen.com/20200427092539.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200427092539.png" srcset="/img/loading.gif" lazyload></p>
 <p>由于LB只是简单地对数据包的MAC地址更改为RS的MAC地址并且将其重新发送到局域网中，所以要求LB和RS必须要在同一个局域网中，这样才能直接利用MAC来进行二层传输。</p>
-<p><img src="https://resource.tinychen.com/20200426225346.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200426225346.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>注意DR模式也同样不支持指定RS的服务端口，因此LB和RS的端口也必须保持一致。</p>
 </blockquote>
-<h1>6、ARP in LVS</h1>
-<p>细心观察上面的DR模式，我们会发现：</p>
+<h1 id="6、ARP-in-LVS"><a href="#6、ARP-in-LVS" class="headerlink" title="6、ARP in LVS"></a>6、ARP in LVS</h1><p>细心观察上面的DR模式，我们会发现：</p>
 <p>LB把数据包发送给RS的时候只修改了MAC，尽管在交换机上会根据MAC直接把包发送给RS，但是RS在接受到数据包之后还是会检查数据包的目的IP和端口，此时数据包的目的IP依旧是VIP。所以这就是为什么需要在RS的网卡上面也绑定VIP的原因。（一般绑定在loopback接口）</p>
 <p>那么当LB和RS都绑定了VIP的时候，问题又来了：</p>
 <p>当客户端的请求数据包传到LVS集群所在的网关的时候，它是不知道LB的MAC地址的，因此需要通过ARP协议来进行查询，也就是在局域网中发送ARP请求，看谁会响应，响应的就是要发送的MAC地址。而这个时候，由于DR模式下的LB和RS都在同一个局域网中且都绑定了VIP，那么它们就都会响应这个ARP请求。这样一来客户端的数据包就不一定会发送到LB上面，也就不一定会触发整个负载均衡效果。</p>
 <p>因此这种情况下一般都会对RS上面的网卡接口的ARP请求设置进行修改：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;1&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;2&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_announce<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;1&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;2&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce<br></code></pre></div></td></tr></table></figure>
+
 <p>我们看一下kernel的文档中对这两个参数的相关描述</p>
 <p><strong>arp_ignore的意义</strong></p>
 <p>arp_ignore - INTEGER</p>
 <p>Define different modes for sending replies in response to received ARP requests that resolve local target IP addresses:</p>
 <ul>
-<li>
-<p>0 - (default): reply for any local target IP address, configured on any interface</p>
+<li><p>0 - (default): reply for any local target IP address, configured on any interface</p>
 </li>
-<li>
-<p>1 - reply only if the target IP address is local address configured on the incoming interface</p>
+<li><p>1 - reply only if the target IP address is local address configured on the incoming interface</p>
 </li>
-<li>
-<p>2 - reply only if the target IP address is local address configured on the incoming interface and both with the sender’s IP address are part from same subnet on this interface</p>
+<li><p>2 - reply only if the target IP address is local address configured on the incoming interface and both with the sender’s IP address are part from same subnet on this interface</p>
 </li>
-<li>
-<p>3 - do not reply for local addresses configured with scope host, only resolutions for global and link addresses are replied</p>
+<li><p>3 - do not reply for local addresses configured with scope host, only resolutions for global and link addresses are replied</p>
 </li>
-<li>
-<p>4-7 - reserved</p>
+<li><p>4-7 - reserved</p>
 </li>
-<li>
-<p>8 - do not reply for all local addresses The max value from conf/{all,interface}/arp_ignore is used when ARP request is received on the {interface}</p>
+<li><p>8 - do not reply for all local addresses The max value from conf&#x2F;{all,interface}&#x2F;arp_ignore is used when ARP request is received on the {interface}</p>
 </li>
 </ul>
-<p><img src="https://resource.tinychen.com/20200505223931.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200505223931.png" srcset="/img/loading.gif" lazyload></p>
 <p>arp_ignore设置为0时，无论收到的ARP请求的IP是否是eth上面的IP，只要在宿主机上有网卡有对应的IP，就会发送ARP应答。</p>
-<p><img src="https://resource.tinychen.com/20200505224231.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200505224231.png" srcset="/img/loading.gif" lazyload></p>
 <p>arp_ignore设置为1即意味着对应的网卡在收到了目标IP不是自己的网卡的IP的数据包的ARP请求时不会进行回应，而在DR模式中，对应的VIP是绑定在lo接口上的，而lo接口并不是物理网卡，实际上数据包都是从物理网卡eth上进来，因此这时就不会对目标IP是VIP的数据包进行ARP回应。使得访问能够顺利地到达LB上面，再从LB上面进行负载均衡。</p>
 <p><strong>arp_annouce的意义</strong></p>
 <p>arp_announce - INTEGER</p>
@@ -368,7 +355,7 @@
 <ul>
 <li>0 - (default) Use any local address, configured on any interface</li>
 <li>1 - Try to avoid local addresses that are not in the target’s subnet for this interface. This mode is useful when target hosts reachable via this interface require the source IP address in ARP requests to be part of their logical network configured on the receiving interface. When we generate the request we will check all our subnets that include the target IP and will preserve the source address if it is from such subnet. If there is no such subnet we select source address according to the rules for level 2.</li>
-<li>2 - Always use the best local address for this target. In this mode we ignore the source address in the IP packet and try to select local address that we prefer for talks with the target host. Such local address is selected by looking for primary IP addresses on all our subnets on the outgoing interface that include the target IP address. If no suitable local address is found we select the first local address we have on the outgoing interface or on all other interfaces, with the hope we will receive reply for our request and even sometimes no matter the source IP address we announce. The max value from conf/{all,interface}/arp_announce is used.</li>
+<li>2 - Always use the best local address for this target. In this mode we ignore the source address in the IP packet and try to select local address that we prefer for talks with the target host. Such local address is selected by looking for primary IP addresses on all our subnets on the outgoing interface that include the target IP address. If no suitable local address is found we select the first local address we have on the outgoing interface or on all other interfaces, with the hope we will receive reply for our request and even sometimes no matter the source IP address we announce. The max value from conf&#x2F;{all,interface}&#x2F;arp_announce is used.</li>
 </ul>
 <p>每个机器或者交换机中都有一张ARP表，ARP表的作用就是用于记录IP地址和MAC地址的对应关系。当收到一个ARP表中没有记录的IP地址的ARP请求，就会在本机的ARP表中新增对应的IP和MAC记录；当收到一个已知IP地址（arp表中已有记录的地址）的arp请求，则会根据arp请求中的源MAC刷新自己的arp表。</p>
 <p>如果arp_announce参数配置为0，则网卡在发送arp请求时，可能选择的源IP地址并不是该网卡自身的IP地址，这时候收到该arp请求的其他节点或者交换机上的arp表中记录的该网卡IP和MAC的对应关系就不正确。</p>

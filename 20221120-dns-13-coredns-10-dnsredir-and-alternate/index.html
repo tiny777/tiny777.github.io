@@ -250,32 +250,26 @@
             <div class="markdown-body">
               <p>本文主要介绍了目前CoreDNS服务在外部域名递归结果过程中出现的一些问题以及使用dnsredir插件进行分流和alternate插件进行重试优化的操作。</p>
 <span id="more"></span>
-<h1>1、自建DNS服务现状</h1>
-<p>一般来说，无论是bind9、coredns、dnsmasq、pdns哪类dns服务器，我们自建的监听在<strong>UDP53端口</strong>上的DNS服务在<strong>DNS解析功能</strong>方面承担着两个角色：分别为权威域名服务器和递归域名服务器。</p>
+
+<h1 id="1、自建DNS服务现状"><a href="#1、自建DNS服务现状" class="headerlink" title="1、自建DNS服务现状"></a>1、自建DNS服务现状</h1><p>一般来说，无论是bind9、coredns、dnsmasq、pdns哪类dns服务器，我们自建的监听在<strong>UDP53端口</strong>上的DNS服务在<strong>DNS解析功能</strong>方面承担着两个角色：分别为权威域名服务器和递归域名服务器。</p>
 <ul>
 <li>权威域名服务器主要为我们内部使用的域名提供服务，为了避免和提供给外部用户访问的域名冲突，这类内网域名一般会使用如local域、internal域，或者是和自身业务无关的org域、io域等后缀；</li>
 <li>递归域名服务器主要是正常的外部域名解析服务，如<code>163.com</code>、<code>baidu.com</code>、<code>google.com</code>这一类常用的外网域名等；</li>
 </ul>
-<h1>2、DNS解析逻辑</h1>
-<p>针对我们自建的权威域名服务器，解析的结果非常的确定，当服务器中存在这条记录就能正常解析，否则就是异常。但是对于递归域名服务器的工作流程来说，有些特殊的域名解析就会出现问题。</p>
+<h1 id="2、DNS解析逻辑"><a href="#2、DNS解析逻辑" class="headerlink" title="2、DNS解析逻辑"></a>2、DNS解析逻辑</h1><p>针对我们自建的权威域名服务器，解析的结果非常的确定，当服务器中存在这条记录就能正常解析，否则就是异常。但是对于递归域名服务器的工作流程来说，有些特殊的域名解析就会出现问题。</p>
 <p>我们以下图为例介绍在递归解析过程中可能会出现的问题：</p>
-<p><img src="https://resource.tinychen.com/20200417112013.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200417112013.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
-<li>
-<p>因为主要是分析到DNS服务器的解析流程，因此这里的第一二步直接跳过；</p>
+<li><p>因为主要是分析到DNS服务器的解析流程，因此这里的第一二步直接跳过；</p>
 </li>
-<li>
-<p>图中的本地DNS服务器可以视为我们的CoreDNS服务器；</p>
+<li><p>图中的本地DNS服务器可以视为我们的CoreDNS服务器；</p>
 </li>
-<li>
-<p>正常情况下，我们的CoreDNS服务器和根域名服务器之间的连接是正常的，也就是说④⑤这两步正常情况下是能顺利返回结果的；</p>
+<li><p>正常情况下，我们的CoreDNS服务器和根域名服务器之间的连接是正常的，也就是说④⑤这两步正常情况下是能顺利返回结果的；</p>
 <p>那这里出现异常的情况主要就是请求了一些非法的不合规域名，比如请求<code>tinychen.comillegal</code>这种奇怪的域名，它的顶级域名是<code>.comillegal</code>，如果这个顶级域名是不存在的，那么DNS解析就会返回异常，无法解析；</p>
 </li>
-<li>
-<p>正常情况下，⑥⑦这两步是由本地DNS服务器去访问顶级域名服务器的IP来获取对应域名的权威域名服务器，一般常用的顶级域名如<code>.com</code> 、<code>.cn</code>这类顶级域名的服务器IP肯定是能正常连上的，但是一些小众的顶级域名就不一定能正常连接了，这类比较常见的是一些小国家的自有顶级域名，详细列表可以参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains">维基百科</a>；</p>
+<li><p>正常情况下，⑥⑦这两步是由本地DNS服务器去访问顶级域名服务器的IP来获取对应域名的权威域名服务器，一般常用的顶级域名如<code>.com</code> 、<code>.cn</code>这类顶级域名的服务器IP肯定是能正常连上的，但是一些小众的顶级域名就不一定能正常连接了，这类比较常见的是一些小国家的自有顶级域名，详细列表可以参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains">维基百科</a>；</p>
 </li>
-<li>
-<p>最后就是权威域名服务器，这里也是最容易出问题的地方；</p>
+<li><p>最后就是权威域名服务器，这里也是最容易出问题的地方；</p>
 <p>正常情况下，本地DNS服务器从顶级域名服务器里面拿到权威域名服务器的IP之后就会去权威域名服务器这里获取到最后的域名解析结果，但是这里容易出现两个问题：</p>
 <ol>
 <li>本地DNS服务器和权威域名服务器之间的连接容易出现问题，权威域名服务器一般是各个域名使用者自己维护或者是使用一些DNS服务商提供的服务器，这些服务器出现无法连接或者是崩溃的概率要远大于前面的根域名服务器和顶级域名服务器</li>
@@ -292,10 +286,8 @@
 <li>因为顶级域名服务器或者权威域名服务器无法正常连接导致无法正常解析，一般为海外域名；</li>
 <li>因为DNS污染导致虽然能进行解析，但是解析结果和实际情况大相径庭，这类域名比较复杂，各种情况都有；</li>
 </ul>
-<h1>3、CoreDNS解析逻辑</h1>
-<p>得益于CoreDNS丰富多样的插件，我们可以使用插件来对DNS的解析流程进行优化，分流不同的域名到不同的服务器，同时还可以针对不同的返回码进行重试。下面介绍一个对CoreDNS进行优化，加入了DNS解析分流功能和DNS解析失败重试功能来补充各种使用场景的架构。</p>
-<h2 id="3-1-插件分析">3.1 插件分析</h2>
-<p>首先是使用<a target="_blank" rel="noopener" href="https://coredns.io/plugins/hosts/">hosts插件</a>，这个插件相当于在CoreDNS上面实现了我们修改服务器<code>/etc/hosts</code>文件的效果，可以用于对一些域名进行简单的劫持，例如一些域名想要拉黑，可以在里面配置解析为127.0.0.1（家庭网络屏蔽广告域名的常用手段）；又或者是有部分域名同时有内外网多个入口的，在机房内网DNS解析直接劫持为内网IP，节省外网流量等。需要注意的是hosts插件仅支持A记录的修改，一些复杂的场景如CNAME记录、MX记录、TXT记录等则无能为力了。</p>
+<h1 id="3、CoreDNS解析逻辑"><a href="#3、CoreDNS解析逻辑" class="headerlink" title="3、CoreDNS解析逻辑"></a>3、CoreDNS解析逻辑</h1><p>得益于CoreDNS丰富多样的插件，我们可以使用插件来对DNS的解析流程进行优化，分流不同的域名到不同的服务器，同时还可以针对不同的返回码进行重试。下面介绍一个对CoreDNS进行优化，加入了DNS解析分流功能和DNS解析失败重试功能来补充各种使用场景的架构。</p>
+<h2 id="3-1-插件分析"><a href="#3-1-插件分析" class="headerlink" title="3.1 插件分析"></a>3.1 插件分析</h2><p>首先是使用<a target="_blank" rel="noopener" href="https://coredns.io/plugins/hosts/">hosts插件</a>，这个插件相当于在CoreDNS上面实现了我们修改服务器<code>/etc/hosts</code>文件的效果，可以用于对一些域名进行简单的劫持，例如一些域名想要拉黑，可以在里面配置解析为127.0.0.1（家庭网络屏蔽广告域名的常用手段）；又或者是有部分域名同时有内外网多个入口的，在机房内网DNS解析直接劫持为内网IP，节省外网流量等。需要注意的是hosts插件仅支持A记录的修改，一些复杂的场景如CNAME记录、MX记录、TXT记录等则无能为力了。</p>
 <p>接下来就是重头戏<a target="_blank" rel="noopener" href="https://github.com/leiless/dnsredir">dnsredir插件</a>和<a target="_blank" rel="noopener" href="https://coredns.io/explugins/alternate/">alternate插件</a>了。其中dnsredir插件是github上面开源的一个第三方插件，alternate插件则是CoreDNS官网上的External Plugins，由CoreDNS维护；两者可靠性相对较高，有需求的同学也可以对其二次开发，关于CoreDNS编译外部插件的教程可以查看之前的<a href="https://tinychen.com/20210516-dns-04-coredns-02-install-external-plugins/">文章</a>。</p>
 <p>官方对<code>alternate插件</code>的介绍是一个基于DNS查询返回码RCODE来把DNS查询请求重定向的插件。举个例子，当我们向CoreDNS查询域名解析<code>tinychen.com</code>的时候，CoreDNS将查询转发给<code>114.114.114.114</code>，然后得到了<code>NXDOMAIN</code>的返回码，这时候一般就说明<code>tinychen.com</code>这个域名在114DNS是没有解析结果的，但是我们不死心，使用<code>alternate插件</code>把RCODE是<code>NXDOMAIN</code>的查询再次转发给<code>8.8.8.8</code>，这时候说不定就能得到域名的解析结果。</p>
 <blockquote>
@@ -303,55 +295,42 @@
 </blockquote>
 <p>还是继续上面的场景，假设我们已经知道<code>tinychen.com</code>这个域名在114DNS是没办法查询到正常结果，而在<code>8.8.8.8</code>DNS能正常解析，我们能否直接去<code>8.8.8.8</code>查询呢？</p>
 <p>答案是肯定的。这时候就要用到我们的dnsredir插件了。它可以根据我们提供的域名列表，将不同的域名转发到不同的DNS服务器进行查询，从而达到DNS查询解析优化的效果，尤其是对应大部分海外域名解析，有条件的同学可以尝试将其转发到海外DNS节点解析，解析效果应该会有明显的提升。</p>
-<h2 id="3-2-解析逻辑分析">3.2 解析逻辑分析</h2>
-<p>alternate插件和dnsredir插件分别从响应码RCODE和域名两个维度对DNS解析进行分流/重定向，再结合CoreDNS本身配置的灵活性，可以有数种组合，这里只是提供一个示范案例作为参考。</p>
-<p><img src="https://resource.tinychen.com/202212221653820.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="3-2-解析逻辑分析"><a href="#3-2-解析逻辑分析" class="headerlink" title="3.2 解析逻辑分析"></a>3.2 解析逻辑分析</h2><p>alternate插件和dnsredir插件分别从响应码RCODE和域名两个维度对DNS解析进行分流&#x2F;重定向，再结合CoreDNS本身配置的灵活性，可以有数种组合，这里只是提供一个示范案例作为参考。</p>
+<p><img src="https://resource.tinychen.com/202212221653820.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>注意上图的插件每个的顺序都是可以调整并且不断递归查询，因此理论上可以进行无限的横向和纵向扩展用于满足日后的增长需求。</p>
 </blockquote>
 <ul>
-<li>
-<p>首先还是针对递归查询的外部DNS域名，这里以<code>.(root):53</code>表示监听在53端口的根域名查询；</p>
+<li><p>首先还是针对递归查询的外部DNS域名，这里以<code>.(root):53</code>表示监听在53端口的根域名查询；</p>
 </li>
-<li>
-<p>进来的第一层匹配就是前面提及的最高优先级全局劫持名单查询，这一层主要是对恶意域名进行屏蔽过滤；</p>
+<li><p>进来的第一层匹配就是前面提及的最高优先级全局劫持名单查询，这一层主要是对恶意域名进行屏蔽过滤；</p>
 </li>
-<li>
-<p>当需要查询的域名不在全局劫持名单中的时候就会触发<code>fallthrough</code>条件，进入到下一层的<code>dnsredir</code>组件进行分流；</p>
+<li><p>当需要查询的域名不在全局劫持名单中的时候就会触发<code>fallthrough</code>条件，进入到下一层的<code>dnsredir</code>组件进行分流；</p>
 </li>
-<li>
-<p><code>dnsredir</code>组件的主要功能就是根据我们配置的域名列表来进行转发，这里我们把域名分为三大类，分别进行不同的逻辑处理；</p>
+<li><p><code>dnsredir</code>组件的主要功能就是根据我们配置的域名列表来进行转发，这里我们把域名分为三大类，分别进行不同的逻辑处理；</p>
 </li>
-<li>
-<p>对于列表里面的海外域名，我们将其转发到海外的DNS解析服务器进行解析，这里统称为<strong>海外DNS</strong>服务器，例如部分有条件的同学可以在海外线路的机房又或者是公有云的海外节点自建DNS服务器；</p>
+<li><p>对于列表里面的海外域名，我们将其转发到海外的DNS解析服务器进行解析，这里统称为<strong>海外DNS</strong>服务器，例如部分有条件的同学可以在海外线路的机房又或者是公有云的海外节点自建DNS服务器；</p>
 </li>
-<li>
-<p>当然在自建的海外线路节点DNS服务器也是会有可能碰到无法正常解析的，这时候就需要依赖<code>alternate</code>组件将请求二次转发到<strong>海外公共DNS</strong>服务器，比如一些海外的公共DNS服务器如8.8.8.8和1.1.1.1等；</p>
+<li><p>当然在自建的海外线路节点DNS服务器也是会有可能碰到无法正常解析的，这时候就需要依赖<code>alternate</code>组件将请求二次转发到<strong>海外公共DNS</strong>服务器，比如一些海外的公共DNS服务器如8.8.8.8和1.1.1.1等；</p>
 </li>
-<li>
-<p>对于一些需要自己定义的域名，则再维护另外一份自定义域名列表和<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc1035">RFC1035格式</a>的域名解析结果文件；</p>
+<li><p>对于一些需要自己定义的域名，则再维护另外一份自定义域名列表和<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc1035">RFC1035格式</a>的域名解析结果文件；</p>
 </li>
-<li>
-<p>这时候相当于再单独自建一个<code>.(root)</code>根域名给自定义域名使用，<code>dnsredir</code>组件将这些自定义的域名转发到这个自建的根域进行解析，正常情况下就会直接解析出自己定义的域名结果；</p>
+<li><p>这时候相当于再单独自建一个<code>.(root)</code>根域名给自定义域名使用，<code>dnsredir</code>组件将这些自定义的域名转发到这个自建的根域进行解析，正常情况下就会直接解析出自己定义的域名结果；</p>
 </li>
-<li>
-<p>如果自定义的域名列表和解析结果出现了偏差，导致部分域名在分流列表中缺不在解析结果中，会使得查询失败返回<code>NXDOMAIN</code>，这时候就需要依赖<code>alternate</code>组件将请求二次转发到正常的DNS解析流程</p>
+<li><p>如果自定义的域名列表和解析结果出现了偏差，导致部分域名在分流列表中缺不在解析结果中，会使得查询失败返回<code>NXDOMAIN</code>，这时候就需要依赖<code>alternate</code>组件将请求二次转发到正常的DNS解析流程</p>
 </li>
-<li>
-<p>最后就是正常的域名解析，优先使用本机的自建递归缓存服务器进行查询，当查询失败的时候可以转去国内的一些公共递归DNS如114或者是自建的海外DNS等进行补充查询</p>
+<li><p>最后就是正常的域名解析，优先使用本机的自建递归缓存服务器进行查询，当查询失败的时候可以转去国内的一些公共递归DNS如114或者是自建的海外DNS等进行补充查询</p>
 </li>
 </ul>
 <p>得益于CoreDNS自身的灵活性，上述的全部插件逻辑可以随意进行组合分配递归调整用于适配不同的业务逻辑。</p>
-<h2 id="3-3-Q-A">3.3 Q&amp;A</h2>
-<ol>
-<li>
-<p>用于给<code>dnsredir</code>组件分流的域名列表格式？</p>
+<h2 id="3-3-Q-A"><a href="#3-3-Q-A" class="headerlink" title="3.3 Q&amp;A"></a>3.3 Q&amp;A</h2><ol>
+<li><p>用于给<code>dnsredir</code>组件分流的域名列表格式？</p>
 <p><code>dnsredir</code>组件使用的分流域名格式列表和dnsmasq的格式一致，格式参考如下：</p>
 <figure class="highlight abnf"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs abnf"><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>a1.mzstatic.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>a2.mzstatic.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>a3.mzstatic.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>a4.mzstatic.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>a5.mzstatic.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>adcdownload.apple.com.akadns.net/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>adcdownload.apple.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>appldnld.apple.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>appldnld.g.aaplimg.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>appleid.cdn-apple.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>apps.apple.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>apps.mzstatic.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>cdn-cn1.apple-mapkit.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>cdn-cn2.apple-mapkit.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>cdn-cn3.apple-mapkit.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br><span class="hljs-attribute">server</span><span class="hljs-operator">=/</span>cdn-cn4.apple-mapkit.com/<span class="hljs-number">114.114</span>.<span class="hljs-number">114.114</span><br></code></pre></div></td></tr></table></figure>
+
 <p>需要注意的是<code>dnsredir</code>组件只会读取上述配置中的域名，而不会读取后面的DNS服务器IP，实际转发的DNS服务器IP在CoreDNS中的配置文件定义；</p>
 </li>
-<li>
-<p>为什么使用RFC1035格式的文本文件作为自定义域名的配置文件？</p>
+<li><p>为什么使用RFC1035格式的文本文件作为自定义域名的配置文件？</p>
 <p>CoreDNS本身支持多种外部后端存储方式（mysql、redis、etcd、pdsql等），使用RFC1035格式的文本文件主要是基于性能、稳定性和可维护性考量。</p>
 <ul>
 <li>CoreDNS会把文本文件的内容全部load到内存中，每次查询都是在内存中查询操作，性能最优，无需额外的网络IO消耗；</li>

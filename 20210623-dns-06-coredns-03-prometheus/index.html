@@ -208,7 +208,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      3.7k 字
+      3.8k 字
     </span>
   
 
@@ -250,11 +250,11 @@
             <div class="markdown-body">
               <p>本文主要对coredns的<em>prometheus</em>监控进行介绍，以及对grafana中配置coredns的dashboard进行分享。</p>
 <span id="more"></span>
-<h1>0、背景</h1>
-<p><a target="_blank" rel="noopener" href="https://coredns.io/plugins/metrics/">Prometheus插件</a>作为coredns的Plugins，默认情况下是内置在coredns中，如果是自己编译安装的版本，需要注意在编译安装的时候的<code>plugin.cfg</code>文件中添加了<code>prometheus:metrics</code>，这样才能确保编译成功。</p>
+
+<h1 id="0、背景"><a href="#0、背景" class="headerlink" title="0、背景"></a>0、背景</h1><p><a target="_blank" rel="noopener" href="https://coredns.io/plugins/metrics/">Prometheus插件</a>作为coredns的Plugins，默认情况下是内置在coredns中，如果是自己编译安装的版本，需要注意在编译安装的时候的<code>plugin.cfg</code>文件中添加了<code>prometheus:metrics</code>，这样才能确保编译成功。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们检查一下运行的版本</span><br>$ ./coredns -plugins | grep prometheus<br>  dns.prometheus<br></code></pre></div></td></tr></table></figure>
-<h1>1、简介</h1>
-<p><em>prometheus</em> 插件主要用于暴露CoreDNS相关的监控数据，除了coredns本身外，其他支持<em>prometheus</em>的插件（如cache插件）在启用的时候也可以通过<em>prometheus</em>插件暴露出相关的监控信息，默认情况下暴露出的监控数据在<code>localhost:9153</code>，路径为<code>/metrics</code>，**配置文件中的每个server块只能使用一次<em>prometheus</em>。**下面是一些coredns自身相关的指标：</p>
+
+<h1 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h1><p><em>prometheus</em> 插件主要用于暴露CoreDNS相关的监控数据，除了coredns本身外，其他支持<em>prometheus</em>的插件（如cache插件）在启用的时候也可以通过<em>prometheus</em>插件暴露出相关的监控信息，默认情况下暴露出的监控数据在<code>localhost:9153</code>，路径为<code>/metrics</code>，<strong>配置文件中的每个server块只能使用一次<em>prometheus</em>。</strong>下面是一些coredns自身相关的指标：</p>
 <ul>
 <li><code>coredns_build_info&#123;version, revision, goversion&#125;</code> -  关于 CoreDNS 本身的信息</li>
 <li><code>coredns_panics_total&#123;&#125;</code> -  panics的总数</li>
@@ -271,20 +271,19 @@
 <li><code>zone</code>：每个<code>request/response</code>相关的指标都会有一个<code>zone</code>的标签，也就是上述的大多数监控指标都是可以细化到每一个<code>zone</code>的。这对于需要具体统计相关数据和监控排查问题的时候是非常有用的</li>
 <li><code>server</code>：是用来标志正在处理这个对应请求的服务器，一般的格式为<code>&lt;scheme&gt;://[&lt;bind&gt;]:&lt;port&gt;</code>，默认情况下应该是<code>dns://:53</code>，如果使用了bind插件指定监听的IP，那么就可能是<code>dns://127.0.0.53:53</code>这个样子</li>
 <li><code>proto</code>：指代的就是传输的协议，一般就是udp或tcp</li>
-<li><code>family</code>：指代的是传输的IP协议代数，(1 = IP (IP version 4), 2 = IP6 (IP version 6))</li>
+<li><code>family</code>：指代的是传输的IP协议代数，(1 &#x3D; IP (IP version 4), 2 &#x3D; IP6 (IP version 6))</li>
 <li><code>type</code>：指代的是DNS查询的类型，这里被分为常见的如(A, AAAA, MX, SOA, CNAME, PTR, TXT, NS, SRV, DS, DNSKEY, RRSIG, NSEC, NSEC3, IXFR, AXFR and ANY) 和其他类型 “other”</li>
 </ul>
 <blockquote>
 <p>If monitoring is enabled, queries that do not enter the plugin chain are exported under the fake name “dropped” (without a closing dot - this is never a valid domain name).</p>
 </blockquote>
-<h1>2、配置</h1>
-<p>coredns中想要启用prometheus插件，只需要在对应的zone中加上这一行配置即可，默认监听的是本机127.0.0.1的9153端口，当然也可以根据自己的需要更改监听的网卡和端口。</p>
+<h1 id="2、配置"><a href="#2、配置" class="headerlink" title="2、配置"></a>2、配置</h1><p>coredns中想要启用prometheus插件，只需要在对应的zone中加上这一行配置即可，默认监听的是本机127.0.0.1的9153端口，当然也可以根据自己的需要更改监听的网卡和端口。</p>
 <blockquote>
-<h2 id="Syntax">Syntax</h2>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">prometheus</span><span class="hljs-meta"> [ADDRESS]</span><br></code></pre></div></td></tr></table></figure>
+<h2 id="Syntax"><a href="#Syntax" class="headerlink" title="Syntax"></a>Syntax</h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">prometheus</span><span class="hljs-meta"> [ADDRESS]</span><br></code></pre></div></td></tr></table></figure>
 </blockquote>
 <p>我们直接来看一段配置：</p>
 <figure class="highlight stylus"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs stylus">tinychen<span class="hljs-selector-class">.com</span>:<span class="hljs-number">53</span> &#123;<br>    forward tinychen<span class="hljs-selector-class">.com</span> <span class="hljs-number">47.107</span>.<span class="hljs-number">188.168</span><br>    prometheus<br>&#125;<br><br>google<span class="hljs-selector-class">.com</span>:<span class="hljs-number">53</span> &#123;<br>    forward google<span class="hljs-selector-class">.com</span> <span class="hljs-number">8.8</span>.<span class="hljs-number">8.8</span> <span class="hljs-number">9.9</span>.<span class="hljs-number">9.9</span><br>    prometheus <span class="hljs-number">192.168</span>.<span class="hljs-number">100.100</span>:<span class="hljs-number">9253</span><br>&#125;<br><br>example<span class="hljs-selector-class">.org</span> &#123;<br>    file /home/coredns/conf/example<span class="hljs-selector-class">.org</span><br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>prometheus的生效范围是按照zone来划分的，在上面的这个配置中：</p>
 <ul>
 <li><code>tinychen.com:53</code>这个域使用的是Prometheus的默认配置，那么此时的监听情况就是默认的127.0.0.1的9153端口，请求<code>http://127.0.0.1:9153/metrics/</code>这个地址就能够获取到<code>tinychen.com:53</code>这个域的监控信息</li>
@@ -293,13 +292,16 @@
 </ul>
 <p>如果有多个zone，每个zone都有相同的基础配置，也可以使用<a target="_blank" rel="noopener" href="https://coredns.io/plugins/import/">import</a>指令，如：</p>
 <figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">tinychen.com:<span class="hljs-number">53</span> &#123;<br>    forward tinychen.com <span class="hljs-number">47.107.188.168</span><br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br>google.com:<span class="hljs-number">53</span> &#123;<br>    forward google.com <span class="hljs-number">8.8.8.8</span> <span class="hljs-number">9.9.9.9</span><br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br>example.org &#123;<br>    file /home/coredns/conf/example.org<br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
+
 <p>可以简化成这样：</p>
 <figure class="highlight dns"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dns">(basesnip) &#123;<br>    log<br>    whoami<br>    errors<br>    prometheus <span class="hljs-number">192.168.100.100</span>:<span class="hljs-number">9253</span><br>    bind <span class="hljs-number">192.168.100.100</span><br>    cache &#123;<br>        success <span class="hljs-number">10240 600</span> <span class="hljs-number">60</span><br>        denial <span class="hljs-number">5120 60 5</span><br>    &#125;<br>&#125;<br><br>tinychen.com:<span class="hljs-number">53</span> &#123;<br>    forward tinychen.com <span class="hljs-number">47.107.188.168</span><br>    import basesnip<br>&#125;<br><br>google.com:<span class="hljs-number">53</span> &#123;<br>    forward google.com <span class="hljs-number">8.8.8.8</span> <span class="hljs-number">9.9.9.9</span><br>    import basesnip<br>&#125;<br><br>example.org &#123;<br>    file /home/coredns/conf/example.org<br>    import basesnip<br>&#125;<br></code></pre></div></td></tr></table></figure>
-<h1>3、grafana配置dashboard</h1>
-<p>coredns原生支持的<code>prometheus</code>指标数量和丰富程度在众多DNS系统中可以说是首屈一指的，此外在grafana的官网上也有着众多<a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards?search=coredns">现成的<code>dashboard</code></a>可用，并且由于绝大多数指标都是通用的，多个不同的<code>dashboard</code>之间的<code>panel</code>可以随意复制拖拽组合成新的<code>dashboard</code>并且不用担心兼容性问题。我们可以很容易的根据自己的实际需求配置对应的权威/递归/组合DNS相关的监控项。</p>
-<p><img src="https://resource.tinychen.com/20210624162017.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+
+<h1 id="3、grafana配置dashboard"><a href="#3、grafana配置dashboard" class="headerlink" title="3、grafana配置dashboard"></a>3、grafana配置dashboard</h1><p>coredns原生支持的<code>prometheus</code>指标数量和丰富程度在众多DNS系统中可以说是首屈一指的，此外在grafana的官网上也有着众多<a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards?search=coredns">现成的<code>dashboard</code></a>可用，并且由于绝大多数指标都是通用的，多个不同的<code>dashboard</code>之间的<code>panel</code>可以随意复制拖拽组合成新的<code>dashboard</code>并且不用担心兼容性问题。我们可以很容易的根据自己的实际需求配置对应的权威&#x2F;递归&#x2F;组合DNS相关的监控项。</p>
+<p><img src="https://resource.tinychen.com/20210624162017.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图我们可以看到能够监控出不同DNS类型的请求数量以及不同的zone各自的请求数量，还有其他的类似请求延迟、请求总数等等各项参数都能完善地监控起来。</p>
-<p><img src="https://resource.tinychen.com/20210624162025.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20210624162025.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图我们能看到可以监控到不同的请求的传输层协议状态，缓存的大小状态和命中情况等各种信息。</p>
 
             </div>

@@ -249,15 +249,15 @@
             <div class="markdown-body">
               <p>项目github地址：<a target="_blank" rel="noopener" href="https://github.com/tiny777/ServersManagementTools">https://github.com/tiny777/ServersManagementTools</a></p>
 <span id="more"></span>
-<h1>0、概述</h1>
-<p>这个脚本需要实现的功能很简单，就是自动ssh登录到网络设备上，查询相应的白名单，然后将结果导出成excel表格，具体的操作命令如下，对应的设备是华为的AC6605。</p>
+
+<h1 id="0、概述"><a href="#0、概述" class="headerlink" title="0、概述"></a>0、概述</h1><p>这个脚本需要实现的功能很简单，就是自动ssh登录到网络设备上，查询相应的白名单，然后将结果导出成excel表格，具体的操作命令如下，对应的设备是华为的AC6605。</p>
 <figure class="highlight vim"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vim">操作步骤<br><br># 执行命令<span class="hljs-built_in">system</span>-<span class="hljs-keyword">view</span>，进入系统视图。<br><span class="hljs-built_in">system</span>-<span class="hljs-keyword">view</span><br><br># 执行命令wlan，进入WLAN视图。<br>wlan<br><br># 查看特定白名单内的信息<br><span class="hljs-keyword">display</span> <span class="hljs-keyword">sta</span>-whitelist-<span class="hljs-keyword">profile</span> name profilename<br><br></code></pre></div></td></tr></table></figure>
+
 <ul>
 <li>由于这里使用的是<code>netmiko</code>库，所以除了华为的网络设备，思科的设备也能支持，只需要在代码文件中稍作修改即可。</li>
 <li>相应的命令也可以进行修改成其他的系列命令</li>
 </ul>
-<h1>1、软件版本</h1>
-<p>eNSP的BUG非常多，这里搭建拓扑来进行测试使用的软件版本是</p>
+<h1 id="1、软件版本"><a href="#1、软件版本" class="headerlink" title="1、软件版本"></a>1、软件版本</h1><p>eNSP的BUG非常多，这里搭建拓扑来进行测试使用的软件版本是</p>
 <ul>
 <li><code>eNSP 1.2.00.500 V100R002C00</code></li>
 <li><code>VirtualBox Graphical User Interface Version 5.1.26r117224(Qt5.6.2)</code></li>
@@ -265,35 +265,37 @@
 <li>Wireshark没有用到，版本应该无所谓</li>
 <li>操作系统是<code>win10 pro</code>，<code>Microsoft Windows Version 1903(OS Build 18362.239)</code></li>
 </ul>
-<h1>2、配置eNSP桥接真机</h1>
-<p>这里使用的是AC6605，对真机进行桥接，使用的桥接网卡是VMware WorkStation 15.1 的VMnet8网卡，即NAT模式的网卡，不是eNSP上面的192.168.56.1的那个网卡（这个老是有问题，各种ping不同）。</p>
-<p><img src="https://resource.tinychen.com/blog/20190816/cpwtbe7uUvBF.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1 id="2、配置eNSP桥接真机"><a href="#2、配置eNSP桥接真机" class="headerlink" title="2、配置eNSP桥接真机"></a>2、配置eNSP桥接真机</h1><p>这里使用的是AC6605，对真机进行桥接，使用的桥接网卡是VMware WorkStation 15.1 的VMnet8网卡，即NAT模式的网卡，不是eNSP上面的192.168.56.1的那个网卡（这个老是有问题，各种ping不同）。</p>
+<p><img src="https://resource.tinychen.com/blog/20190816/cpwtbe7uUvBF.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来的eNSP内的桥接配置就十分简单了，添加一个UDP端口，然后添加一个网卡，再添加端口映射，就可以了。可以参考下面的这张图。</p>
-<p><img src="https://resource.tinychen.com/blog/20190816/TxJqKjGMH9CU.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190816/TxJqKjGMH9CU.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们拖入一个设备，我这里使用的是华为的AC6605。</p>
 <p>给它配置一个IP地址然后测试一下。</p>
 <figure class="highlight stylus"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs stylus"><span class="hljs-selector-attr">[AC6605]</span>vlan batch <span class="hljs-number">10</span><br>Info: This operation may take <span class="hljs-selector-tag">a</span> few seconds. Please wait <span class="hljs-keyword">for</span> <span class="hljs-selector-tag">a</span> moment..<span class="hljs-selector-class">.done</span>.<br><span class="hljs-selector-attr">[AC6605]</span>int Vlanif <span class="hljs-number">10</span><br><span class="hljs-selector-attr">[AC6605-Vlanif10]</span>ip <span class="hljs-selector-tag">address</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">59.2</span> <span class="hljs-number">24</span><br><span class="hljs-selector-attr">[AC6605-Vlanif10]</span><span class="hljs-selector-tag">q</span><br><span class="hljs-selector-attr">[AC6605]</span>int GigabitEthernet <span class="hljs-number">0</span>/<span class="hljs-number">0</span>/<span class="hljs-number">1</span><br><span class="hljs-selector-attr">[AC6605-GigabitEthernet0/0/1]</span>port link-type access <br><span class="hljs-selector-attr">[AC6605-GigabitEthernet0/0/1]</span>port default vlan <span class="hljs-number">10</span><br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190816/g43DkiCQiUkV.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190816/g43DkiCQiUkV.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们ping一下真机的网卡，能通就说明桥接成功了。</p>
-<p><img src="https://resource.tinychen.com/blog/20190816/ySXeeAXjIs3a.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h1>3、配置SSH服务</h1>
-<p>首先进行系统视图，然后创建<code>rsa key</code>，全部选择默认，接着启动<code>stelnet</code>服务。</p>
+<p><img src="https://resource.tinychen.com/blog/20190816/ySXeeAXjIs3a.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、配置SSH服务"><a href="#3、配置SSH服务" class="headerlink" title="3、配置SSH服务"></a>3、配置SSH服务</h1><p>首先进行系统视图，然后创建<code>rsa key</code>，全部选择默认，接着启动<code>stelnet</code>服务。</p>
 <figure class="highlight gauss"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs gauss"><span class="hljs-keyword">system</span>-<span class="hljs-built_in">view</span> <br>rsa <span class="hljs-keyword">local</span>-<span class="hljs-built_in">key</span>-pair <span class="hljs-keyword">create</span><br>stelnet server <span class="hljs-keyword">enable</span><br></code></pre></div></td></tr></table></figure>
+
 <p>接着配置用来远程的终端</p>
 <figure class="highlight sql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs sql"><span class="hljs-keyword">system</span><span class="hljs-operator">-</span><span class="hljs-keyword">view</span><br><span class="hljs-keyword">user</span><span class="hljs-operator">-</span>interface vty <span class="hljs-number">0</span> <span class="hljs-number">4</span><br>authentication<span class="hljs-operator">-</span>mode aaa<br>protocol inbound ssh<br></code></pre></div></td></tr></table></figure>
+
 <p>然后创建用户并设置密码。然后启动ssh服务。</p>
 <figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql"><span class="hljs-keyword">system</span>-<span class="hljs-keyword">view</span> <br>aaa<br><span class="hljs-keyword">local</span>-<span class="hljs-keyword">user</span> tinychen <span class="hljs-keyword">password</span> irreversible-cipher easy1234<br><span class="hljs-keyword">local</span>-<span class="hljs-keyword">user</span> tinychen privilege <span class="hljs-keyword">level</span> <span class="hljs-number">3</span><br><span class="hljs-keyword">local</span>-<span class="hljs-keyword">user</span> tinychen service-<span class="hljs-keyword">type</span> ssh<br>quit<br></code></pre></div></td></tr></table></figure>
+
 <p>最后回到系统视图下，设置ssh用户的登录方式为密码登录。</p>
 <figure class="highlight crmsh"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs crmsh">ssh <span class="hljs-keyword">user</span> <span class="hljs-title">tinychen</span> authentication-<span class="hljs-keyword">type</span> password<br></code></pre></div></td></tr></table></figure>
-<h1>4、保存配置</h1>
-<p><strong>上面的所有配置如果不保存，当前的终端退出就会失效，所以要记得保存配置，方法是退到最开始的登录视图输入save就能保存了。</strong></p>
-<h1>5、<code>def sshLogin</code></h1>
-<p>这里使用<code>netmiko</code>来对网络设备进行<code>ssh</code>登录，考虑到获取到的结果是包含了命令执行过程中的所有套接字，因此得到结果之后，先将其全部写入一个<code>debug.log</code>文件中保存记录，再将该次的操作结果写入<code>cache</code>文件用于下一步处理。</p>
-<h1>6、<code>def sort_to_csv</code></h1>
-<p>对于输出的结果进行筛选处理，我们需要用到<code>re</code>库的正则表达式，以及<code>split()</code>，因为大多数的输出结果是以空格来分列的，因此使用<code>split()</code>来处理这些字符是最好不过的了。</p>
+
+
+
+<h1 id="4、保存配置"><a href="#4、保存配置" class="headerlink" title="4、保存配置"></a>4、保存配置</h1><p><strong>上面的所有配置如果不保存，当前的终端退出就会失效，所以要记得保存配置，方法是退到最开始的登录视图输入save就能保存了。</strong></p>
+<h1 id="5、def-sshLogin"><a href="#5、def-sshLogin" class="headerlink" title="5、def sshLogin"></a>5、<code>def sshLogin</code></h1><p>这里使用<code>netmiko</code>来对网络设备进行<code>ssh</code>登录，考虑到获取到的结果是包含了命令执行过程中的所有套接字，因此得到结果之后，先将其全部写入一个<code>debug.log</code>文件中保存记录，再将该次的操作结果写入<code>cache</code>文件用于下一步处理。</p>
+<h1 id="6、def-sort-to-csv"><a href="#6、def-sort-to-csv" class="headerlink" title="6、def sort_to_csv"></a>6、<code>def sort_to_csv</code></h1><p>对于输出的结果进行筛选处理，我们需要用到<code>re</code>库的正则表达式，以及<code>split()</code>，因为大多数的输出结果是以空格来分列的，因此使用<code>split()</code>来处理这些字符是最好不过的了。</p>
 <p>最后导出成<code>csv</code>文件而不是直接导出excel的<code>xlsx</code>文件则是因为<code>csv</code>相比<code>xlsx</code>更容易读取处理，转成其他格式也更加方便。</p>
-<h1>7、<code>def csv_to_xlsx_pd</code></h1>
-<p>这里就是使用<code>pandas</code>库来将上一步生成的<code>csv</code>转为<code>xlsx</code>文件了，非常的简单，需要的注意的就是添加的行名和列名参数。</p>
+<h1 id="7、def-csv-to-xlsx-pd"><a href="#7、def-csv-to-xlsx-pd" class="headerlink" title="7、def csv_to_xlsx_pd"></a>7、<code>def csv_to_xlsx_pd</code></h1><p>这里就是使用<code>pandas</code>库来将上一步生成的<code>csv</code>转为<code>xlsx</code>文件了，非常的简单，需要的注意的就是添加的行名和列名参数。</p>
 
             </div>
             <hr>

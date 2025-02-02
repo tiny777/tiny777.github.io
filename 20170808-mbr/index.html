@@ -206,7 +206,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      2.5k 字
+      2.6k 字
     </span>
   
 
@@ -248,43 +248,39 @@
             <div class="markdown-body">
               <p>目前来说，比较主流的两种硬盘的分区表是MBR和GPT（GUID）。今天小七带大家了解一下比较旧一点的MBR分区表（相对于GPT）。</p>
 <span id="more"></span>
-<h1>1、简介</h1>
-<p>**MBR这个概念首次出现，是在1983年的IBM PC DOS 2.0操作系统当中，因此也被称为DOS分区结构。**实际上，MBR分区结构是一种应用非常广泛的硬盘分区结构，不仅仅是DOS，包括windows系列操作系统、Linux以及基于X86架构的UNIX操作系统等平台均有使用。</p>
+
+<h1 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h1><p><strong>MBR这个概念首次出现，是在1983年的IBM PC DOS 2.0操作系统当中，因此也被称为DOS分区结构。</strong>实际上，MBR分区结构是一种应用非常广泛的硬盘分区结构，不仅仅是DOS，包括windows系列操作系统、Linux以及基于X86架构的UNIX操作系统等平台均有使用。</p>
 <p><strong>MBR的英文全称是Main Boot Record（一说Master Boot Record）</strong>，翻译过来的中文名称是主引导记录。</p>
 <p><strong>它主要有以下几个特点：</strong></p>
 <p>1、在我们常见的电脑中，一般是BIOS+MBR、(U)efi+GPT的组合；</p>
 <p>2、MBR分区表中单个分区最大仅支持2TB，而整个分区表最大也是仅支持2TB的硬盘；</p>
 <p>3、MBR分区表最大只支持四个主分区（可少不可多），如果觉得四个不够用，可以使用三个主分区+一个扩展分区的组合（扩展分区仅能存在一个，但扩展分区下可以分出无数个逻辑分区）；</p>
-<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2801%29.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2801%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为MBR分区常见的两种组成</p>
-<h1>2、结构</h1>
-<p>MBR分区表占用一个扇区，位于硬盘的0磁头、0柱面、1扇区。</p>
+<h1 id="2、结构"><a href="#2、结构" class="headerlink" title="2、结构"></a>2、结构</h1><p>MBR分区表占用一个扇区，位于硬盘的0磁头、0柱面、1扇区。</p>
 <p>这里需要引用一下度娘百科对于磁头柱面扇区这三个概念的解释。</p>
-<p><strong>磁头(Heads)</strong>：每张磁片的正反两面各有一个磁头，一个磁头对应一张磁片的一个面。因此，用第几磁 头就可以表示数据在哪个磁面。</p>
-<p><strong>柱面(Cylinder)</strong>：所有磁片中半径相同的同心磁道构成“柱面&quot;，意思是这一系列的磁道垂直叠在一起，就形成一个柱面的形状。简单地理解，柱面数=磁道数。</p>
-<p><strong>扇区(Sector)</strong>：将磁道划分为若干个小的区段，就是扇区。虽然很小，但实际是一个扇子的形状，故称为扇区。</p>
-<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2802%29.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<p>**磁头(Heads)**：每张磁片的正反两面各有一个磁头，一个磁头对应一张磁片的一个面。因此，用第几磁 头就可以表示数据在哪个磁面。</p>
+<p>**柱面(Cylinder)**：所有磁片中半径相同的同心磁道构成“柱面”，意思是这一系列的磁道垂直叠在一起，就形成一个柱面的形状。简单地理解，柱面数&#x3D;磁道数。</p>
+<p>**扇区(Sector)**：将磁道划分为若干个小的区段，就是扇区。虽然很小，但实际是一个扇子的形状，故称为扇区。</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2802%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为磁头、柱面、扇区示意图</p>
 <p>①不管是CHS寻址还是LBA寻址，都需要知道磁头柱面和扇区来对数据进行定位；</p>
 <p>②通常来说，一个扇区的大小为512字节（Byte）；</p>
 <p>③该扇区为隐藏扇区，实际上，0磁头0柱面的扇区均为隐藏扇区，一般的硬盘访问命令无法访问，因此MBR分区表放在此处比较安全，不容易遭到破坏，同理，许多病毒也会隐藏在这里，不容易被查杀。</p>
 <p>由于MBR扇区中大部分都被MBR所占领，因此这个扇区就被称为MBR扇区。而MBR扇区主要是由MBR、DPT和结束标识三个部分组成。</p>
-<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2803%29.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2803%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为标准MBR结构</p>
-<h1>3、工作原理</h1>
-<p>MBR的产生并不依赖于任何一个操作系统，在电脑开机通电后，BIOS进行自检，自检完成后就开始执行MBR中的启动代码（Bootloader），通过读取启动代码来确定需要引导的系统。因此，双系统或者是多系统安装完成之后，需要修改引导启动项，即为修改此处的启动代码（Bootloader）。</p>
+<h1 id="3、工作原理"><a href="#3、工作原理" class="headerlink" title="3、工作原理"></a>3、工作原理</h1><p>MBR的产生并不依赖于任何一个操作系统，在电脑开机通电后，BIOS进行自检，自检完成后就开始执行MBR中的启动代码（Bootloader），通过读取启动代码来确定需要引导的系统。因此，双系统或者是多系统安装完成之后，需要修改引导启动项，即为修改此处的启动代码（Bootloader）。</p>
 <p>执行完启动代码之后，系统下一步就会读取MBR扇区中的最后两个字节，如果是55AA，则继续读取磁盘分区表DPT来确定是否有活动分区，从而启动系统；如果不是55AA，系统会认为该MBR为非法MBR，系统将停止操作并报错。</p>
-<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2804%29.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2804%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为MBR分区表的硬盘开机过程</p>
 <p>这里再额外提一下。</p>
 <p>MBR中的选用磁盘标识，这个在MBR分区中比较重要。如果安装的是windows操作系统的话，系统在启动时需要依赖该磁盘签名来识别硬盘并确定该磁盘是否初始化。</p>
 <p><strong>而DPT的作用其实非常简单，就是管理磁盘的分区信息。如果DPT被破坏，那么系统将无法识别该磁盘上的所有分区，并且有可能会提示需要格式化磁盘。</strong></p>
 <p>一般小白遇到这种情况会比较无奈，只能格式化，对磁盘中宝贵的数据说拜拜，<strong>但是，其实只要修复DPT，就可以读取分区，找回数据，实际上，硬盘的数据一直都在那里。那怕是对硬盘进行一般的格式化操作，也只是将DPT中对应的分区的数据清空，并没有影响到原来的在其他扇区的数据，此时只要不进行数据的读写操作（防止覆盖原有数据），还是有可能找回丢失的数据的。</strong></p>
-<h1>4、DPT</h1>
-<p>DPT其实有挺多可以讲的地方，这里拿一个分区（16Byte）为例，<strong>讲解一下MBR分区最大只能识别2TB硬盘的原因。</strong></p>
-<h1>5、分区项表内容及含义</h1>
-<p><strong>注：1 Byte=8 bit</strong></p>
-<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2805%29.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1 id="4、DPT"><a href="#4、DPT" class="headerlink" title="4、DPT"></a>4、DPT</h1><p>DPT其实有挺多可以讲的地方，这里拿一个分区（16Byte）为例，<strong>讲解一下MBR分区最大只能识别2TB硬盘的原因。</strong></p>
+<h1 id="5、分区项表内容及含义"><a href="#5、分区项表内容及含义" class="headerlink" title="5、分区项表内容及含义"></a>5、分区项表内容及含义</h1><p><strong>注：1 Byte&#x3D;8 bit</strong></p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2805%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>▲图为MBR中的DPT的分区项表的内容及含义</p>
 <p>再对其作进一步的解释：</p>
 <p>第1字节的引导标识：如果该分区内安装了操作系统，则该分区必须为活动分区，方可成功引导该分区内的操作系统（即为80H）；</p>
@@ -293,16 +289,15 @@
 <p><strong>最后的8个字节就是MBR分区为何最大只能识别2TB容量的原因了。</strong></p>
 <p><strong>前提知识背景：</strong></p>
 <p>①	计算机中采用2进制，bit是最小的大小计量单位；</p>
-<p>②	1 Byte=8 bit；</p>
+<p>②	1 Byte&#x3D;8 bit；</p>
 <p>③	一个扇区的大小是512Byte；</p>
 <p>④	Byte、KB、MB、GB、TB、PB这六者按照从小到大的顺序排列，且相邻两者间差1024倍（即2^10）；</p>
 <p>⑤	在上面的缩写中，大写的B表示Byte，小写的b表示bit，两者相差8倍；</p>
-<p>由于只有4 Byte来记录本分区的总扇区数，4 Byte=32 bit，在2进制即有2^32种状态，假设全部为1，则最多有2^32个扇区。即</p>
-<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2806%29.jpg" srcset="/img/loading.gif" lazyload alt=""></p>
+<p>由于只有4 Byte来记录本分区的总扇区数，4 Byte&#x3D;32 bit，在2进制即有2^32种状态，假设全部为1，则最多有2^32个扇区。即</p>
+<p><img src="https://resource.tinychen.com/MBR%E5%88%86%E5%8C%BA%E8%A1%A8%2806%29.jpg" srcset="/img/loading.gif" lazyload></p>
 <p>所以MBR分区中单个分区最多只能识别2TB容量，而由于记录已使用的扇区的字节数也是4，所以整个分区最多也只能识别2TB容量。</p>
-<h1>6、扩展分区</h1>
-<p>前面我们已经提到了当四个主分区无法满足需求的时候，可以使用三个主分区+一个扩展分区的方法，在扩展分区下，理论上可以分出无数个分区（实际还要看操作系统的限制等其他因素）。</p>
-<p>这里还要介绍一个概念——**EBR（Extended Boot Record），即扩展分区引导记录。其原理和工作模式与MBR非常相似，但它是链式的，**也就是说一个EBR不够用，可以再增加一个，新增加的EBR链接在旧的EBR之后，一个链接着一个，就像链条一样。理论上就可以实现无数个分区。</p>
+<h1 id="6、扩展分区"><a href="#6、扩展分区" class="headerlink" title="6、扩展分区"></a>6、扩展分区</h1><p>前面我们已经提到了当四个主分区无法满足需求的时候，可以使用三个主分区+一个扩展分区的方法，在扩展分区下，理论上可以分出无数个分区（实际还要看操作系统的限制等其他因素）。</p>
+<p>这里还要介绍一个概念——<strong>EBR（Extended Boot Record），即扩展分区引导记录。其原理和工作模式与MBR非常相似，但它是链式的，</strong>也就是说一个EBR不够用，可以再增加一个，新增加的EBR链接在旧的EBR之后，一个链接着一个，就像链条一样。理论上就可以实现无数个分区。</p>
 <p>MBR分区表的内容介绍到这里就结束了，如果对它还有兴趣的话，或者觉得这里的介绍太过简单的话，可以去查询一些相关书籍和论坛。另外，如果文中有任何错误，还望不吝赐教。</p>
 
             </div>

@@ -249,52 +249,44 @@
             <div class="markdown-body">
               <p>本文主要介绍了iptables的基本工作原理和四表五链等基本概念以及NAT的工作原理。</p>
 <span id="more"></span>
-<h1>1、iptables简介</h1>
-<p>我们先来看一下<a target="_blank" rel="noopener" href="https://www.netfilter.org/projects/iptables/index.html">netfilter官网</a>对iptables的描述：</p>
+
+<h1 id="1、iptables简介"><a href="#1、iptables简介" class="headerlink" title="1、iptables简介"></a>1、iptables简介</h1><p>我们先来看一下<a target="_blank" rel="noopener" href="https://www.netfilter.org/projects/iptables/index.html">netfilter官网</a>对iptables的描述：</p>
 <blockquote>
 <p><strong>iptables</strong> is the userspace command line program used to configure the Linux 2.4.x and later packet filtering ruleset. It is targeted towards system administrators.</p>
 <p>Since Network Address Translation is also configured from the packet filter ruleset, <strong>iptables</strong> is used for this, too.</p>
 <p>The <strong>iptables</strong> package also includes <strong>ip6tables</strong>. <strong>ip6tables</strong> is used for configuring the IPv6 packet filter.</p>
 </blockquote>
 <p>也就是说<code>iptables</code>实际上只是位于用户空间的一个面向系统管理员的Linux防火墙的管理工具而已，而真正实现防火墙功能的是<code>netfilter</code>，它是Linux内核中实现包过滤的内核模块，<code>iptables</code>对应在内核中的模块应该是<code>ip_tables</code>，我们查看系统内核中<code>ip_tables</code>的信息的时候可以看到<code>ip_tables.ko</code>这个模块是在<code>netfilter</code>这个目录下的。</p>
-<p><img src="https://resource.tinychen.com/20200420164507.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200420164507.png" srcset="/img/loading.gif" lazyload></p>
 <p>实际上除了<code>iptables</code>还有如<code>nftables</code>、<code>firewalld</code>等防火墙工具都是在用户空间（用户层）对相应的内核空间中对应的<code>netfilter</code>相关的模块进行操作的工具。</p>
-<h1>2、iptables的四表五链</h1>
-<h2 id="2-1-iptables流程图">2.1 iptables流程图</h2>
-<p>首先我们来看一下下面的这张图了解一下iptables中的表和链的概念。图中使用箭头展示了用户访问使用了iptables的机器的过程，其中按照箭头的顺序我们就可以将其梳理为一条大的带有分支的链条，在每个需要进行操作的模块处都标有名称和相应的括号，括号内的就是iptables的四表，而每个模块都可以视为一个链。</p>
-<p><img src="https://resource.tinychen.com/20200420174840.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h1 id="2、iptables的四表五链"><a href="#2、iptables的四表五链" class="headerlink" title="2、iptables的四表五链"></a>2、iptables的四表五链</h1><h2 id="2-1-iptables流程图"><a href="#2-1-iptables流程图" class="headerlink" title="2.1 iptables流程图"></a>2.1 iptables流程图</h2><p>首先我们来看一下下面的这张图了解一下iptables中的表和链的概念。图中使用箭头展示了用户访问使用了iptables的机器的过程，其中按照箭头的顺序我们就可以将其梳理为一条大的带有分支的链条，在每个需要进行操作的模块处都标有名称和相应的括号，括号内的就是iptables的四表，而每个模块都可以视为一个链。</p>
+<p><img src="https://resource.tinychen.com/20200420174840.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>CentOS7中的input链中还有nat表，但是在CentOS6中并没有。</p>
 </blockquote>
 <p>之所以叫做链就是因为在访问该链的时候会按照每个链对应的表依次进行查询匹配执行的操作，如<code>PREROUTING</code>链对应的就是(<code>raw</code>-&gt;<code>mangle</code>-&gt;<code>nat</code>)，每个表按照优先级顺序进行连接，每个表中还可能有多个规则，因此最后看起来就像链一样，因此称为链。而<code>iptables</code>的表中存储的就是对应的规则和需要执行的操作，这里以路由器为例查看其中<code>iptables</code>的<code>filter</code>表：</p>
-<p><img src="https://resource.tinychen.com/20200421101939.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200421101939.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意每一个链对应的表都是不完全一样的，表和链之间是多对多的对应关系。但是不管一个链对应多少个表，它的表都是按照下面的优先顺序来进行查找匹配的。</p>
 <p><strong>表的处理优先级：<code>raw</code>&gt;<code>mangle</code>&gt;<code>nat</code>&gt;<code>filter</code>。</strong></p>
-<h2 id="2-2-四表">2.2 四表</h2>
-<p><code>iptables</code>的四个表<code>iptable_filter</code>，<code>iptable_mangle</code>，<code>iptable_nat</code>，<code>iptable_raw</code>，默认表是<code>filter</code>（没有指定表的时候就是filter表）。</p>
+<h2 id="2-2-四表"><a href="#2-2-四表" class="headerlink" title="2.2 四表"></a>2.2 四表</h2><p><code>iptables</code>的四个表<code>iptable_filter</code>，<code>iptable_mangle</code>，<code>iptable_nat</code>，<code>iptable_raw</code>，默认表是<code>filter</code>（没有指定表的时候就是filter表）。</p>
 <ul>
-<li>
-<p><code>filter 表</code>：用来对数据包进行过滤，具体的规则要求决定如何处理一个数据包。</p>
+<li><p><code>filter 表</code>：用来对数据包进行过滤，具体的规则要求决定如何处理一个数据包。</p>
 <p>对应的内核模块为：<code>iptable_filter</code>，其表内包括三个链：<code>input</code>、<code>forward</code>、<code>output</code>;</p>
 </li>
-<li>
-<p><code>nat 表</code>：nat 全称：network address translation 网络地址转换，主要用来修改数据包的 IP 地址、端口号信息。</p>
+<li><p><code>nat 表</code>：nat 全称：network address translation 网络地址转换，主要用来修改数据包的 IP 地址、端口号信息。</p>
 <p>对应的内核模块为：<code>iptable_nat</code>，其表内包括三个链：<code>prerouting</code>、<code>postrouting</code>、<code>output</code>;</p>
 </li>
-<li>
-<p><code>mangle 表</code>：主要用来修改数据包的服务类型，生存周期，为数据包设置标记，实现流量整形、策略路由等。</p>
+<li><p><code>mangle 表</code>：主要用来修改数据包的服务类型，生存周期，为数据包设置标记，实现流量整形、策略路由等。</p>
 <p>对应的内核模块为：<code>iptable_mangle</code>，其表内包括五个链：<code>prerouting</code>、<code>postrouting</code>、<code>input</code>、<code>output</code>、<code>forward</code>;</p>
 </li>
-<li>
-<p><code>raw 表</code>：主要用来决定是否对数据包进行状态跟踪。</p>
+<li><p><code>raw 表</code>：主要用来决定是否对数据包进行状态跟踪。</p>
 <p>对应的内核模块为：<code>iptable_raw</code>，其表内包括两个链：<code>output</code>、<code>prerouting</code>;</p>
 </li>
 </ul>
 <blockquote>
 <p>raw表只使用在<code>PREROUTING</code>链和<code>OUTPUT</code>链上,因为优先级最高，从而可以对收到的数据包在系统进行ip_conntrack（连接跟踪）前进行处理。一但用户使用了raw表,在某个链上，raw表处理完后，将跳过NAT表和ip_conntrack处理，即不再做地址转换和数据包的链接跟踪处理了。RAW表可以应用在那些不需要做nat的情况下，以提高性能。</p>
 </blockquote>
-<h2 id="2-3-五链">2.3 五链</h2>
-<p><code>iptables</code>的五个链<code>PREROUTING</code>，<code>INPUT</code>，<code>FORWARD</code>，<code>OUTPUT</code>，<code>POSTROUTING</code>。</p>
+<h2 id="2-3-五链"><a href="#2-3-五链" class="headerlink" title="2.3 五链"></a>2.3 五链</h2><p><code>iptables</code>的五个链<code>PREROUTING</code>，<code>INPUT</code>，<code>FORWARD</code>，<code>OUTPUT</code>，<code>POSTROUTING</code>。</p>
 <ul>
 <li><code>input 链</code>：当收到访问防火墙本机地址的数据包时，将应用此链中的规则；</li>
 <li><code>output 链</code>：当防火墙本机向外发送数据包时，将应用此链中的规则；</li>
@@ -302,60 +294,50 @@
 <li><code>prerouting 链</code>：在对数据包做路由选择之前，将应用此链中的规则；</li>
 <li><code>postrouting 链</code>：在对数据包做路由选择之后，将应用此链中的规则；</li>
 </ul>
-<h2 id="2-4-iptables的常见情况">2.4 iptables的常见情况</h2>
-<p>下面我们利用上面的流程图来对几种常见的情况解析：<strong>关键点在于发往iptables主机的数据包的目的地址是否是iptables主机本机</strong>。如果是，那我们就可以理解为常见的开启了iptables防火墙的网站服务器主机；如果不是，那就是走ip_forward进行转发，比如我们常见的NAT路由器的NAT服务和策略路由等。如下图为开启了ip_forward功能的openwrt路由器。</p>
-<p><img src="https://resource.tinychen.com/20200421111042.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h1>3、NAT工作原理</h1>
-<p>接下来介绍一些NAT(<strong>N</strong>etwork <strong>A</strong>ddress <strong>T</strong>ranslation，网络地址转换)的基本知识，众所周知，IPv4的公网IP地址已经枯竭，但是需要接入互联网的设备还在不断增加，这其中NAT就发挥了很大的作用（此处不讨论IPv6）。NAT服务器提供了一组私有的IP地址池（10.0.0.0/8、172.16.0.0/12、192.168.0.0/16），使得连接该NAT服务器的设备能够获得一个私有的IP地址（也称局域网IP/内网IP），当设备需要连接互联网的时候，NAT服务器将该设备的私有IP转换成可以在互联网上路由的公网IP（全球唯一）。NAT的实现方式有很多种，这里我们主要介绍三种：<strong>静态NAT</strong>、<strong>动态NAT</strong>和网络地址端口转换（<strong>NAPT</strong>）。</p>
-<h2 id="3-1-BNAT">3.1 BNAT</h2>
-<ul>
-<li>
-<p>静态NAT：LVS的官方文档中也称为(N-to-N mapping)<br>
-，前面的N指的是局域网中需要联网的设备数量，后面的N指的是该NAT服务器所拥有的公网IP的数量。既然数量相等，那么就可以实现静态转换，即一个设备对应一个公网IP，这时候的NAT服务器只需要维护一张静态的NAT映射转换表。</p>
+<h2 id="2-4-iptables的常见情况"><a href="#2-4-iptables的常见情况" class="headerlink" title="2.4 iptables的常见情况"></a>2.4 iptables的常见情况</h2><p>下面我们利用上面的流程图来对几种常见的情况解析：<strong>关键点在于发往iptables主机的数据包的目的地址是否是iptables主机本机</strong>。如果是，那我们就可以理解为常见的开启了iptables防火墙的网站服务器主机；如果不是，那就是走ip_forward进行转发，比如我们常见的NAT路由器的NAT服务和策略路由等。如下图为开启了ip_forward功能的openwrt路由器。</p>
+<p><img src="https://resource.tinychen.com/20200421111042.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、NAT工作原理"><a href="#3、NAT工作原理" class="headerlink" title="3、NAT工作原理"></a>3、NAT工作原理</h1><p>接下来介绍一些NAT(<strong>N</strong>etwork <strong>A</strong>ddress <strong>T</strong>ranslation，网络地址转换)的基本知识，众所周知，IPv4的公网IP地址已经枯竭，但是需要接入互联网的设备还在不断增加，这其中NAT就发挥了很大的作用（此处不讨论IPv6）。NAT服务器提供了一组私有的IP地址池（10.0.0.0&#x2F;8、172.16.0.0&#x2F;12、192.168.0.0&#x2F;16），使得连接该NAT服务器的设备能够获得一个私有的IP地址（也称局域网IP&#x2F;内网IP），当设备需要连接互联网的时候，NAT服务器将该设备的私有IP转换成可以在互联网上路由的公网IP（全球唯一）。NAT的实现方式有很多种，这里我们主要介绍三种：<strong>静态NAT</strong>、<strong>动态NAT</strong>和网络地址端口转换（<strong>NAPT</strong>）。</p>
+<h2 id="3-1-BNAT"><a href="#3-1-BNAT" class="headerlink" title="3.1 BNAT"></a>3.1 BNAT</h2><ul>
+<li><p>静态NAT：LVS的官方文档中也称为(N-to-N mapping)<br>，前面的N指的是局域网中需要联网的设备数量，后面的N指的是该NAT服务器所拥有的公网IP的数量。既然数量相等，那么就可以实现静态转换，即一个设备对应一个公网IP，这时候的NAT服务器只需要维护一张静态的NAT映射转换表。	</p>
 <table>
 <thead>
 <tr>
-<th style="text-align:center">内网IP</th>
-<th style="text-align:center">外网IP</th>
+<th align="center">内网IP</th>
+<th align="center">外网IP</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align:center">192.168.1.55</td>
-<td style="text-align:center">219.152.168.222</td>
+<tbody><tr>
+<td align="center">192.168.1.55</td>
+<td align="center">219.152.168.222</td>
 </tr>
 <tr>
-<td style="text-align:center">192.168.1.59</td>
-<td style="text-align:center">219.152.168.223</td>
+<td align="center">192.168.1.59</td>
+<td align="center">219.152.168.223</td>
 </tr>
 <tr>
-<td style="text-align:center">192.168.1.155</td>
-<td style="text-align:center">219.152.168.224</td>
+<td align="center">192.168.1.155</td>
+<td align="center">219.152.168.224</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 </li>
-<li>
-<p>动态NAT：LVS的官方文档中也称为(M-to-N mapping)<br>
-，注意这时候的M&gt;N，也就是说局域网中需要联网的设备数量多于NAT服务器拥有的公网IP数量，这时候就需要由NAT服务器来实现动态的转换，这样每个内网设备访问公网的时候使用的公网IP就不一定是同一个IP。</p>
+<li><p>动态NAT：LVS的官方文档中也称为(M-to-N mapping)<br>，注意这时候的M&gt;N，也就是说局域网中需要联网的设备数量多于NAT服务器拥有的公网IP数量，这时候就需要由NAT服务器来实现动态的转换，这样每个内网设备访问公网的时候使用的公网IP就不一定是同一个IP。</p>
 </li>
 </ul>
 <blockquote>
 <p>在一些家用路由器中，DMZ是指一部所有端口都暴露在外部网络的内部网络主机，除此以外的端口都被转发。严格来说这不是真正的DMZ，因为该主机仍能访问内部网络，并非独立于内部网络之外的。但真正的DMZ是不允许访问内部网络的，DMZ和内部网络是分开的。这种 DMZ主机并没有真正DMZ所拥有的子网划分的安全优势，其常常以一种简单的方法将所有端口转发到另外的防火墙或NAT设备上。</p>
 </blockquote>
-<h2 id="3-2-NAPT">3.2 NAPT</h2>
-<p>以上的这两种都属于<strong>基本网络地址转换（Basic NAT）</strong>，这种转换在技术上比较简单，仅支持地址转换，不支持端口映射，这也就带来了另一个问题就是资源的浪费。我们知道一个IP实际上可以对应多个端口，而我们访问应用实际上是通过IP地址+端口号的形式来访问的，即客户端访问的时候发送请求到服务器端应用程序监听的端口即可实现访问。那么NAPT就是在这基础上的扩展延申，它在IP地址的基础上加上了端口号，支持了端口映射的功能。</p>
+<h2 id="3-2-NAPT"><a href="#3-2-NAPT" class="headerlink" title="3.2 NAPT"></a>3.2 NAPT</h2><p>以上的这两种都属于<strong>基本网络地址转换（Basic NAT）</strong>，这种转换在技术上比较简单，仅支持地址转换，不支持端口映射，这也就带来了另一个问题就是资源的浪费。我们知道一个IP实际上可以对应多个端口，而我们访问应用实际上是通过IP地址+端口号的形式来访问的，即客户端访问的时候发送请求到服务器端应用程序监听的端口即可实现访问。那么NAPT就是在这基础上的扩展延申，它在IP地址的基础上加上了端口号，支持了端口映射的功能。</p>
 <ul>
-<li>NAPT：NAPT实际上还可以分为**源地址转换（SNAT）<strong>和</strong>目的地址转换（DNAT）**两种。<strong>注意这个源地址和目的地址是针对NAT服务器而言</strong>，我们通过下面一张图来说明：</li>
+<li>NAPT：NAPT实际上还可以分为<strong>源地址转换（SNAT）</strong>和<strong>目的地址转换（DNAT）</strong>两种。<strong>注意这个源地址和目的地址是针对NAT服务器而言</strong>，我们通过下面一张图来说明：</li>
 </ul>
-<p><img src="https://resource.tinychen.com/20200415111556.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p>首先我们这里有一个客户端，上面运行着一个浏览器，假设它使用的是<code>5566</code>端口，它需要访问<code>14.25.23.47</code>这个Web服务器的HTTPS服务的<code>443</code>端口，它在访问的时候需要经过局域网出口的这个路由器网关（同时也是NAT服务器），路由器对它进行一个NAPT的<strong>源地址转换（SNAT）</strong>，这个时候客户端的请求经过NAT服务器之后变成了<code>222.17.23.45:7788</code>这个IP端口对Web服务器的<code>443</code>端口进行访问。注意在这个过程中，目标服务器（Web服务器）的IP和端口是一直没有改变的。</p>
-<p>接下来在Web服务器接收到请求之后，需要返回数据给发送请求的设备，注意这时候web服务器返回数据的指向IP应该是刚刚NAT服务器发送请求的<code>227.17.23.45:7788</code>这个IP端口，这时候路由器网关再进行一次NAPT的<strong>目标地址转换（DNAT）</strong>，目标的IP端口就是最开始发送请求的<code>192.168.1.77:5566</code>这个端口。</p>
+<p><img src="https://resource.tinychen.com/20200415111556.png" srcset="/img/loading.gif" lazyload></p>
+<p>  首先我们这里有一个客户端，上面运行着一个浏览器，假设它使用的是<code>5566</code>端口，它需要访问<code>14.25.23.47</code>这个Web服务器的HTTPS服务的<code>443</code>端口，它在访问的时候需要经过局域网出口的这个路由器网关（同时也是NAT服务器），路由器对它进行一个NAPT的<strong>源地址转换（SNAT）</strong>，这个时候客户端的请求经过NAT服务器之后变成了<code>222.17.23.45:7788</code>这个IP端口对Web服务器的<code>443</code>端口进行访问。注意在这个过程中，目标服务器（Web服务器）的IP和端口是一直没有改变的。</p>
+<p>  接下来在Web服务器接收到请求之后，需要返回数据给发送请求的设备，注意这时候web服务器返回数据的指向IP应该是刚刚NAT服务器发送请求的<code>227.17.23.45:7788</code>这个IP端口，这时候路由器网关再进行一次NAPT的<strong>目标地址转换（DNAT）</strong>，目标的IP端口就是最开始发送请求的<code>192.168.1.77:5566</code>这个端口。</p>
 <p>实际上对于大多数人来说日常接触到最多的就是路由器做的SNAT和DNAT操作，它们一般成对出现用于解决公网IP资源不足的问题，需要注意的是NAT是可以进行嵌套操作的，即NAT下面的网络设备还可以继续做NAT，只要做NAT的网段不和上层的NAT的网段相同即可。</p>
-<h1>4、iptables配置</h1>
-<p>在了解清楚iptables的工作原理和每个表以及链的作用之后，我们就可以根据其特点进行针对性的配置。</p>
+<h1 id="4、iptables配置"><a href="#4、iptables配置" class="headerlink" title="4、iptables配置"></a>4、iptables配置</h1><p>在了解清楚iptables的工作原理和每个表以及链的作用之后，我们就可以根据其特点进行针对性的配置。</p>
 <p>iptables 的基本语法命令格式</p>
 <figure class="highlight css"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs css">iptables <span class="hljs-selector-attr">[-t 表名]</span> 管理选项 <span class="hljs-selector-attr">[链名]</span> <span class="hljs-selector-attr">[匹配条件]</span> <span class="hljs-selector-attr">[-j 控制类型]</span><br></code></pre></div></td></tr></table></figure>
+
 <ul>
 <li><code>表名</code>、<code>链名</code>：指定<code>iptables</code>命令所操作的<code>表</code>和<code>链</code>，未指定表名时将默认使用<code>filter</code>表；</li>
 <li><code>管理选项</code>：表示<code>iptables</code>规则的操作方式，比如：<code>插入</code>、<code>增加</code>、<code>删除</code>、<code>查看</code>等；</li>
@@ -363,20 +345,23 @@
 <li><code>控制类型</code>：指数据包的处理方式，比如：<code>允许accept</code>、<code>拒绝reject</code>、<code>丢弃drop</code>、<code>日志LOG</code>等；</li>
 </ul>
 <figure class="highlight diff"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs diff">iptables 命令的常用管理选项<br><span class="hljs-deletion">-A:在指定链的末尾添加一条新的规则</span><br><span class="hljs-deletion">-D:删除指定链中的某一条规则，可删除指定序号或具体内容</span><br><span class="hljs-deletion">-I:在指定链中插入一条新规则，未指定序号时默认作为第一条规则</span><br><span class="hljs-deletion">-R:修改、替换指定链中的某一条规则，可指定规则序号或具体内容</span><br><span class="hljs-deletion">-L:列出指定链中所有的规则，未指定链名，则列出表中的所有链</span><br><span class="hljs-deletion">-F:清空指定链中所有的规则，未指定链名，则清空表中的所有链</span><br><span class="hljs-deletion">-P:设置指定链的默认策略</span><br><span class="hljs-deletion">-n:使用数字形式显示输出结果</span><br><span class="hljs-deletion">-v:查看规则列表时显示详细的信息</span><br><span class="hljs-deletion">-h:查看命令帮助信息</span><br><span class="hljs-deletion">--line-numbers:查看规则列表时，同时显示规则在链中的顺序号</span><br></code></pre></div></td></tr></table></figure>
+
 <p>在添加规则之前我们先开启iptables的独立log功能，对于centos6，我们可以执行以下操作：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;kern.*     /var/log/iptables.log&quot;</span> &gt;&gt; /etc/rsyslog.conf<br><span class="hljs-comment"># 记录所有级别的日志到指定目录中</span><br>service rsyslog restart<br><span class="hljs-comment"># 重启rsyslog服务使配置生效</span><br></code></pre></div></td></tr></table></figure>
+
 <p>接着我们开始添加一条比较有针对性的规则：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">iptables -A INPUT -j LOG --log-prefix <span class="hljs-string">&quot;*** INPUT ***&quot;</span> --log-level debug<br>iptables -t filter -A INPUT -p tcp -s 192.168.100.100 --dport 80 -j REJECT <br></code></pre></div></td></tr></table></figure>
+
 <p>上述两条命令第一条增加了一条记录日志的规则，对于INPUT链中的所有操作都记录到日志中，添加日志前缀<code>*** INPUT ***</code>并设定日志级别为<code>debug</code></p>
 <p>第二条是在INPUT链的filter表中插入一条规则，限定对<code>192.168.100.100</code>这个IP使用<code>tcp</code>协议访问本机的目的端口<code>80</code>端口的时候拒绝掉数据包。</p>
-<p><img src="https://resource.tinychen.com/20200421153817.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200421153817.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们尝试访问发现无法正常显示页面。</p>
-<p><img src="https://resource.tinychen.com/20200421153854.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200421153854.png" srcset="/img/loading.gif" lazyload></p>
 <p>再查看日志发现iptables日志中多了很多请求被拒绝的记录。</p>
-<p><img src="https://resource.tinychen.com/20200421154137.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200421154137.png" srcset="/img/loading.gif" lazyload></p>
 <p>再清空所有的规则，此时可以正常访问，且不再继续记录日志，因为记录日志的那条规则也被我们清空掉了。</p>
-<p><img src="https://resource.tinychen.com/20200421154237.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/20200421154255.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20200421154237.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200421154255.png" srcset="/img/loading.gif" lazyload></p>
 
             </div>
             <hr>

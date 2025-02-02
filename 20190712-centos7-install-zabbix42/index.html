@@ -30,8 +30,8 @@
 <meta property="article:modified_time" content="2019-07-12T02:00:00.000Z">
 <meta property="article:author" content="TinyChen">
 <meta property="article:tag" content="centos">
-<meta property="article:tag" content="graduation">
 <meta property="article:tag" content="zabbix">
+<meta property="article:tag" content="graduation">
 <meta property="article:tag" content="monitor">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://resource.tinychen.com/20210617170554.jpg">
@@ -251,89 +251,104 @@
             <div class="markdown-body">
               <p>在五台CentOS7的虚拟机上尝试安装Zabbix4.2用来监控各个主机的运行状况。</p>
 <span id="more"></span>
-<h1>1、master前期准备工作</h1>
-<h2 id="1-1-关闭防火墙和SELinux">1.1 关闭防火墙和SELinux</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sed -i <span class="hljs-string">&quot;s/SELINUX=enforcing/SELINUX=disabled/g&quot;</span> /etc/selinux/config<br>sed -i <span class="hljs-string">&#x27;s/SELINUXTYPE=targeted/#&amp;/&#x27;</span> /etc/selinux/config<br><span class="hljs-comment"># 可以设置配置文件永久关闭</span><br>setenforce 0<br><span class="hljs-comment"># 更改selinux需要重启系统才会生效</span><br>reboot<br><br><span class="hljs-comment"># 关闭防火墙</span><br><span class="hljs-comment"># 一般来说centos7里面默认没有iptables</span><br>systemctl stop iptables.service<br>systemctl stop firewalld.service<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/XJkmA7JtKFYn.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="1-2-修改字符集">1.2 修改字符集</h2>
-<p>修改字符集，确保输出中文的时候不会报错</p>
+
+<h1 id="1、master前期准备工作"><a href="#1、master前期准备工作" class="headerlink" title="1、master前期准备工作"></a>1、master前期准备工作</h1><h2 id="1-1-关闭防火墙和SELinux"><a href="#1-1-关闭防火墙和SELinux" class="headerlink" title="1.1 关闭防火墙和SELinux"></a>1.1 关闭防火墙和SELinux</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sed -i <span class="hljs-string">&quot;s/SELINUX=enforcing/SELINUX=disabled/g&quot;</span> /etc/selinux/config<br>sed -i <span class="hljs-string">&#x27;s/SELINUXTYPE=targeted/#&amp;/&#x27;</span> /etc/selinux/config<br><span class="hljs-comment"># 可以设置配置文件永久关闭</span><br>setenforce 0<br><span class="hljs-comment"># 更改selinux需要重启系统才会生效</span><br>reboot<br><br><span class="hljs-comment"># 关闭防火墙</span><br><span class="hljs-comment"># 一般来说centos7里面默认没有iptables</span><br>systemctl stop iptables.service<br>systemctl stop firewalld.service<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/XJkmA7JtKFYn.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="1-2-修改字符集"><a href="#1-2-修改字符集" class="headerlink" title="1.2 修改字符集"></a>1.2 修改字符集</h2><p>修改字符集，确保输出中文的时候不会报错</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8<br><span class="hljs-built_in">export</span> LC_ALL=zh_CN.UTF-8<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;LANG=zh_CN.UTF-8&#x27;</span> &gt; /etc/locale.conf<br></code></pre></div></td></tr></table></figure>
-<h1>2、master安装Mariadb</h1>
-<h2 id="2-1-安装Mariadb">2.1 安装Mariadb</h2>
-<p>需要安装一个数据库来存储zabbix监控时产生的数据，在centos7中，mysql被换成了mariadb</p>
+
+<h1 id="2、master安装Mariadb"><a href="#2、master安装Mariadb" class="headerlink" title="2、master安装Mariadb"></a>2、master安装Mariadb</h1><h2 id="2-1-安装Mariadb"><a href="#2-1-安装Mariadb" class="headerlink" title="2.1 安装Mariadb"></a>2.1 安装Mariadb</h2><p>需要安装一个数据库来存储zabbix监控时产生的数据，在centos7中，mysql被换成了mariadb</p>
 <figure class="highlight pgsql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs pgsql">yum install mariadb mariadb-devel mariadb-<span class="hljs-keyword">server</span>  <br>systemctl <span class="hljs-keyword">enable</span> mariadb<br>systemctl <span class="hljs-keyword">start</span> mariadb<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/K53Ynls1J3bV.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="2-2-导入zabbix初始数据">2.2 导入zabbix初始数据</h2>
-<p>这里是官方的指导文档</p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/K53Ynls1J3bV.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="2-2-导入zabbix初始数据"><a href="#2-2-导入zabbix初始数据" class="headerlink" title="2.2 导入zabbix初始数据"></a>2.2 导入zabbix初始数据</h2><p>这里是官方的指导文档</p>
 <p><a target="_blank" rel="noopener" href="https://www.zabbix.com/documentation/4.2/manual/appendix/install/db_scripts">https://www.zabbix.com/documentation/4.2/manual/appendix/install/db_scripts</a></p>
 <figure class="highlight sql"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs sql"><span class="hljs-comment">-- 设置数据库root密码</span><br>mysqladmin <span class="hljs-operator">-</span>u root <span class="hljs-operator">-</span>h localhost password <span class="hljs-string">&#x27;xxxxxxxx&#x27;</span><br><br><span class="hljs-comment">-- 进入mysql创建zabbix数据库</span><br>mysql <span class="hljs-operator">-</span>u root <span class="hljs-operator">-</span>p<br><br><span class="hljs-comment">-- 创建zabbix数据库并设定字符集和校对集为UTF8</span><br><span class="hljs-keyword">create</span> database zabbix <span class="hljs-type">character</span> <span class="hljs-keyword">set</span> utf8 <span class="hljs-keyword">collate</span> utf8_bin;<br><br><span class="hljs-comment">-- 创建zabbix用户并授权zabbix用户对zabbix数据库有完全操作权限</span><br><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> privileges <span class="hljs-keyword">on</span> zabbix.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> zabbix<span class="hljs-variable">@localhost</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;xxxxxxxx&#x27;</span>;<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/tWH2935tMEX0.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/blog/20190711/b0YmoXtBxwpe.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h1>3、master上安装zabbix-server</h1>
-<h2 id="3-1-安装zabbix-server">3.1 安装zabbix-server</h2>
-<figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-comment"># 导入官网对应的centos7的rpm包</span><br><span class="hljs-comment"># 从链接中可以看到centos7和rhel7使用的版本是一样的</span><br><span class="hljs-attribute">rpm</span> -Uvh https://repo.zabbix.com/zabbix/<span class="hljs-number">4</span>.<span class="hljs-number">2</span>/rhel/<span class="hljs-number">7</span>/x86_64/zabbix-release-<span class="hljs-number">4</span>.<span class="hljs-number">2</span>-<span class="hljs-number">1</span>.el7.noarch.rpm<br><br><span class="hljs-attribute">yum</span> clean <span class="hljs-literal">all</span><br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/tWH2935tMEX0.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/b0YmoXtBxwpe.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="3、master上安装zabbix-server"><a href="#3、master上安装zabbix-server" class="headerlink" title="3、master上安装zabbix-server"></a>3、master上安装zabbix-server</h1><h2 id="3-1-安装zabbix-server"><a href="#3-1-安装zabbix-server" class="headerlink" title="3.1 安装zabbix-server"></a>3.1 安装zabbix-server</h2><figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-comment"># 导入官网对应的centos7的rpm包</span><br><span class="hljs-comment"># 从链接中可以看到centos7和rhel7使用的版本是一样的</span><br><span class="hljs-attribute">rpm</span> -Uvh https://repo.zabbix.com/zabbix/<span class="hljs-number">4</span>.<span class="hljs-number">2</span>/rhel/<span class="hljs-number">7</span>/x86_64/zabbix-release-<span class="hljs-number">4</span>.<span class="hljs-number">2</span>-<span class="hljs-number">1</span>.el7.noarch.rpm<br><br><span class="hljs-attribute">yum</span> clean <span class="hljs-literal">all</span><br></code></pre></div></td></tr></table></figure>
+
 <p>官网的yum源有些时候可能会连不上，我们也可以使用阿里云的镜像源。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[zabbix]<br>name=Zabbix Official Repository - <span class="hljs-variable">$basearch</span><br>baseurl=https://mirrors.aliyun.com/zabbix/zabbix/4.2/rhel/7/<span class="hljs-variable">$basearch</span>/<br>enabled=1<br>gpgcheck=1<br>gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ZABBIX-A14FE591<br><br>[zabbix-non-supported]<br>name=Zabbix Official Repository non-supported - <span class="hljs-variable">$basearch</span> <br><br>baseurl=https://mirrors.aliyun.com/zabbix/non-supported/rhel/7/<span class="hljs-variable">$basearch</span>/<br>enabled=1<br>gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-ZABBIX<br>gpgcheck=1<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/yeJKGWd3MeMt.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/yeJKGWd3MeMt.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight axapta"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs axapta">yum install zabbix-<span class="hljs-keyword">server</span>-mysql zabbix-web-mysql zabbix-agent<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/Y6quP0urwdd4.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="3-2-修改配置文件">3.2 修改配置文件</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 修改server的配置文件，填入刚刚的数据库账户密码和数据库名</span><br>vim /etc/zabbix/zabbix_server.conf<br><br>DBHost=localhost<br>DBName=zabbix<br>DBUser=zabbix<br>DBPassword=xxxxxxxx<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/Y6quP0urwdd4.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="3-2-修改配置文件"><a href="#3-2-修改配置文件" class="headerlink" title="3.2 修改配置文件"></a>3.2 修改配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 修改server的配置文件，填入刚刚的数据库账户密码和数据库名</span><br>vim /etc/zabbix/zabbix_server.conf<br><br>DBHost=localhost<br>DBName=zabbix<br>DBUser=zabbix<br>DBPassword=xxxxxxxx<br></code></pre></div></td></tr></table></figure>
+
+
+
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 修改PHP时区</span><br>vim /etc/httpd/conf.d/zabbix.conf<br><span class="hljs-comment"># 将下面这行修改为亚洲上海</span><br>php_value date.timezone Asia/Shanghai<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/TxWi3uoQhcfr.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="3-3-修改防火墙设置">3.3 修改防火墙设置</h2>
-<figure class="highlight jboss-cli"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs jboss-cli"><span class="hljs-comment"># 添加httpd的80、zabbix-server的10051和zabbix-agent的10050监听端口</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=80/tcp</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=10050/tcp</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=10051/tcp</span><br><span class="hljs-comment"># 查看是否成功</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--list-all</span><br></code></pre></div></td></tr></table></figure>
+
+
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/TxWi3uoQhcfr.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="3-3-修改防火墙设置"><a href="#3-3-修改防火墙设置" class="headerlink" title="3.3 修改防火墙设置"></a>3.3 修改防火墙设置</h2><figure class="highlight jboss-cli"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs jboss-cli"><span class="hljs-comment"># 添加httpd的80、zabbix-server的10051和zabbix-agent的10050监听端口</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=80/tcp</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=10050/tcp</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--add-port=10051/tcp</span><br><span class="hljs-comment"># 查看是否成功</span><br>firewall-cmd <span class="hljs-params">--permanent</span> <span class="hljs-params">--list-all</span><br></code></pre></div></td></tr></table></figure>
+
 <p><strong>最后我们需要重启zabbix服务、httpd服务和firewall服务使得修改的配置生效。</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">systemctl restart zabbix-server zabbix-agent httpd firewalld<br>systemctl <span class="hljs-built_in">enable</span> zabbix-server zabbix-agent httpd firewalld<br></code></pre></div></td></tr></table></figure>
-<h2 id="3-4-导入数据库">3.4 导入数据库</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将zabbix初始数据导入到刚刚创建的zabbix数据库中</span><br>zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -uzabbix -p<span class="hljs-string">&#x27;xxxxxxxx&#x27;</span> zabbix<br></code></pre></div></td></tr></table></figure>
-<h1>4、设置zabbix-server的web端</h1>
-<p>在和master同一局域网内的任意电脑的浏览器上输入<code>zabbix-server</code>的<code>IP地址</code>加上<code>/zabbix</code></p>
-<p><img src="https://resource.tinychen.com/blog/20190711/bp9cgXcqELl9.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/blog/20190711/glqLIRrlBs2V.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<h2 id="3-4-导入数据库"><a href="#3-4-导入数据库" class="headerlink" title="3.4 导入数据库"></a>3.4 导入数据库</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 将zabbix初始数据导入到刚刚创建的zabbix数据库中</span><br>zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -uzabbix -p<span class="hljs-string">&#x27;xxxxxxxx&#x27;</span> zabbix<br></code></pre></div></td></tr></table></figure>
+
+
+
+<h1 id="4、设置zabbix-server的web端"><a href="#4、设置zabbix-server的web端" class="headerlink" title="4、设置zabbix-server的web端"></a>4、设置zabbix-server的web端</h1><p>在和master同一局域网内的任意电脑的浏览器上输入<code>zabbix-server</code>的<code>IP地址</code>加上<code>/zabbix</code></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/bp9cgXcqELl9.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/glqLIRrlBs2V.png" srcset="/img/loading.gif" lazyload></p>
 <p>点击next step，我们回发现有一堆的前置要求，如无意外，应该全部都是ok</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/CnvAKaN5zPgx.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/CnvAKaN5zPgx.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们输入之前在数据库中创建的zabbix用户的账号密码</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/DWPhGAGEmQg9.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/DWPhGAGEmQg9.png" srcset="/img/loading.gif" lazyload></p>
 <p>name这里我们输入一个自定义的名字方便确认，当然也可以不输入留空</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/HvE4VaGBut8Y.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/HvE4VaGBut8Y.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后我们确认一下即可。</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/AHMsvz2PNTrb.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/AHMsvz2PNTrb.png" srcset="/img/loading.gif" lazyload></p>
 <p>我们可以看到上面的所有配置都保存在了<code>/etc/zabbix/web/zabbix.conf.php</code>这个配置文件中，需要的话我们可以随时修改。</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/1cqO19qNfH06.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/1cqO19qNfH06.png" srcset="/img/loading.gif" lazyload></p>
 <p>默认的账号是<code>Admin</code>密码是<code>zabbix</code>,注意A要大写。</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/7Dm3Sa5tr9uI.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/7Dm3Sa5tr9uI.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们要修改密码并开启中文支持</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/leSRHa44T4Nh.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/blog/20190711/Ub6zrPgTLHNJ.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/leSRHa44T4Nh.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/Ub6zrPgTLHNJ.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后重新登录就能够生效了。</p>
 <p>如果在语言列表里面没有找到中文的，检查一下<code>/usr/share/zabbix/include/locales.inc.php</code>这个文件的<code>chinese</code>这一栏是否为true，如果不是，修改之后重启zabbix即可。</p>
-<p><img src="https://resource.tinychen.com/blog/20190711/C24TlHmUKUw9.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190711/C24TlHmUKUw9.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>这里补充说明一下，如果需要在外网能够访问zabbix的web监控端，需要给该master分配公网IP或者是端口转发或者是<a href="https://tinychen.com/20190706-frp/">设置frp反向代理</a>。</p>
 </blockquote>
-<h1>5、agent上安装zabbix-agent</h1>
-<h2 id="5-1-安装zabbix-agent">5.1 安装zabbix-agent</h2>
-<p>这里我们基本是重复上面3.1的步骤，但是最后安装的模块有点不同。</p>
+<h1 id="5、agent上安装zabbix-agent"><a href="#5、agent上安装zabbix-agent" class="headerlink" title="5、agent上安装zabbix-agent"></a>5、agent上安装zabbix-agent</h1><h2 id="5-1-安装zabbix-agent"><a href="#5-1-安装zabbix-agent" class="headerlink" title="5.1 安装zabbix-agent"></a>5.1 安装zabbix-agent</h2><p>这里我们基本是重复上面3.1的步骤，但是最后安装的模块有点不同。</p>
 <figure class="highlight apache"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">rpm</span> -Uvh https://repo.zabbix.com/zabbix/<span class="hljs-number">4</span>.<span class="hljs-number">2</span>/rhel/<span class="hljs-number">7</span>/x86_64/zabbix-release-<span class="hljs-number">4</span>.<span class="hljs-number">2</span>-<span class="hljs-number">1</span>.el7.noarch.rpm<br><br><span class="hljs-attribute">yum</span> clean <span class="hljs-literal">all</span><br><br><span class="hljs-attribute">yum</span> install -y zabbix-agent zabbix-get<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190711/9G9Rm4626BxR.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="5-2-修改zabbix-agent配置文件">5.2 修改zabbix-agent配置文件</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/zabbix/zabbix_agentd.conf<br><br><span class="hljs-comment"># 然后我们修改下列内容</span><br><br><span class="hljs-comment"># zabbix-server内网IP</span><br>Server=zabbix-server内网IP <br><br><span class="hljs-comment"># zabbix-server内网IP，Active表示agent主动推送</span><br>ServerActive=zabbix-server内网IP<br><br><span class="hljs-comment"># zabbix-agent节点名称，需要和web端添加的名称一致</span><br>Hostname=该agent节点的命名<br><br><span class="hljs-comment"># 启动zabbix-agent并设置开机启动</span><br>systemctl start zabbix-agent<br>systemctl <span class="hljs-built_in">enable</span> zabbix-agent<br><br><span class="hljs-comment"># 查看zabbix-agent运行状态</span><br>systemctl status zabbix-agent<br><br></code></pre></div></td></tr></table></figure>
-<h2 id="5-3-修改防火墙设置">5.3 修改防火墙设置</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 添加zabbix-agent的10050监听端口例外</span><br>firewall-cmd --permanent --add-port=10050/tcp<br><span class="hljs-comment"># 查看是否成功</span><br>firewall-cmd --permanent --list-all<br><span class="hljs-comment"># 重启firewall和zabbix</span><br>systemctl restart firewalld.service zabbix-agent.service<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190712/lHOG0j9d3p04.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/blog/20190712/G7qoS8xRQtCz.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="5-4-在web端添加监控主机">5.4 在web端添加监控主机</h2>
-<p>登录web端，点击配置→主机→创建主机</p>
-<p><img src="https://resource.tinychen.com/blog/20190712/JNzD6sPwy1SV.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190711/9G9Rm4626BxR.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="5-2-修改zabbix-agent配置文件"><a href="#5-2-修改zabbix-agent配置文件" class="headerlink" title="5.2 修改zabbix-agent配置文件"></a>5.2 修改zabbix-agent配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/zabbix/zabbix_agentd.conf<br><br><span class="hljs-comment"># 然后我们修改下列内容</span><br><br><span class="hljs-comment"># zabbix-server内网IP</span><br>Server=zabbix-server内网IP <br><br><span class="hljs-comment"># zabbix-server内网IP，Active表示agent主动推送</span><br>ServerActive=zabbix-server内网IP<br><br><span class="hljs-comment"># zabbix-agent节点名称，需要和web端添加的名称一致</span><br>Hostname=该agent节点的命名<br><br><span class="hljs-comment"># 启动zabbix-agent并设置开机启动</span><br>systemctl start zabbix-agent<br>systemctl <span class="hljs-built_in">enable</span> zabbix-agent<br><br><span class="hljs-comment"># 查看zabbix-agent运行状态</span><br>systemctl status zabbix-agent<br><br></code></pre></div></td></tr></table></figure>
+
+<h2 id="5-3-修改防火墙设置"><a href="#5-3-修改防火墙设置" class="headerlink" title="5.3 修改防火墙设置"></a>5.3 修改防火墙设置</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 添加zabbix-agent的10050监听端口例外</span><br>firewall-cmd --permanent --add-port=10050/tcp<br><span class="hljs-comment"># 查看是否成功</span><br>firewall-cmd --permanent --list-all<br><span class="hljs-comment"># 重启firewall和zabbix</span><br>systemctl restart firewalld.service zabbix-agent.service<br></code></pre></div></td></tr></table></figure>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190712/lHOG0j9d3p04.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/G7qoS8xRQtCz.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="5-4-在web端添加监控主机"><a href="#5-4-在web端添加监控主机" class="headerlink" title="5.4 在web端添加监控主机"></a>5.4 在web端添加监控主机</h2><p>登录web端，点击配置→主机→创建主机</p>
+<p><img src="https://resource.tinychen.com/blog/20190712/JNzD6sPwy1SV.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意这里的主机名称要和配置文件中的<code>hostname</code>一致</p>
-<p><img src="https://resource.tinychen.com/blog/20190712/N4GB0VLmR22j.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/N4GB0VLmR22j.png" srcset="/img/loading.gif" lazyload></p>
 <p>模板这里有提供很多预设的监控模板，我们可以直接选择</p>
-<p><img src="https://resource.tinychen.com/blog/20190712/Y9AWDM714eYX.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/blog/20190712/WsKRcNjLa1gE.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/Y9AWDM714eYX.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/WsKRcNjLa1gE.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后我们点击主机下面的添加，就可以成功添加主机了。</p>
 <p>最后的整体效果如下</p>
-<p><img src="https://resource.tinychen.com/blog/20190712/AmBqnKhKrI12.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190712/AmBqnKhKrI12.png" srcset="/img/loading.gif" lazyload></p>
 
             </div>
             <hr>
@@ -353,9 +368,9 @@
                     
                       <a class="hover-with-bg" href="/tags/centos/">centos</a>
                     
-                      <a class="hover-with-bg" href="/tags/graduation/">graduation</a>
-                    
                       <a class="hover-with-bg" href="/tags/zabbix/">zabbix</a>
+                    
+                      <a class="hover-with-bg" href="/tags/graduation/">graduation</a>
                     
                       <a class="hover-with-bg" href="/tags/monitor/">monitor</a>
                     

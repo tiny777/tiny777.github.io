@@ -249,20 +249,25 @@
               <p>本文主要介绍如何在centos8中使用nmcli工具创建虚拟网桥并且添加物理网卡到虚拟网桥中，使其成为一个二层交换机。</p>
 <p>这个操作不仅适用于物理网卡设备上，还适用于各种虚拟机的虚拟网卡设备。</p>
 <span id="more"></span>
-<p><img src="https://resource.tinychen.com/20210508144438.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<p><img src="https://resource.tinychen.com/20210508144438.png" srcset="/img/loading.gif" lazyload></p>
 <p>目标是将红框内的三个网卡都组合成为一个二层的交换机，首先我们需要创建一个网桥设备，这个设备的功能就相当于我们平时使用的交换机</p>
 <figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">nmcli<span class="hljs-built_in"> connection </span><span class="hljs-built_in">add</span><span class="hljs-built_in"> type bridge </span>con-name switch ifname switch autoconnect <span class="hljs-literal">yes</span><br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/20210508144442.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<p><img src="https://resource.tinychen.com/20210508144442.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们将需要的网卡添加到刚刚创建的名为switch的网桥中</p>
 <figure class="highlight crmsh"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs crmsh">nmcli connection add <span class="hljs-keyword">type</span> bridge-<span class="hljs-literal">slave</span> ifname enp0s20u3 <span class="hljs-keyword">master</span> <span class="hljs-title">switch</span><br>nmcli connection add <span class="hljs-keyword">type</span> bridge-<span class="hljs-literal">slave</span> ifname enp0s20u4 <span class="hljs-keyword">master</span> <span class="hljs-title">switch</span><br>nmcli connection add <span class="hljs-keyword">type</span> bridge-<span class="hljs-literal">slave</span> ifname enp6s0 <span class="hljs-keyword">master</span> <span class="hljs-title">switch</span><br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/20210508144446.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<p><img src="https://resource.tinychen.com/20210508144446.png" srcset="/img/loading.gif" lazyload></p>
 <p>完成添加之后我们需要对网桥和网卡的配置进行修改，编辑对应的配置文件修改启动选项和IP地址：<code>/etc/sysconfig/network-scripts/ifcfg-*</code>，把添加到switch网桥的所有网卡取消开机启动，避免和网桥的配置产生冲突：</p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-attr">ONBOOT</span>=<span class="hljs-literal">no</span><br></code></pre></div></td></tr></table></figure>
+
 <p>同时给网桥设置静态IP地址，配置的方法和部分相关配置如下</p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-attr">BOOTPROTO</span>=static<br><span class="hljs-attr">ONBOOT</span>=<span class="hljs-literal">yes</span><br><span class="hljs-attr">IPADDR</span>=<span class="hljs-number">192.168</span>.<span class="hljs-number">1.1</span><br><span class="hljs-attr">NETMASK</span>=<span class="hljs-number">255.255</span>.<span class="hljs-number">255.0</span><br><span class="hljs-attr">GATEWAY</span>=<span class="hljs-number">192.168</span>.<span class="hljs-number">1.253</span><br><span class="hljs-attr">DNS1</span>=<span class="hljs-number">8.8</span>.<span class="hljs-number">8.8</span><br></code></pre></div></td></tr></table></figure>
+
 <p>配置完成之后，这时的整个switch设备就相当于一个拥有三个RJ45接口的带有管理IP的二层交换机。我们在switch的网卡上面接上路由器，另一个接口接上我们的电脑，理论上这时候就能够正常获取路由器通过DHCP下发的IP地址：</p>
 <p>电脑网卡使用网线直接连接到Linux主机上已经添加到网桥中的网卡，查看状态可以直接获取到IPv4和IPv6的地址并且能够正确联网，这时候证明整个虚拟网桥设备是可以正常工作的。</p>
-<p><img src="https://resource.tinychen.com/20210508144429.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20210508144429.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>同样的操作我们还可以在KVM虚拟机上面实现，一般情况下如果我们给虚拟机直接添加宿主机网卡的桥接网卡，是可以实现虚拟机和宿主机处在相同网段的操作的。但是这个时候会出现宿主机没办法直接和虚拟机进行通信的情况。</p>
 <p>这时候就可以创建一个虚拟网桥，然后把宿主机的网卡添加到这个网桥内，然后虚拟机的网卡创建的时候选择桥接这个虚拟网桥即可。</p>
