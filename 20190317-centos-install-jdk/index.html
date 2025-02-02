@@ -249,33 +249,51 @@
             <div class="markdown-body">
               <p>在CentOS7上面实现JDK的环境配置。</p>
 <span id="more"></span>
+
 <hr>
-<h1>1、下载软件包</h1>
-<p>注意使用wget命令的时候不能直接对文件链接进行下载</p>
+<h1 id="1、下载软件包"><a href="#1、下载软件包" class="headerlink" title="1、下载软件包"></a>1、下载软件包</h1><p>注意使用wget命令的时候不能直接对文件链接进行下载</p>
 <p>因为Oracle官网需要我们在下载之前先同意协议，所以我们需要使用cookie，否则只能下载到一个html文件</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">wget --no-check-certificate --no-cookies --header <span class="hljs-string">&quot;Cookie: oraclelicense=accept-securebackup-cookie&quot;</span> https://download.oracle.com/otn-pub/java/jdk/8u201-b09/42970487e3af4f5aa5bca3f542482c60/jdk-8u201-linux-x64.tar.gz<br></code></pre></div></td></tr></table></figure>
+
 <p>使用file命令检测下载到的文件是否正常</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">file jdk-8u201-linux-x64.tar.gz<br></code></pre></div></td></tr></table></figure>
+
+
+
+
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$  file jdk-8u201-linux-x64.tar.gz<br>jdk-8u201-linux-x64.tar.gz: gzip compressed data, from Unix, last modified: Sun Dec 16 03:48:30 2018<br></code></pre></div></td></tr></table></figure>
-<h1>2、检测并卸载相关JDK</h1>
-<p>输入该指令检测是否存在已安装的jdk或者openJDK</p>
+
+<h1 id="2、检测并卸载相关JDK"><a href="#2、检测并卸载相关JDK" class="headerlink" title="2、检测并卸载相关JDK"></a>2、检测并卸载相关JDK</h1><p>输入该指令检测是否存在已安装的jdk或者openJDK</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">rpm -qa | grep java<br></code></pre></div></td></tr></table></figure>
+
 <p>使用该下面两个指令对已安装的jdk进行卸载和强制卸载（记得补充软件名）</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">rpm e<br>rpm e --nodeps<br></code></pre></div></td></tr></table></figure>
-<h1>3、解压文件</h1>
-<p>解压文件</p>
+
+
+
+<h1 id="3、解压文件"><a href="#3、解压文件" class="headerlink" title="3、解压文件"></a>3、解压文件</h1><p>解压文件 </p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">tar -zxvf jdk-8u201-linux-x64.tar.gz<br></code></pre></div></td></tr></table></figure>
+
 <p>将解压后的文件夹移动到home目录下</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> -r jdk1.8.0_201/ /home/<br></code></pre></div></td></tr></table></figure>
-<h1>4、配置环境变量</h1>
-<p>编辑环境变量</p>
+
+<h1 id="4、配置环境变量"><a href="#4、配置环境变量" class="headerlink" title="4、配置环境变量"></a>4、配置环境变量</h1><p>编辑环境变量</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">vim /etc/profile<br></code></pre></div></td></tr></table></figure>
+
+
+
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">JAVA_HOME=/home/jdk_1.8.0_201<br>CLASSPATH=%JAVA_HOME%/lib:%JAVA_HOME%/jre/lib<br>PATH=<span class="hljs-variable">$PATH</span>:<span class="hljs-variable">$JAVA_HOME</span>/bin:<span class="hljs-variable">$JAVA_HOME</span>/jre/bin<br><span class="hljs-built_in">export</span> JAVA_HOME CLASSPATH PATH<br></code></pre></div></td></tr></table></figure>
+
 <p>重新载入配置文件</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">source</span> /etc/profile<br></code></pre></div></td></tr></table></figure>
-<h1>5、检验安装是否成功</h1>
-<p>查看java版本是否配置成功</p>
+
+
+
+<h1 id="5、检验安装是否成功"><a href="#5、检验安装是否成功" class="headerlink" title="5、检验安装是否成功"></a>5、检验安装是否成功</h1><p>查看java版本是否配置成功</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">java -version<br></code></pre></div></td></tr></table></figure>
+
+
+
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ java -version<br>java version <span class="hljs-string">&quot;1.8.0_201&quot;</span><br>Java(TM) SE Runtime Environment (build 1.8.0_201-b09)<br>Java HotSpot(TM) 64-Bit Server VM (build 25.201-b09, mixed mode)<br></code></pre></div></td></tr></table></figure>
 
             </div>

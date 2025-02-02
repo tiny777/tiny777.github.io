@@ -32,10 +32,10 @@
 <meta property="article:tag" content="centos">
 <meta property="article:tag" content="k8s">
 <meta property="article:tag" content="docker">
+<meta property="article:tag" content="containerd">
 <meta property="article:tag" content="calico">
 <meta property="article:tag" content="purelb">
 <meta property="article:tag" content="bgp">
-<meta property="article:tag" content="containerd">
 <meta property="article:tag" content="ebpf">
 <meta property="article:tag" content="bird">
 <meta name="twitter:card" content="summary_large_image">
@@ -258,71 +258,74 @@
 <p>关于本次使用的calico集群的部署过程可以参考之前的文章<a href="https://tinychen.com/20230109-k8s-13-deploy-ha-k8s-with-calico-bgp/">k8s系列13-calico部署BGP模式的高可用k8s集群</a>。</p>
 <p>此前写的一些关于k8s基础知识和集群搭建的一些<a href="https://tinychen.com/tags/k8s/">方案</a>，有需要的同学可以看一下。</p>
 <span id="more"></span>
-<h1>1、eBPF</h1>
-<h2 id="1-1-关于eBPF">1.1 关于eBPF</h2>
-<p><a target="_blank" rel="noopener" href="https://ebpf.io/">eBPF</a>是一项革命性的技术，起源于 Linux 内核，可以在操作系统内核中运行沙盒程序。它用于安全有效地扩展内核的功能，而无需更改内核源代码或加载内核模块。</p>
-<p><img src="https://resource.tinychen.com/202301162037665.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<h1 id="1、eBPF"><a href="#1、eBPF" class="headerlink" title="1、eBPF"></a>1、eBPF</h1><h2 id="1-1-关于eBPF"><a href="#1-1-关于eBPF" class="headerlink" title="1.1 关于eBPF"></a>1.1 关于eBPF</h2><p><a target="_blank" rel="noopener" href="https://ebpf.io/">eBPF</a>是一项革命性的技术，起源于 Linux 内核，可以在操作系统内核中运行沙盒程序。它用于安全有效地扩展内核的功能，而无需更改内核源代码或加载内核模块。</p>
+<p><img src="https://resource.tinychen.com/202301162037665.png" srcset="/img/loading.gif" lazyload></p>
 <p>它允许将小程序加载到内核中，并附加到钩子上，这些钩子在某些事件发生时被触发。这甚至允许大量定制内核的行为。虽然 eBPF 虚拟机对于每种类型的钩子都是相同的，但钩子的功能却有很大差异。因为将程序加载到内核中可能很危险，所以内核通过非常严格的静态验证器运行所有程序；静态验证器对程序进行沙盒处理，确保它只能访问允许的内存部分，并确保它必须迅速终止。</p>
 <blockquote>
 <p>eBPF is a Linux kernel feature that allows fast yet safe mini-programs to be loaded into the kernel in order to customise its operation.</p>
 </blockquote>
-<h2 id="1-2-eBPF的优势">1.2 eBPF的优势</h2>
-<p>ebpf的几个优势：</p>
+<h2 id="1-2-eBPF的优势"><a href="#1-2-eBPF的优势" class="headerlink" title="1.2 eBPF的优势"></a>1.2 eBPF的优势</h2><p>ebpf的几个优势：</p>
 <ul>
 <li>更高的吞吐IO</li>
 <li>更低的CPU资源占用</li>
-<li>无需kube-proxy即可对K8S服务实现原生支持
-<ul>
+<li>无需kube-proxy即可对K8S服务实现原生支持<ul>
 <li>更低的首个数据包延迟</li>
 <li>外部请求可保留客户端源IP（Preserves external client source IP）</li>
-<li>支持 DSR (Direct Server Return)</li>
+<li>支持 DSR (Direct Server Return) </li>
 <li>相比kube-proxy，ebpf数据面同步转发规则时占用的资源更少</li>
 </ul>
 </li>
 </ul>
 <p>更多的信息可以查看calico官方的这篇<a target="_blank" rel="noopener" href="https://www.tigera.io/blog/introducing-the-calico-ebpf-dataplane/">介绍文章</a>。</p>
-<h1>2、calico配置eBPF</h1>
-<h2 id="2-1-升级内核">2.1 升级内核</h2>
-<p>我们使用的centos7系统，根据文档比较适合的内核版本需要大于5.8，因此我们直接使用elrepo源升级最新的6.1.4版本内核。</p>
+<h1 id="2、calico配置eBPF"><a href="#2、calico配置eBPF" class="headerlink" title="2、calico配置eBPF"></a>2、calico配置eBPF</h1><h2 id="2-1-升级内核"><a href="#2-1-升级内核" class="headerlink" title="2.1 升级内核"></a>2.1 升级内核</h2><p>我们使用的centos7系统，根据文档比较适合的内核版本需要大于5.8，因此我们直接使用elrepo源升级最新的6.1.4版本内核。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看elrepo源中支持的内核版本</span><br>[root@k8s-calico-master-10-31-90-1 ~]<span class="hljs-comment"># yum --disablerepo=&quot;*&quot; --enablerepo=&quot;elrepo-kernel&quot; list available</span><br>Loaded plugins: fastestmirror<br>Loading mirror speeds from cached hostfile<br>elrepo-kernel                                                                                                                                      | 3.0 kB  00:00:00<br>elrepo-kernel/x86_64/primary_db                                                                                                                    | 2.1 MB  00:00:00<br>Available Packages<br>elrepo-release.noarch                                                                7.0-6.el7.elrepo                                                        elrepo-kernel<br>kernel-lt.x86_64                                                                     5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-lt-devel.x86_64                                                               5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-lt-doc.noarch                                                                 5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-lt-headers.x86_64                                                             5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-lt-tools.x86_64                                                               5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-lt-tools-libs.x86_64                                                          5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-lt-tools-libs-devel.x86_64                                                    5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>kernel-ml.x86_64                                                                     6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>kernel-ml-devel.x86_64                                                               6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>kernel-ml-doc.noarch                                                                 6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>kernel-ml-headers.x86_64                                                             6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>kernel-ml-tools.x86_64                                                               6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>kernel-ml-tools-libs.x86_64                                                          6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>kernel-ml-tools-libs-devel.x86_64                                                    6.1.4-1.el7.elrepo                                                      elrepo-kernel<br>perf.x86_64                                                                          5.4.228-1.el7.elrepo                                                    elrepo-kernel<br>python-perf.x86_64                                                                   5.4.228-1.el7.elrepo                                                    elrepo-kernel<br><br><br><br><span class="hljs-comment"># 看起来ml版本的内核比较满足我们的需求,直接使用yum进行安装</span><br>sudo yum --enablerepo=elrepo-kernel install kernel-ml -y<br><span class="hljs-comment"># 使用grubby工具查看系统中已经安装的内核版本信息</span><br>sudo grubby --info=ALL<br><span class="hljs-comment"># 设置新安装的6.1.4版本内核为默认内核版本，此处的index=0要和上面查看的内核版本信息一致</span><br>sudo grubby --set-default-index=0<br><span class="hljs-comment"># 查看默认内核是否修改成功</span><br>sudo grubby --default-kernel<br><span class="hljs-comment"># 重启系统切换到新内核</span><br>init 6<br><span class="hljs-comment"># 重启后检查内核版本是否为新的6.1.4</span><br><span class="hljs-built_in">uname</span> -a<br></code></pre></div></td></tr></table></figure>
+
 <p>确认系统内核升级成功后我们继续下一步</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ ansible calico -m shell -a <span class="hljs-string">&quot;uname -rv&quot;</span><br>10.31.90.4 | CHANGED | rc=0 &gt;&gt;<br>6.1.4-1.el7.elrepo.x86_64 <span class="hljs-comment">#1 SMP PREEMPT_DYNAMIC Wed Jan  4 18:17:10 EST 2023</span><br>10.31.90.5 | CHANGED | rc=0 &gt;&gt;<br>6.1.4-1.el7.elrepo.x86_64 <span class="hljs-comment">#1 SMP PREEMPT_DYNAMIC Wed Jan  4 18:17:10 EST 2023</span><br>10.31.90.3 | CHANGED | rc=0 &gt;&gt;<br>6.1.4-1.el7.elrepo.x86_64 <span class="hljs-comment">#1 SMP PREEMPT_DYNAMIC Wed Jan  4 18:17:10 EST 2023</span><br>10.31.90.2 | CHANGED | rc=0 &gt;&gt;<br>6.1.4-1.el7.elrepo.x86_64 <span class="hljs-comment">#1 SMP PREEMPT_DYNAMIC Wed Jan  4 18:17:10 EST 2023</span><br>10.31.90.1 | CHANGED | rc=0 &gt;&gt;<br>6.1.4-1.el7.elrepo.x86_64 <span class="hljs-comment">#1 SMP PREEMPT_DYNAMIC Wed Jan  4 18:17:10 EST 2023</span><br>10.31.90.6 | CHANGED | rc=0 &gt;&gt;<br>6.1.4-1.el7.elrepo.x86_64 <span class="hljs-comment">#1 SMP PREEMPT_DYNAMIC Wed Jan  4 18:17:10 EST 2023</span><br></code></pre></div></td></tr></table></figure>
-<h2 id="2-2-配置API-Server">2.2 配置API Server</h2>
-<p>在默认情况下，calico是通过<code>kube-proxy</code>和集群内的apiserver进行通信的。当我们开启了ebpf之后，往往会关闭集群的<code>kube-proxy</code>功能，此时为了保证calico能够和apiserver进行通信，就需要我们先手动配置一个稳定可用的地址。一般来说，使用我们初始化集群的时候配置的VIP和端口即可。</p>
+
+<h2 id="2-2-配置API-Server"><a href="#2-2-配置API-Server" class="headerlink" title="2.2 配置API Server"></a>2.2 配置API Server</h2><p>在默认情况下，calico是通过<code>kube-proxy</code>和集群内的apiserver进行通信的。当我们开启了ebpf之后，往往会关闭集群的<code>kube-proxy</code>功能，此时为了保证calico能够和apiserver进行通信，就需要我们先手动配置一个稳定可用的地址。一般来说，使用我们初始化集群的时候配置的VIP和端口即可。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ <span class="hljs-built_in">cat</span> kubernetes-services-endpoint.yaml<br>kind: ConfigMap<br>apiVersion: v1<br>metadata:<br>  name: kubernetes-services-endpoint<br>  namespace: tigera-operator<br>data:<br>  KUBERNETES_SERVICE_HOST: <span class="hljs-string">&quot;k8s-calico-apiserver.tinychen.io&quot;</span><br>  KUBERNETES_SERVICE_PORT: <span class="hljs-string">&quot;8443&quot;</span><br><br>$ kubectl create -f kubernetes-services-endpoint.yaml<br>configmap/kubernetes-services-endpoint created<br></code></pre></div></td></tr></table></figure>
+
 <p>更新配置后检查pod是否重启成功，以及集群是否正常</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ watch kubectl get pods -n calico-system<br>$ calicoctl node status<br></code></pre></div></td></tr></table></figure>
-<h2 id="2-3-配置kube-proxy">2.3 配置kube-proxy</h2>
-<p>因为ebpf会和<code>kube-proxy</code>冲突，比较好的方式是禁用掉<code>kube-proxy</code>。而禁用kube-proxy主要有两种方式，一种是直接将其对应的<code>daemonset</code>删除，另一种则是通过<code>nodeSelector</code>的方式将特定的node设置为不运行<code>kube-proxy</code>。从官方的文档来看两种方式各有优势，如果是初始化k8s集群的时候就直接使用ebpf的话可以考虑直接在初始化参数中将<code>kube-proxy</code>禁用，这里我们已经安装好了<code>kube-proxy</code>，则使用<code>nodeSelector</code>的方式控制会更为优雅。</p>
+
+<h2 id="2-3-配置kube-proxy"><a href="#2-3-配置kube-proxy" class="headerlink" title="2.3 配置kube-proxy"></a>2.3 配置kube-proxy</h2><p>因为ebpf会和<code>kube-proxy</code>冲突，比较好的方式是禁用掉<code>kube-proxy</code>。而禁用kube-proxy主要有两种方式，一种是直接将其对应的<code>daemonset</code>删除，另一种则是通过<code>nodeSelector</code>的方式将特定的node设置为不运行<code>kube-proxy</code>。从官方的文档来看两种方式各有优势，如果是初始化k8s集群的时候就直接使用ebpf的话可以考虑直接在初始化参数中将<code>kube-proxy</code>禁用，这里我们已经安装好了<code>kube-proxy</code>，则使用<code>nodeSelector</code>的方式控制会更为优雅。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl patch ds -n kube-system kube-proxy -p <span class="hljs-string">&#x27;&#123;&quot;spec&quot;:&#123;&quot;template&quot;:&#123;&quot;spec&quot;:&#123;&quot;nodeSelector&quot;:&#123;&quot;non-calico&quot;: &quot;true&quot;&#125;&#125;&#125;&#125;&#125;&#x27;</span><br></code></pre></div></td></tr></table></figure>
+
 <p>此时我们再查看集群的kube-proxy状态可以发现<code>DESIRED</code>和<code>CURRENT</code>均为0</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl get ds -n kube-system kube-proxy<br>NAME         DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                            AGE<br>kube-proxy   0         0         0       0            0           kubernetes.io/os=linux,non-calico=<span class="hljs-literal">true</span>   4d9h<br></code></pre></div></td></tr></table></figure>
-<h2 id="2-4-配置eBPF">2.4 配置eBPF</h2>
-<p>开启eBPF只需要修改<code>linuxDataplane</code>参数即可，注意eBPF模式不支持配置<code>hostPorts</code>，因此需要同时将其设置为空。</p>
+
+
+
+<h2 id="2-4-配置eBPF"><a href="#2-4-配置eBPF" class="headerlink" title="2.4 配置eBPF"></a>2.4 配置eBPF</h2><p>开启eBPF只需要修改<code>linuxDataplane</code>参数即可，注意eBPF模式不支持配置<code>hostPorts</code>，因此需要同时将其设置为空。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">$ kubectl patch installation.operator.tigera.io default --<span class="hljs-built_in">type</span> merge -p <span class="hljs-string">&#x27;&#123;&quot;spec&quot;:&#123;&quot;calicoNetwork&quot;:&#123;&quot;linuxDataplane&quot;:&quot;BPF&quot;, &quot;hostPorts&quot;:null&#125;&#125;&#125;&#x27;</span><br>installation.operator.tigera.io/default patched<br></code></pre></div></td></tr></table></figure>
+
 <p>等待calico滚动重启完成，即成功开启eBPF。注意在滚动重启的过程中，会存在部分node使用eBPF而部分node使用iptables的情况。</p>
-<h2 id="2-5-配置DSR">2.5 配置DSR</h2>
-<p>eBPF还有一项不错的功能称之为DSR（Direct Server Return），即pod在接收到外部的请求之后，直接由pod本身对客户端进行回包，而不是再经由原来的路径回包，这样可以有效缩短回包路径从而提升性能。</p>
-<p><img src="https://resource.tinychen.com/202301161849084.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="2-5-配置DSR"><a href="#2-5-配置DSR" class="headerlink" title="2.5 配置DSR"></a>2.5 配置DSR</h2><p>eBPF还有一项不错的功能称之为DSR（Direct Server Return），即pod在接收到外部的请求之后，直接由pod本身对客户端进行回包，而不是再经由原来的路径回包，这样可以有效缩短回包路径从而提升性能。</p>
+<p><img src="https://resource.tinychen.com/202301161849084.png" srcset="/img/loading.gif" lazyload></p>
 <p>DSR模式的工作效果和LVS的DR模式十分相似，但是一般来说，DSR需要pod和客户端之间的网络本身是正常联通的，所以默认情况下该项功能并没有开启。</p>
 <p>我们可以使用<code>calicoctl</code>来修改<code>felixconfiguration</code>中的<code>bpfExternalServiceMode</code>参数，将其从默认的<code>Tunnel</code>修改为<code>DSR</code>即可启用。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 开启DSR模式</span><br>$ calicoctl patch felixconfiguration default --patch=<span class="hljs-string">&#x27;&#123;&quot;spec&quot;: &#123;&quot;bpfExternalServiceMode&quot;: &quot;DSR&quot;&#125;&#125;&#x27;</span><br>Successfully patched 1 <span class="hljs-string">&#x27;FelixConfiguration&#x27;</span> resource<br></code></pre></div></td></tr></table></figure>
+
 <p>如果需要关闭DSR模式只需要逆向修改回去即可</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 关闭DSR模式</span><br>$ calicoctl patch felixconfiguration default --patch=<span class="hljs-string">&#x27;&#123;&quot;spec&quot;: &#123;&quot;bpfExternalServiceMode&quot;: &quot;Tunnel&quot;&#125;&#125;&#x27;</span><br></code></pre></div></td></tr></table></figure>
-<h1>3、检验eBPF</h1>
-<h2 id="3-1-calico-bpf">3.1 calico-bpf</h2>
-<p>官方在calico-node中内置了calico-bpf来帮助我们排查定位eBPF模式下的一些问题，我们也可以用它来检测集群的eBPF是否工作正常。</p>
+
+
+
+<h1 id="3、检验eBPF"><a href="#3、检验eBPF" class="headerlink" title="3、检验eBPF"></a>3、检验eBPF</h1><h2 id="3-1-calico-bpf"><a href="#3-1-calico-bpf" class="headerlink" title="3.1 calico-bpf"></a>3.1 calico-bpf</h2><p>官方在calico-node中内置了calico-bpf来帮助我们排查定位eBPF模式下的一些问题，我们也可以用它来检测集群的eBPF是否工作正常。</p>
 <blockquote>
-<p>对应的ds/calico-node也可以替换为某个特定node上面的calico-node的pod名称</p>
+<p>对应的ds&#x2F;calico-node也可以替换为某个特定node上面的calico-node的pod名称</p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看calico-bpf工具使用说明</span><br>$ kubectl <span class="hljs-built_in">exec</span> -n calico-system ds/calico-node -- calico-node -bpf<br><span class="hljs-comment"># 查看eth0网卡计数器</span><br>$ kubectl <span class="hljs-built_in">exec</span> -n calico-system ds/calico-node -- calico-node -bpf counters dump --iface=eth0<br><span class="hljs-comment"># 查看conntrack情况</span><br>$ kubectl <span class="hljs-built_in">exec</span> -n calico-system ds/calico-node -- calico-node -bpf conntrack dump<br><span class="hljs-comment"># 查看路由表</span><br>$ kubectl <span class="hljs-built_in">exec</span> -n calico-system ds/calico-node -- calico-node -bpf routes dump<br></code></pre></div></td></tr></table></figure>
-<h2 id="3-2-访问服务">3.2 访问服务</h2>
-<p>我们在集群外的机器进行测试，分别访问podIP 、clusterIP和loadbalancerIP，查看是否能够正确返回客户端的IP地址<code>10.31.100.100</code>。</p>
+
+<h2 id="3-2-访问服务"><a href="#3-2-访问服务" class="headerlink" title="3.2 访问服务"></a>3.2 访问服务</h2><p>我们在集群外的机器进行测试，分别访问podIP 、clusterIP和loadbalancerIP，查看是否能够正确返回客户端的IP地址<code>10.31.100.100</code>。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 访问pod IP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.26.2</span><br>10.31.100.100:43240<br><br><span class="hljs-comment"># 访问clusterIP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.151.137</span><br>10.31.100.100:52758<br><br><span class="hljs-comment"># 访问loadbalancerIP</span><br>root@tiny-unraid:~<span class="hljs-comment"># curl 10.33.192.0</span><br>10.31.100.100:7319<br></code></pre></div></td></tr></table></figure>
+
 <p>在配置了eBPF的情况下，从集群外访问clusterIP和loadbalancerIP都是能够正常返回客户端的IP地址的。</p>
-<h1>4、关闭eBPF</h1>
-<p>关闭eBPF的操作也是非常简单，只需要逆向操作上面的过程即可，这里直接关闭calico的eBPF功能（DSR只在eBPF下生效），再开启k8s集群的kube-proxy即可。</p>
+<h1 id="4、关闭eBPF"><a href="#4、关闭eBPF" class="headerlink" title="4、关闭eBPF"></a>4、关闭eBPF</h1><p>关闭eBPF的操作也是非常简单，只需要逆向操作上面的过程即可，这里直接关闭calico的eBPF功能（DSR只在eBPF下生效），再开启k8s集群的kube-proxy即可。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置linuxDataplane为iptables模式</span><br>$ kubectl patch installation.operator.tigera.io default --<span class="hljs-built_in">type</span> merge -p <span class="hljs-string">&#x27;&#123;&quot;spec&quot;:&#123;&quot;calicoNetwork&quot;:&#123;&quot;linuxDataplane&quot;:&quot;Iptables&quot;&#125;&#125;&#125;&#x27;</span><br><span class="hljs-comment"># 关闭nodeSelector,开启k8s集群的kube-proxy</span><br>$ kubectl patch ds -n kube-system kube-proxy --<span class="hljs-built_in">type</span> merge -p <span class="hljs-string">&#x27;&#123;&quot;spec&quot;:&#123;&quot;template&quot;:&#123;&quot;spec&quot;:&#123;&quot;nodeSelector&quot;:&#123;&quot;non-calico&quot;: null&#125;&#125;&#125;&#125;&#125;&#x27;</span><br></code></pre></div></td></tr></table></figure>
+
 <p>配置完成后，等待全部节点的calico重启完成并且kube-proxy启动完成即可。</p>
 
             </div>
@@ -347,13 +350,13 @@
                     
                       <a class="hover-with-bg" href="/tags/docker/">docker</a>
                     
+                      <a class="hover-with-bg" href="/tags/containerd/">containerd</a>
+                    
                       <a class="hover-with-bg" href="/tags/calico/">calico</a>
                     
                       <a class="hover-with-bg" href="/tags/purelb/">purelb</a>
                     
                       <a class="hover-with-bg" href="/tags/bgp/">bgp</a>
-                    
-                      <a class="hover-with-bg" href="/tags/containerd/">containerd</a>
                     
                       <a class="hover-with-bg" href="/tags/ebpf/">ebpf</a>
                     

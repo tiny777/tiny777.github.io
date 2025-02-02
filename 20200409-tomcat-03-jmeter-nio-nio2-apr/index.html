@@ -207,7 +207,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      9.2k 字
+      9.3k 字
     </span>
   
 
@@ -247,35 +247,27 @@
               </p>
             
             <div class="markdown-body">
-              <p>本文主要包括Tomcat9的NIO、NIO2、APR三种I/O模型的工作原理以及使用Jmeter对其进行持续压力测试。</p>
+              <p>本文主要包括Tomcat9的NIO、NIO2、APR三种I&#x2F;O模型的工作原理以及使用Jmeter对其进行持续压力测试。</p>
 <span id="more"></span>
-<h1>1、connector的工作原理</h1>
-<p>这里我们说的Tomcat中三种不同的I/O模型主要指的是其连接器（connector）的工作模型，对于tomcat而言，连接器一般指的是coyote，其工作原理大致如下图所示：</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/Yt4hJSPQcMJj.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p>连接器中的各个组件的作用如下：</p>
-<h2 id="1-1-EndPoint">1.1 <code>EndPoint</code></h2>
-<p><code>EndPoint</code>即Coyote通信端点，是通信监听的接口，是具体Socket接收和发送处理器，是对传输层（四层）的抽象，因此<code>EndPoint</code>用来实现TCP/IP协议的。Tomcat 并没有<code>EndPoint</code>接口，而是提供了一个抽象类<code>AbstractEndpoint</code>， 里面定义了两个内部类：<code>Acceptor</code>和<code>SocketProcessor</code>。<code>Acceptor</code>用于监听Socket连接请求。 <code>SocketProcessor</code>用于处理接收到的Socket请求，它实现<code>Runnable</code>接口，在<code>Run</code>方法里 调用协议处理组件<code>Processor</code>进行处理。为了提高处理能力，<code>SocketProcessor</code>被提交到线程池来执行，而这个线程池叫作执行器（<strong>Executor</strong>)。</p>
-<h2 id="1-2-Processor">1.2 <code>Processor</code></h2>
-<p>**<code>Processor</code>是coyote的协议处理接口 。**如果说EndPoint是用来实现TCP/IP协议的，那么 <code>Processor</code>用来实现HTTP协议，<code>Processor</code>接收来自EndPoint的Socket，读取字节流解析成Tomcat的<code>Request</code>和<code>Response</code>对象，并通过<code>Adapter</code>将其提交到容器处理， <code>Processor</code>是对应用层（七层）协议的抽象。</p>
-<h2 id="1-3-ProtocolHandler">1.3 <code>ProtocolHandler</code></h2>
-<p>**<code>ProtocolHandler</code>是Coyote的协议接口，通过Endpoint和Processor ，实现对具体协议（HTTP或AJP）的处理。**Tomcat 按照协议和I/O 提供了6个实现类 ： <code>AjpNioProtocol</code> ， <code>AjpAprProtocol</code>， <code>AjpNio2Protocol</code> ， <code>Http11NioProtocol</code> ，<code>Http11Nio2Protocol</code> ， <code>Http11AprProtocol</code>。我们在配置<code>tomcat/conf/server.xml</code> 中的<code>connecter</code>块时 ， 至少要指定具体的<code>ProtocolHandler</code> , 当然也可以指定协议名称（如HTTP/1.1）。</p>
-<h2 id="1-4-Adapter">1.4 <code>Adapter</code></h2>
-<p>由于协议不同，客户端发过来的请求信息也不尽相同，Tomcat定义了自己的Request类来存放这些请求信息。<code>ProtocolHandler</code>接口负责解析请求并生成Tomcat的<code>Request</code>类。 但是这个Request对象不是标准的ServletRequest，不能用来作为参数来调用容器。因此需要引入<code>CoyoteAdapter</code>，连接器调用<code>CoyoteAdapter</code>的<code>Sevice</code>方法，传入Tomcat的<code>Request</code>对象，CoyoteAdapter将<code>Request</code>转成<code>ServletRequest</code>，再调用容器的Service方法。</p>
-<h1>2、三种I/O模型原理</h1>
-<p>在开始之前，我们先看一下<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/http.html">tomcat官网</a>给出的这三种I/O模型的工作参数的一个对比图：</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/l0bTxdP2juMk.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<h1 id="1、connector的工作原理"><a href="#1、connector的工作原理" class="headerlink" title="1、connector的工作原理"></a>1、connector的工作原理</h1><p>这里我们说的Tomcat中三种不同的I&#x2F;O模型主要指的是其连接器（connector）的工作模型，对于tomcat而言，连接器一般指的是coyote，其工作原理大致如下图所示：</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/Yt4hJSPQcMJj.png" srcset="/img/loading.gif" lazyload></p>
+<p>连接器中的各个组件的作用如下： </p>
+<h2 id="1-1-EndPoint"><a href="#1-1-EndPoint" class="headerlink" title="1.1 EndPoint"></a>1.1 <code>EndPoint</code></h2><p><code>EndPoint</code>即Coyote通信端点，是通信监听的接口，是具体Socket接收和发送处理器，是对传输层（四层）的抽象，因此<code>EndPoint</code>用来实现TCP&#x2F;IP协议的。Tomcat 并没有<code>EndPoint</code>接口，而是提供了一个抽象类<code>AbstractEndpoint</code>， 里面定义了两个内部类：<code>Acceptor</code>和<code>SocketProcessor</code>。<code>Acceptor</code>用于监听Socket连接请求。 <code>SocketProcessor</code>用于处理接收到的Socket请求，它实现<code>Runnable</code>接口，在<code>Run</code>方法里 调用协议处理组件<code>Processor</code>进行处理。为了提高处理能力，<code>SocketProcessor</code>被提交到线程池来执行，而这个线程池叫作执行器（<strong>Executor</strong>)。</p>
+<h2 id="1-2-Processor"><a href="#1-2-Processor" class="headerlink" title="1.2 Processor"></a>1.2 <code>Processor</code></h2><p><strong><code>Processor</code>是coyote的协议处理接口 。</strong>如果说EndPoint是用来实现TCP&#x2F;IP协议的，那么 <code>Processor</code>用来实现HTTP协议，<code>Processor</code>接收来自EndPoint的Socket，读取字节流解析成Tomcat的<code>Request</code>和<code>Response</code>对象，并通过<code>Adapter</code>将其提交到容器处理， <code>Processor</code>是对应用层（七层）协议的抽象。</p>
+<h2 id="1-3-ProtocolHandler"><a href="#1-3-ProtocolHandler" class="headerlink" title="1.3 ProtocolHandler"></a>1.3 <code>ProtocolHandler</code></h2><p><strong><code>ProtocolHandler</code>是Coyote的协议接口，通过Endpoint和Processor ，实现对具体协议（HTTP或AJP）的处理。</strong>Tomcat 按照协议和I&#x2F;O 提供了6个实现类 ： <code>AjpNioProtocol</code> ， <code>AjpAprProtocol</code>， <code>AjpNio2Protocol</code> ， <code>Http11NioProtocol</code> ，<code>Http11Nio2Protocol</code> ， <code>Http11AprProtocol</code>。我们在配置<code>tomcat/conf/server.xml</code> 中的<code>connecter</code>块时 ， 至少要指定具体的<code>ProtocolHandler</code> , 当然也可以指定协议名称（如HTTP&#x2F;1.1）。</p>
+<h2 id="1-4-Adapter"><a href="#1-4-Adapter" class="headerlink" title="1.4 Adapter"></a>1.4 <code>Adapter</code></h2><p>由于协议不同，客户端发过来的请求信息也不尽相同，Tomcat定义了自己的Request类来存放这些请求信息。<code>ProtocolHandler</code>接口负责解析请求并生成Tomcat的<code>Request</code>类。 但是这个Request对象不是标准的ServletRequest，不能用来作为参数来调用容器。因此需要引入<code>CoyoteAdapter</code>，连接器调用<code>CoyoteAdapter</code>的<code>Sevice</code>方法，传入Tomcat的<code>Request</code>对象，CoyoteAdapter将<code>Request</code>转成<code>ServletRequest</code>，再调用容器的Service方法。</p>
+<h1 id="2、三种I-O模型原理"><a href="#2、三种I-O模型原理" class="headerlink" title="2、三种I&#x2F;O模型原理"></a>2、三种I&#x2F;O模型原理</h1><p>在开始之前，我们先看一下<a target="_blank" rel="noopener" href="https://tomcat.apache.org/tomcat-9.0-doc/config/http.html">tomcat官网</a>给出的这三种I&#x2F;O模型的工作参数的一个对比图：</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/l0bTxdP2juMk.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到一般说的NIO、NIO2和APR使用的是非阻塞方式指的就是在<strong>读取请求报头</strong>和<strong>等待下一个请求</strong>的时候是使用的非阻塞方式。</p>
-<p>Tomcat的NIO是基于I/O复用（同步I/O）来实现的，而NIO2是使用的异步I/O。参考经典书籍《UNIX网络编程 卷1 套接字联网API》，两者的主要原理如下：</p>
-<h2 id="I-O复用（NIO）">I/O复用（NIO）</h2>
-<p>I/O复用（I/O multiplexing）可以调用<code>select</code>或<code>poll</code>，阻塞在这两个系统调用中的某一个之上，而不是阻塞在真正的I/O系统调用上。进程阻塞于<code>select</code>调用，等待数据报套接字变为可读。当<code>select</code>返回套接字可读这一条件时，进程调用<code>recvfrom</code>把所读数据报复制到应用进程缓冲区，尽管这里需要使用<code>select</code>和<code>recvfrom</code>两个系统调用，但是使用<code>select</code>的可以等待多个描述符就绪，即可以等待多个请求。</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/tKX17eQCJnzT.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="异步IO（NIO2）">异步IO（NIO2）</h2>
-<p>异步I/O（asynchronous I/O）的工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到应用程序的缓冲区）完成后通知应用程序。需要注意的是：异步I/O模型是由内核通知应用进程I/O操作何时完成。</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/cxhjDzPYM0a4.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p>Tomcat的NIO是基于I&#x2F;O复用（同步I&#x2F;O）来实现的，而NIO2是使用的异步I&#x2F;O。参考经典书籍《UNIX网络编程 卷1 套接字联网API》，两者的主要原理如下：</p>
+<h2 id="I-O复用（NIO）"><a href="#I-O复用（NIO）" class="headerlink" title="I&#x2F;O复用（NIO）"></a>I&#x2F;O复用（NIO）</h2><p>I&#x2F;O复用（I&#x2F;O multiplexing）可以调用<code>select</code>或<code>poll</code>，阻塞在这两个系统调用中的某一个之上，而不是阻塞在真正的I&#x2F;O系统调用上。进程阻塞于<code>select</code>调用，等待数据报套接字变为可读。当<code>select</code>返回套接字可读这一条件时，进程调用<code>recvfrom</code>把所读数据报复制到应用进程缓冲区，尽管这里需要使用<code>select</code>和<code>recvfrom</code>两个系统调用，但是使用<code>select</code>的可以等待多个描述符就绪，即可以等待多个请求。</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/tKX17eQCJnzT.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="异步IO（NIO2）"><a href="#异步IO（NIO2）" class="headerlink" title="异步IO（NIO2）"></a>异步IO（NIO2）</h2><p>异步I&#x2F;O（asynchronous I&#x2F;O）的工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到应用程序的缓冲区）完成后通知应用程序。需要注意的是：异步I&#x2F;O模型是由内核通知应用进程I&#x2F;O操作何时完成。</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/cxhjDzPYM0a4.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后我们可以把上面的过程结合剩下没有提到的三种UNIX系统中的IO模型进行对比得到下图：</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/YDYCG1ChUYRp.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="NIO、NIO2和APR的区别">NIO、NIO2和APR的区别</h2>
-<table>
+<p><img src="https://resource.tinychen.com/blog/20200409/YDYCG1ChUYRp.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="NIO、NIO2和APR的区别"><a href="#NIO、NIO2和APR的区别" class="headerlink" title="NIO、NIO2和APR的区别"></a>NIO、NIO2和APR的区别</h2><table>
 <thead>
 <tr>
 <th></th>
@@ -284,8 +276,7 @@
 <th>APR</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>实现</td>
 <td>JAVA NIO库</td>
 <td>JDK1.7 NIO2库</td>
@@ -297,84 +288,71 @@
 <td>异步非阻塞</td>
 <td>取决于系统</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <blockquote>
 <p>APR的重点在于使用C语言实现并且能够跨平台使用，它相当于将UNIX系统中的IO操作进行了一层封装使得编程开发更容易</p>
 </blockquote>
-<h1>3、connector的几个重要参数</h1>
-<h2 id="connectionTimeout">connectionTimeout</h2>
-<blockquote>
+<h1 id="3、connector的几个重要参数"><a href="#3、connector的几个重要参数" class="headerlink" title="3、connector的几个重要参数"></a>3、connector的几个重要参数</h1><h2 id="connectionTimeout"><a href="#connectionTimeout" class="headerlink" title="connectionTimeout"></a>connectionTimeout</h2><blockquote>
 <p>The number of milliseconds this <strong>Connector</strong> will wait, after accepting a connection, for the request URI line to be presented. Use a value of -1 to indicate no (i.e. infinite) timeout. The default value is 60000 (i.e. 60 seconds) but note that the standard server.xml that ships with Tomcat sets this to 20000 (i.e. 20 seconds). Unless <strong>disableUploadTimeout</strong> is set to <code>false</code>, this timeout will also be used when reading the request body (if any).</p>
 </blockquote>
 <p>在connector和请求的客户端建立连接之后开始计时，当超过该值的时候就会超时，然后断开连接。使用值-1表示无超时，默认值为60000（即60秒），但Tomcat中的server.xml将此值设置为20000（即20秒）。</p>
 <p>除非disableUploadTimeout设置为false，否则在读取请求正文（如果有）时也会使用此超时。</p>
-<h2 id="maxThreads">maxThreads</h2>
-<blockquote>
+<h2 id="maxThreads"><a href="#maxThreads" class="headerlink" title="maxThreads"></a>maxThreads</h2><blockquote>
 <p>The maximum number of request processing threads to be created by this <strong>Connector</strong>, which therefore determines the maximum number of simultaneous requests that can be handled. If not specified, this attribute is set to 200. If an executor is associated with this connector, this attribute is ignored as the connector will execute tasks using the executor rather than an internal thread pool. Note that if an executor is configured any value set for this attribute will be recorded correctly but it will be reported (e.g. via JMX) as <code>-1</code> to make clear that it is not used.</p>
 </blockquote>
 <p>最大线程数，大并发请求时，tomcat能创建来处理请求的最大线程数，超过则放入请求队列中进行排队，默认值为200。</p>
-<h2 id="acceptCount">acceptCount</h2>
-<blockquote>
+<h2 id="acceptCount"><a href="#acceptCount" class="headerlink" title="acceptCount"></a>acceptCount</h2><blockquote>
 <p>The maximum queue length for incoming connection requests when all possible request processing threads are in use. Any requests received when the queue is full will be refused. The default value is 100.</p>
 </blockquote>
 <p>当最大线程数（maxThreads）被使用完时，可以放入请求队列排队个数，超过这个数返回connection refused（请求被拒绝），默认值为100；</p>
-<h2 id="maxConnections">maxConnections</h2>
-<blockquote>
-<p>The maximum number of connections that the server will accept and process at any given time. When this number has been reached, the server will accept, but not process, one further connection. This additional connection be blocked until the number of connections being processed falls below <strong>maxConnections</strong> at which point the server will start accepting and processing new connections again. Note that once the limit has been reached, the operating system may still accept connections based on the <code>acceptCount</code> setting. The default value is <code>8192</code>.For NIO/NIO2 only, setting the value to -1, will disable the maxConnections feature and connections will not be counted.</p>
+<h2 id="maxConnections"><a href="#maxConnections" class="headerlink" title="maxConnections"></a>maxConnections</h2><blockquote>
+<p>The maximum number of connections that the server will accept and process at any given time. When this number has been reached, the server will accept, but not process, one further connection. This additional connection be blocked until the number of connections being processed falls below <strong>maxConnections</strong> at which point the server will start accepting and processing new connections again. Note that once the limit has been reached, the operating system may still accept connections based on the <code>acceptCount</code> setting. The default value is <code>8192</code>.For NIO&#x2F;NIO2 only, setting the value to -1, will disable the maxConnections feature and connections will not be counted.</p>
 </blockquote>
-<p>Tomcat在任意时刻接收和处理的最大连接数。当Tomcat接收的连接数达到maxConnections时，Acceptor线程不会读取accept队列中的连接；这时accept队列中的线程会一直阻塞着，直到Tomcat接收的连接数小于maxConnections。默认值为8192。</p>
-<p>对于NIO / NIO2，将该值设置为-1将禁用maxConnections功能，并且不计算连接数。</p>
-<h2 id="图解">图解</h2>
-<p>按照被处理的先后顺序我们可以把tomcat中的线程队列和以上四个参数使用该图进行表示</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/Ic6Wtt6KkKeV.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p>Tomcat在任意时刻接收和处理的最大连接数。当Tomcat接收的连接数达到maxConnections时，Acceptor线程不会读取accept队列中的连接；这时accept队列中的线程会一直阻塞着，直到Tomcat接收的连接数小于maxConnections。默认值为8192。 </p>
+<p>对于NIO &#x2F; NIO2，将该值设置为-1将禁用maxConnections功能，并且不计算连接数。</p>
+<h2 id="图解"><a href="#图解" class="headerlink" title="图解"></a>图解</h2><p>按照被处理的先后顺序我们可以把tomcat中的线程队列和以上四个参数使用该图进行表示</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/Ic6Wtt6KkKeV.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>当<code>maxThreads + acceptCount &lt; maxConnections</code>的时候将不会有线程被阻塞</li>
 <li>当阻塞的线程时间超过connectionTimeout还没得到返回值将返回连接超时</li>
 </ul>
-<h1>4、配置测试环境</h1>
-<h2 id="4-1-配置connector">4.1 配置connector</h2>
-<p>首先我们需要在tomcat中配置三个connector，分别对应三种I/O模型：</p>
+<h1 id="4、配置测试环境"><a href="#4、配置测试环境" class="headerlink" title="4、配置测试环境"></a>4、配置测试环境</h1><h2 id="4-1-配置connector"><a href="#4-1-配置connector" class="headerlink" title="4.1 配置connector"></a>4.1 配置connector</h2><p>首先我们需要在tomcat中配置三个connector，分别对应三种I&#x2F;O模型：</p>
 <figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8080&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;org.apache.coyote.http11.Http11AprProtocol&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">connectionTimeout</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8443&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">acceptCount</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">maxThreads</span>=<span class="hljs-string">&quot;16&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">maxConnections</span>=<span class="hljs-string">&quot;22000&quot;</span>/&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8081&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;org.apache.coyote.http11.Http11Nio2Protocol&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">connectionTimeout</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8444&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">acceptCount</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">maxThreads</span>=<span class="hljs-string">&quot;200&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">maxConnections</span>=<span class="hljs-string">&quot;22000&quot;</span>/&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">Connector</span> <span class="hljs-attr">port</span>=<span class="hljs-string">&quot;8082&quot;</span> <span class="hljs-attr">protocol</span>=<span class="hljs-string">&quot;org.apache.coyote.http11.Http11NioProtocol&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">connectionTimeout</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">redirectPort</span>=<span class="hljs-string">&quot;8445&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">acceptCount</span>=<span class="hljs-string">&quot;20000&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">maxThreads</span>=<span class="hljs-string">&quot;16&quot;</span></span><br><span class="hljs-tag">           <span class="hljs-attr">maxConnections</span>=<span class="hljs-string">&quot;22000&quot;</span>/&gt;</span><br></code></pre></div></td></tr></table></figure>
-<h2 id="4-2-配置jmeter">4.2 配置jmeter</h2>
-<h3 id="4-2-1-测试环境">4.2.1 测试环境</h3>
-<p><a target="_blank" rel="noopener" href="https://jmeter.apache.org/index.html">jmeter</a>是apache旗下的一款开源的使用JAVA编写的服务器压力测试软件，我们从<a target="_blank" rel="noopener" href="https://jmeter.apache.org/index.html">官网</a>下载源码包，分别部署在windows和Linux系统上，因为windows系统的硬件配置太差了，没办法进行高并发的压力测试，所以windows平台只进行jmeter的测试文件jmx的配置，配置完成后再使用Linux测试机来进行压力测试。(注意jmeter版本需要保持一致)</p>
+
+<h2 id="4-2-配置jmeter"><a href="#4-2-配置jmeter" class="headerlink" title="4.2 配置jmeter"></a>4.2 配置jmeter</h2><h3 id="4-2-1-测试环境"><a href="#4-2-1-测试环境" class="headerlink" title="4.2.1 测试环境"></a>4.2.1 测试环境</h3><p><a target="_blank" rel="noopener" href="https://jmeter.apache.org/index.html">jmeter</a>是apache旗下的一款开源的使用JAVA编写的服务器压力测试软件，我们从<a target="_blank" rel="noopener" href="https://jmeter.apache.org/index.html">官网</a>下载源码包，分别部署在windows和Linux系统上，因为windows系统的硬件配置太差了，没办法进行高并发的压力测试，所以windows平台只进行jmeter的测试文件jmx的配置，配置完成后再使用Linux测试机来进行压力测试。(注意jmeter版本需要保持一致)</p>
 <p>使用jmeter进行测试的机器系统和内核版本为：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[root@www ~]<span class="hljs-comment"># lsb_release -a</span><br>LSB Version:    :base-4.0-amd64:base-4.0-noarch:core-4.0-amd64:core-4.0-noarch:graphics-4.0-amd64:graphics-4.0-noarch:printing-4.0-amd64:printing-4.0-noarch<br>Distributor ID: RedHatEnterpriseServer<br>Description:    Red Hat Enterprise Linux Server release 6.9 (Santiago)<br>Release:        6.9<br>Codename:       Santiago<br>[root@www ~]<span class="hljs-comment"># uname -r</span><br>2.6.32-696.el6.x86_64<br></code></pre></div></td></tr></table></figure>
+
 <p>安装tomcat9的服务器系统和内核版本为：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[root@tmpsys conf]<span class="hljs-comment"># lsb_release -a</span><br>LSB Version:    :core-4.1-amd64:core-4.1-noarch:cxx-4.1-amd64:cxx-4.1-noarch:desktop-4.1-amd64:desktop-4.1-noarch:languages-4.1-amd64:languages-4.1-noarch:printing-4.1-amd64:printing-4.1-noarch<br>Distributor ID: n/a<br>Description:    NAME=<span class="hljs-string">&quot;Red Hat Enterprise Linux Server&quot;</span><br>Release:        n/a<br>Codename:       n/a<br>[root@tmpsys conf]<span class="hljs-comment"># uname -r</span><br>3.10.0-1062.18.1.el7.x86_64<br></code></pre></div></td></tr></table></figure>
-<h3 id="4-2-2-配置jmeter">4.2.2 配置jmeter</h3>
-<p>jmeter使用前需要配置JDK和系统环境变量（JDK配置这里不再赘述），我们在<code>/etc/profile</code>中导入相关变量并使用source命令保证生效。</p>
+
+<h3 id="4-2-2-配置jmeter"><a href="#4-2-2-配置jmeter" class="headerlink" title="4.2.2 配置jmeter"></a>4.2.2 配置jmeter</h3><p>jmeter使用前需要配置JDK和系统环境变量（JDK配置这里不再赘述），我们在<code>/etc/profile</code>中导入相关变量并使用source命令保证生效。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> JMETER_HOME=/home/jmeter<br><span class="hljs-built_in">export</span> CLASSPATH=<span class="hljs-variable">$JMETER_HOME</span>/lib/ext/ApacheJMeter_core.jar:<span class="hljs-variable">$JMETER_HOME</span>/lib/jorphan.jar:<span class="hljs-variable">$CLASSPATH</span><br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$JMETER_HOME</span>/bin:<span class="hljs-variable">$PATH</span><br></code></pre></div></td></tr></table></figure>
+
 <p>配置成功后应该可以看到如下输出</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/nVqBfW2s6jJu.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="4-3-编辑JMX文件">4.3 编辑JMX文件</h2>
-<p>JMX的文件配置不算复杂，最重要的是测试的时间和并发线程数量</p>
-<p><img src="https://resource.tinychen.com/blog/20200409/xfSP92UKkTQR.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p>这里我们使用持续压力测试模式，设置<strong>循环次数</strong>为永远，然后设置<strong>持续时间</strong>为300秒即5分钟，设置<strong>线程数</strong>为200并且<strong>ramp-up时间</strong>为1s即每秒200并发数，如果ramp-up时间为10s即每秒200÷10=20并发数，以此类推。对应到jmx文件中的xml文件块为：</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/nVqBfW2s6jJu.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="4-3-编辑JMX文件"><a href="#4-3-编辑JMX文件" class="headerlink" title="4.3 编辑JMX文件"></a>4.3 编辑JMX文件</h2><p>JMX的文件配置不算复杂，最重要的是测试的时间和并发线程数量</p>
+<p><img src="https://resource.tinychen.com/blog/20200409/xfSP92UKkTQR.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里我们使用持续压力测试模式，设置<strong>循环次数</strong>为永远，然后设置<strong>持续时间</strong>为300秒即5分钟，设置<strong>线程数</strong>为200并且<strong>ramp-up时间</strong>为1s即每秒200并发数，如果ramp-up时间为10s即每秒200÷10&#x3D;20并发数，以此类推。对应到jmx文件中的xml文件块为：</p>
 <figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">ThreadGroup</span> <span class="hljs-attr">guiclass</span>=<span class="hljs-string">&quot;ThreadGroupGui&quot;</span> <span class="hljs-attr">testclass</span>=<span class="hljs-string">&quot;ThreadGroup&quot;</span> <span class="hljs-attr">testname</span>=<span class="hljs-string">&quot;线程组&quot;</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">stringProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.on_sample_error&quot;</span>&gt;</span>continue<span class="hljs-tag">&lt;/<span class="hljs-name">stringProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">elementProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.main_controller&quot;</span> <span class="hljs-attr">elementType</span>=<span class="hljs-string">&quot;LoopController&quot;</span> <span class="hljs-attr">guiclass</span>=<span class="hljs-string">&quot;LoopControlPanel&quot;</span> <span class="hljs-attr">testclass</span>=<span class="hljs-string">&quot;LoopController&quot;</span> <span class="hljs-attr">testname</span>=<span class="hljs-string">&quot;循环控制器&quot;</span> <span class="hljs-attr">enabled</span>=<span class="hljs-string">&quot;true&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">boolProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;LoopController.continue_forever&quot;</span>&gt;</span>false<span class="hljs-tag">&lt;/<span class="hljs-name">boolProp</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">intProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;LoopController.loops&quot;</span>&gt;</span>-1<span class="hljs-tag">&lt;/<span class="hljs-name">intProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">elementProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">stringProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.num_threads&quot;</span>&gt;</span>200<span class="hljs-tag">&lt;/<span class="hljs-name">stringProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">stringProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.ramp_time&quot;</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-name">stringProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">boolProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.scheduler&quot;</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">boolProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">stringProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.duration&quot;</span>&gt;</span>300<span class="hljs-tag">&lt;/<span class="hljs-name">stringProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">stringProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.delay&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">stringProp</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">boolProp</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;ThreadGroup.same_user_on_next_iteration&quot;</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">boolProp</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">ThreadGroup</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
-<h2 id="4-4-测试类型">4.4 测试类型</h2>
-<p>这里我们分别测试<strong>五分钟持续压测</strong>情况下<strong>200、400、600、800、1000的并发情况</strong>，测试的页面为tomcat的默认首页，tomcat自带的<code>examples</code>中的<code>/examples/servlets/nonblocking/bytecounter.html</code>和<code>/examples/servlets/nonblocking/numberwriter</code>。可以看到后面的两个example都是使用非阻塞的方式进行编写的<code>sevlet</code>。三者的主要操作如下：</p>
+
+<h2 id="4-4-测试类型"><a href="#4-4-测试类型" class="headerlink" title="4.4 测试类型"></a>4.4 测试类型</h2><p>这里我们分别测试<strong>五分钟持续压测</strong>情况下<strong>200、400、600、800、1000的并发情况</strong>，测试的页面为tomcat的默认首页，tomcat自带的<code>examples</code>中的<code>/examples/servlets/nonblocking/bytecounter.html</code>和<code>/examples/servlets/nonblocking/numberwriter</code>。可以看到后面的两个example都是使用非阻塞的方式进行编写的<code>sevlet</code>。三者的主要操作如下：</p>
 <ul>
 <li>tomcat首页几乎相当于一个静态页面，属于简单的网页请求操作，应用程序发送请求到内核，内核从IO从读取相应文件并返回；</li>
 <li><code>numberwriter</code>是生成返回一串很长的数字，应用程序发送请求到内核并接收从内核生成返回的较大的数据；</li>
 <li><code>bytecounter</code>需要上传一个文件然后再计算字数（这里使用了一个大小约30KB的markdown文件作为测试），需要进行IO传输和CPU计算再从内核返回一个简单的数值到应用程序；</li>
 </ul>
-<h2 id="4-5-tomcat9启动参数">4.5 tomcat9启动参数</h2>
-<p>此处我们使用的依旧是systemd调用jsvc启动tomcat，启动参数如下:</p>
+<h2 id="4-5-tomcat9启动参数"><a href="#4-5-tomcat9启动参数" class="headerlink" title="4.5 tomcat9启动参数"></a>4.5 tomcat9启动参数</h2><p>此处我们使用的依旧是systemd调用jsvc启动tomcat，启动参数如下:</p>
 <figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros"><span class="hljs-attribute">ExecStart</span>=/home/tomcat9/bin/jsvc \<br>        -user tomcat \<br>        -nodetach \<br>        -java-home <span class="hljs-variable">$&#123;JAVA_HOME&#125;</span> \<br>        -Xms4096m \<br>        -Xmx8192m \<br>        -XX:<span class="hljs-attribute">NewRatio</span>=3 \<br>        -XX:<span class="hljs-attribute">SurvivorRatio</span>=4 \<br>        -pidfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/tomcat.pid \<br>        -classpath <span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/bootstrap.jar:<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span>/bin/tomcat-juli.jar \<br>        -outfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.out \<br>        -errfile <span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/logs/catalina.err \<br>        -Dcatalina.<span class="hljs-attribute">home</span>=<span class="hljs-variable">$&#123;CATALINA_HOME&#125;</span> \<br>        -Dcatalina.<span class="hljs-attribute">base</span>=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span> \<br>        -Djava.io.<span class="hljs-attribute">tmpdir</span>=<span class="hljs-variable">$&#123;CATALINA_TMPDIR&#125;</span> \<br>        -Djava.util.logging.<span class="hljs-attribute">manager</span>=org.apache.juli.ClassLoaderLogManager \<br>        -Djava.util.logging.config.<span class="hljs-attribute">file</span>=<span class="hljs-variable">$&#123;CATALINA_BASE&#125;</span>/conf/logging.properties \<br>        -Djava.library.<span class="hljs-attribute">path</span>=/usr/local/apr/lib \<br>        org.apache.catalina.startup.Bootstrap<br></code></pre></div></td></tr></table></figure>
-<h1>5、测试结果</h1>
-<h2 id="5-1-tomcat首页测试结果">5.1 tomcat首页测试结果</h2>
-<p><img src="https://resource.tinychen.com/20200410133532.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/20200410132141.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+<h1 id="5、测试结果"><a href="#5、测试结果" class="headerlink" title="5、测试结果"></a>5、测试结果</h1><h2 id="5-1-tomcat首页测试结果"><a href="#5-1-tomcat首页测试结果" class="headerlink" title="5.1 tomcat首页测试结果"></a>5.1 tomcat首页测试结果</h2><p><img src="https://resource.tinychen.com/20200410133532.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200410132141.png" srcset="/img/loading.gif" lazyload></p>
 <p>对于简单的请求，三种模式的所有表现数据都几乎一样，基本不存在测试误差范围外的差距。</p>
-<h2 id="5-2-numberwriter测试结果">5.2 numberwriter测试结果</h2>
-<p><img src="https://resource.tinychen.com/20200410133419.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/20200410133050.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="5-2-numberwriter测试结果"><a href="#5-2-numberwriter测试结果" class="headerlink" title="5.2 numberwriter测试结果"></a>5.2 numberwriter测试结果</h2><p><img src="https://resource.tinychen.com/20200410133419.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200410133050.png" srcset="/img/loading.gif" lazyload></p>
 <p>到了numberwrite这一种返回较长数据的请求，NIO2模型的错误率要比其他两者低得多，到了1200并发的时候apr模型和NIO模型的错误率都已经超过了六成，个人认为此时的响应时间不具有参考性。</p>
-<h2 id="5-3-wordcount测试结果">5.3 wordcount测试结果</h2>
-<p><img src="https://resource.tinychen.com/20200410133833.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<p><img src="https://resource.tinychen.com/20200410134056.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<h2 id="5-3-wordcount测试结果"><a href="#5-3-wordcount测试结果" class="headerlink" title="5.3 wordcount测试结果"></a>5.3 wordcount测试结果</h2><p><img src="https://resource.tinychen.com/20200410133833.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/20200410134056.png" srcset="/img/loading.gif" lazyload></p>
 <p>和之前的numberwrite一样，同样是牺牲了响应时间而降低了错误率。</p>
 
             </div>

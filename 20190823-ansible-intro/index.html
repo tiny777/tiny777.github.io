@@ -250,13 +250,11 @@
             <div class="markdown-body">
               <p>Ansible的基本概念和入门安装配置。</p>
 <span id="more"></span>
-<h1>1、Intro</h1>
-<p>Ansible是一款使用python开发的自动化运维工具，实现了批量系统配置、批量程序部署、批量运行命令等功能。Ansible是基于模块工作的，本身没有批量部署的能力。真正具有批量部署的是Ansible所运行的模块，Ansible只是提供一种框架。</p>
+
+<h1 id="1、Intro"><a href="#1、Intro" class="headerlink" title="1、Intro"></a>1、Intro</h1><p>Ansible是一款使用python开发的自动化运维工具，实现了批量系统配置、批量程序部署、批量运行命令等功能。Ansible是基于模块工作的，本身没有批量部署的能力。真正具有批量部署的是Ansible所运行的模块，Ansible只是提供一种框架。</p>
 <p>Ansible默认是通过SSH协议来远程连接集群中的各台设备并进行相关操作，因此我们只需要在一台设备上安装Ansible即可，安装、升级和卸载都只需要对一台设备进行操作，其余的设备上面并不会有软件的安装残留之类的问题。同时，由于是使用的SSH连接，Ansible也不需要在系统后台维持相关进程一直运行。</p>
-<h1>2、Version</h1>
-<p>因为Ansible的只需要在一台机器上安装，所以它的升级和卸载都十分简单，因此很多人会选择安装最新版的Ansible甚至是github上的开发版。Ansible的更新周期非常短，只有四个月，因此即使是出现了BUG，也能很快的在下一个版本中解决。</p>
-<h1>3、Install</h1>
-<p><strong>在centos7上安装最新版本的ansible</strong></p>
+<h1 id="2、Version"><a href="#2、Version" class="headerlink" title="2、Version"></a>2、Version</h1><p>因为Ansible的只需要在一台机器上安装，所以它的升级和卸载都十分简单，因此很多人会选择安装最新版的Ansible甚至是github上的开发版。Ansible的更新周期非常短，只有四个月，因此即使是出现了BUG，也能很快的在下一个版本中解决。</p>
+<h1 id="3、Install"><a href="#3、Install" class="headerlink" title="3、Install"></a>3、Install</h1><p><strong>在centos7上安装最新版本的ansible</strong></p>
 <blockquote>
 <p>Currently Ansible can be run from any machine with Python 2 (version 2.7) or Python 3 (versions 3.5 and higher) installed. Windows isn’t supported for the control node.</p>
 <p>This includes Red Hat, Debian, CentOS, macOS, any of the BSDs, and so on.</p>
@@ -264,20 +262,23 @@
 <p>从官网上我们可以看到，截止目前（2019.8.23），安装ansible需要python2.7以上或者是python3.5以上版本。</p>
 <p>这里为了方便管理，我选择了epel源里面的python3.6版本进行安装，需要安装最新的python3可以<a href="https://tinychen.com/20190413-centos-install-python/">参考这里</a>。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 首先我们需要安装epel库</span><br>yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm<br><br><span class="hljs-comment"># 安装python3.6</span><br>yum install python36 -y<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190823/Wdn84odF5qsl.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190823/Wdn84odF5qsl.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 接着我们查看一下ansible的最新版本</span><br>yum list | grep ansible<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190823/IPmqRSypkcNm.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190823/IPmqRSypkcNm.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到最新版是<code>2.8.4</code>，官网上显示的最新版也是2.8，这就没问题了。</p>
 <p>然后我们直接安装</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install ansible -y<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190823/0zR6j2O50qFA.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h1>4、Conf</h1>
-<h2 id="存放目录">存放目录</h2>
-<p>ansible的配置文件存放在<code>/etc/ansible</code>目录下：</p>
-<p><img src="https://resource.tinychen.com/blog/20190823/JaN8V9A7Xdn3.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190823/0zR6j2O50qFA.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="4、Conf"><a href="#4、Conf" class="headerlink" title="4、Conf"></a>4、Conf</h1><h2 id="存放目录"><a href="#存放目录" class="headerlink" title="存放目录"></a>存放目录</h2><p>ansible的配置文件存放在<code>/etc/ansible</code>目录下：</p>
+<p><img src="https://resource.tinychen.com/blog/20190823/JaN8V9A7Xdn3.png" srcset="/img/loading.gif" lazyload></p>
 <p>图中的<code>ansible.cfg</code>文件就是对应的配置文件，默认情况下，里面的所有配置都是注释掉的，也就是说里面是没有任何默认配置的。</p>
-<h2 id="读取顺序">读取顺序</h2>
-<p>ansible读取配置文件的先后顺序如下：</p>
+<h2 id="读取顺序"><a href="#读取顺序" class="headerlink" title="读取顺序"></a>读取顺序</h2><p>ansible读取配置文件的先后顺序如下：</p>
 <ul>
 <li><code>ANSIBLE_CONFIG</code> (environment variable if set)</li>
 <li><code>ansible.cfg</code> (in the current directory)</li>
@@ -289,24 +290,28 @@
 <p><code>ansible.cfg</code>配置文件是ini配置文件，因此可以使用<code>#</code>和<code>;</code>作为注释，但是如果需要在已经写了配置的同一行后添加注释，则只能使用<code>;</code></p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-comment"># some basic default values...</span><br><span class="hljs-attr">inventory</span> = /etc/ansible/hosts  <span class="hljs-comment">; This points to the file that lists your hosts</span><br></code></pre></div></td></tr></table></figure>
 </blockquote>
-<h2 id="ansible-cfg"><code>ansible.cfg</code></h2>
-<p>这里为了方便我们配合git来进行版本控制，我们在github上面创建一个repo，然后clone到本地，接着把配置文件和之后会使用到的playbook都放入到这个文件夹内。</p>
+<h2 id="ansible-cfg"><a href="#ansible-cfg" class="headerlink" title="ansible.cfg"></a><code>ansible.cfg</code></h2><p>这里为了方便我们配合git来进行版本控制，我们在github上面创建一个repo，然后clone到本地，接着把配置文件和之后会使用到的playbook都放入到这个文件夹内。</p>
 <p>具体的git使用方法比较简单，我们不在这里赘述。</p>
-<p><img src="https://resource.tinychen.com/blog/20190826/H3hMQaSXFWh2.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190826/H3hMQaSXFWh2.png" srcset="/img/loading.gif" lazyload></p>
 <p><code>ansible.cfg</code>文件的配置比较简单：</p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-section">[defaults]</span><br><span class="hljs-comment"># hosts文件的存放位置</span><br><span class="hljs-attr">inventory</span>       = ./hosts<br><span class="hljs-comment"># 执行超级命令的用户</span><br><span class="hljs-attr">sudo_user</span>      = root<br><span class="hljs-comment"># 传输方式</span><br><span class="hljs-attr">transport</span>      = smart<br><span class="hljs-comment"># ssh的端口</span><br><span class="hljs-attr">remote_port</span>    = <span class="hljs-number">22</span><br><span class="hljs-comment"># 执行sudo命令的时候使用的命令</span><br><span class="hljs-attr">sudo_exe</span> = sudo<br><span class="hljs-comment"># 远程执行命令的默认用户</span><br><span class="hljs-attr">remote_user</span> = tinychen<br><span class="hljs-comment"># log日志存放的地方</span><br><span class="hljs-attr">log_path</span> = /var/log/ansible.log<br><span class="hljs-comment"># 默认使用的模块</span><br><span class="hljs-attr">module_name</span> = command<br><span class="hljs-comment"># 默认使用的shell</span><br><span class="hljs-attr">executable</span> = /bin/sh<br><span class="hljs-comment"># 使用rsa密钥进行验证登录而不是密码</span><br><span class="hljs-attr">private_key_file</span> = /home/tinychen/.ssh/id_rsa<br></code></pre></div></td></tr></table></figure>
+
 <p><code>hosts</code>文件中我们可以添加需要控制的主机的IP或者是hostname</p>
-<p><img src="https://resource.tinychen.com/blog/20190826/i1bwHLiAYiMT.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/blog/20190826/i1bwHLiAYiMT.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-section">[k8s]</span><br>192.168.100.22<span class="hljs-section">[0:6]</span><br></code></pre></div></td></tr></table></figure>
+
 <p>这里因为我的被控制主机的IP地址是连续的，因此我直接使用<code>[]</code>来表示，这里的<code>k8s</code>是这一堆被控制主机的组名，一个IP可以加入多个组，也可以一个组都不加入。</p>
-<h1>5、Test</h1>
-<p>接下来我们执行几条命令来测试一下</p>
+<h1 id="5、Test"><a href="#5、Test" class="headerlink" title="5、Test"></a>5、Test</h1><p>接下来我们执行几条命令来测试一下</p>
 <p>先执行一下ping模块看看能否连通</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ansible k8s -m ping<br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190826/aUiXKeT36Sik.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190826/aUiXKeT36Sik.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里可以看到是没有问题的（结果太长没有全部截图出来）</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ansible k8s -m <span class="hljs-built_in">command</span> -a <span class="hljs-string">&quot;id&quot;</span><br></code></pre></div></td></tr></table></figure>
-<p><img src="https://resource.tinychen.com/blog/20190826/xjrjiELxILjf.png" srcset="/img/loading.gif" lazyload alt=""></p>
+
+
+<p><img src="https://resource.tinychen.com/blog/20190826/xjrjiELxILjf.png" srcset="/img/loading.gif" lazyload></p>
 <p>可以看到这里已经是顺利执行了。</p>
 
             </div>

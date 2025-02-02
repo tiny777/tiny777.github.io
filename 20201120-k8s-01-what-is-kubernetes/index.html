@@ -250,123 +250,90 @@
               <p>本文主要介绍什么是k8s以及k8s的基本架构和相关基础概念。</p>
 <p><strong>Kubernetes</strong> 一词源于希腊语，意为“舵手”或“飞行员”，作为一个可移植、可扩展的开源平台，k8s可以使用声明式配置来管理编排容器服务并且提高自动化水平和效率。同时，得益于庞大且仍不断在增长的生态系统支撑，k8s拥有海量可用的周边服务、工具和生态支持。</p>
 <span id="more"></span>
+
 <p><a target="_blank" rel="noopener" href="https://kubernetes.io/">kubernetes官网</a>上给出的定义如下：Kubernetes是用于自动部署，扩展和管理容器化应用程序的开源系统。（Kubernetes, also known as K8s, is an open-source system for automating deployment, scaling, and management of containerized applications.）它将组成应用程序的容器组合成逻辑单元（pod），以便于管理和服务发现。Kubernetes 源自Google 15 年生产环境的运维经验，同时凝聚了社区的最佳创意和实践。</p>
-<h1>1、软件部署的迭代进程</h1>
-<p>一般来说，我们可以把软件部分分为三个阶段：<strong>传统部署、虚拟化部署、容器化部署</strong>。</p>
+<h1 id="1、软件部署的迭代进程"><a href="#1、软件部署的迭代进程" class="headerlink" title="1、软件部署的迭代进程"></a>1、软件部署的迭代进程</h1><p>一般来说，我们可以把软件部分分为三个阶段：<strong>传统部署、虚拟化部署、容器化部署</strong>。</p>
 <blockquote>
 <p>注意容器化虽然也属于虚拟化的一种，但是这里所指的虚拟化部署指的是通过KVM等虚拟化方式创建的虚拟机来部署应用。</p>
 </blockquote>
-<p><img src="https://resource.tinychen.com/20210111092521.png" srcset="/img/loading.gif" lazyload alt=""></p>
+<p><img src="https://resource.tinychen.com/20210111092521.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
-<li>
-<p><strong>传统部署</strong></p>
+<li><p><strong>传统部署</strong></p>
 <p>在传统部署时代，所有的应用都运行在同一台物理机上面。这给资源的隔离带来了很大的困扰，不同的应用会因为争夺系统资源而降低性能表现，也有可能会出现一个应用占用了大部分资源而另一个应用无资源可用的情况。同时，运维人员维护如此多的运行不同应用的物理机也是相当麻烦的。</p>
 </li>
-<li>
-<p><strong>虚拟化部署</strong></p>
+<li><p><strong>虚拟化部署</strong></p>
 <p>在虚拟化部署时代，通过在操作系统中加入了Hypervisor，以及CPU等硬件的更新迭代支持，可以在一台物理机上面通过虚拟化的方式创建多台虚拟机Virtual Machines (VMs)。每台虚拟机都是一个独立的操作系统，拥有自己的文件系统和各种资源以及虚拟化的硬件。运维人员只需要维护各种虚拟机镜像镜像即可。</p>
 </li>
-<li>
-<p><strong>容器化部署</strong></p>
+<li><p><strong>容器化部署</strong></p>
 <p>前面我们说过容器化严格来说也是虚拟化的一种，只不过容器化更进一步，通过容器运行时（Container Runtime），可以让不同的容器共享底层宿主机的操作系统，因为容器化被视为是一种轻量的虚拟化技术。同时，和虚拟机一样，容器也有自己的文件系统、CPU、内存、进程空间等资源。而且由于容器和底层的操作系统分离，一个容器可以运行在不同操作系统和云环境上。容器化技术的一些特点如下：</p>
 <ul>
-<li>
-<p><strong>解耦了应用的创建和部署过程</strong>：对比虚拟机，可以提供更高的易用性和效率</p>
+<li><p><strong>解耦了应用的创建和部署过程</strong>：对比虚拟机，可以提供更高的易用性和效率</p>
 </li>
-<li>
-<p><strong>持续开发、集成、部署（CI/CD）</strong>：得益于容器镜像的不变性，容器化技术可以高效快速地频繁创建高质量的容器镜像用于部署和回滚</p>
+<li><p><strong>持续开发、集成、部署（CI&#x2F;CD）</strong>：得益于容器镜像的不变性，容器化技术可以高效快速地频繁创建高质量的容器镜像用于部署和回滚</p>
 </li>
-<li>
-<p><strong>开发和运维分离</strong>：创建应用容器镜像和部署应用的时空连续性被打断，创建之后不需要立即部署，而是使用容器作为中介将其保存起来，从而使得应用和底层的基础架构解耦</p>
+<li><p><strong>开发和运维分离</strong>：创建应用容器镜像和部署应用的时空连续性被打断，创建之后不需要立即部署，而是使用容器作为中介将其保存起来，从而使得应用和底层的基础架构解耦</p>
 </li>
-<li>
-<p><strong>出色的可观察性</strong>：不仅仅是系统层面的指标信息，包括应用的健康状态和其他变量也能够展示出来</p>
+<li><p><strong>出色的可观察性</strong>：不仅仅是系统层面的指标信息，包括应用的健康状态和其他变量也能够展示出来</p>
 </li>
-<li>
-<p><strong>环境一致性</strong>：开发、测试和生产环境只要使用同样的镜像，就可以保证环境的一致性</p>
+<li><p><strong>环境一致性</strong>：开发、测试和生产环境只要使用同样的镜像，就可以保证环境的一致性</p>
 </li>
-<li>
-<p><strong>跨云和操作系统</strong>：容器可以运行在各种云环境和不同的操作系统上</p>
+<li><p><strong>跨云和操作系统</strong>：容器可以运行在各种云环境和不同的操作系统上</p>
 </li>
-<li>
-<p><strong>以应用为中心进行管理</strong>：容器的抽象层级上升到了应用级别，因此可以从应用的逻辑资源层面进行调度分配和管理</p>
+<li><p><strong>以应用为中心进行管理</strong>：容器的抽象层级上升到了应用级别，因此可以从应用的逻辑资源层面进行调度分配和管理</p>
 </li>
-<li>
-<p><strong>松散耦合、分布式、弹性、解放的微服务</strong>：应用程序被分解成较小的独立部分， 并且可以动态部署和管理，而不是在一台大型的物理机或虚拟机上整体运行</p>
+<li><p><strong>松散耦合、分布式、弹性、解放的微服务</strong>：应用程序被分解成较小的独立部分， 并且可以动态部署和管理，而不是在一台大型的物理机或虚拟机上整体运行</p>
 </li>
-<li>
-<p><strong>资源隔离</strong>：可预测的应用程序性能</p>
+<li><p><strong>资源隔离</strong>：可预测的应用程序性能</p>
 </li>
-<li>
-<p><strong>资源利用</strong>：高效率和高密度</p>
+<li><p><strong>资源利用</strong>：高效率和高密度</p>
 </li>
 </ul>
 </li>
 </ul>
-<h1>2、k8s的优势</h1>
-<p>容器无疑是一种运行和管理应用的良方。在生产环境中，我们需要保证每一个容器服务都正常运行，如果某个容器宕掉了，需要重启一个新的容器来进行替补。如果上述的操作能够被某个系统自动实现呢？这时候k8s的优势就展现出来了。k8s提供了一个弹性的分布式系统框架，它照顾到了应用扩容、故障转移和部署模式等多个方面。k8s的一些主要特性有：</p>
+<h1 id="2、k8s的优势"><a href="#2、k8s的优势" class="headerlink" title="2、k8s的优势"></a>2、k8s的优势</h1><p>容器无疑是一种运行和管理应用的良方。在生产环境中，我们需要保证每一个容器服务都正常运行，如果某个容器宕掉了，需要重启一个新的容器来进行替补。如果上述的操作能够被某个系统自动实现呢？这时候k8s的优势就展现出来了。k8s提供了一个弹性的分布式系统框架，它照顾到了应用扩容、故障转移和部署模式等多个方面。k8s的一些主要特性有：</p>
 <ul>
-<li>
-<p><strong>服务发现和负载均衡</strong>：k8s可以通过DNS或者是IP地址来暴露容器中的服务。如果某个容器的流量/请求特别高，k8s能够主动实现负载均衡来降低该容器的流量/请求从而保证容器的稳定运行</p>
+<li><p><strong>服务发现和负载均衡</strong>：k8s可以通过DNS或者是IP地址来暴露容器中的服务。如果某个容器的流量&#x2F;请求特别高，k8s能够主动实现负载均衡来降低该容器的流量&#x2F;请求从而保证容器的稳定运行</p>
 </li>
-<li>
-<p><strong>存储编排</strong>：k8s允许我们根据自己的实际需求和选择来挂载存储系统，支持但不限于本地存储、云存储等各种方式</p>
+<li><p><strong>存储编排</strong>：k8s允许我们根据自己的实际需求和选择来挂载存储系统，支持但不限于本地存储、云存储等各种方式</p>
 </li>
-<li>
-<p><strong>自动部署和回滚</strong>：我们可以使用k8s来声明已经部署的容器的期望状态，它可以以受控的速率将实际状态切换到期望状态。例如我们可以声明某个容器的运行数量的期望值为10，k8s会自动将容器的数量调整到该期望状态；我们还可以使用自动化 Kubernetes 来为部署创建新容器， 删除现有容器并将它们的所有资源用于新容器</p>
+<li><p><strong>自动部署和回滚</strong>：我们可以使用k8s来声明已经部署的容器的期望状态，它可以以受控的速率将实际状态切换到期望状态。例如我们可以声明某个容器的运行数量的期望值为10，k8s会自动将容器的数量调整到该期望状态；我们还可以使用自动化 Kubernetes 来为部署创建新容器， 删除现有容器并将它们的所有资源用于新容器</p>
 </li>
-<li>
-<p><strong>自动装箱计算</strong>：我们可以在k8s中指定每个容器所需 CPU 和内存（RAM）。 当容器指定了资源请求时，k8s会根据每个node节点的状态和每个容器所需要的资源来进行智能调度，确保资源的最大化利用</p>
+<li><p><strong>自动装箱计算</strong>：我们可以在k8s中指定每个容器所需 CPU 和内存（RAM）。 当容器指定了资源请求时，k8s会根据每个node节点的状态和每个容器所需要的资源来进行智能调度，确保资源的最大化利用</p>
 </li>
-<li>
-<p><strong>自我修复</strong></p>
+<li><p><strong>自我修复</strong></p>
 <p>k8s能够自动重启运行失败的容器、替换容器、杀死不响应 <code>用户定义的运行状况检查</code>的容器，并且在准备好服务之前不将其通告给客户端，从而保证客户端的请求不会被分发到有问题的容器中</p>
 </li>
-<li>
-<p><strong>密钥与配置管理</strong></p>
+<li><p><strong>密钥与配置管理</strong></p>
 <p>k8s允许我们存储和管理如密码、OAuth 令牌和 ssh 密钥等敏感信息，我们可以在不重建容器镜像的情况下部署和更新密钥和应用程序配置，也不需要在配置中暴露密钥等敏感信息</p>
 </li>
 </ul>
-<h1>3、k8s不是什么</h1>
-<p>官方一直在强调这个观点：**k8s并不是一个传统的包罗万象的PaaS平台，**它的设计思想是提供最核心的基础框架和必要的核心功能，而在其他的选择上尽可能保证多样的兼容性和灵活性。尽管因为操作在容器级别层面而不是硬件层面，使得k8s提供了一些如部署、扩容、负载均衡等和PaaS平台类似的特性，但是对于日志、存储、报警、监控、CI/CD等其他诸多方面，k8s选择了将选择权交给使用者，这也是构建k8s丰富的生态中的重要一环。</p>
+<h1 id="3、k8s不是什么"><a href="#3、k8s不是什么" class="headerlink" title="3、k8s不是什么"></a>3、k8s不是什么</h1><p>官方一直在强调这个观点：<strong>k8s并不是一个传统的包罗万象的PaaS平台，</strong>它的设计思想是提供最核心的基础框架和必要的核心功能，而在其他的选择上尽可能保证多样的兼容性和灵活性。尽管因为操作在容器级别层面而不是硬件层面，使得k8s提供了一些如部署、扩容、负载均衡等和PaaS平台类似的特性，但是对于日志、存储、报警、监控、CI&#x2F;CD等其他诸多方面，k8s选择了将选择权交给使用者，这也是构建k8s丰富的生态中的重要一环。</p>
 <ul>
-<li>
-<p>k8s不限制支持的应用类型：包括无状态（nginx等）、有状态（数据库等）和数据处理（AI、大数据、深度学习等）各种各样的应用类型，基本上能在容器中运行的应用都能在k8s中运行，而事实上绝大多数应用都能在容器中运行，因此绝大多数应用都能在k8s中运行</p>
+<li><p>k8s不限制支持的应用类型：包括无状态（nginx等）、有状态（数据库等）和数据处理（AI、大数据、深度学习等）各种各样的应用类型，基本上能在容器中运行的应用都能在k8s中运行，而事实上绝大多数应用都能在容器中运行，因此绝大多数应用都能在k8s中运行</p>
 </li>
-<li>
-<p>不负责部署源代码、不构建程序、没有CI/CD：k8s并不涉及这些部分，使用者可以根据自己的偏好来选择合适的解决方案</p>
+<li><p>不负责部署源代码、不构建程序、没有CI&#x2F;CD：k8s并不涉及这些部分，使用者可以根据自己的偏好来选择合适的解决方案</p>
 </li>
-<li>
-<p>不提供应用级别的服务：不提供中间件、数据库、数据存储集群等作为内置服务，但是它们都能够很好地运行在k8s中，也能通过各种方式将服务暴露出去使用</p>
+<li><p>不提供应用级别的服务：不提供中间件、数据库、数据存储集群等作为内置服务，但是它们都能够很好地运行在k8s中，也能通过各种方式将服务暴露出去使用</p>
 </li>
-<li>
-<p>不提供日志、监控和报警等解决方案，但是提供了一些概念和指标数据等用于收集导出机制</p>
+<li><p>不提供日志、监控和报警等解决方案，但是提供了一些概念和指标数据等用于收集导出机制</p>
 </li>
-<li>
-<p>不提供或不要求配置语言/系统（例如 jsonnet），它提供了可以由任意形式的声明性规范所构成的声明性 API</p>
+<li><p>不提供或不要求配置语言&#x2F;系统（例如 jsonnet），它提供了可以由任意形式的声明性规范所构成的声明性 API</p>
 </li>
-<li>
-<p>不提供也不采用任何全面的机器配置、维护、管理或自我修复系统</p>
+<li><p>不提供也不采用任何全面的机器配置、维护、管理或自我修复系统</p>
 </li>
-<li>
-<p>此外，Kubernetes 不仅仅是一个编排系统，实际上它消除了编排的需要。 编排的技术定义是执行已定义的工作流程：首先执行 A，然后执行 B，再执行 C。 相比之下，Kubernetes 包含一组独立的、可组合的控制过程， 这些过程连续地将当前状态驱动到所提供的所需状态。 如何从 A 到 C 的方式无关紧要，也不需要集中控制，这使得系统更易于使用 且功能更强大、系统更健壮、更为弹性和可扩展。</p>
+<li><p>此外，Kubernetes 不仅仅是一个编排系统，实际上它消除了编排的需要。 编排的技术定义是执行已定义的工作流程：首先执行 A，然后执行 B，再执行 C。 相比之下，Kubernetes 包含一组独立的、可组合的控制过程， 这些过程连续地将当前状态驱动到所提供的所需状态。 如何从 A 到 C 的方式无关紧要，也不需要集中控制，这使得系统更易于使用 且功能更强大、系统更健壮、更为弹性和可扩展。</p>
 </li>
 </ul>
-<h1>4、k8s基本架构</h1>
-<p>我们先来看看官方给出的基本架构图。下图只包含了非常基础的k8s架构组件。我们先从这里开始。</p>
+<h1 id="4、k8s基本架构"><a href="#4、k8s基本架构" class="headerlink" title="4、k8s基本架构"></a>4、k8s基本架构</h1><p>我们先来看看官方给出的基本架构图。下图只包含了非常基础的k8s架构组件。我们先从这里开始。</p>
 <p><img src="https://resource.tinychen.com/20201216164907.png" srcset="/img/loading.gif" lazyload alt="image-20201216164905461"></p>
 <p>首先上图灰色区域表示的是一整个k8s集群，整个k8s的架构其实和我们常见的master-worker模型非常相似，只不过由于这是分布式的集群，要更复杂一些。</p>
-<h2 id="4-1-Control-Plane">4.1 Control Plane</h2>
-<p>首先我们看到蓝色框内的<code>Control Plane</code>，这个是整个集群的<strong>控制平面</strong>，相当于是master进程的加强版。k8s中的<code>Control Plane</code>一般都会运行在Master节点上面。<strong>在默认情况下</strong>，Master节点并不会运行应用工作负载，所有的应用工作负载都交由Node节点负责。</p>
+<h2 id="4-1-Control-Plane"><a href="#4-1-Control-Plane" class="headerlink" title="4.1 Control Plane"></a>4.1 Control Plane</h2><p>首先我们看到蓝色框内的<code>Control Plane</code>，这个是整个集群的<strong>控制平面</strong>，相当于是master进程的加强版。k8s中的<code>Control Plane</code>一般都会运行在Master节点上面。<strong>在默认情况下</strong>，Master节点并不会运行应用工作负载，所有的应用工作负载都交由Node节点负责。</p>
 <p><strong>控制平面</strong>中的Master节点主要运行控制平面的各种组件，它们主要的作用就是维持整个k8s集群的正常工作、存储集群的相关信息，同时为集群提供故障转移、负载均衡、任务调度和高可用等功能。对于Master节点一般有多个用于保证高可用，而控制平面中的各个组件均以容器的Pod形式运行在Master节点中，大部分的组件需要在每个Master节点上都运行，少数如<code>DNS</code>服务等组件则只需要保证足够数量的高可用即可。</p>
-<h3 id="4-1-1-kube-apiserver">4.1.1 kube-apiserver</h3>
-<p>k8s集群的控制平面的核心是API服务器，而API服务器主要就是由<code>kube-apiserver</code>组件实现的，它被设计为可水平扩展，即通过部署不同数量的实例来进行缩放从而适应不同的流量。API服务器作为整个k8s控制平面的前端，负责提供 HTTP API，以供用户、集群中的不同部分组件和集群外部组件相互通信。</p>
+<h3 id="4-1-1-kube-apiserver"><a href="#4-1-1-kube-apiserver" class="headerlink" title="4.1.1 kube-apiserver"></a>4.1.1 kube-apiserver</h3><p>k8s集群的控制平面的核心是API服务器，而API服务器主要就是由<code>kube-apiserver</code>组件实现的，它被设计为可水平扩展，即通过部署不同数量的实例来进行缩放从而适应不同的流量。API服务器作为整个k8s控制平面的前端，负责提供 HTTP API，以供用户、集群中的不同部分组件和集群外部组件相互通信。</p>
 <p>并且kubernetes api在设计的时候是遵循REST思想的，我们可以通过kubeadm或者kubectl这类的CLI工具来操控API从而控制整个k8s集群，也可以通过其他的Web UI来进行操控。</p>
-<h3 id="4-1-2-kube-scheduler">4.1.2 kube-scheduler</h3>
-<p>主节点上的组件，该组件监视那些新创建的未指定运行节点的 Pod，并选择节点让 Pod 在上面运行。</p>
-<p>调度决策考虑的因素包括单个 Pod 和 Pod 集合的资源需求、硬件/软件/策略约束、亲和性和反亲和性规范、数据位置、工作负载间的干扰和最后时限。</p>
-<h3 id="4-1-3-kube-controller-manager">4.1.3 kube-controller-manager</h3>
-<p>在主节点上运行 <code>控制器</code> 的组件。</p>
+<h3 id="4-1-2-kube-scheduler"><a href="#4-1-2-kube-scheduler" class="headerlink" title="4.1.2 kube-scheduler"></a>4.1.2 kube-scheduler</h3><p>主节点上的组件，该组件监视那些新创建的未指定运行节点的 Pod，并选择节点让 Pod 在上面运行。</p>
+<p>调度决策考虑的因素包括单个 Pod 和 Pod 集合的资源需求、硬件&#x2F;软件&#x2F;策略约束、亲和性和反亲和性规范、数据位置、工作负载间的干扰和最后时限。</p>
+<h3 id="4-1-3-kube-controller-manager"><a href="#4-1-3-kube-controller-manager" class="headerlink" title="4.1.3 kube-controller-manager"></a>4.1.3 kube-controller-manager</h3><p>在主节点上运行 <code>控制器</code> 的组件。</p>
 <p>从逻辑上讲，每个控制器都是一个单独的进程， 但是为了降低复杂性，它们都被编译到同一个可执行文件，并在一个进程中运行。</p>
 <p>这些控制器包括:</p>
 <ul>
@@ -375,25 +342,18 @@
 <li>端点控制器（Endpoints Controller）: 填充端点(Endpoints)对象(即加入 Service 与 Pod)。</li>
 <li>服务帐户和令牌控制器（Service Account &amp; Token Controllers）: 为新的命名空间创建默认帐户和 API 访问令牌.</li>
 </ul>
-<h3 id="4-1-4-etcd">4.1.4 etcd</h3>
-<p><code>etcd</code> 是兼具一致性和高可用性的键值<code>key-value</code>数据库，可以作为保存 Kubernetes 所有集群数据的后台数据库，负责保存Kubernetes Cluster的配置信息和各种资源的状态信息，当数据发生变化时，etcd 会快速地通知Kubernetes相关组件。</p>
+<h3 id="4-1-4-etcd"><a href="#4-1-4-etcd" class="headerlink" title="4.1.4 etcd"></a>4.1.4 etcd</h3><p><code>etcd</code> 是兼具一致性和高可用性的键值<code>key-value</code>数据库，可以作为保存 Kubernetes 所有集群数据的后台数据库，负责保存Kubernetes Cluster的配置信息和各种资源的状态信息，当数据发生变化时，etcd 会快速地通知Kubernetes相关组件。</p>
 <p>Kubernetes 集群的 etcd 数据库通常需要有个备份计划。此外还有一种k8s集群部署的高可用方案是将etcd数据库从容器中抽离出来，单独作为一个高可用数据库部署，从而为k8s提供稳定可靠的高可用数据库存储。</p>
-<h3 id="4-1-5-cloud-controller-manager">4.1.5 cloud-controller-manager</h3>
-<p><code>cloud-controller-manager</code> <strong>仅运行特定于云平台的控制回路</strong>。 如果你在自己的环境中运行 Kubernetes，或者在本地计算机中运行学习环境， 所部署的环境中不需要云控制器管理器。<strong>因此可以将其理解为云服务厂商专用的kube-controller-manager</strong>，这里不作赘述。</p>
-<h3 id="4-1-6-DNS">4.1.6 DNS</h3>
-<p>DNS虽然在k8s的官方文档被划分为插件部分，但是从k8s的原理中我们不难看出其重要性，因此几乎所有 Kubernetes 集群都应该有<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/dns-pod-service/">集群 DNS</a>， 因为很多示例都需要 DNS 服务。</p>
+<h3 id="4-1-5-cloud-controller-manager"><a href="#4-1-5-cloud-controller-manager" class="headerlink" title="4.1.5 cloud-controller-manager"></a>4.1.5 cloud-controller-manager</h3><p><code>cloud-controller-manager</code> <strong>仅运行特定于云平台的控制回路</strong>。 如果你在自己的环境中运行 Kubernetes，或者在本地计算机中运行学习环境， 所部署的环境中不需要云控制器管理器。<strong>因此可以将其理解为云服务厂商专用的kube-controller-manager</strong>，这里不作赘述。</p>
+<h3 id="4-1-6-DNS"><a href="#4-1-6-DNS" class="headerlink" title="4.1.6 DNS"></a>4.1.6 DNS</h3><p>DNS虽然在k8s的官方文档被划分为插件部分，但是从k8s的原理中我们不难看出其重要性，因此几乎所有 Kubernetes 集群都应该有<a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/concepts/services-networking/dns-pod-service/">集群 DNS</a>， 因为很多示例都需要 DNS 服务。</p>
 <p>集群 DNS 是一个 DNS 服务器，和环境中的其他 DNS 服务器一起工作，它为 Kubernetes 服务提供 DNS 记录。Kubernetes 启动的容器自动将此 DNS 服务器包含在其 DNS 搜索列表中。</p>
 <p>k8s默认使用的是coreDNS组件。</p>
-<h2 id="4-2-Worker-Node">4.2 Worker Node</h2>
-<p><code>Worker Node</code>的概念是和前面的<code>Control Plane</code>相对立的，集群中的节点基本都可以分为控制节点（<code>Control Plane</code>/<code>master</code>）和工作节点(<code>Worker Node</code>/<code>worker</code>)两大类。一般来说集群中的主要工作负载都是运行在<code>Worker Node</code>上面的，Master节点默认情况下不参与工作负载，但是可以手动设置为允许参与工作负载。</p>
-<h3 id="4-3-1-Pod">4.3.1 Pod</h3>
-<p>Pod是k8s集群中最小的工作单元，和docker里面的单个运行的容器不同，Pod中可以包含多个容器，它们共享相同的计算、网络和存储等资源（相当于在一台机器上运行多个应用）</p>
-<h3 id="4-3-2-kubelet">4.3.2 kubelet</h3>
-<p>kubelet是k8s集群中的每个节点上（包括master节点）都会运行的代理。 它能够保证容器都运行在 Pod 中。kubelet 只会管理由 Kubernetes 创建的容器。</p>
+<h2 id="4-2-Worker-Node"><a href="#4-2-Worker-Node" class="headerlink" title="4.2 Worker Node"></a>4.2 Worker Node</h2><p><code>Worker Node</code>的概念是和前面的<code>Control Plane</code>相对立的，集群中的节点基本都可以分为控制节点（<code>Control Plane</code>&#x2F;<code>master</code>）和工作节点(<code>Worker Node</code>&#x2F;<code>worker</code>)两大类。一般来说集群中的主要工作负载都是运行在<code>Worker Node</code>上面的，Master节点默认情况下不参与工作负载，但是可以手动设置为允许参与工作负载。</p>
+<h3 id="4-3-1-Pod"><a href="#4-3-1-Pod" class="headerlink" title="4.3.1 Pod"></a>4.3.1 Pod</h3><p>Pod是k8s集群中最小的工作单元，和docker里面的单个运行的容器不同，Pod中可以包含多个容器，它们共享相同的计算、网络和存储等资源（相当于在一台机器上运行多个应用）</p>
+<h3 id="4-3-2-kubelet"><a href="#4-3-2-kubelet" class="headerlink" title="4.3.2 kubelet"></a>4.3.2 kubelet</h3><p>kubelet是k8s集群中的每个节点上（包括master节点）都会运行的代理。 它能够保证容器都运行在 Pod 中。kubelet 只会管理由 Kubernetes 创建的容器。</p>
 <p>kubelet 接收一组通过各类机制提供给它的 PodSpecs，确保这些 PodSpecs 中描述的容器处于运行状态且健康。 当Scheduler确定在某个Node上运行Pod后，会将Pod的具体配置信息（image、volume等）发送给该节点的kubelet，kubelet根据这些信息创建和运行容器，并向Master报告运行状态。</p>
-<h3 id="4-3-3-kube-proxy">4.3.3 kube-proxy</h3>
-<p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-proxy/">kube-proxy</a> 是集群中每个节点上运行的网络代理， kube-proxy通过维护主机上的网络规则并执行连接转发，实现了Kubernetes服务抽象。</p>
-<p>service在逻辑上代表了后端的多个Pod，外界通过service访问Pod。service接收到的请求就是通过kube-proxy转发到Pod上的，kube-proxy服务负责将访问service的TCP/UDP数据流转发到后端的容器。<strong>如果有多个副本，kube-proxy会实现负载均衡。</strong></p>
+<h3 id="4-3-3-kube-proxy"><a href="#4-3-3-kube-proxy" class="headerlink" title="4.3.3 kube-proxy"></a>4.3.3 kube-proxy</h3><p><a target="_blank" rel="noopener" href="https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-proxy/">kube-proxy</a> 是集群中每个节点上运行的网络代理， kube-proxy通过维护主机上的网络规则并执行连接转发，实现了Kubernetes服务抽象。</p>
+<p>service在逻辑上代表了后端的多个Pod，外界通过service访问Pod。service接收到的请求就是通过kube-proxy转发到Pod上的，kube-proxy服务负责将访问service的TCP&#x2F;UDP数据流转发到后端的容器。<strong>如果有多个副本，kube-proxy会实现负载均衡。</strong></p>
 
             </div>
             <hr>

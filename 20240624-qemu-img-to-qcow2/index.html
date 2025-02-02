@@ -208,7 +208,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      5.4k 字
+      5.5k 字
     </span>
   
 
@@ -250,23 +250,20 @@
             <div class="markdown-body">
               <p>将 raw 格式转换为 qcow2 格式是 KVM 虚拟化环境中常见的操作，本文主要介绍如何使用qemu工具将虚拟机的镜像文件从raw格式转换为qcow2格式。</p>
 <span id="more"></span>
-<h1>KVM 虚拟机硬盘文件格式</h1>
-<p>KVM 虚拟机可以使用多种格式的硬盘文件，其中 raw 和 qcow2 是两种最常用的格式。</p>
-<h2 id="raw-格式">raw 格式</h2>
-<p><strong>工作原理：</strong></p>
+
+<h1 id="KVM-虚拟机硬盘文件格式"><a href="#KVM-虚拟机硬盘文件格式" class="headerlink" title="KVM 虚拟机硬盘文件格式"></a>KVM 虚拟机硬盘文件格式</h1><p>KVM 虚拟机可以使用多种格式的硬盘文件，其中 raw 和 qcow2 是两种最常用的格式。 </p>
+<h2 id="raw-格式"><a href="#raw-格式" class="headerlink" title="raw 格式"></a>raw 格式</h2><p><strong>工作原理：</strong></p>
 <p>raw 格式文件是<strong>原始磁盘镜像</strong>，它直接复制了物理硬盘的扇区数据，没有经过任何压缩或转换。因此，raw 文件的大小与它所代表的虚拟磁盘大小完全相同。</p>
 <p><strong>特点：</strong></p>
 <ul>
-<li>
-<p><strong>优点：</strong></p>
+<li><p><strong>优点：</strong></p>
 <ul>
 <li><strong>高性能：</strong> 由于没有额外的转换层，raw 格式文件读写速度最快。</li>
 <li><strong>简单直接：</strong> 结构简单，易于理解和管理。</li>
 <li><strong>兼容性好：</strong>  可以被大多数虚拟化软件和工具识别。</li>
 </ul>
 </li>
-<li>
-<p><strong>缺点：</strong></p>
+<li><p><strong>缺点：</strong></p>
 <ul>
 <li><strong>空间占用大：</strong>  即使虚拟磁盘内部有很多空闲空间，raw 文件也会占用全部空间。</li>
 <li><strong>不支持快照：</strong>  无法创建磁盘快照，备份和恢复操作效率低。</li>
@@ -280,8 +277,7 @@
 <li>需要将虚拟磁盘镜像直接复制到物理硬盘的场景。</li>
 <li>需要与其他不支持 qcow2 格式的虚拟化软件或工具兼容的场景。</li>
 </ul>
-<h2 id="qcow2-格式">qcow2 格式</h2>
-<p><strong>工作原理：</strong></p>
+<h2 id="qcow2-格式"><a href="#qcow2-格式" class="headerlink" title="qcow2 格式"></a>qcow2 格式</h2><p><strong>工作原理：</strong></p>
 <p>qcow2 格式文件是 <strong>QEMU 镜像文件格式</strong>，它是一种<strong>精简配置的磁盘镜像</strong>，采用了多种技术来提高存储效率和性能。</p>
 <ul>
 <li><strong>写时复制 (Copy-on-Write)：</strong>  qcow2 文件初始大小很小，只有在写入数据时才会分配实际空间。</li>
@@ -290,8 +286,7 @@
 </ul>
 <p><strong>特点：</strong></p>
 <ul>
-<li>
-<p><strong>优点：</strong></p>
+<li><p><strong>优点：</strong></p>
 <ul>
 <li><strong>节省存储空间：</strong>  只占用实际使用的磁盘空间，支持压缩。</li>
 <li><strong>支持快照：</strong>  方便备份、恢复和测试。</li>
@@ -299,8 +294,7 @@
 <li><strong>高级功能：</strong>  支持 AES 加密、zlib 压缩等高级功能。</li>
 </ul>
 </li>
-<li>
-<p><strong>缺点：</strong></p>
+<li><p><strong>缺点：</strong></p>
 <ul>
 <li><strong>性能略低：</strong>  由于引入了额外的转换层，性能略低于 raw 格式。</li>
 <li><strong>兼容性稍差：</strong>  主要用于 KVM 和 QEMU 等虚拟化软件。</li>
@@ -314,8 +308,7 @@
 <li>需要频繁创建快照进行备份和测试的场景。</li>
 <li>对安全性要求较高的场景。</li>
 </ul>
-<h2 id="总结：">总结：</h2>
-<table>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><table>
 <thead>
 <tr>
 <th>特性</th>
@@ -323,8 +316,7 @@
 <th>qcow2 格式</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>文件大小</td>
 <td>与虚拟磁盘大小相同</td>
 <td>远小于虚拟磁盘大小，按需分配</td>
@@ -354,18 +346,18 @@
 <td>对性能要求极高、需要直接复制到物理硬盘</td>
 <td>大多数场景，节省空间、支持快照、安全性更高</td>
 </tr>
-</tbody>
-</table>
-<p><strong>总的来说，qcow2 格式在功能、效率和安全性方面都优于 raw 格式，除非对性能有较高的要求，不然一般推荐使用qcow2作为 KVM 虚拟机使用的硬盘文件格式。</strong></p>
-<h1>转换格式</h1>
-<h2 id="检查硬盘">检查硬盘</h2>
-<p>改造前我们先进入虚拟机中检查一下硬盘的相关信息：</p>
+</tbody></table>
+<p><strong>总的来说，qcow2 格式在功能、效率和安全性方面都优于 raw 格式，除非对性能有较高的要求，不然一般推荐使用qcow2作为 KVM 虚拟机使用的硬盘文件格式。</strong> </p>
+<h1 id="转换格式"><a href="#转换格式" class="headerlink" title="转换格式"></a>转换格式</h1><h2 id="检查硬盘"><a href="#检查硬盘" class="headerlink" title="检查硬盘"></a>检查硬盘</h2><p>改造前我们先进入虚拟机中检查一下硬盘的相关信息：</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@infra-centos7 ~]# lsblk<br>NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT<br>vda    253:0    0  150G  0 disk <br>├─vda1 253:1    0    1G  0 part /boot<br>└─vda2 253:2    0  149G  0 part /<br>[root@infra-centos7 ~]# blkid<br>/dev/vda1: UUID=&quot;763539f9-fc49-443a-a246-4cedb357dc92&quot; TYPE=&quot;xfs&quot; <br>/dev/vda2: UUID=&quot;4110a890-d483-4d07-af95-dda95c600e96&quot; TYPE=&quot;xfs&quot; <br>[root@infra-centos7 ~]# df -Th | grep vda<br>/dev/vda2      xfs       149G   70G   80G  47% /<br>/dev/vda1      xfs      1014M  279M  736M  28% /boot<br></code></pre></div></td></tr></table></figure>
+
 <p>然后在宿主机上面查看文件信息</p>
 <figure class="highlight mel"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs mel">root@tiny-unraid:/mnt/user/domains/infra-centos7# qemu-img info vdisk1.img <br><span class="hljs-keyword">image</span>: vdisk1.img<br><span class="hljs-keyword">file</span> <span class="hljs-keyword">format</span>: raw<br>virtual <span class="hljs-keyword">size</span>: <span class="hljs-number">150</span> GiB (<span class="hljs-number">161061273600</span> bytes)<br>disk <span class="hljs-keyword">size</span>: <span class="hljs-number">150</span> GiB<br></code></pre></div></td></tr></table></figure>
-<h2 id="转换命令">转换命令</h2>
-<p>接着使用这个命令进行转换</p>
+
+<h2 id="转换命令"><a href="#转换命令" class="headerlink" title="转换命令"></a>转换命令</h2><p>接着使用这个命令进行转换</p>
 <figure class="highlight awk"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs awk">root@tiny-unraid:<span class="hljs-regexp">/mnt/u</span>ser<span class="hljs-regexp">/domains/i</span>nfra-centos7<span class="hljs-comment"># qemu-img convert -f raw -O qcow2 -c vdisk1.img vdisk1.qcow2</span><br></code></pre></div></td></tr></table></figure>
+
+
 <p>让我们逐个分析命令中的参数：</p>
 <ul>
 <li><strong><code>qemu-img convert</code></strong>:  这是 <code>qemu-img</code> 工具的子命令，用于转换磁盘镜像文件的格式。</li>
@@ -384,17 +376,17 @@
 </ol>
 <p>转换完成之后我们查看qcow2文件的信息，可以看到转换前后的文件大小有非常明显的差别</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">root@tiny-unraid:/mnt/user/domains/infra-centos7# ls -lh<br>total 182G<br>-rwxrwxr-x 1 root users 150G Jun 24 14:07 vdisk1.img*<br>-rw-r--r-- 1 root root   32G Jun 24 15:07 vdisk1.qcow2<br><br>root@tiny-unraid:/mnt/user/domains/infra-centos7# qemu-img info vdisk1.qcow2 <br>image: vdisk1.qcow2<br>file format: qcow2<br>virtual size: 150 GiB (161061273600 bytes)<br>disk size: 31.5 GiB<br>cluster_size: 65536<br>Format specific information:<br>    compat: 1.1<br>    compression type: zlib<br>    lazy refcounts: false<br>    refcount bits: 16<br>    corrupt: false<br>    extended l2: false<br></code></pre></div></td></tr></table></figure>
+
 <blockquote>
 <p>这里还需要注意，如果担心ls命令看到的文件大小并不是文件真实占用硬盘空间的大小，可以考虑使用du命令来检查</p>
 <p>默认情况下使用dd命令来生成一个raw文件，并不会马上占用对应的硬盘大小。（例如dd一个100G大小的raw文件，实际并不会马上占用100G的硬盘，只会随着实际使用而不断增长）</p>
 <p>但是还有一种特殊的情况就是使用rsync命令备份这些文件的时候，因为raw文件的特性，如果一个100G的raw硬盘文件，只使用了30G，实际只占用了30G硬盘，因为rsync过程中对文件的复制操作，会导致复制过后的新文件大小变为100G。</p>
 </blockquote>
-<h1>修改xml配置</h1>
-<h2 id="修改前xml文件">修改前xml文件</h2>
-<p>qemu转换完成之后我们需要修改kvm虚拟机的xml配置文件</p>
+<h1 id="修改xml配置"><a href="#修改xml配置" class="headerlink" title="修改xml配置"></a>修改xml配置</h1><h2 id="修改前xml文件"><a href="#修改前xml文件" class="headerlink" title="修改前xml文件"></a>修改前xml文件</h2><p>qemu转换完成之后我们需要修改kvm虚拟机的xml配置文件</p>
 <figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">disk</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&#x27;file&#x27;</span> <span class="hljs-attr">device</span>=<span class="hljs-string">&#x27;disk&#x27;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">driver</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&#x27;qemu&#x27;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&#x27;raw&#x27;</span> <span class="hljs-attr">cache</span>=<span class="hljs-string">&#x27;writeback&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">file</span>=<span class="hljs-string">&#x27;/mnt/user/domains/infra-centos7/vdisk1.img&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&#x27;hdc&#x27;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&#x27;virtio&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">boot</span> <span class="hljs-attr">order</span>=<span class="hljs-string">&#x27;1&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">address</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&#x27;pci&#x27;</span> <span class="hljs-attr">domain</span>=<span class="hljs-string">&#x27;0x0000&#x27;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&#x27;0x03&#x27;</span> <span class="hljs-attr">slot</span>=<span class="hljs-string">&#x27;0x00&#x27;</span> <span class="hljs-attr">function</span>=<span class="hljs-string">&#x27;0x0&#x27;</span>/&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">disk</span>&gt;</span><br><br></code></pre></div></td></tr></table></figure>
+
 <p>解析一下上面的这段配置</p>
-<p><strong>1. 硬盘缓存模式 <code>cache='writeback'</code></strong></p>
+<p><strong>1. 硬盘缓存模式 <code>cache=&#39;writeback&#39;</code></strong></p>
 <ul>
 <li><code>writeback</code> 模式下，数据写入磁盘镜像文件时会先缓存到主机内存，稍后再写入磁盘。</li>
 <li>优点：提升写入性能。</li>
@@ -402,15 +394,14 @@
 </ul>
 <p>建议：</p>
 <ul>
-<li>
-<p>除非对性能要求极高，否则建议使用更安全的缓存模式，例如：</p>
+<li><p>除非对性能要求极高，否则建议使用更安全的缓存模式，例如：</p>
 <ul>
-<li><code>cache='none'</code>：禁用缓存，每次写入都直接写入磁盘，最安全但性能较低。</li>
-<li><code>cache='writethrough'</code>：写入数据时同时写入缓存和磁盘，兼顾性能和安全性。</li>
+<li><code>cache=&#39;none&#39;</code>：禁用缓存，每次写入都直接写入磁盘，最安全但性能较低。</li>
+<li><code>cache=&#39;writethrough&#39;</code>：写入数据时同时写入缓存和磁盘，兼顾性能和安全性。</li>
 </ul>
 </li>
 </ul>
-<p><strong>2. 硬盘总线类型 <code>bus='virtio'</code></strong></p>
+<p><strong>2. 硬盘总线类型 <code>bus=&#39;virtio&#39;</code></strong></p>
 <ul>
 <li><code>virtio</code> 是半虚拟化驱动，性能优于模拟设备。</li>
 <li>但需要客户机操作系统安装 <code>virtio</code> 驱动才能识别。</li>
@@ -418,33 +409,30 @@
 <p>建议：</p>
 <ul>
 <li>确认客户机操作系统已安装 <code>virtio</code> 驱动，例如 Ubuntu 通常默认安装。</li>
-<li>如果客户机操作系统不支持 <code>virtio</code>，则需要使用模拟设备，例如 <code>bus='ide'</code> 或 <code>bus='scsi'</code>。</li>
+<li>如果客户机操作系统不支持 <code>virtio</code>，则需要使用模拟设备，例如 <code>bus=&#39;ide&#39;</code> 或 <code>bus=&#39;scsi&#39;</code>。</li>
 </ul>
-<p><strong>3. PCI 地址分配 <code>address type='pci' ...</code></strong></p>
+<p><strong>3. PCI 地址分配 <code>address type=&#39;pci&#39; ...</code></strong></p>
 <ul>
 <li>这段配置为虚拟硬盘分配了固定的 PCI 地址。</li>
 <li>一般情况下，KVM 会自动分配 PCI 地址，无需手动指定。</li>
 <li>如果对这个配置进行了修改导致报错却又不知道如何还原，可以尝试将这段配置直接删除，删除后再次启动虚拟机一般会自动生成对应的新配置。</li>
 </ul>
-<p><strong>4. disk type</strong></p>
-<p>在 KVM 虚拟机配置文件中，<code>&lt;disk&gt;</code> 元素的 <code>&lt;driver&gt;</code> 子元素中的 <code>type='raw'</code> 指的是虚拟磁盘镜像文件的格式。</p>
-<p><strong><code>type='raw'</code> 表示使用原始磁盘镜像格式。</strong></p>
+<p><strong>4. disk type</strong> </p>
+<p>   在 KVM 虚拟机配置文件中，<code>&lt;disk&gt;</code> 元素的 <code>&lt;driver&gt;</code> 子元素中的 <code>type=&#39;raw&#39;</code> 指的是虚拟磁盘镜像文件的格式。</p>
+<p>   <strong><code>type=&#39;raw&#39;</code> 表示使用原始磁盘镜像格式。</strong></p>
 <ul>
-<li>特点：
-<ul>
+<li>特点：<ul>
 <li><strong>直接映射:</strong> 虚拟磁盘文件直接映射到主机文件系统上的一个文件，没有额外的格式转换，读写性能最好。</li>
 <li><strong>简单:</strong> 结构简单，创建和使用方便。</li>
 <li><strong>空间占用大:</strong> 即使虚拟磁盘内部文件系统有空闲空间，镜像文件大小也不会自动缩减。</li>
 </ul>
 </li>
 </ul>
-<p><strong>其他可用的 <code>type</code> 参数：</strong></p>
-<p>除了 <code>raw</code> 之外，<code>qemu</code> 驱动还支持其他几种虚拟磁盘镜像文件格式：</p>
+<p>   <strong>其他可用的 <code>type</code> 参数：</strong></p>
+<p>   除了 <code>raw</code> 之外，<code>qemu</code> 驱动还支持其他几种虚拟磁盘镜像文件格式：</p>
 <ul>
-<li><code>qcow2</code> (推荐):
-<ul>
-<li>QEMU 默认格式，支持许多高级功能，例如：
-<ul>
+<li><code>qcow2</code> (推荐):<ul>
+<li>QEMU 默认格式，支持许多高级功能，例如：<ul>
 <li><strong>稀疏分配:</strong> 镜像文件大小可以动态增长，只占用实际使用的空间。</li>
 <li><strong>快照:</strong> 可以创建虚拟磁盘的时间点副本。</li>
 <li><strong>压缩:</strong> 可以压缩镜像文件，节省存储空间。</li>
@@ -452,22 +440,21 @@
 </li>
 </ul>
 </li>
-<li><code>qed</code>:
-<ul>
-<li>KVM/QEMU 早期版本使用的格式，功能较少，现在已经很少使用。</li>
+<li><code>qed</code>:<ul>
+<li>KVM&#x2F;QEMU 早期版本使用的格式，功能较少，现在已经很少使用。</li>
 </ul>
 </li>
-<li><code>vmdk</code>:
-<ul>
+<li><code>vmdk</code>:<ul>
 <li>VMware 使用的虚拟磁盘格式，KVM 可以读取和使用，但不建议创建新的 <code>vmdk</code> 格式镜像。</li>
 </ul>
 </li>
 </ul>
-<h2 id="修改后xml文件">修改后xml文件</h2>
-<p>这里主要修改的是source file和type字段</p>
+<h2 id="修改后xml文件"><a href="#修改后xml文件" class="headerlink" title="修改后xml文件"></a>修改后xml文件</h2><p>这里主要修改的是source file和type字段</p>
 <figure class="highlight xml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">disk</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&#x27;file&#x27;</span> <span class="hljs-attr">device</span>=<span class="hljs-string">&#x27;disk&#x27;</span>&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">driver</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&#x27;qemu&#x27;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&#x27;qcow2&#x27;</span> <span class="hljs-attr">cache</span>=<span class="hljs-string">&#x27;writeback&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">source</span> <span class="hljs-attr">file</span>=<span class="hljs-string">&#x27;/mnt/user/domains/infra-centos7/vdisk1.qcow2&#x27;</span> <span class="hljs-attr">index</span>=<span class="hljs-string">&#x27;1&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">backingStore</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">target</span> <span class="hljs-attr">dev</span>=<span class="hljs-string">&#x27;hdc&#x27;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&#x27;virtio&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">boot</span> <span class="hljs-attr">order</span>=<span class="hljs-string">&#x27;1&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">alias</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&#x27;virtio-disk2&#x27;</span>/&gt;</span><br>  <span class="hljs-tag">&lt;<span class="hljs-name">address</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&#x27;pci&#x27;</span> <span class="hljs-attr">domain</span>=<span class="hljs-string">&#x27;0x0000&#x27;</span> <span class="hljs-attr">bus</span>=<span class="hljs-string">&#x27;0x03&#x27;</span> <span class="hljs-attr">slot</span>=<span class="hljs-string">&#x27;0x00&#x27;</span> <span class="hljs-attr">function</span>=<span class="hljs-string">&#x27;0x0&#x27;</span>/&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">disk</span>&gt;</span><br></code></pre></div></td></tr></table></figure>
+
 <p>重新登录机器之后我们检查硬盘的情况</p>
 <figure class="highlight shell"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs shell">[root@infra-centos7 ~]# lsblk<br>NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT<br>vda    253:0    0  150G  0 disk <br>├─vda1 253:1    0    1G  0 part /boot<br>└─vda2 253:2    0  149G  0 part /<br>[root@infra-centos7 ~]# blkid<br>/dev/vda1: UUID=&quot;763539f9-fc49-443a-a246-4cedb357dc92&quot; TYPE=&quot;xfs&quot; <br>/dev/vda2: UUID=&quot;4110a890-d483-4d07-af95-dda95c600e96&quot; TYPE=&quot;xfs&quot; <br>[root@infra-centos7 ~]# df -Th | grep vda<br>/dev/vda2      xfs       149G   70G   80G  47% /<br>/dev/vda1      xfs      1014M  279M  736M  28% /boot<br></code></pre></div></td></tr></table></figure>
+
 <p>到这里整个转换就完成了。</p>
 
             </div>

@@ -249,43 +249,37 @@
             <div class="markdown-body">
               <p>RHEL7中的rpm和yum的简单介绍。</p>
 <span id="more"></span>
-<h1>1、RPM和dpkg简介</h1>
-<p>目前在Linux界软件安装方式最常见的有两种，分别是：</p>
+
+<h1 id="1、RPM和dpkg简介"><a href="#1、RPM和dpkg简介" class="headerlink" title="1、RPM和dpkg简介"></a>1、RPM和dpkg简介</h1><p>目前在Linux界软件安装方式最常见的有两种，分别是：</p>
 <ul>
-<li>dpkg<br>
-这个机制最早是由Debian Linux社群所开发出来的，透过dpkg的机制，Debian提供的软件就能够简单的安装起来，同时还能提供安装后的软件信息，实在非常不错。只要是衍生于Debian的其他Linux distributions大多使用dpkg这个机制来管理软件的，包括B2D，Ubuntu等等。</li>
-<li>RPM<br>
-这个机制最早是由Red Hat 这家公司开发出来的，后来实在很好用，因此很多distributions就使用这个机制来作为软件安装的管理方式。包括Fedora，CentOS，SuSE等等知名的开发商都是用的RPM。</li>
+<li>dpkg<br>  这个机制最早是由Debian Linux社群所开发出来的，透过dpkg的机制，Debian提供的软件就能够简单的安装起来，同时还能提供安装后的软件信息，实在非常不错。只要是衍生于Debian的其他Linux distributions大多使用dpkg这个机制来管理软件的，包括B2D，Ubuntu等等。</li>
+<li>RPM<br>  这个机制最早是由Red Hat 这家公司开发出来的，后来实在很好用，因此很多distributions就使用这个机制来作为软件安装的管理方式。包括Fedora，CentOS，SuSE等等知名的开发商都是用的RPM。</li>
 </ul>
-<p>如前所述，不论dpkg/rpm这些机制或多或少都会有软件依赖的问题，那该如何解决呢？其实前面不是谈到过每个软件文件都有提供对应依赖的的检查吗？那么如果我们将每个软件对应依赖的数据做成列表，等到实际软件安装时，若发生需要安装依赖的情况，例如安装A需要先安装B与C，而安装B则需要安装D与E时，那么当你要安装A，通过查询依赖的数据列表，管理机制自动去取得B，C，D，E来同时安装，就可以很方便的解决依赖的了。</p>
+<p>如前所述，不论dpkg&#x2F;rpm这些机制或多或少都会有软件依赖的问题，那该如何解决呢？其实前面不是谈到过每个软件文件都有提供对应依赖的的检查吗？那么如果我们将每个软件对应依赖的数据做成列表，等到实际软件安装时，若发生需要安装依赖的情况，例如安装A需要先安装B与C，而安装B则需要安装D与E时，那么当你要安装A，通过查询依赖的数据列表，管理机制自动去取得B，C，D，E来同时安装，就可以很方便的解决依赖的了。</p>
 <p>在dpkg管理机制上就开发出APT的在线升级机制，RPM则依开发商的不同，有Red Hat系统的yum，SuSE系统的Yast Online Update（YOU）等。</p>
 <table>
 <thead>
 <tr>
-<th style="text-align:center">distribution代表</th>
-<th style="text-align:center">软件管理机制</th>
-<th style="text-align:center">使用指令</th>
-<th style="text-align:center">在线升级机制（指令）</th>
+<th align="center">distribution代表</th>
+<th align="center">软件管理机制</th>
+<th align="center">使用指令</th>
+<th align="center">在线升级机制（指令）</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td style="text-align:center">Red Hat/Fedora</td>
-<td style="text-align:center">RPM</td>
-<td style="text-align:center">rpm</td>
-<td style="text-align:center">yum(yum)</td>
+<tbody><tr>
+<td align="center">Red Hat&#x2F;Fedora</td>
+<td align="center">RPM</td>
+<td align="center">rpm</td>
+<td align="center">yum(yum)</td>
 </tr>
 <tr>
-<td style="text-align:center">Debian/Ubuntu</td>
-<td style="text-align:center">dpkg</td>
-<td style="text-align:center">dpkg</td>
-<td style="text-align:center">apt(apt-get)</td>
+<td align="center">Debian&#x2F;Ubuntu</td>
+<td align="center">dpkg</td>
+<td align="center">dpkg</td>
+<td align="center">apt(apt-get)</td>
 </tr>
-</tbody>
-</table>
-<h1>2、RPM和SRPM</h1>
-<h2 id="2-1-RPM">2.1 RPM</h2>
-<p>RPM全名是<strong>RedHat Package Manager</strong>，简称RPM。顾名思义，当初这个软件管理的机制是由Red Hat 这家公司发展出来的。RPM是以一种数据库记录的方式来将你所需要的软件安装到你的Linux系统的一套管理机制。</p>
+</tbody></table>
+<h1 id="2、RPM和SRPM"><a href="#2、RPM和SRPM" class="headerlink" title="2、RPM和SRPM"></a>2、RPM和SRPM</h1><h2 id="2-1-RPM"><a href="#2-1-RPM" class="headerlink" title="2.1 RPM"></a>2.1 RPM</h2><p>RPM全名是<strong>RedHat Package Manager</strong>，简称RPM。顾名思义，当初这个软件管理的机制是由Red Hat 这家公司发展出来的。RPM是以一种数据库记录的方式来将你所需要的软件安装到你的Linux系统的一套管理机制。</p>
 <p>RPM最大的特点就是将你要安装的软件先编译过，并且打包成为RPM机制的包装文件，透过包装好的软件里头默认的数据库记录，记录这个软件要安装的时候必须具备的依赖软件，当安装在你的Linux主机时，RPM会先依照软件里头的数据查询Linux主机的所需依赖软件是否满足，若满足则予以安装，若不满足则不予安装。那么安装的时候就将该软件的信息整个写入RPM的数据库中，以便未来的查询、验证与卸载！这样一来的优点是：</p>
 <ul>
 <li>由于已经编译完成并且打包完毕，所以软件传输与安装上很方便（不需要再重新编译）；</li>
@@ -295,9 +289,8 @@
 <blockquote>
 <p>举例来说，rp-pppoe这个ADSL拨接软件，他必须要在ppp这个软件存在的环境下才能进行安装！如果你的主机并没有ppp这个软件，那么很抱歉，除非你先安装ppp否则rp-pppoe就是不让你安装的（当然你可以强制安装，但是通常都会有点问题发生就是了！）。</p>
 </blockquote>
-<h2 id="2-2-SRPM">2.2 SRPM</h2>
-<p>SRPM就是<strong>Source RPM</strong>的意思，也就是这个RPM文件里面含有源码。<strong>也就是说这个SRPM所提供的软件内容并没有经过编译，它提供的是原始码。</strong></p>
-<p>通常SRPM的扩展名是以<code>***src.rpm</code>这种格式来命名的。**需要注意的是，虽然RPM提供的是原始码，但是他仍然含有该软件所需要的依赖软件说明、以及所有RPM文件所提供的数据。同时，他与RPM不同的是，他也提供了参数配置文件（就是<code>configure</code>与<code>makefile</code>）。**所以，如果我们下载的是SRPM，那么要安装该软件时，你就必须要：</p>
+<h2 id="2-2-SRPM"><a href="#2-2-SRPM" class="headerlink" title="2.2 SRPM"></a>2.2 SRPM</h2><p>SRPM就是<strong>Source RPM</strong>的意思，也就是这个RPM文件里面含有源码。<strong>也就是说这个SRPM所提供的软件内容并没有经过编译，它提供的是原始码。</strong></p>
+<p>通常SRPM的扩展名是以<code>***src.rpm</code>这种格式来命名的。<strong>需要注意的是，虽然RPM提供的是原始码，但是他仍然含有该软件所需要的依赖软件说明、以及所有RPM文件所提供的数据。同时，他与RPM不同的是，他也提供了参数配置文件（就是<code>configure</code>与<code>makefile</code>）。</strong>所以，如果我们下载的是SRPM，那么要安装该软件时，你就必须要：</p>
 <ul>
 <li>先将该软件以RPM管理的方式编译，此时SRPM会被编译成为RPM文件；</li>
 <li>然后将编译完成的RPM文件安装到Linux系统当中</li>
@@ -305,8 +298,7 @@
 <blockquote>
 <p>通常一个软件在释出的时候，都会同时释出该软件的RPM与SRPM。我们现在知道RPM文件必须要在相同的Linux环境下才能够安装，而SRPM既然是原始码的格式，我们可以修改SRPM内的参数配置文件，然后重新编译产生能适合我们Linux环境的RPM文件。</p>
 </blockquote>
-<h2 id="2-3-x86和noarch">2.3 x86和noarch</h2>
-<p>一般对应的rpm包会有不同的几种平台对应，下表列出了比较常见的一些平台，需要注意的是，现在基本已经全部步入了64位时代(主要是服务器、桌面端和移动端)，==主打服务器端的CentOS7已经不再发布32位版本，因此在CentOS7上面见到的主要是<code>x86_64</code>和<code>noarch</code>。==</p>
+<h2 id="2-3-x86和noarch"><a href="#2-3-x86和noarch" class="headerlink" title="2.3 x86和noarch"></a>2.3 x86和noarch</h2><p>一般对应的rpm包会有不同的几种平台对应，下表列出了比较常见的一些平台，需要注意的是，现在基本已经全部步入了64位时代(主要是服务器、桌面端和移动端)，&#x3D;&#x3D;主打服务器端的CentOS7已经不再发布32位版本，因此在CentOS7上面见到的主要是<code>x86_64</code>和<code>noarch</code>。&#x3D;&#x3D;</p>
 <table>
 <thead>
 <tr>
@@ -314,8 +306,7 @@
 <th>说明</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>i386</td>
 <td>几乎适用于所有的x86平台，不论是旧的pentum或者是新的Intel Core2与K8系列的CPU等等，都可以正常的工作。那个i指的是Intel兼容的CPU的意思。386就是CPU的等级。</td>
 </tr>
@@ -335,19 +326,15 @@
 <td>noarch</td>
 <td>noarch是no architecture的缩写，说明这个包可以在各个不同的cpu上使用。一般来说，这种类型的RPM文件，里面应该没有binary program存在，较常出现的就是属于shell script方面的软件。</td>
 </tr>
-</tbody>
-</table>
-<h1>3、Yum</h1>
-<h2 id="3-1-yum简介">3.1 yum简介</h2>
-<p>当客户端有升级、安装的需求时，yum会向软件库要求清单的更新，等到清单更新到本机的<br>
-<code>/var/cache/yum</code>里面后，等一下更新时就会用这个本机清单与本机的RPM数据库进行比较，这样就知道该下载什么软件。接下来yum会跑到软件库服务器（<code>yum server</code>）下载所需要的软件（因为有记录软件所在的网址），然后再透过RPM的机制开始安装软件。这就是yum安装软件的整个流程。</p>
+</tbody></table>
+<h1 id="3、Yum"><a href="#3、Yum" class="headerlink" title="3、Yum"></a>3、Yum</h1><h2 id="3-1-yum简介"><a href="#3-1-yum简介" class="headerlink" title="3.1 yum简介"></a>3.1 yum简介</h2><p>当客户端有升级、安装的需求时，yum会向软件库要求清单的更新，等到清单更新到本机的<br><code>/var/cache/yum</code>里面后，等一下更新时就会用这个本机清单与本机的RPM数据库进行比较，这样就知道该下载什么软件。接下来yum会跑到软件库服务器（<code>yum server</code>）下载所需要的软件（因为有记录软件所在的网址），然后再透过RPM的机制开始安装软件。这就是yum安装软件的整个流程。</p>
 <p>yum的repo文件一般在<code>/etc/yum.repo.d/</code>目录下，如图所示就是小七的CentOS7中的yum repo list</p>
-<p><img src="https://resource.tinychen.com/blog/20190708/PpfaSN8jr03X.png" srcset="/img/loading.gif" lazyload alt=""></p>
-<h2 id="3-2-yum-update和upgrade">3.2 yum update和upgrade</h2>
-<figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 升级所有包同时也升级软件和系统内核</span><br>yum update<br><br><span class="hljs-comment"># 只升级所有包，不升级软件和系统内核</span><br>yum upgrade<br></code></pre></div></td></tr></table></figure>
-<h2 id="3-3-yum-repo文件构成">3.3 yum repo文件构成</h2>
-<p>一般来说，一个<code>yum repo</code>文件由下面的几部分构成</p>
+<p><img src="https://resource.tinychen.com/blog/20190708/PpfaSN8jr03X.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="3-2-yum-update和upgrade"><a href="#3-2-yum-update和upgrade" class="headerlink" title="3.2 yum update和upgrade"></a>3.2 yum update和upgrade</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 升级所有包同时也升级软件和系统内核</span><br>yum update<br><br><span class="hljs-comment"># 只升级所有包，不升级软件和系统内核</span><br>yum upgrade<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="3-3-yum-repo文件构成"><a href="#3-3-yum-repo文件构成" class="headerlink" title="3.3 yum repo文件构成"></a>3.3 yum repo文件构成</h2><p>一般来说，一个<code>yum repo</code>文件由下面的几部分构成</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 必须是独一无二的ID来标记这个yum repo，如果重复了，后面的会覆盖掉前面的</span><br>[serverid]<br><br><span class="hljs-comment"># 添加一段文字来描述这个yum repo</span><br>name=Description<br><br><span class="hljs-comment"># 设置资源库的地址，可以是http或者ftp等多种形式</span><br>baseurl=&#123;ftp://|http://|file://&#125;<br><br><span class="hljs-comment"># enabled=1开启本地更新模式</span><br>enabled=&#123;1|0&#125;<br><br><span class="hljs-comment"># gpgcheck=1表示检查；可以不检查gpgcheck=0</span><br>gpgcheck=&#123;1|0&#125;<br><br><span class="hljs-comment"># 检查的key；如果上面不检查这一行可以不写</span><br><span class="hljs-comment"># gpgkey的地址也可以是http或者ftp等多种形式</span><br>gpgkey=<br></code></pre></div></td></tr></table></figure>
+
 
             </div>
             <hr>
