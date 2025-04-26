@@ -261,22 +261,22 @@
 
 
 <h1 id="3、使用chrony同步"><a href="#3、使用chrony同步" class="headerlink" title="3、使用chrony同步"></a>3、使用chrony同步</h1><p>此处我们使用CentOS8作为展示。</p>
-<p><img src="https://resource.tinychen.com/blog/20191108/3CQLIRpx3B6r.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261449517.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用yum安装chrony</span><br>yum install chrony -y<br><br><span class="hljs-comment"># 设置开机启动并开启chony并查看运行状态</span><br>systemctl <span class="hljs-built_in">enable</span> chronyd.service<br>systemctl start chronyd.service<br>systemctl status chronyd.service<br></code></pre></div></td></tr></table></figure>
 
 
 
 <p>chrony的配置文件目录位于<code>/etc/chrony.conf</code>，我们将里面默认的服务器注释掉，换成阿里云和国家时间中心的服务器。</p>
-<p><img src="https://resource.tinychen.com/blog/20191108/Cq7erDf8XvOt.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261450675.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们重启服务查看一下状态</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 重启服务使配置文件生效</span><br>systemctl restart chronyd.service<br><br><span class="hljs-comment"># 查看chrony的ntp服务器状态</span><br>chronyc sourcestats -v<br>chronyc sources -v<br><br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20191108/MS35bzfuDDom.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261450263.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查看本地时间</span><br>timedatectl<br>hwclock<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20191108/TVEHiCfMKfpL.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500667.png" srcset="/img/loading.gif" lazyload></p>
 <p>如上图所示显示<code>System clock synchronized</code>状态为<code>yes</code>并且<code>NTP service</code>显示为<code>active</code>则说明已经配置成功了。</p>
 
             </div>

@@ -325,7 +325,7 @@
 </li>
 </ul>
 <h1 id="4、k8s基本架构"><a href="#4、k8s基本架构" class="headerlink" title="4、k8s基本架构"></a>4、k8s基本架构</h1><p>我们先来看看官方给出的基本架构图。下图只包含了非常基础的k8s架构组件。我们先从这里开始。</p>
-<p><img src="https://resource.tinychen.com/20201216164907.png" srcset="/img/loading.gif" lazyload alt="image-20201216164905461"></p>
+<p><img src="https://resource.tinychen.com/20201216164907.png" srcset="/img/loading.gif" lazyload></p>
 <p>首先上图灰色区域表示的是一整个k8s集群，整个k8s的架构其实和我们常见的master-worker模型非常相似，只不过由于这是分布式的集群，要更复杂一些。</p>
 <h2 id="4-1-Control-Plane"><a href="#4-1-Control-Plane" class="headerlink" title="4.1 Control Plane"></a>4.1 Control Plane</h2><p>首先我们看到蓝色框内的<code>Control Plane</code>，这个是整个集群的<strong>控制平面</strong>，相当于是master进程的加强版。k8s中的<code>Control Plane</code>一般都会运行在Master节点上面。<strong>在默认情况下</strong>，Master节点并不会运行应用工作负载，所有的应用工作负载都交由Node节点负责。</p>
 <p><strong>控制平面</strong>中的Master节点主要运行控制平面的各种组件，它们主要的作用就是维持整个k8s集群的正常工作、存储集群的相关信息，同时为集群提供故障转移、负载均衡、任务调度和高可用等功能。对于Master节点一般有多个用于保证高可用，而控制平面中的各个组件均以容器的Pod形式运行在Master节点中，大部分的组件需要在每个Master节点上都运行，少数如<code>DNS</code>服务等组件则只需要保证足够数量的高可用即可。</p>

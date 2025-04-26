@@ -250,16 +250,16 @@
 <span id="more"></span>
 
 <p>在开机选择内核的时候，快速按下e，注意这个时候要选中需要修改root密码的内核，而不要选错了内核。</p>
-<p><img src="https://resource.tinychen.com/blog/20190707/jRmJjHu2onsE.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261606061.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们找到倒数第二行的<code>LANG=en_US.UTF-8</code>这个位置，在后面加入<code>rd.break console=tty0</code>这一行指令，然后按<code>ctrl+x</code>执行</p>
-<p><img src="https://resource.tinychen.com/blog/20190707/aPmuhCYnm9FF.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261606844.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们会进入到一个操作终端，进行下列操作</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 重新挂载/sysroot分区为可读写模式</span><br>mount -o rw,remount /sysroot<br><br><span class="hljs-comment"># 更改root到这个可读写的/sysroot分区</span><br><span class="hljs-built_in">chroot</span> /sysroot<br><br><span class="hljs-comment"># 使用passwd指令修改root账户的密码</span><br>paawd<br><br><span class="hljs-comment"># 或者使用echo的方式修改密码</span><br><span class="hljs-built_in">echo</span> 你的新密码 | passwd --stdin root<br><br><span class="hljs-comment"># 如果系统打开了SELinux，还需要新建一个文件，否则修改密码不生效</span><br><span class="hljs-built_in">touch</span> /.autorelabel<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190707/OVGBsRyEdXYB.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261606979.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着输入两次exit退出重启，我们可以看到如果开启了SELiunx的话还会有一个读条的操作</p>
-<p><img src="https://resource.tinychen.com/blog/20190707/jJFfkqEihDeV.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261606709.png" srcset="/img/loading.gif" lazyload></p>
 <p>读条完成重启之后就可以使用修改完密码的root账户登录了。</p>
 
             </div>

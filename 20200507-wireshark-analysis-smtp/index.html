@@ -275,37 +275,37 @@
 <p>身份验证成功后会返回235的成功代码：<br><img src="https://resource.tinychen.com/20200507173605.png" srcset="/img/loading.gif" lazyload></p>
 <p>到这里就完成了和SMTP服务器建立连接和身份验证的步骤。</p>
 <h2 id="2-4-MAIL-FROM"><a href="#2-4-MAIL-FROM" class="headerlink" title="2.4 MAIL FROM"></a>2.4 MAIL FROM</h2><p>接下来客户端发送<code>MAIL FROM</code>命令声明邮件的发件人：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/xjCEYf4Xvkcj.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459747.png" srcset="/img/loading.gif" lazyload></p>
 <p>服务器返回250代码确定操作成功：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/sRxGBH7GD0fY.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459823.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-5-RCPT-TO"><a href="#2-5-RCPT-TO" class="headerlink" title="2.5 RCPT TO"></a>2.5 RCPT TO</h2><p>然后客户端发送RCPT TO命令声明邮件的收件人：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/rQCKIjkrcLu3.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459149.png" srcset="/img/loading.gif" lazyload></p>
 <p>服务器返回250代码确定操作成功：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/sLA244UWvWWK.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459383.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-6-DATA"><a href="#2-6-DATA" class="headerlink" title="2.6 DATA"></a>2.6 DATA</h2><p>客户端使用DATA命令，告知服务器要开始传输邮件的正文内容：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/HP5J6t6jjWXj.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459706.png" srcset="/img/loading.gif" lazyload></p>
 <p>服务端返回354代码，告知邮件的内容结束以<code>&lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;</code>为标记：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/gzyFRF2mYx7e.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459846.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>windows中的换行符标记为CRLF而Linux中的为LF，<code>&lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;</code>即表明当服务器收到单独一行的<code>.</code>即完成本次邮件正文传输。</p>
 </blockquote>
 <p>客户端接收到254代码后，开始传输邮件内容：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/7IIh3IrxuBGX.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459070.png" srcset="/img/loading.gif" lazyload></p>
 <p>我们可以看到在上面的数据包中包含了SMTP和IMF两个部分，因为抓包发送的邮件内容都是文本，所以直接使用<a target="_blank" rel="noopener" href="https://wiki.wireshark.org/IMF">IMF协议</a>就可以传输，而SMTP协议中的报文内容则是DATA命令的终止标志<code>.</code></p>
 <h2 id="2-7-QUIT"><a href="#2-7-QUIT" class="headerlink" title="2.7 QUIT"></a>2.7 QUIT</h2><p>在客户端发送完邮件内容之后，还会接着发送一个QUIT命令来表示结束这次的SMTP传输：</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/OiBr10p82Nn6.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459907.png" srcset="/img/loading.gif" lazyload></p>
 <p>服务器在接受到数据之后会返回250代码表示接受成功并且再返回221代码表示结束本次SMTP传输。</p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/HrBlY8YAY7JE.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blogphotos/20200507/T5t8Go18UFJ9.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459467.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459211.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、telnet测试SMTP"><a href="#3、telnet测试SMTP" class="headerlink" title="3、telnet测试SMTP"></a>3、telnet测试SMTP</h1><p>由于SMTP协议十分简单且没有加密，所以我们使用telnet命令连接到邮件服务器也可以执行同样的操作：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用telnet和服务器建立连接</span><br>telnet localhost 25<br><span class="hljs-comment"># 这里根据邮件系统的不同选择EHLO或者是HELO</span><br>HELO TINY-DESKTOP<br>EHLO TINY-DESKTOP<br><span class="hljs-comment"># 使用EHLO还可以进行身份验证</span><br><span class="hljs-comment"># 使用AUTH命令进行身份验证和登录</span><br><span class="hljs-comment"># 需要注意要将账号密码转码成base64编码的文本才可以成功登录</span><br>AUTH LOGIN<br><span class="hljs-comment"># 转码前的账号test01@coremail.cn</span><br>dGVzdDAxQGNvcmVtYWlsLmNu<br><span class="hljs-comment"># 转码前的密码password01</span><br>cGFzc3dvcmQwMQ==<br><br><span class="hljs-comment"># 确定发件人</span><br>MAIL FROM: &lt;test01@coremail.cn&gt;<br><span class="hljs-comment"># 确定收件人</span><br>RCPT TO: &lt;test02@coremail.cn&gt;<br><span class="hljs-comment"># 开始传输正文</span><br>DATA<br><br>Subject: telnet <span class="hljs-built_in">test</span> mail<br>From:<span class="hljs-string">&quot;test01&quot;</span>&lt;test01@coremail.cn&gt;<br>To:<span class="hljs-string">&quot;test02&quot;</span>&lt;test02@coremail.cn&gt;<br><br>Hello,<br>This is a smtp <span class="hljs-built_in">test</span> via telnet.<br>Goodbye.<br><br>.<br><span class="hljs-comment"># 结束传输并退出</span><br>QUIT<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/image-20200508092826669.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459901.png" srcset="/img/loading.gif" lazyload></p>
 <p>如图中所示使用AUTH命令登录认证成功之后是会收到服务器返回的235代码的。我们操作完成之后查看邮箱确定收到了测试的邮件则说明操作成功。</p>
-<p><img src="https://resource.tinychen.com/image-20200508093321223.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459153.png" srcset="/img/loading.gif" lazyload></p>
 <p>在使用AUTH认证的情况如下：</p>
-<p><img src="https://resource.tinychen.com/image-20200508095204708.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459512.png" srcset="/img/loading.gif" lazyload></p>
 <p>实际上返回的334代码后面的<code>dXNlcm5hbWU6</code>和<code>UGFzc3dvcmQ6</code>就是base64编码的<code>username</code>和<code>Password</code>。</p>
 <p>由于明文传输的不安全性，现在单纯的SMTP已经几乎没有使用了，使用的较多的都是它的加密版本SMTPS（465端口，SSL加密，不推荐使用）和STARTTLS（587端口，TLS加密，推荐使用）。</p>
 

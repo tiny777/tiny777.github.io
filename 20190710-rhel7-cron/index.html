@@ -264,15 +264,15 @@
 <h1 id="2、cron安装"><a href="#2、cron安装" class="headerlink" title="2、cron安装"></a>2、cron安装</h1><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># cron的安装进程是cronie</span><br>yum install -y cronie<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190709/O6eDpJ2adV2B.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261605442.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 设置cron开机启动</span><br>systemctl <span class="hljs-built_in">enable</span> crond.service<br><br><span class="hljs-comment"># 关闭cron开机启动</span><br>systemctl <span class="hljs-built_in">disable</span> crond.service<br><br><span class="hljs-comment"># 启动cron</span><br>systemctl start crond.service<br><br><span class="hljs-comment"># 查看cron运行状态</span><br>systemctl status crond.service<br><br><span class="hljs-comment"># 重启cron</span><br>systemctl restart crond.service<br><br><span class="hljs-comment"># 关闭cron</span><br>systemctl stop crond.service<br></code></pre></div></td></tr></table></figure>
 
 
 
 <h1 id="3、cron相关文件"><a href="#3、cron相关文件" class="headerlink" title="3、cron相关文件"></a>3、cron相关文件</h1><p>我们先看一下在<code>/etc</code>目录下和cron相关的文件主要有哪些，接下来我们逐个对其进行分析。</p>
-<p><img src="https://resource.tinychen.com/blog/20190710/fY25X17dYdiG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261605066.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="3-1-etc-crontab"><a href="#3-1-etc-crontab" class="headerlink" title="3.1 &#x2F;etc&#x2F;crontab"></a>3.1 &#x2F;etc&#x2F;crontab</h2><p>我们cat一下<code>/etc/crontab</code>这个文件看看里面的内容</p>
-<p><img src="https://resource.tinychen.com/blog/20190709/UUFUSB1FVE07.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261605920.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 使用哪种she11接口</span><br>SHELL=/bin/bash<br><span class="hljs-comment"># 执行文件搜寻路径</span><br>PATH=/sbin:/bin:/usr/sbin:/usr/bin<br><span class="hljs-comment"># 若有额外STDOUT，以email将数据送给谁</span><br>MAILTO=root<br><br><span class="hljs-comment"># For details see man 4 crontabs</span><br><br><span class="hljs-comment"># Example of job definition:</span><br><span class="hljs-comment"># .---------------- minute (0 - 59)</span><br><span class="hljs-comment"># |  .------------- hour (0 - 23)</span><br><span class="hljs-comment"># |  |  .---------- day of month (1 - 31)</span><br><span class="hljs-comment"># |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...</span><br><span class="hljs-comment"># |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat</span><br><span class="hljs-comment"># |  |  |  |  |</span><br><span class="hljs-comment"># *  *  *  *  * user-name  command to be executed</span><br></code></pre></div></td></tr></table></figure>
 
 <ul>
@@ -297,7 +297,7 @@
 <h2 id="3-3-etc-cron-d"><a href="#3-3-etc-cron-d" class="headerlink" title="3.3 &#x2F;etc&#x2F;cron.d"></a>3.3 &#x2F;etc&#x2F;cron.d</h2><p><code>/etc/cron.d/</code> 这个目录用来存放任何要执行的<code>crontab</code>文件或脚本</p>
 <h2 id="3-4-etc-cron-ly"><a href="#3-4-etc-cron-ly" class="headerlink" title="3.4.&#x2F;etc&#x2F;cron.*ly&#x2F;"></a>3.4.&#x2F;etc&#x2F;cron.*ly&#x2F;</h2><p><code>cron.monthly/</code>，<code> cron.weekly/</code> ， <code>cron.daily/</code> ， <code>cron.hourly/</code>这四个目录下面存放的文件会在对应的时间内被执行，如 <code>cron.hourly/</code>里面的文件会在每个小时被执行一次，<strong>需要注意的是，这里放置的是直接执行的脚本文件，而不是上述的crontab格式的定时任务描述文件。</strong></p>
 <h2 id="3-5-var-spool-cron"><a href="#3-5-var-spool-cron" class="headerlink" title="3.5 &#x2F;var&#x2F;spool&#x2F;cron&#x2F;"></a>3.5 &#x2F;var&#x2F;spool&#x2F;cron&#x2F;</h2><p><code>/var/spool/cron/</code>目录下存放着每个用户自己的<code>crontab</code>文件。</p>
-<p><img src="https://resource.tinychen.com/blog/20190710/15mBjRkwAUoR.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261605642.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="4、crontab命令"><a href="#4、crontab命令" class="headerlink" title="4、crontab命令"></a>4、crontab命令</h1><p><strong>语法格式：</strong>crontab [参数]</p>
 <p><strong>常用参数：</strong></p>
 <table>
@@ -338,7 +338,7 @@
 <figure class="highlight asciidoc"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs asciidoc"><span class="hljs-bullet">*	</span>代表所有的取值范围内的数字<br><br>/	代表每的意思,如/5表示每5个单位<br><br><span class="hljs-bullet">-	</span>代表从某个数字到某个数字<br><br>,	分开几个离散的数字<br></code></pre></div></td></tr></table></figure>
 
 <p><strong>需要注意的是，<code>crontab -r</code>是删除该用户的所有定时任务。</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20190710/NEkfbtYTLoMU.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261605358.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="5、小结"><a href="#5、小结" class="headerlink" title="5、小结"></a>5、小结</h1><ul>
 <li><p>个人化的行为使用<code>crontab-e</code>：</p>
 <p>  如果你是依据个人需求来建立的例行工作排程，建议直接使用<code>crontab-e</code>。这样也能保障你的指令行为不会被大家看到（<code>/etc/crontab</code>是大家都能读取的）；</p>

@@ -276,13 +276,13 @@
 <figure class="highlight crystal"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs crystal">./configure --sbin-path=<span class="hljs-regexp">/usr/local</span><span class="hljs-regexp">/nginx/nginx</span> --conf-path=<span class="hljs-regexp">/usr/local</span><span class="hljs-regexp">/nginx/nginx</span>.conf --pid-path=<span class="hljs-regexp">/usr/local</span><span class="hljs-regexp">/nginx/nginx</span>.pid --<span class="hljs-keyword">with</span>-http_ssl_module<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20200324/XBFWbitOjxxu.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446160.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以看到，我们在参数里面并没有指定上面提到的几个库的目录，configure文件会默认系统已经安装的库版本和目录，当然我们也可以手动指定某个库的目录来指定版本。</p>
 <p>接下来进行make安装：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">make<br>make install<br></code></pre></div></td></tr></table></figure>
 
 <p>如无意外此时应该已经正常安装好了，我们到前面指定的安装目录看一下</p>
-<p><img src="https://resource.tinychen.com/blog/20200324/yCV4ewKcJh8E.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446558.png" srcset="/img/loading.gif" lazyload></p>
 <p>注意这个时候我们如果需要使用nginx需要指定这个安装目录，想要全局使用我们可以创建一个软链接：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">ln</span> -s /usr/local/nginx/nginx /usr/sbin/nginx<br></code></pre></div></td></tr></table></figure>
 
@@ -309,9 +309,9 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">make<br>make install<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20200324/0wsDPdjxSyL6.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446157.png" srcset="/img/loading.gif" lazyload></p>
 <p>最后我们再确定一下是否安装成功：</p>
-<p><img src="https://resource.tinychen.com/blog/20200324/K86pzHvKgi61.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446251.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="1、yum安装nginx"><a href="#1、yum安装nginx" class="headerlink" title="1、yum安装nginx"></a>1、yum安装nginx</h1><h2 id="1-1-yum仓库建立和安装配置"><a href="#1-1-yum仓库建立和安装配置" class="headerlink" title="1.1 yum仓库建立和安装配置"></a>1.1 yum仓库建立和安装配置</h2><p>centos自带的repo中就有nginx，可以直接安装，但是版本比较旧，想要使用yum进行安装最新的稳定版本，我们需要自行配置yum仓库。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[nginx-stable]<br>name=nginx stable repo<br>baseurl=http://nginx.org/packages/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/<br>gpgcheck=1<br>enabled=1<br>gpgkey=https://nginx.org/keys/nginx_signing.key<br>module_hotfixes=<span class="hljs-literal">true</span><br><br>[nginx-mainline]<br>name=nginx mainline repo<br>baseurl=http://nginx.org/packages/mainline/centos/<span class="hljs-variable">$releasever</span>/<span class="hljs-variable">$basearch</span>/<br>gpgcheck=1<br>enabled=0<br>gpgkey=https://nginx.org/keys/nginx_signing.key<br>module_hotfixes=<span class="hljs-literal">true</span><br></code></pre></div></td></tr></table></figure>
 
@@ -319,7 +319,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">yum install yum-utils<br>yum-config-manager --<span class="hljs-built_in">enable</span> nginx-mainline<br>yum clean all<br>yum repolist<br>yum install nginx<br></code></pre></div></td></tr></table></figure>
 
 <p>安装的时候需要注意这个列出信息中的repo应该是我们刚刚新建的repo。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/oVhLjc6gtrUu.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446754.png" srcset="/img/loading.gif" lazyload></p>
 <p>安装完成之后需要设置开机启动和防火墙放行80端口，如果使用https还需要放行443端口。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">systemctl <span class="hljs-built_in">enable</span> nginx <br>systemctl start nginx <br>firewall-cmd --permanent --zone=public --add-port=80/tcp<br>firewall-cmd --permanent --zone=public --add-port=443/tcp<br>firewall-cmd --reload <br></code></pre></div></td></tr></table></figure>
 
@@ -327,22 +327,22 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">nginx -v<br>curl 127.0.0.1<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20200317/3f4pVwyJKKz8.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446776.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="1-2-master和worker进程"><a href="#1-2-master和worker进程" class="headerlink" title="1.2 master和worker进程"></a>1.2 master和worker进程</h2><p>使用ps命令查看进程，我们可以看到有一个master进程和一个worker进程，默认情况下，worker的进程数量为1，实际上我们可以根据具体需要对其进行修改。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">ps -ef | grep nginx<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20200317/vrTFVgW4tsi4.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446397.png" srcset="/img/loading.gif" lazyload></p>
 <p>在正式提供服务的产品环境下，<strong>部署Nginx时都是使用一个master进程来管理多个worker进程，一般情况下，worker进程的数量与服务器上的CPU核心数相等</strong>。每一个worker进程都是繁忙的，它们在真正地提供互联网服务，master进程则很“清闲”，只负责监控管理worker进程。worker进程之间通过共享内存、原子操作等一些进程间通信机制来实现各种功能。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/YjtkNXpqb702.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446904.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、nginx基本配置"><a href="#2、nginx基本配置" class="headerlink" title="2、nginx基本配置"></a>2、nginx基本配置</h1><h2 id="2-1-nginx默认目录"><a href="#2-1-nginx默认目录" class="headerlink" title="2.1 nginx默认目录"></a>2.1 nginx默认目录</h2><h3 id="etc-nginx"><a href="#etc-nginx" class="headerlink" title="/etc/nginx/"></a><code>/etc/nginx/</code></h3><p>这个是nginx服务器的默认配置目录</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/shQqNYJuU4vW.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446520.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="etc-nginx-nginx-conf"><a href="#etc-nginx-nginx-conf" class="headerlink" title="/etc/nginx/nginx.conf"></a><code>/etc/nginx/nginx.conf</code></h3><p>这个是nginx服务器的默认配置文件，我们可以在这里对nginx的所有全局配置进行修改，包括线程数端口号等等，同时在默认情况下它也包括了下述的<code>/etc/nginx/conf.d/</code>目录中的所有配置文件。</p>
 <h3 id="etc-nginx-conf-d"><a href="#etc-nginx-conf-d" class="headerlink" title="/etc/nginx/conf.d/"></a><code>/etc/nginx/conf.d/</code></h3><p>这个目录中包含的<code>.conf</code>配置文件主要用于单独定义某个http网页，从而使得整个配置目录文件的管理变得更加简洁而清晰。</p>
 <h3 id="var-log-nginx"><a href="#var-log-nginx" class="headerlink" title="/var/log/nginx"></a><code>/var/log/nginx</code></h3><p>这个目录是默认的log日志目录，主要有<code>acces.log</code>和<code>error.log</code>两个文件，前者负责记录每一个被访问的记录，后者负责记录访问中出现的错误。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/zUthGtH2nWfK.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446834.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-2-nginx命令"><a href="#2-2-nginx命令" class="headerlink" title="2.2 nginx命令"></a>2.2 nginx命令</h2><p>输入<code>nginx -h</code>即可查看所有指令，不需要特意去记忆，用多了就自然记住了。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/vJhEEkDYRGVw.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446112.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、nginx-conf文件"><a href="#3、nginx-conf文件" class="headerlink" title="3、nginx.conf文件"></a>3、nginx.conf文件</h1><p>我们把整个全局配置文件拿出来分析一下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">user  nginx;<br>worker_processes  16;<br><br>error_log  /var/log/nginx/error.log warn;<br>pid        /var/run/nginx.pid;<br><br><br>events &#123;<br>    worker_connections  1024;<br>&#125;<br><br><br>http &#123;<br>    include       /etc/nginx/mime.types;<br>    default_type  application/octet-stream;<br><br>    log_format  main  <span class="hljs-string">&#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span><br>                      <span class="hljs-string">&#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;</span>;<br><br>    access_log  /var/log/nginx/access.log  main;<br><br>    sendfile        on;<br>    <span class="hljs-comment">#tcp_nopush     on;</span><br><br>    keepalive_timeout  65;<br><br>    <span class="hljs-comment">#gzip  on;</span><br><br>    include /etc/nginx/conf.d/*.conf;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
@@ -353,7 +353,7 @@
 <p>如果设定的日志级别是<code>debug</code>，则会输出所有的日志，这样数据量会很大，要确保存放日志的硬盘有足够的空间，同时，如果需要开启日志的<code>debug</code>功能，需要在编译安装的时候在<code>configure</code>时加入<code>--with-debug</code>配置项，如果不确定是否开启了<code>debug</code>功能，可以输入<code>nginx -V</code>查看所有的<code>configure arguments</code>。</p>
 </blockquote>
 <h2 id="3-4-pid"><a href="#3-4-pid" class="headerlink" title="3.4 pid"></a>3.4 pid</h2><p><code>pid</code>是<code>nginx</code>的<code>master</code>进程的<code>pid</code>文件，理论上应该和查找的<code>nginx</code>进程中<code>master</code>进程的<code>PID</code>以及<code>worker</code>进程的<code>PPID</code>一致。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/2vUn1KmtJfeJ.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446296.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="3-5-块配置"><a href="#3-5-块配置" class="headerlink" title="3.5 块配置"></a>3.5 块配置</h2><p>接下来的<code>events</code>和<code>http</code>都是属于模块或者块。最基本的配置项语法格式为<code>配置项名 配置项值1 配置项值2 … ;</code></p>
 <ul>
 <li>一个配置项以英文分号<code>;</code>结束，中间的值使用空格隔开</li>
@@ -390,9 +390,9 @@
 <h2 id="4-1-default-server"><a href="#4-1-default-server" class="headerlink" title="4.1 default_server"></a>4.1 default_server</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">[root@localhost conf.d]<span class="hljs-comment"># ll</span><br>总用量 16<br>-rw-r--r-- 1 root root 1093 3月   4 00:20 default.conf.bak<br>-rw-r--r-- 1 root root  158 3月  18 00:08 example.com.conf<br>-rw-r--r-- 1 root root  158 3月  18 00:09 example.net.conf<br>-rw-r--r-- 1 root root  173 3月  18 00:11 example.org.conf<br>[root@localhost conf.d]<span class="hljs-comment"># cat example.*</span><br>server &#123;<br>    listen 80;<br>    server_name example.com www.example.com;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.com.html;<br>    &#125;<br>&#125;<br>server &#123;<br>    listen 80;<br>    server_name example.net www.example.net;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.net.html;<br>    &#125;<br>&#125;<br>server &#123;<br>    listen 80 default_server;<br>    server_name example.org www.example.org;<br><br>    location / &#123;<br>        root   /var/www/html;<br>        index  example.org.html;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 <p>这里我们可以看到上面配置了三个server块，分别对应三组域名，三组域名都是指向本机的IP地址，同样都是监听的80端口，其中我们在第三个server块中指定了<code>default_server</code>参数，此时我们访问本机IP，返回的页面就是我们指定了<code>default_server</code>参数的这个页面。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/V9SN9w4cYpqG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447292.png" srcset="/img/loading.gif" lazyload></p>
 <p>如果我们不指定<code>default_server</code>参数，返回的则是默认的第一个页面。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/nrgXs9YImesb.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447150.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="4-2-location"><a href="#4-2-location" class="headerlink" title="4.2 location"></a>4.2 location</h2><p>location块的默认语法如下，<a target="_blank" rel="noopener" href="http://nginx.org/en/docs/http/ngx_http_core_module.html#location">官网文档点这里</a>。</p>
 <figure class="highlight crmsh"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs crmsh">Syntax:	<span class="hljs-keyword">location</span> <span class="hljs-title">[ = | ~ | ~* | ^~ ] uri</span> &#123; ... &#125;<br><span class="hljs-keyword">location</span> <span class="hljs-title">@name</span> &#123; ... &#125;<br>Default: —<br>Context: server, location<br></code></pre></div></td></tr></table></figure>
 
@@ -408,9 +408,9 @@
 <figure class="highlight nginx"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">server_name</span> example.com www.example.com;<br><br>    <span class="hljs-section">location</span> / &#123;<br>        <span class="hljs-attribute">root</span>   /var/www/html;<br>        <span class="hljs-attribute">index</span>  example.com.html;<br>    &#125;<br>    <br>    <span class="hljs-section">location</span> /images &#123;<br>        <span class="hljs-attribute">root</span>  /var/www;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 <p>我们先来看一个<code>server</code>块，这里我们可以看到里面包含了两个<code>location</code>块，在<code>/var/www/html</code>和<code>/var/www</code>这两个目录下均有一个<code>images</code>文件夹，但是在<code>www</code>目录下的<code>images</code>文件夹没有<code>images2.html</code>这个文件。</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/NDKJhkhoG0vG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447581.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们尝试访问：</p>
-<p><img src="https://resource.tinychen.com/blog/20200317/FPrVs7UyolQD.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447852.png" srcset="/img/loading.gif" lazyload></p>
 <p>可以看到因为我们在<code>www</code>目录下的<code>images</code>文件夹没有<code>images2.html</code>这个文件，所以在执行<code>curl example.com/images/images2.html</code>的时候返回了404请求。</p>
 <p>所以我们可以得到结论，当访问域名后面的目录（如这里的<code>/images/</code>），如果在<code>server</code>块里面单独定义了一个相关的<code>location</code>块，则只会在这个<code>/images/</code>目录相关<code>location</code>块定义的目录中去查找，不存在则返回404，并不会再去根目录<code>/</code>的<code>location</code>块中的目录中查找。</p>
 

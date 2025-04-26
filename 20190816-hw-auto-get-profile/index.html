@@ -266,17 +266,17 @@
 <li>操作系统是<code>win10 pro</code>，<code>Microsoft Windows Version 1903(OS Build 18362.239)</code></li>
 </ul>
 <h1 id="2、配置eNSP桥接真机"><a href="#2、配置eNSP桥接真机" class="headerlink" title="2、配置eNSP桥接真机"></a>2、配置eNSP桥接真机</h1><p>这里使用的是AC6605，对真机进行桥接，使用的桥接网卡是VMware WorkStation 15.1 的VMnet8网卡，即NAT模式的网卡，不是eNSP上面的192.168.56.1的那个网卡（这个老是有问题，各种ping不同）。</p>
-<p><img src="https://resource.tinychen.com/blog/20190816/cpwtbe7uUvBF.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261451794.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来的eNSP内的桥接配置就十分简单了，添加一个UDP端口，然后添加一个网卡，再添加端口映射，就可以了。可以参考下面的这张图。</p>
-<p><img src="https://resource.tinychen.com/blog/20190816/TxJqKjGMH9CU.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261451956.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们拖入一个设备，我这里使用的是华为的AC6605。</p>
 <p>给它配置一个IP地址然后测试一下。</p>
 <figure class="highlight stylus"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs stylus"><span class="hljs-selector-attr">[AC6605]</span>vlan batch <span class="hljs-number">10</span><br>Info: This operation may take <span class="hljs-selector-tag">a</span> few seconds. Please wait <span class="hljs-keyword">for</span> <span class="hljs-selector-tag">a</span> moment..<span class="hljs-selector-class">.done</span>.<br><span class="hljs-selector-attr">[AC6605]</span>int Vlanif <span class="hljs-number">10</span><br><span class="hljs-selector-attr">[AC6605-Vlanif10]</span>ip <span class="hljs-selector-tag">address</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">59.2</span> <span class="hljs-number">24</span><br><span class="hljs-selector-attr">[AC6605-Vlanif10]</span><span class="hljs-selector-tag">q</span><br><span class="hljs-selector-attr">[AC6605]</span>int GigabitEthernet <span class="hljs-number">0</span>/<span class="hljs-number">0</span>/<span class="hljs-number">1</span><br><span class="hljs-selector-attr">[AC6605-GigabitEthernet0/0/1]</span>port link-type access <br><span class="hljs-selector-attr">[AC6605-GigabitEthernet0/0/1]</span>port default vlan <span class="hljs-number">10</span><br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190816/g43DkiCQiUkV.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261452839.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们ping一下真机的网卡，能通就说明桥接成功了。</p>
-<p><img src="https://resource.tinychen.com/blog/20190816/ySXeeAXjIs3a.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261452894.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="3、配置SSH服务"><a href="#3、配置SSH服务" class="headerlink" title="3、配置SSH服务"></a>3、配置SSH服务</h1><p>首先进行系统视图，然后创建<code>rsa key</code>，全部选择默认，接着启动<code>stelnet</code>服务。</p>
 <figure class="highlight gauss"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs gauss"><span class="hljs-keyword">system</span>-<span class="hljs-built_in">view</span> <br>rsa <span class="hljs-keyword">local</span>-<span class="hljs-built_in">key</span>-pair <span class="hljs-keyword">create</span><br>stelnet server <span class="hljs-keyword">enable</span><br></code></pre></div></td></tr></table></figure>
 

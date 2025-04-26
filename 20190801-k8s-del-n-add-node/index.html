@@ -255,15 +255,15 @@
 <h2 id="在master节点上"><a href="#在master节点上" class="headerlink" title="在master节点上"></a>在master节点上</h2><figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 其中&lt; node name &gt;是在k8s集群中使用&lt; kubectl get nodes &gt;查询到的节点名称</span><br>kubectl drain &lt;node name&gt; --delete-local-data --force --ignore-daemonsets<br>kubectl delete node &lt;node name&gt;<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190820/EORre3VEGpKk.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261534719.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="在需要删除的节点上"><a href="#在需要删除的节点上" class="headerlink" title="在需要删除的节点上"></a>在需要删除的节点上</h2><figure class="highlight perl"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs perl"><span class="hljs-comment"># 重置k8s</span><br>sudo kubeadm <span class="hljs-keyword">reset</span><br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190820/dWqs7mrdCIB8.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500172.png" srcset="/img/loading.gif" lazyload></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 删除残留的文件</span><br>sudo <span class="hljs-built_in">rm</span> -rf /etc/kubernetes/<br><br><span class="hljs-comment"># 清除iptables或者ipvs的配置</span><br>sudo iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X<br>sudo ipvsadm --clear<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190820/HnuNsnOApNKD.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500942.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>如果删除的是master节点，还需要删除用户目录下的<code>.kube</code>文件</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-built_in">rm</span> -rf ~/.kube<br></code></pre></div></td></tr></table></figure>
@@ -273,7 +273,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 查询token</span><br>kubeadm token list<br><span class="hljs-comment"># 创建一个token</span><br>kubeadm token create<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190820/sbjkRzBJGqrv.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500848.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>这里我们可以看到ttl值就是这个token对应的有效时间了</p>
 </blockquote>
@@ -281,7 +281,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">openssl x509 -pubkey -<span class="hljs-keyword">in</span> /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed <span class="hljs-string">&#x27;s/^.* //&#x27;</span><br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190820/yqHmvgaXDult.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500269.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们就可以把node节点添加到集群中了</p>
 <p>命令的格式如下：</p>
 <figure class="highlight vim"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs vim">kubeadm <span class="hljs-keyword">join</span> &lt;集群master节点IP：端口&gt; --token <span class="hljs-symbol">&lt;token&gt;</span> --discovery-token-<span class="hljs-keyword">ca</span>-cert-hash <span class="hljs-built_in">sha256</span>:<span class="hljs-symbol">&lt;sha256&gt;</span> <br></code></pre></div></td></tr></table></figure>
@@ -292,9 +292,9 @@
 <figure class="highlight stylus"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs stylus">kubeadm join kubernetes<span class="hljs-selector-class">.haproxy</span><span class="hljs-selector-class">.com</span>:<span class="hljs-number">8443</span> <span class="hljs-attr">--token</span> d98xt5.<span class="hljs-number">6</span>xvz7nldv2niknnv \<br>    <span class="hljs-attr">--discovery-token-ca-cert-hash</span> sha256:ae8d99e389a6a3109c188b5c27792c490e6a18e438bb4fc81a0a44b9542f3835 <br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190820/93of3AtxBuny.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500463.png" srcset="/img/loading.gif" lazyload></p>
 <p>接着我们在master节点中就可以查看到新添加的这个节点了。</p>
-<p><img src="https://resource.tinychen.com/blog/20190820/IsfDdJlLP44O.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261500125.png" srcset="/img/loading.gif" lazyload></p>
 
             </div>
             <hr>

@@ -268,7 +268,7 @@
 <p>Ceph这个词是宠物章鱼的一个常见绰号。Ceph可以看作Cephalopod的缩写，它属于海洋软体类动物家族。Ceph以章鱼作为自己的吉祥物，表达了Ceph跟章鱼一样的并行行为。</p>
 <p>Inktank这个词与章鱼有一定关系。渔民有时候也把章鱼称为墨鱼，因为它们可以喷射墨汁。这就解释了为什么章鱼(Ceph)跟墨鱼(Inktank)有一定关系。同样，Ceph和Inktank有很多共同点。你可以认为Inktank就是Ceph的智库。</p>
 <p>开源Linux社区2008年就预见到Ceph的潜力，并将其加入Linux内核主线。这已经成为Ceph的里程碑事件。</p>
-<p><img src="https://resource.tinychen.com/blog/20200301/zTF3g5mjkgMe.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447010.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、Ceph与云"><a href="#2、Ceph与云" class="headerlink" title="2、Ceph与云"></a>2、Ceph与云</h1><p>云环境要求其存储能够以低成本纵向和横向扩展，而且能够容易与云框架中其他组件集成。</p>
 <p>OpenStack项目大力推动了公有云和私有云的发展。它已经证明了自己是一个端到端云解决方案。它自己的内部核心存储组件Swift提供基于对象的存储和Nova-Volume(也称为Cinder)，而Cinder则为VM提供块存储。</p>
 <p>与Swift(它仅提供对象存储)不同，Ceph是一个包含块存储、文件存储和对象存储的统一存储解决方案，这样可以通过单一存储集群为OpenStack提供多种存储类型。因此，你可以轻松而高效地为OpenStack云管理存储。OpenStack和Ceph社区已经一起合作了许多年，致力于为OpenStack云开发一个完全支持的Ceph存储后端。从Folsom(OpenStack第6个主要版本)开始，Ceph已经完全与OpenStack集成。Ceph开发人员确保Ceph能够适用于OpenStack的最新版，同时贡献新特性以及修正bug。OpenStack通过它的cinder和glance组件使用Ceph最苛刻的特性RADOS块设备(RBD)。Ceph RBD通过提供精简配置的快照复制(snapshotted-cloned)卷帮助OpenStack快速配置数百个VM实例，这种方式既减少空间需求，又非常快速。</p>
@@ -294,13 +294,13 @@
 <p>Ceph引入了一个新的RBD协议，也就是Ceph块设备(Ceph Block Device)。</p>
 <p>RBD块呈带状分布在多个Ceph对象之上，而这些对象本身又分布在整个Ceph存储集群中，因此能够保证数据的可靠性以及性能。</p>
 <p>几乎所有的Linux操作系统发行版都支持RBD。除了可靠性和性能之外，RBD也支持其他的企业级特性，例如完整和增量式快照，精简的配置，写时复制(copy-on-write)式克隆，以及其他特性。RBD还支持全内存式缓存，这可以大大提高它的性能。Ceph RBD支持的最大镜像为16EB。在OpenStack中，可以通过cinder(块)和glance(image)组件来使用Ceph块设备。这样做可以让你利用Ceph块存储的copy-on-write特性在很短的时间内创建上千个VM。</p>
-<p><img src="https://resource.tinychen.com/blog/20200311/BkOvaglxAz9O.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447779.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="5-2-Ceph文件存储"><a href="#5-2-Ceph文件存储" class="headerlink" title="5.2 Ceph文件存储"></a>5.2 Ceph文件存储</h2><p><strong>Ceph文件系统(也就是CephFS)是一个兼容POSIX的文件系统，它利用Ceph存储集群来保存用户数据。CephFS将数据和元数据分开存储，为上层的应用程序提供较高的性能以及可靠性。</strong></p>
 <blockquote>
 <p>Linux内核驱动程序支持CephFS，这也使得CephFS高度适用于各大Linux操作系统发行版。</p>
 </blockquote>
 <p>在Cpeh集群内部，Ceph文件系统库(libcephfs)运行在RADOS库(librados)之上，后者是Ceph存储集群协议，由文件、块和对象存储共用。<strong>要使用CephFS，你的集群节点上最少要配置一个Ceph元数据服务器(MDS)。</strong>然而，需要注意的是，单一的MDS服务器将成为Ceph文件系统的<strong>单点故障</strong>。MDS配置后，客户端可以采用多种方式使用CephFS。如果要把Ceph挂载成文件系统，客户端可以使用本地Linux内核的功能或者使用Ceph社区提供的ceph-fuse(用户空间文件系统)驱动。除此之外，客户端可以使用第三方开源程序，例如NFS的Ganesha和SMB&#x2F;CIFS的Samba。</p>
-<p><img src="https://resource.tinychen.com/blog/20200311/RkKUgQoFHBHG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447238.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="5-3-Ceph对象存储"><a href="#5-3-Ceph对象存储" class="headerlink" title="5.3 Ceph对象存储"></a>5.3 Ceph对象存储</h2><p><strong>对象存储是一种以对象形式而不是传统文件和块形式存储数据的方法。</strong></p>
 <p>Ceph是一个分布式对象存储系统，通过它的对象网关(object gateway)，也就是RADOS网关(radosgw)提供对象存储接口。RADOS网关利用librgw(RADOS网关库)和librados这些库，允许应用程序跟Ceph对象存储建立连接。</p>
 <p>RADOS网关提供RESTful接口让用户的应用程序将数据存储到Ceph集群中。RADOS网关接口满足以下特点。</p>
@@ -310,7 +310,7 @@
 <li><strong>Admin API</strong>：这也称为管理API或者原生API，应用程序可以直接使用它来获取访问存储系统的权限以管理存储系统。</li>
 </ul>
 <p>要访问Ceph的对象存储系统，也可以绕开RADOS网关层，这样更灵活并且速度更快。librados软件库允许用户的应用程序通过C、C++、Java、Python和PHP直接访问Ceph对象存储。Ceph对象存储具备多站点(multisite)的能力，也就是说它能为灾难恢复提供解决方案。通过RADOS或者联合网关可以配置多站点的对象存储。</p>
-<p><img src="https://resource.tinychen.com/blog/20200311/bmlrefKsKRLa.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261459565.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="6、其他存储方案"><a href="#6、其他存储方案" class="headerlink" title="6、其他存储方案"></a>6、其他存储方案</h1><h2 id="6-1-GPFS-通用并行文件系统"><a href="#6-1-GPFS-通用并行文件系统" class="headerlink" title="6.1 GPFS&#x2F;通用并行文件系统"></a>6.1 GPFS&#x2F;通用并行文件系统</h2><p>GPFS(General Parallel File System，通用并行文件系统)是一个分布式文件系统，由IBM开发及拥有。这是一个专有、闭源的存储系统，这使得它缺少吸引力并且难以适应。存储硬件加上授权以及支持成本使得它非常昂贵。另外，它提供的存储访问接口非常有限；它既不能提供块存储，也不能提供RESTful接口来访问存储系统，因此这是一个限制非常严格的系统。甚至最大的数据副本数都限制只有3个，这在多个组件同时故障的情形下降低了系统的可靠性。</p>
 <h2 id="6-2-iRDOS"><a href="#6-2-iRDOS" class="headerlink" title="6.2 iRDOS"></a>6.2 iRDOS</h2><p>iRDOS是面向规则的数据系统的代表，它是依据第三条款(3-clause)BSD协议发布的开源数据管理软件。iRDOS不是一个高度可靠的存储系统，因为它的iCAT元数据服务器是单点(single point of failure，SPOF)，并且它不提供真正的HA。另外，它提供的存储访问接口很有限；既不能提供块存储，也不能提供RESTful接口来访问存储系统，因此这是一个限制非常严格的系统。它更适合于存储少量大文件，而不是同时存储小文件和大文件。iRdos采用传统的工作方式，维护一个关于物理位置(与文件名相关联)的索引。由于多个客户端都需要从元数据服务器请求文件位置，使得元数据服务器需要承受更多的计算负载，从而导致单点故障以及性能瓶颈。</p>
 <h2 id="6-3-HDFS"><a href="#6-3-HDFS" class="headerlink" title="6.3 HDFS"></a>6.3 HDFS</h2><p>HDFS是一个用Java写的并且为Hadoop框架而生的分布式可扩展文件系统。HDFS不是一个完全兼容POSIX的文件系统，并且不支持块存储，这使得它的适用范围不如Ceph。HDFS的可靠性不需要讨论，因为它不是一个高度可用的文件系统。HDFS中的单点故障以及性能瓶颈主要源于它单一的NameNode节点。它更适合于存储少量大文件，而不是同时存储小文件和大文件。</p>

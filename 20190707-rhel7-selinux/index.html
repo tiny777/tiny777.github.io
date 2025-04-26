@@ -311,7 +311,7 @@
 </blockquote>
 </li>
 </ul>
-<p><img src="https://resource.tinychen.com/blog/20190707/hzW6RgLKHPPa.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261606936.png" srcset="/img/loading.gif" lazyload></p>
 <p>解释一下这张示意图：当主体想要访问目标时，如果系统中启动了 SELinux，则主体的访问请求首先需要和 SELinux 中定义好的策略进行匹配。如果进程符合策略中定义好的规则，则允许访问，这时进程的安全上下文就可以和目标的安全上下文进行匹配；如果比较失败，则拒绝访问，并通过 AVC（Access Vector Cache，访问向量缓存，主要用于记录所有和 SELinux 相关的访问统计信息）生成拒绝访问信息。如果安全上下文匹配，则可以正常访问目标文件。当然，最终是否可以真正地访问到目标文件，还要匹配产生进程（主体）的用户是否对目标文件拥有合理的读、写、执行权限。</p>
 <p>我们在进行 SELinux 管理的时候，一般只会修改文件或目录的安全上下文，使其和访问进程的安全上下文匹配或不匹配，用来控制进程是否可以访问文件或目录资源；而很少会去修改策略中的具体规则，因为规则实在太多了，修改起来过于复杂。不过，我们是可以人为定义规则是否生效，用以控制规则的启用与关闭的。  </p>
 <h2 id="3-2-三种工作模式"><a href="#3-2-三种工作模式" class="headerlink" title="3.2 三种工作模式"></a>3.2 三种工作模式</h2><p><strong>SELinux 提供了 3 种工作模式：Disabled、Permissive 和 Enforcing，而每种模式都为 Linux 系统安全提供了不同的好处。</strong></p>

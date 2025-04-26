@@ -253,11 +253,11 @@
 
 <h1 id="0、简介"><a href="#0、简介" class="headerlink" title="0、简介"></a>0、简介</h1><p>虚拟化技术的演变过程可以分为<strong>软件模拟、虚拟化层翻译、容器虚拟化</strong>三个大的阶段。其中，虚拟化层翻译又可以分为：<strong>软件捕获翻译（软件全虚拟化）</strong>、<strong>改造虚拟机系统内核加虚拟化层翻译（半虚拟化）</strong>和<strong>硬件支持的虚拟化层翻译（硬件支持的全虚拟化）</strong>三种。</p>
 <h1 id="1、软件模拟"><a href="#1、软件模拟" class="headerlink" title="1、软件模拟"></a>1、软件模拟</h1><p>软件模拟是<strong>通过软件完全模拟</strong>CPU、芯片组、磁盘、网卡等计算机硬件。因为是软件模拟，所以理论上可以模拟任何硬件，<strong>甚至是不存在的硬件</strong>。但是因为这种方式全部是软件模拟硬件，所以非常低效，<strong>性能很差</strong>，因此一般只用于研究测试的场景。采用这种技术的典型产品有<a target="_blank" rel="noopener" href="http://bochs.sourceforge.net/">Bochs</a>、<a target="_blank" rel="noopener" href="https://www.qemu.org/">QEMU</a>等。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/iC7twu8IzcUB.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447885.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="2、虚拟化层翻译"><a href="#2、虚拟化层翻译" class="headerlink" title="2、虚拟化层翻译"></a>2、虚拟化层翻译</h1><p>X86平台指令集划分为4个特权模式：Ring 0、Ring 1、Ring 2、Ring 3。操作系统一般使用Ring 0级别，应用程序使用Ring 3级别，驱动程序使用Ring 1和Ring 2级别。<strong>X86平台在虚拟化方面的一个难点就是如何将虚拟机越级的指令使用进行隔离。</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20200316/saHItFzI3ptv.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447424.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="2-1-软件全虚拟化"><a href="#2-1-软件全虚拟化" class="headerlink" title="2.1 软件全虚拟化"></a>2.1 软件全虚拟化</h2><p>VMware公司首先想到了通过虚拟化引擎，捕获虚拟机的指令，并进行处理的解决方法。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/oOf6IYhAXMoN.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447555.png" srcset="/img/loading.gif" lazyload></p>
 <p>通过虚拟化引擎VMM来对虚拟机上的指令进行捕获并解释执行，就可以有效地隔离开虚拟机和物理机上的操作，最常见的表现就是关闭虚拟机并不会关闭物理机。这种方案也因此叫做软件全虚拟化的解决方案。</p>
 <blockquote>
 <p>Hypervisor，又称虚拟机监视器（英语：virtual machine monitor，缩写为 VMM），是用来建立与执行虚拟机器的软件、固件或硬件。</p>
@@ -266,7 +266,7 @@
 <h2 id="2-2-半虚拟化"><a href="#2-2-半虚拟化" class="headerlink" title="2.2 半虚拟化"></a>2.2 半虚拟化</h2><p>软件全虚拟化的解决方案虽然可行，但是由于指令需要经过VMM，所以要在虚拟化层做大量的工作，性能上比较一般，因此Xen项目提出了使用修改虚拟机操作系统内核的解决方案。具体来说就是在虚拟机上使用修改过的内核，在修改过的内核中对特殊指令进行修改使其与物理机隔离开来，这样就可以有效地减少虚拟化层的工作，从而提高性能。但是劣势也是显而易见的，由于需要使用特殊的内核，因此在配置上也会相对麻烦一些，且由于内核原因一开始不支持windows系统的虚拟化，直到后来才加入支持。</p>
 <p>不过由于将一部分的指令翻译工作从虚拟化层转移到了修改过的内核当中，因此性能比上面提到的软件全虚拟化要高很多，这种虚拟化方式也称为<strong>半虚拟化（paravirtualization）</strong>或者是<strong>准虚拟化</strong>。</p>
 <h2 id="2-3-硬件全虚拟化"><a href="#2-3-硬件全虚拟化" class="headerlink" title="2.3 硬件全虚拟化"></a>2.3 硬件全虚拟化</h2><p>2005年，Intel推出了硬件的方案，对CPU指令进行改造，即VT-x，如图1-5所示。VT-x增加了两种操作模式：VMX root operation和VMX non-root operation。VMM运行在VMX root operation模式，虚拟机运行在VMX non-root operation模式。这两种操作模式都支持Ring 0～Ring 3这4个特权级。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/HcrpDc5oVu1v.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447482.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>2005年，随着Intel推出支持x86虚拟化技术的CPU，Xen亦加入全虚拟化模式。Xen的全虚拟化模式允许在虚拟机中运行Windows等非Linux系统。</p>
 </blockquote>
@@ -274,7 +274,7 @@
 <blockquote>
 <p>除了Intel，AMD也在自家的处理器上加入了对硬件级虚拟化的支持，命名为AMD-v。</p>
 </blockquote>
-<p><img src="https://resource.tinychen.com/blog/20200316/WT68pw0flJ4K.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447541.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p>当前的虚拟化引擎，都是使用硬件支持的虚拟化解决方案。并且最新的操作系统一般都支持一些半虚拟化的特性，所以宿主机和虚拟机使用比较新的版本，性能也会好一些。</p>
 </blockquote>
@@ -285,7 +285,7 @@
 </blockquote>
 <p>KVM包含一个为处理器提供底层虚拟化、可加载的核心模块<code>kvm.ko</code>（<code>kvm-intel.ko</code>或<code>kvm-amd.ko</code>），使用QEMU（QEMU-KVM）作为虚拟机上层控制工具。KVM不需要改变Linux或Windows系统就能运行。</p>
 <p>实际上，在Linux中，kvm就是内核中的一个模块，用户空间通过QEMU模拟硬件提供给虚拟机使用，而一台使用kvm创建的虚拟机就是一个Linux中的进程，管理这个对应的进程就是相当于管理整个对应的虚拟机。</p>
-<p><img src="https://resource.tinychen.com/blog/20200316/CirIGJLtOkIo.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261447721.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="4-2-QEMU和KVM"><a href="#4-2-QEMU和KVM" class="headerlink" title="4.2 QEMU和KVM"></a>4.2 QEMU和KVM</h2><blockquote>
 <p>以下摘录自wiki：</p>
 <p>QEMU有多种模式</p>

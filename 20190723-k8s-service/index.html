@@ -267,21 +267,21 @@
 
 <p>需要特别注意的是这里我们使用了一个<code>labels</code>，使用这个配置文件创建的<code>pod</code>都会带上一个<code>app=httpd</code>的<code>labels</code>，这个是后面创建的<code>service</code>用来区分<code>pod</code>的。</p>
 <p>这里我们使用curl直接对部署的三个pod进行访问，可以看到都是能够访问成功的。</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/P9LU7PSYuWCX.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261600911.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们创建一个service，配置文件如下</p>
 <figure class="highlight yaml"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs yaml"><span class="hljs-attr">kind:</span> <span class="hljs-string">Service</span><br><span class="hljs-attr">apiVersion:</span> <span class="hljs-string">v1</span><br><span class="hljs-attr">metadata:</span><br>  <span class="hljs-attr">name:</span> <span class="hljs-string">http-service</span><br><span class="hljs-attr">spec:</span><br>  <span class="hljs-attr">selector:</span><br>    <span class="hljs-attr">app:</span> <span class="hljs-string">httpd</span><br>  <span class="hljs-attr">ports:</span><br>    <span class="hljs-bullet">-</span> <span class="hljs-attr">protocol:</span> <span class="hljs-string">TCP</span><br>      <span class="hljs-attr">port:</span> <span class="hljs-number">7777</span><br>      <span class="hljs-attr">targetPort:</span> <span class="hljs-number">80</span><br></code></pre></div></td></tr></table></figure>
 
 <p>上述配置将创建一个名称为 “http-service” 的 <code>Service</code> 对象，它会将请求代理到使用 TCP 端口 80，并且具有<code>标签(labels)</code> <code>&quot;app=httpd&quot;</code> 的 <code>Pod</code> 上。 这个 <code>Service</code> 将被指派一个 IP 地址（通常称为 “Cluster IP”），它会被服务的代理使用（见下面）。 该 <code>Service</code> 的 selector 将会持续评估，处理结果将被 POST 到一个名称为 <code>“http-service”</code> 的 <code>Endpoints</code> 对象上。</p>
 <p>需要注意的是， <code>Service</code> 能够将一个接收端口映射到任意的 <code>targetPort</code>。 默认情况下，<code>targetPort</code> 将被设置为与 <code>port</code> 字段相同的值。 </p>
-<p><img src="https://resource.tinychen.com/blog/20190723/g4EDrExzjTyM.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261600720.png" srcset="/img/loading.gif" lazyload></p>
 <p>创建成功之后我们可以使用下面的这个命令来查看<code>service</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">kubectl get service -o wide<br></code></pre></div></td></tr></table></figure>
 
 <p>这里我们可以看到这个<code>service</code>被分配了一个<code>10.96.16.218</code>的IP地址（这个IP地址称为<code>ClusterIP</code>），服务对应的端口号是<code>7777</code>。我们试着使用curl来对其进行访问。</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/naCMoORvomnL.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261616446.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里可以看到是可以成功访问的。</p>
 <p>我们再来看一下详细的情况：</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/Qxcmbfvgz5OV.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261600197.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里可以看到已经和上面的三个pods的80端口建立了映射关系。</p>
 <h1 id="3、ipvs和iptables"><a href="#3、ipvs和iptables" class="headerlink" title="3、ipvs和iptables"></a>3、ipvs和iptables</h1><p>我们现在已经知道，<code>service</code>这个抽象层是将这个<code>service</code>的IP（<code>10.96.16.218</code>）的7777端口和<code>Endpoints</code>的pod的80端口建立映射关系来实现这个抽象的。那么这个映射关系的建立，就是由<code>iptables</code>来实现的，而<code>ipvs</code>在这里也能实现一样的功能，但是更加强大，我们可以将它简单看作是<code>iptables</code>的增强版。</p>
 <h2 id="3-1-ipvs和iptables的区别"><a href="#3-1-ipvs和iptables的区别" class="headerlink" title="3.1 ipvs和iptables的区别"></a>3.1 ipvs和iptables的区别</h2><p>k8s中默认使用的是<code>iptables</code>，但是<code>ipvs</code>要更加强大，</p>
@@ -296,14 +296,14 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">sudo ipvsadm -<span class="hljs-built_in">ln</span><br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190723/DvxtRHLUuVum.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261600345.png" srcset="/img/loading.gif" lazyload></p>
 <p>从这里的规则中我们可以看到。<code>ipvs</code>将对<code>10.96.16.218:7777</code>的访问转发到下面对应的三个IP地址的80端口上。</p>
 <p>接下来我们对这个deployment进行修改，将副本数量从3改到6，再看这个ipvs规则的变化</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/JCiKR2H5uBhM.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261615955.png" srcset="/img/loading.gif" lazyload></p>
 <p>副本数量增加到了6个，对应的<code>ipvs</code>规则也完成了更新：</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/fxjkNMdBIUF0.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261615390.png" srcset="/img/loading.gif" lazyload></p>
 <p>接下来我们删除掉这个service，可以看到ipvs中的规则并没有进行删除</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/h4Bd7IBFQjoG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261600995.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里我们可以知道，k8s对ipvs的规则可以说是只增不减。</p>
 <blockquote>
 <p>这里留一个坑，后面再开一篇来详细研究一下<code>ipvs</code></p>
@@ -316,17 +316,17 @@
 <figure class="highlight routeros"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs routeros">kubectl <span class="hljs-built_in">run</span> busybox --rm -ti <span class="hljs-attribute">--image</span>=busybox /bin/sh<br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190723/JeaNq64gqmpG.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601246.png" srcset="/img/loading.gif" lazyload></p>
 <p><code>busybox</code>对<code>nslookup</code>的支持似乎有些问题，不一定能成功查询到<code>dns</code>，而且并没有内置<code>curl</code>命令，我们只能用<code>wget</code>来进行访问。<strong>事实上<code>wget</code>能成功就说明<code>dns</code>服务是正常的。</strong></p>
-<p><img src="https://resource.tinychen.com/blog/20190723/IIYnXUyxiDkL.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601750.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们使用它的测试版本，这时候<code>nslookup</code>命令正常了，<code>wget</code>命令又不正常了。</p>
 <figure class="highlight dockerfile"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs dockerfile">kubectl <span class="hljs-keyword">run</span><span class="language-bash"> dig --<span class="hljs-built_in">rm</span> -it --image=docker.io/azukiapp/dig /bin/sh</span><br></code></pre></div></td></tr></table></figure>
 
 
-<p><img src="https://resource.tinychen.com/blog/20190723/Fxbv9dHLo0QQ.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190723/VVldLTbs4PbY.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601107.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601471.png" srcset="/img/loading.gif" lazyload></p>
 <p>这里面的<code>10.96.0.10</code>地址正是我们的<code>coredns</code>的地址：</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/EcxMr38HWqqS.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601781.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="4、外网访问service"><a href="#4、外网访问service" class="headerlink" title="4、外网访问service"></a>4、外网访问service</h1><h2 id="4-1-NodePort简介"><a href="#4-1-NodePort简介" class="headerlink" title="4.1 NodePort简介"></a>4.1 NodePort简介</h2><p>前面我们已经可以通过clusterIP来访问service了，但是显然这只能局限于在k8s集群内的主机进行，集群外的机器无法对其进行访问，这显然是不行的。我们先看一下官网给出的解决方案：</p>
 <blockquote>
 <p>对一些应用（如 Frontend）的某些部分，可能希望通过外部（Kubernetes 集群外部）IP 地址暴露 Service。</p>
@@ -345,19 +345,19 @@
 <p>这可以让开发人员自由地安装他们自己的负载均衡器，并配置 Kubernetes 不能完全支持的环境参数，或者直接暴露一个或多个 Node 的 IP 地址。</p>
 <p>需要注意的是，Service 将能够通过 <code>&lt;NodeIP&gt;:spec.ports[*].nodePort</code> 和<code>spec.clusterIp:spec.ports[*].port</code> 而对外可见。</p>
 <h2 id="4-2-自动分配端口"><a href="#4-2-自动分配端口" class="headerlink" title="4.2 自动分配端口"></a>4.2 自动分配端口</h2><p>接下来我们来修改一下刚刚的service配置文件，先尝试一下让master自动分配一个端口。</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/ATIjgIhqAAxK.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601832.png" srcset="/img/loading.gif" lazyload></p>
 <p>然后我们重新应用一下该配置文件，就能看到分配的端口：</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/5LhvE8622rSf.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601764.png" srcset="/img/loading.gif" lazyload></p>
 <p>我们查看ipvs规则，可以看到本机对应的IP都已经建立了相应的映射转发规则</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/xBo6fK5W6cW8.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601741.png" srcset="/img/loading.gif" lazyload></p>
 <p>正好小七用的是虚拟机，使用集群外的电脑用浏览器访问<strong>任意一个master节点</strong>均可：</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/NBFeLpK5c0a1.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190723/hYpBcXWYVJyp.png" srcset="/img/loading.gif" lazyload></p>
-<p><img src="https://resource.tinychen.com/blog/20190723/qzQIsQiEafSA.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601974.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601306.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601324.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="4-3-手动指定端口"><a href="#4-3-手动指定端口" class="headerlink" title="4.3 手动指定端口"></a>4.3 手动指定端口</h2><p>我们在下面的port选项中添加<code>nodePort: 32333</code>，然后重新应用配置文件。</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/sez3VyymGdY7.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601354.png" srcset="/img/loading.gif" lazyload></p>
 <p>使用浏览器尝试访问：</p>
-<p><img src="https://resource.tinychen.com/blog/20190723/3y4OejGxkAFl.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261601509.png" srcset="/img/loading.gif" lazyload></p>
 
             </div>
             <hr>

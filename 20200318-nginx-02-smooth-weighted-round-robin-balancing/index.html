@@ -271,7 +271,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash">upstream backend &#123;    <br>    server 127.0.0.1:8080   weight=3;    <br>    server 127.0.0.1:8081   weight=5; <br>    server 127.0.0.1:8082   weight=7;<br>&#125;<br><br>server &#123;<br>    listen 80;<br>    server_name example.com www.example.com;<br><br>    location / &#123;<br>        proxy_pass http://backend;<br>    &#125;<br>&#125;<br></code></pre></div></td></tr></table></figure>
 
 <p>这里我们使用nginx监听在本机8080~8081三个端口，然后这三个端口作为本机的80端口的负载均衡后端，接着我们把权重设为比较复杂的<code>3：5：7</code>，然后我们进行实际测试。</p>
-<p><img src="https://resource.tinychen.com/blog/20200318/pwzKS3ftCfn5.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261446835.png" srcset="/img/loading.gif" lazyload></p>
 <p>得到的结果为，<code>c b a c b c a c b c b c a b c</code>，这里刚好15次也就是符合权重上面的加起来的总和，从结果来看这里的访问顺序比较均衡，但是细看又比较难找出规律。</p>
 <p>我们去Github上面找到<a target="_blank" rel="noopener" href="https://github.com/nginx/nginx">nginx的源码</a>，对应的我们这里使用的测试的版本是稳定版的<code>1.17.9</code>，我们在目录下的<code>nginx-master\src\http\ngx_http_upstream_round_robin.c</code>当中可以看到这部分的实现源码，主要集中在该文件的前面部分。接下来我们需要理解源码中的几个变量：</p>
 <ul>

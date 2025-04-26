@@ -261,16 +261,16 @@
 </ol>
 <p><strong>三种地址分配方式中，只有动态分配可以重复使用客户端不再需要的地址。</strong></p>
 <h1 id="2、DHCP状态机"><a href="#2、DHCP状态机" class="headerlink" title="2、DHCP状态机"></a>2、DHCP状态机</h1><h2 id="2-0-DHCP状态机"><a href="#2-0-DHCP状态机" class="headerlink" title="2.0 DHCP状态机"></a>2.0 DHCP状态机</h2><p>如下图所示是比较常见的DHCP状态机，下面我们结合Wireshark抓到的数据包来进行分析。</p>
-<p><img src="https://resource.tinychen.com/blog/20190609/dogAUe1Ba8D2.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261610856.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="2-0-1-如何抓取数据包"><a href="#2-0-1-如何抓取数据包" class="headerlink" title="2.0.1 如何抓取数据包"></a>2.0.1 如何抓取数据包</h3><p>在windows下，使网卡重新发出DHCP请求获取IP地址比较简单的方法就是使用<code>ipconfig</code>命令。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 释放IP地址</span><br>ipconfig -realease<br><span class="hljs-comment"># 重新获取IP地址</span><br>ipconfig -renew<br></code></pre></div></td></tr></table></figure>
 
 <p>需要注意的是要确定网卡配置中是使用了DHCP而不是手动指定IP地址。</p>
-<p><img src="https://resource.tinychen.com/blog/20190609/4wSvnifDgxaP.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261610650.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="2-0-2-一次DHCP过程的四个数据包"><a href="#2-0-2-一次DHCP过程的四个数据包" class="headerlink" title="2.0.2 一次DHCP过程的四个数据包"></a>2.0.2 一次DHCP过程的四个数据包</h3><p>正常来说，一次DHCP过程只需要上面状态机的前四步，后面的续约是在DHCP的租期到达1&#x2F;2和7&#x2F;8的时候进行的。</p>
-<p><img src="https://resource.tinychen.com/blog/20190609/CDdjQgrGbqac.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261610766.png" srcset="/img/loading.gif" lazyload></p>
 <p>打开任意一个数据包，我们可以看到wireshark已经把里面的数据分层显示。</p>
-<p><img src="https://resource.tinychen.com/blog/20190609/hytGlrtwYwlT.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261610225.png" srcset="/img/loading.gif" lazyload></p>
 <p>从上到下依次为物理层、数据链路层、网络层、传输层和应用层。</p>
 <p>接下来我们对这四个数据包进行分析。</p>
 <h2 id="2-1-发现阶段——DHCP-Discover（广播）"><a href="#2-1-发现阶段——DHCP-Discover（广播）" class="headerlink" title="2.1 发现阶段——DHCP Discover（广播）"></a>2.1 发现阶段——DHCP Discover（广播）</h2><h3 id="2-1-1-DHCP-Discover-理论分析"><a href="#2-1-1-DHCP-Discover-理论分析" class="headerlink" title="2.1.1 DHCP Discover 理论分析"></a>2.1.1 DHCP Discover 理论分析</h3><p>DHCP Discover（广播）是第一个阶段即DHCP客户端寻找DHCP服务端的阶段。</p>
@@ -281,11 +281,11 @@
 <p>在三层中，广播地址是4个255（IPv4）即<code>255.255.255.255</code>。</p>
 <p>换算成二进制，即全为1。</p>
 </blockquote>
-<h3 id="2-1-2-DHCP-Discover-物理层"><a href="#2-1-2-DHCP-Discover-物理层" class="headerlink" title="2.1.2 DHCP Discover 物理层"></a>2.1.2 DHCP Discover 物理层</h3><p><img src="https://resource.tinychen.com/blog/20190609/GrScXGYroTPm.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-1-2-DHCP-Discover-物理层"><a href="#2-1-2-DHCP-Discover-物理层" class="headerlink" title="2.1.2 DHCP Discover 物理层"></a>2.1.2 DHCP Discover 物理层</h3><p><img src="https://resource.tinychen.com/202504261610932.png" srcset="/img/loading.gif" lazyload></p>
 <p>物理层给出的有用信息并不多，但是我们能够看到网卡相关信息和这个是DHCP的数据包且使用了UDP协议。</p>
-<h3 id="2-1-3-DHCP-Discover-数据链路层"><a href="#2-1-3-DHCP-Discover-数据链路层" class="headerlink" title="2.1.3 DHCP Discover 数据链路层"></a>2.1.3 DHCP Discover 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190609/hNKn0hoQPFaU.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-1-3-DHCP-Discover-数据链路层"><a href="#2-1-3-DHCP-Discover-数据链路层" class="headerlink" title="2.1.3 DHCP Discover 数据链路层"></a>2.1.3 DHCP Discover 数据链路层</h3><p><img src="https://resource.tinychen.com/202504261610846.png" srcset="/img/loading.gif" lazyload></p>
 <p>数据链路层中我们可以看到本机的MAC地址和目标MAC地址（广播）。</p>
-<h3 id="2-1-4-DHCP-Discover-网络层"><a href="#2-1-4-DHCP-Discover-网络层" class="headerlink" title="2.1.4 DHCP Discover 网络层"></a>2.1.4 DHCP Discover 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190609/XvL5NVjcpFtO.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-1-4-DHCP-Discover-网络层"><a href="#2-1-4-DHCP-Discover-网络层" class="headerlink" title="2.1.4 DHCP Discover 网络层"></a>2.1.4 DHCP Discover 网络层</h3><p><img src="https://resource.tinychen.com/202504261611012.png" srcset="/img/loading.gif" lazyload></p>
 <p>网络层的参数较多，我们对其进行一一解析：</p>
 <ul>
 <li><p>版本（Version）：4，表明这里使用IPv4</p>
@@ -315,9 +315,9 @@
 <li><p>目标IP地址（Destination）：255.255.255.255，广播IP地址，对同一广播域内的所有TCP&#x2F;IP协议客户端进行广播</p>
 </li>
 </ul>
-<h3 id="2-1-5-DHCP-Discover-传输层"><a href="#2-1-5-DHCP-Discover-传输层" class="headerlink" title="2.1.5 DHCP Discover 传输层"></a>2.1.5 DHCP Discover 传输层</h3><p><img src="https://resource.tinychen.com/blog/20190609/wYNVDCL6RDrJ.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-1-5-DHCP-Discover-传输层"><a href="#2-1-5-DHCP-Discover-传输层" class="headerlink" title="2.1.5 DHCP Discover 传输层"></a>2.1.5 DHCP Discover 传输层</h3><p><img src="https://resource.tinychen.com/202504261611078.png" srcset="/img/loading.gif" lazyload></p>
 <p>传输层这里可以看到源端口为68，目的端口为67，且校验状态为未校验。</p>
-<h3 id="2-1-6-DHCP-Discover-应用层"><a href="#2-1-6-DHCP-Discover-应用层" class="headerlink" title="2.1.6 DHCP Discover 应用层"></a>2.1.6 DHCP Discover 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190609/bOfKYRIT14yC.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-1-6-DHCP-Discover-应用层"><a href="#2-1-6-DHCP-Discover-应用层" class="headerlink" title="2.1.6 DHCP Discover 应用层"></a>2.1.6 DHCP Discover 应用层</h3><p><img src="https://resource.tinychen.com/202504261611243.png" srcset="/img/loading.gif" lazyload></p>
 <p>应用层的报文也有很多重要数据，我们截取重要的进行分析。</p>
 <ul>
 <li>Bootp flags：0表示单播，1表示广播，这里为0，即DHCP服务端回复的DHCP Offer报文应为单播形式</li>
@@ -340,15 +340,15 @@
 <p>DHCP服务器在分配这个地址之间会ping一下这个分配的ip地址，如果没有Response就才会预分配这个地址</p>
 </blockquote>
 <p>客户端通过封装在帧中的目的MAC地址（也就是DHCP Discover报文中的CHADDR字段值）的比对来确定是否接收该帧。但这样以来，理论上DHCP客户端可能会收到多个DHCP Offer报文（当网络中存在多个DHCP服务器时），但DHCP客户端只接收第一个到来的DHCP Offer报文。</p>
-<h3 id="2-2-2-DHCP-Offer-数据链路层"><a href="#2-2-2-DHCP-Offer-数据链路层" class="headerlink" title="2.2.2 DHCP Offer 数据链路层"></a>2.2.2 DHCP Offer 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/gW8jaa3BavbB.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-2-2-DHCP-Offer-数据链路层"><a href="#2-2-2-DHCP-Offer-数据链路层" class="headerlink" title="2.2.2 DHCP Offer 数据链路层"></a>2.2.2 DHCP Offer 数据链路层</h3><p><img src="https://resource.tinychen.com/202504261611374.png" srcset="/img/loading.gif" lazyload></p>
 <p>这时可以看到根据之前的DHCP报文，这里使用了单播的形式。而源MAC地址就是DHCP服务器的MAC地址且目的MAC地址是之前发送DHCP Discover报文的客户端MAC地址。</p>
-<h3 id="2-2-3-DHCP-Offer-网络层"><a href="#2-2-3-DHCP-Offer-网络层" class="headerlink" title="2.2.3 DHCP Offer 网络层"></a>2.2.3 DHCP Offer 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/gJ4zNuXFF8Tn.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-2-3-DHCP-Offer-网络层"><a href="#2-2-3-DHCP-Offer-网络层" class="headerlink" title="2.2.3 DHCP Offer 网络层"></a>2.2.3 DHCP Offer 网络层</h3><p><img src="https://resource.tinychen.com/202504261611786.png" srcset="/img/loading.gif" lazyload></p>
 <p>网络层报文中我们可以看到这时候目的IP地址和源IP地址都已经有了数据，10.22.25.118就是即将要分配的IP地址，而10.22.25.254就是DHCP服务器的地址又或者是DHCP中继代理服务器的IP地址，具体要看应用层的报文。</p>
 <blockquote>
 <p>通过DHCP中继代理服务，与DHCP服务器不在同一子网的DHCP客户端可以通过DHCP中继代理（通常是路由器或三层交换机设备开启DHCP中继功能）与位于其他网段的DHCP服务器通信，最终是DHCP客户端获取到从DHCP服务器上分配而来的IP地址。</p>
 <p>此时的DHCP中继代理就位于DHCP客户端和DHCP服务器之间，负责广播DHCP报文的转发。</p>
 </blockquote>
-<h3 id="2-2-4-DHCP-Offer-应用层"><a href="#2-2-4-DHCP-Offer-应用层" class="headerlink" title="2.2.4 DHCP Offer 应用层"></a>2.2.4 DHCP Offer 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190610/0h17nDkVa0yE.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-2-4-DHCP-Offer-应用层"><a href="#2-2-4-DHCP-Offer-应用层" class="headerlink" title="2.2.4 DHCP Offer 应用层"></a>2.2.4 DHCP Offer 应用层</h3><p><img src="https://resource.tinychen.com/202504261611364.png" srcset="/img/loading.gif" lazyload></p>
 <p>这个时候我们再看应用层的报文：</p>
 <ul>
 <li>Ciaddr即客户端IP地址（Client IP address）：此时还没有分配，所以还是0.0.0.0</li>
@@ -364,22 +364,22 @@
 <p>如果有多台DHCP服务器向该客户端发来DHCPOFFER报文，客户端只接收第一个收到的DHCP Offer报文，然后以广播方式发送DHCP Request报文。在该报文的Requested Address选项中包含DHCP服务器在DHCP Offer报文中预分配的IP地址、对应的DHCP服务器IP地址等。</p>
 <p><strong>这样也就相当于同时告诉其他DHCP服务器，它们可以释放已提供的地址并将这些地址返回到可用的地址池中。</strong></p>
 <p>在DHCP REQUEST报文封装的IP协议头部中，客户端的Source Address仍然是0.0.0.0，数据包的Destination仍然是255.255.255.255。但在DHCP Request报文中Ciaddr、Yiaddr、Siaddr、Giaddr 字段的地址均为0.0.0.0</p>
-<h3 id="2-3-2-DHCP-Request-数据链路层"><a href="#2-3-2-DHCP-Request-数据链路层" class="headerlink" title="2.3.2 DHCP Request 数据链路层"></a>2.3.2 DHCP Request 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/srlcaXxu8jT1.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-3-2-DHCP-Request-数据链路层"><a href="#2-3-2-DHCP-Request-数据链路层" class="headerlink" title="2.3.2 DHCP Request 数据链路层"></a>2.3.2 DHCP Request 数据链路层</h3><p><img src="https://resource.tinychen.com/202504261611972.png" srcset="/img/loading.gif" lazyload></p>
 <p>这时候又变回了广播。</p>
-<h3 id="2-3-3-DHCP-Request-网络层"><a href="#2-3-3-DHCP-Request-网络层" class="headerlink" title="2.3.3 DHCP Request 网络层"></a>2.3.3 DHCP Request 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/R3t0oJPxuuvv.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-3-3-DHCP-Request-网络层"><a href="#2-3-3-DHCP-Request-网络层" class="headerlink" title="2.3.3 DHCP Request 网络层"></a>2.3.3 DHCP Request 网络层</h3><p><img src="https://resource.tinychen.com/202504261611245.png" srcset="/img/loading.gif" lazyload></p>
 <p>由于是广播，所以目标IP地址是255.255.255.255，而源IP地址还是0.0.0.0是因为还没有完成整个DHCP过程，本机尚未获取到IP地址。</p>
-<h3 id="2-3-4-DHCP-Request-应用层"><a href="#2-3-4-DHCP-Request-应用层" class="headerlink" title="2.3.4 DHCP Request 应用层"></a>2.3.4 DHCP Request 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190610/S3Scm4vea5l1.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-3-4-DHCP-Request-应用层"><a href="#2-3-4-DHCP-Request-应用层" class="headerlink" title="2.3.4 DHCP Request 应用层"></a>2.3.4 DHCP Request 应用层</h3><p><img src="https://resource.tinychen.com/202504261611496.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>Bootp flags：0表示单播，1表示广播，这里为0，即DHCP服务端回复的报文应为单播形式</li>
 <li>Ciaddr、Yiaddr、Siaddr、Giaddr 字段的地址均为0.0.0.0</li>
 </ul>
 <h2 id="2-4-确认阶段——DHCP-Ack（单播-广播）"><a href="#2-4-确认阶段——DHCP-Ack（单播-广播）" class="headerlink" title="2.4 确认阶段——DHCP Ack（单播&#x2F;广播）"></a>2.4 确认阶段——DHCP Ack（单播&#x2F;广播）</h2><h3 id="2-4-1-DHCP-Ack-理论分析"><a href="#2-4-1-DHCP-Ack-理论分析" class="headerlink" title="2.4.1 DHCP Ack 理论分析"></a>2.4.1 DHCP Ack 理论分析</h3><p>确认阶段，即DHCP服务器确认分配级DHCP客户端IP地址的阶段。</p>
 <p>某个DHCP服务器在收到DHCP客户端发来的DHCP REOUEST报文后，只有DHCP客户端选择的服务器会进行如下操作：如果确认将地址分配给该客户端，则以单播&#x2F;广播方式返回DHCP ACK报文；否则返回DHCP NAK报文，表明地址不能分配给该客户端。</p>
-<h3 id="2-4-2-DHCP-Ack-数据链路层"><a href="#2-4-2-DHCP-Ack-数据链路层" class="headerlink" title="2.4.2 DHCP Ack 数据链路层"></a>2.4.2 DHCP Ack 数据链路层</h3><p><img src="https://resource.tinychen.com/blog/20190610/sf6I5auVsS32.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-4-2-DHCP-Ack-数据链路层"><a href="#2-4-2-DHCP-Ack-数据链路层" class="headerlink" title="2.4.2 DHCP Ack 数据链路层"></a>2.4.2 DHCP Ack 数据链路层</h3><p><img src="https://resource.tinychen.com/202504261611716.png" srcset="/img/loading.gif" lazyload></p>
 <p>可以看到这里是单播，源MAC地址是DHCP服务器（此处为中继代理）的MAC地址，目标MAC地址是DHCP客户端的MAC地址。</p>
-<h3 id="2-4-3-DHCP-Ack-网络层"><a href="#2-4-3-DHCP-Ack-网络层" class="headerlink" title="2.4.3 DHCP Ack 网络层"></a>2.4.3 DHCP Ack 网络层</h3><p><img src="https://resource.tinychen.com/blog/20190610/wT71TP3iEOGS.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-4-3-DHCP-Ack-网络层"><a href="#2-4-3-DHCP-Ack-网络层" class="headerlink" title="2.4.3 DHCP Ack 网络层"></a>2.4.3 DHCP Ack 网络层</h3><p><img src="https://resource.tinychen.com/202504261611053.png" srcset="/img/loading.gif" lazyload></p>
 <p>10.22.25.118就是即将要分配的IP地址，而10.22.25.254就是DHCP服务器的地址（此处为DHCP中继代理服务器）</p>
-<h3 id="2-4-4-DHCP-Ack-应用层"><a href="#2-4-4-DHCP-Ack-应用层" class="headerlink" title="2.4.4 DHCP Ack 应用层"></a>2.4.4 DHCP Ack 应用层</h3><p><img src="https://resource.tinychen.com/blog/20190610/wTONY9Wj3T9b.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="2-4-4-DHCP-Ack-应用层"><a href="#2-4-4-DHCP-Ack-应用层" class="headerlink" title="2.4.4 DHCP Ack 应用层"></a>2.4.4 DHCP Ack 应用层</h3><p><img src="https://resource.tinychen.com/202504261611052.png" srcset="/img/loading.gif" lazyload></p>
 <p>在DHCPACK报文中Yiaddr字段包含要分配给客户端的IP地址，而Chaddr和DHCP:Client Identifier字段是发出请求的客户端中网卡的MAC地址。</p>
 <p>同时，在选项部分也会把在DHCPOFFER报文中所分配的IP地址的子网掩码、默认网关、DNS服务器、租约期、续约时间等信息加上。</p>
 <h1 id="3、DHCP的IP地址租约更新"><a href="#3、DHCP的IP地址租约更新" class="headerlink" title="3、DHCP的IP地址租约更新"></a>3、DHCP的IP地址租约更新</h1><h2 id="3-1-DHCP服务IP地址租约更新原理"><a href="#3-1-DHCP服务IP地址租约更新原理" class="headerlink" title="3.1 DHCP服务IP地址租约更新原理"></a>3.1 DHCP服务IP地址租约更新原理</h2><p>如果采用动态IP地址分配策略，则DHCP服务器分配给客户端的IP地址都是有一定租约期限的，当租约期满后DHCP服务器又会收回原来分配的这个IP地址。</p>
@@ -394,10 +394,10 @@
 <h1 id="4、DHCP中继代理服务"><a href="#4、DHCP中继代理服务" class="headerlink" title="4、DHCP中继代理服务"></a>4、DHCP中继代理服务</h1><p>在前面我们已经说过，在DHCP客户端初次从DHCP服务器获取IP地址的过程中，所有从DHCP客户端发出的请求报文均是以广播方式（目的地址为255.255.255.255）进行发送的，<strong>所以DHCP服务只适用于DHCP客户端和DHCP服务器处于同一个子网</strong>（也就是DHCP服务器至少有一个端口与DHCP客户端所在的子网是直接连接的）的情况，因为广播包是不能穿越子网的。</p>
 <p>基于DHCP服务的以上限制，这样一来，如果DHCP客户端与DHCP服务器之间隔了路由器设备，不在同一子网，就不能直接通过这台DHCP服务器获取IP地址，即使DHCP服务器上已配置了对应的地址池。<strong>这也就意味着，如果想要让多个子网中的主机进行动态IP地址分配，就需要在网络中的所有子网中都设置一个DHCP服务器。这显然是很不经济的，也是没有必要的。</strong></p>
 <p>DHCP中继功能可以很好地解决DHCP服务的以上难题。<strong>通过DHCP中继代理服务，与DHCP服务器不在同一子网的DHCP客户端可以通过DHCP中继代理（通常也是由路由器或三层交换机设备担当，但需要开启DHCP中继功能）与位于其他网段的DHCP服务器通信，最终使DHCP客户端获取到从DHCP服务器上分配而来的IP地址。</strong>此时的DHCP中继代理就位于DHCP客户端和DHCP服务器之间，负责广播DHCP报文的转发。</p>
-<p><img src="https://resource.tinychen.com/blog/20190610/B4cjmSsyBsVz.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261611308.png" srcset="/img/loading.gif" lazyload></p>
 <p>从前面的报文分析我们可以轻松的看出10.22.25.118和192.168.112.240是明显不属于同一个子网的，他们之间通信肯定需要使用路由器进行路由，而10.22.25.254就是担任着DHCP中继代理的角色。</p>
 <p>至于和DHCP服务器之间经过了多少个路由，我们可以tracert一下。</p>
-<p><img src="https://resource.tinychen.com/blog/20190610/4ALNec1bheRj.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261611435.png" srcset="/img/loading.gif" lazyload></p>
 <p>从图中我们可以看到，从10.22.25.254这个DHCP中继代理到DHCP服务器之间需要经过5个路由节点。</p>
 <p>而实际上，在很多的大型园区网络中，都会使用一个DHCP服务器集群+多个DHCP中继代理这样的方式进行DHCP分配。</p>
 <h1 id="5、路由干扰"><a href="#5、路由干扰" class="headerlink" title="5、路由干扰"></a>5、路由干扰</h1><h2 id="5-1-路由干扰原理"><a href="#5-1-路由干扰原理" class="headerlink" title="5.1 路由干扰原理"></a>5.1 路由干扰原理</h2><p>路由干扰是园区网络中经常出现的问题，主要体现在用户无法获取到正确的IP地址&#x2F;网关地址&#x2F;DNS服务器地址等信息而无法上网。</p>
@@ -407,14 +407,14 @@
 <p><strong>但是，大型网络中使用静态网络地址往往容易产生管理混乱，IP地址冲突等问题。</strong></p>
 <h2 id="5-2-路由干扰模拟"><a href="#5-2-路由干扰模拟" class="headerlink" title="5.2 路由干扰模拟"></a>5.2 路由干扰模拟</h2><p>下面我们在一个局域网内接入两个DHCP服务器，进行路由干扰的模拟。</p>
 <p>从本文前面我们可以知道，由于DHCP Discover是以广播的方式进行发送，因此局域网内的所有DHCP服务器都会进行回应，而客户端只会选择最快回应的那一个DHCP服务器，其他的DHCP服务器则会被拒绝，如果此时我们的局域网中出现了一个能提供DHCP服务而不能提供上网服务的设备，就会对其产生路由干扰。</p>
-<h3 id="5-2-1-模拟1"><a href="#5-2-1-模拟1" class="headerlink" title="5.2.1 模拟1"></a>5.2.1 模拟1</h3><p><img src="https://resource.tinychen.com/blog/20190610/uPIQx7MjUTrt.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="5-2-1-模拟1"><a href="#5-2-1-模拟1" class="headerlink" title="5.2.1 模拟1"></a>5.2.1 模拟1</h3><p><img src="https://resource.tinychen.com/202504261611885.png" srcset="/img/loading.gif" lazyload></p>
 <p>第一次模拟中我们可以看到，在客户端发送了DHCP Discover报文之后，10.22.25.254和192.168.100.1两个DHCP服务器都进行了回应，不同的是这时10.22.25.254的回应显然要快得多，因此客户端选择了10.22.25.254这个DHCP服务器而192.168.100.1这个DHCP服务器则是发送了DHCP NAK报文来表示DHCP失败。</p>
 <h3 id="5-2-2-模拟2"><a href="#5-2-2-模拟2" class="headerlink" title="5.2.2 模拟2"></a>5.2.2 模拟2</h3><p>这次我们调整192.168.100.1这个路由器对于DHCP报文的查询频率（加快），再次进行模拟。</p>
-<p><img src="https://resource.tinychen.com/blog/20190610/URDqGmgJtBk0.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261611245.png" srcset="/img/loading.gif" lazyload></p>
 <p>这次我们可以看到是192.168.100.1这个DHCP服务器先建立了连接。</p>
-<h3 id="5-2-3-实例分析"><a href="#5-2-3-实例分析" class="headerlink" title="5.2.3 实例分析"></a>5.2.3 实例分析</h3><p><img src="https://resource.tinychen.com/blog/20190610/FEQGPHjUltML.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="5-2-3-实例分析"><a href="#5-2-3-实例分析" class="headerlink" title="5.2.3 实例分析"></a>5.2.3 实例分析</h3><p><img src="https://resource.tinychen.com/202504261611450.png" srcset="/img/loading.gif" lazyload></p>
 <p>从上图的IPv4地址和对应的子网掩码，我们可以计算出对应的默认网关应该是10.27.26.254，而这里则是显示10.27.26.59，显然是错误的，很可能就是受到了路由干扰。</p>
-<p><img src="https://resource.tinychen.com/blog/20190610/BfscX3u634RB.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="https://resource.tinychen.com/202504261611681.png" srcset="/img/loading.gif" lazyload></p>
 <p>这种IP地址在接了路由器的情况下是很常见的，但是如果是接入的分配10开头的IP地址的网络中出现这种IP地址信息，也是很有可能受到了路由干扰。</p>
 <h3 id="5-2-4-定位干扰源"><a href="#5-2-4-定位干扰源" class="headerlink" title="5.2.4 定位干扰源"></a>5.2.4 定位干扰源</h3><p>定位干扰源最简单的方法就是查询arp缓存表。</p>
 <figure class="highlight bash"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs bash"><span class="hljs-comment"># 在cmd中输入下列命令查询arp缓存</span><br>arp -a<br></code></pre></div></td></tr></table></figure>
